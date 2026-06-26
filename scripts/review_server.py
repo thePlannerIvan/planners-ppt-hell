@@ -8,7 +8,7 @@ import socket
 import sys
 import uuid
 from datetime import datetime, timezone
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs
 
@@ -257,7 +257,7 @@ def main():
         encoding="utf-8",
     )
 
-    server = HTTPServer(("127.0.0.1", port), ReviewHandler)
+    server = ThreadingHTTPServer(("127.0.0.1", port), ReviewHandler)
     print(f"[server] Project: {root}")
     print(f"[server] Session: {ReviewHandler.session_id}", flush=True)
     print("[server] Human approval key: required", flush=True)
