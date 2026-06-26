@@ -111,13 +111,14 @@ validator 和模型自检只是内部证据，真正的通过必须来自人工�
 仓库发布后，可以作为 Skill 安装：
 
 ```bash
-npx skills add https://github.com/thePlannerIvan/planners-ppt-hell --skill planners-ppt-hell
+npx skills add https://github.com/thePlannerIvan/planners-ppt-hell/tree/main/planners-ppt-hell --skill planners-ppt-hell
 ```
 
-也可以 clone 到本地 skills 目录：
+也可以 clone 仓库后，只复制 Skill bundle 目录到本地 skills 目录：
 
 ```bash
-git clone https://github.com/thePlannerIvan/planners-ppt-hell.git ~/.claude/skills/planners-ppt-hell
+git clone https://github.com/thePlannerIvan/planners-ppt-hell.git /tmp/planners-ppt-hell
+cp -R /tmp/planners-ppt-hell/planners-ppt-hell ~/.claude/skills/planners-ppt-hell
 ```
 
 然后对 agent 说：
@@ -308,13 +309,14 @@ If you only need something that looks good fast, a template-based PPT or HTML pr
 After this repository is published, install it as a Skill:
 
 ```bash
-npx skills add https://github.com/thePlannerIvan/planners-ppt-hell --skill planners-ppt-hell
+npx skills add https://github.com/thePlannerIvan/planners-ppt-hell/tree/main/planners-ppt-hell --skill planners-ppt-hell
 ```
 
-Or clone it into your local skills directory:
+Or clone the repository and copy only the Skill bundle directory into your local skills directory:
 
 ```bash
-git clone https://github.com/thePlannerIvan/planners-ppt-hell.git ~/.claude/skills/planners-ppt-hell
+git clone https://github.com/thePlannerIvan/planners-ppt-hell.git /tmp/planners-ppt-hell
+cp -R /tmp/planners-ppt-hell/planners-ppt-hell ~/.claude/skills/planners-ppt-hell
 ```
 
 Then ask an agent:
@@ -379,32 +381,32 @@ Final customer deliverables do not include this credit by default. The Skill sho
 
 ```text
 planners-ppt-hell/
-├── SKILL.md
 ├── README.md
 ├── LICENSE
 ├── NOTICE
 ├── TRADEMARK.md
 ├── COMMERCIAL.md
-├── CONTRIBUTING.md
 ├── SECURITY.md
-├── agents/
-│   └── openai.yaml
-├── references/
-│   ├── page_content_contract.md
-│   ├── layout_plan_contract.md
-│   ├── page_manifest_contract.md
-│   ├── 03_style_system.md
-│   ├── 04_svg_rules.md
-│   ├── 05_layout_taxonomy.md
-│   └── 06_quality_checklist.md
-└── scripts/
-    ├── pptflow.py
-    ├── pipeline_gate.py
-    ├── review_server.py
-    ├── generate_layout_html.py
-    ├── generate_review_html.py
-    ├── validate_svg_layout.py
-    └── native_svg_to_ppt.py
+└── planners-ppt-hell/
+    ├── SKILL.md
+    ├── agents/
+    │   └── openai.yaml
+    ├── references/
+    │   ├── page_content_contract.md
+    │   ├── layout_plan_contract.md
+    │   ├── page_manifest_contract.md
+    │   ├── 03_style_system.md
+    │   ├── 04_svg_rules.md
+    │   ├── 05_layout_taxonomy.md
+    │   └── 06_quality_checklist.md
+    └── scripts/
+        ├── pptflow.py
+        ├── pipeline_gate.py
+        ├── review_server.py
+        ├── generate_layout_html.py
+        ├── generate_review_html.py
+        ├── validate_svg_layout.py
+        └── native_svg_to_ppt.py
 ```
 
 ## Open Source And Commercial Use
