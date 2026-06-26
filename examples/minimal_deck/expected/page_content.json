@@ -1,0 +1,76 @@
+{
+  "project": "Q1 2026 Product Review",
+  "source_path": "examples/minimal_deck/source.md",
+  "generated_at": "2026-06-22T00:00:00Z",
+  "pages": [
+    {
+      "page_key": "page_01",
+      "source_page_id": "P1",
+      "source_title": "Market Position",
+      "action_title": "From Shipping to Leading",
+      "core_message": "Q1 2026 — 34% SMB market share. Three releases. One quarter. Zero downtime.",
+      "body_blocks": [
+        {
+          "type": "bullet_list",
+          "items": [
+            "Shipped 3 major releases in Q1",
+            "34% market share in the SMB segment",
+            "Zero downtime across all releases"
+          ]
+        }
+      ],
+      "tables": [],
+      "speaker_notes": "Opening page — set the tone. Frame Q1 as a turning point from execution to market leadership.",
+      "source_excerpt": "## Page 1: Market Position\n\nThe company has shipped 3 major releases in Q1 and now holds 34% market share in the SMB segment.\n\nH1: From Shipping to Leading\nH2: Q1 2026 — 34% SMB market share\nBody: Three releases. One quarter. Zero downtime."
+    },
+    {
+      "page_key": "page_02",
+      "source_page_id": "P2",
+      "source_title": "Key Metrics",
+      "action_title": "Three numbers that define the quarter",
+      "core_message": "Revenue $12.4M (+22% QoQ), Active accounts 8,400 (+18% QoQ), NPS 72 (+5 points).",
+      "body_blocks": [
+        {
+          "type": "kpi_set",
+          "items": [
+            "Revenue: $12.4M (+22% QoQ)",
+            "Active accounts: 8,400 (+18% QoQ)",
+            "NPS: 72 (+5 points)"
+          ]
+        }
+      ],
+      "tables": [],
+      "speaker_notes": "Data-heavy page. Emphasize the QoQ growth numbers — 22% revenue growth is the headline. NPS improvement shows product quality is the growth engine.",
+      "source_excerpt": "## Page 2: Key Metrics\n\nThree numbers that define the quarter.\n\n- Revenue: $12.4M (+22% QoQ)\n- Active accounts: 8,400 (+18% QoQ)\n- NPS: 72 (+5 points)"
+    },
+    {
+      "page_key": "page_03",
+      "source_page_id": "P3",
+      "source_title": "What Changed",
+      "action_title": "The biggest lever was onboarding automation",
+      "core_message": "Before: manual onboarding, 3-day time-to-value, 40% activation. After: automated onboarding, 4-hour time-to-value, 78% activation.",
+      "body_blocks": [
+        {
+          "type": "bullet_list",
+          "items": [
+            "Before Q1: manual onboarding, 3-day time-to-value, 40% activation rate",
+            "After Q1: automated onboarding, 4-hour time-to-value, 78% activation rate"
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "caption": "Before vs After Comparison",
+          "headers": ["Metric", "Before Q1", "After Q1", "Change"],
+          "rows": [
+            ["Onboarding", "Manual", "Automated", "—"],
+            ["Time-to-value", "3 days", "4 hours", "94% faster"],
+            ["Activation rate", "40%", "78%", "+38pp"]
+          ]
+        }
+      ],
+      "speaker_notes": "This is the 'how' page. The before/after contrast should be stark. If the audience asks about the automation tooling, mention it was built in-house over 6 weeks.",
+      "source_excerpt": "## Page 3: What Changed\n\nBefore Q1: manual onboarding, 3-day time-to-value, 40% activation rate.\nAfter Q1: automated onboarding, 4-hour time-to-value, 78% activation rate.\n\nH1: The biggest lever was onboarding automation"
+    }
+  ]
+}

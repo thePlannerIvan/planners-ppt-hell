@@ -1,0 +1,40 @@
+{
+  "project": "Q1 2026 Product Review",
+  "version": "2.0",
+  "batch_size": 3,
+  "batch_config": {
+    "batch_01": {
+      "status": "planned",
+      "pages": ["page_01", "page_02", "page_03"]
+    }
+  },
+  "pages": [
+    {
+      "page_key": "page_01",
+      "svg_path": "_internal/02_svg_source/page_01.svg",
+      "png_path": "_internal/03_png_preview/page_01.png",
+      "validation_status": "not_validated",
+      "layout_approved": false,
+      "visual_approved": false,
+      "export_allowed": false
+    },
+    {
+      "page_key": "page_02",
+      "svg_path": "_internal/02_svg_source/page_02.svg",
+      "png_path": "_internal/03_png_preview/page_02.png",
+      "validation_status": "not_validated",
+      "layout_approved": false,
+      "visual_approved": false,
+      "export_allowed": false
+    },
+    {
+      "page_key": "page_03",
+      "svg_path": "_internal/02_svg_source/page_03.svg",
+      "png_path": "_internal/03_png_preview/page_03.png",
+      "validation_status": "not_validated",
+      "layout_approved": false,
+      "visual_approved": false,
+      "export_allowed": false
+    }
+  ]
+}

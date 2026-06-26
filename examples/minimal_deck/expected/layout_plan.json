@@ -1,0 +1,136 @@
+{
+  "project": "Q1 2026 Product Review",
+  "generated_at": "2026-06-22T00:00:00Z",
+  "layout_version": 1,
+  "pages": [
+    {
+      "page_key": "page_01",
+      "layout_id": "L01",
+      "page_mode": "emotional",
+      "visual_density": "airy",
+      "grid": "full-width",
+      "wireframe": [
+        {"label": "主标题 + 副标题", "x": 60, "y": 260, "w": 1800, "h": 380, "zone": "main"},
+        {"label": "关键词标签", "x": 60, "y": 700, "w": 1800, "h": 100, "zone": "main"}
+      ],
+      "copy_handling": {
+        "final_on_slide": {
+          "title": "Q1 proved the platform can scale without breaking",
+          "subtitle": "Three signals matter most: revenue growth, active-account expansion, and zero downtime.",
+          "body": ["Revenue up 22%", "Active accounts up 31%", "Zero downtime"],
+          "footer_takeaway": "The quarter's story is reliable growth, not just higher volume."
+        },
+        "kept_on_slide": ["action_title", "core_message", "body_blocks"],
+        "compression_rationale": [
+          "封面保留季度核心判断和三条结果信号，删除解释性展开以制造开场停顿。",
+          "具体 KPI 细节在后续数据页展开，封面只承担方向定调。"
+        ],
+        "compressed": [],
+        "moved_to_notes": []
+      },
+      "visual_asset_strategy": {
+        "asset_need": "optional",
+        "asset_type": "svg_background",
+        "placement": "background",
+        "reason": "封面是情绪入口，可用轻量 SVG 背景增强开场势能；如果标题本身足够强，也可保持纯文字。",
+        "prompt_or_source": "使用 SVG 背景，不需要外部素材。"
+      },
+      "layout_reason": "PageMode: emotional\nPurpose: emotionalize\nTone: emotional-anchor\nAnchor: 主标题\nReason: 封面页使用全宽情绪构图，大标题+副标题创造呼吸感和开场势能。底部关键词标签提供信息锚点。",
+      "design_risks": [],
+      "review_suggestions": [
+        "可以考虑在标题下方增加一条装饰线增强视觉层次",
+        "如果品牌色允许，可以在背景使用极浅渐变增加深度",
+        "考虑将'Zero downtime'作为大字高亮数据单独强调"
+      ]
+    },
+    {
+      "page_key": "page_02",
+      "layout_id": "L03",
+      "page_mode": "rational",
+      "visual_density": "dense",
+      "grid": "4-4-4",
+      "wireframe": [
+        {"label": "标题区：核心论断", "x": 60, "y": 60, "w": 1800, "h": 120, "zone": "header"},
+        {"label": "KPI 1: 营收", "x": 60, "y": 220, "w": 564, "h": 620, "zone": "main"},
+        {"label": "KPI 2: 活跃账户", "x": 678, "y": 220, "w": 564, "h": 620, "zone": "main"},
+        {"label": "KPI 3: NPS", "x": 1296, "y": 220, "w": 564, "h": 620, "zone": "main"},
+        {"label": "底部结论条/数据来源", "x": 60, "y": 960, "w": 1800, "h": 60, "zone": "footer"}
+      ],
+      "copy_handling": {
+        "final_on_slide": {
+          "title": "Q1 growth was broad-based across revenue, accounts, and NPS",
+          "subtitle": "The strongest signal is that growth and satisfaction improved together.",
+          "body": ["Revenue: +22%", "Active accounts: +31%", "NPS: +9 pts"],
+          "footer_takeaway": "Momentum is not concentrated in a single metric."
+        },
+        "kept_on_slide": ["action_title", "core_message", "body_blocks"],
+        "compression_rationale": [
+          "保留三个 KPI 和变化幅度，因为它们是本页证据链。",
+          "将解释性判断压缩成底部 takeaway，避免三列数据区过载。"
+        ],
+        "compressed": [],
+        "moved_to_notes": []
+      },
+      "visual_asset_strategy": {
+        "asset_need": "required",
+        "asset_type": "chart",
+        "placement": "card_visual",
+        "reason": "KPI 页面需要用数据可视化增强证据感，避免三列只有文字和数字。",
+        "prompt_or_source": "使用源文案中的营收、活跃账户、NPS 数据绘制小型趋势或对比图。"
+      },
+      "layout_reason": "PageMode: rational\nPurpose: prove\nTone: evidence-led\nAnchor: 三个 KPI 数字\nReason: 三列KPI仪表板让营收、活跃账户、NPS 各占一列。dense密度适合数据举证页，三列等宽提供公平比较视角。",
+      "design_risks": [
+        "如果KPI数字显示过大（80px+），三列宽度可能偏紧"
+      ],
+      "review_suggestions": [
+        "考虑将增长率（+22%等）用红色高亮突出",
+        "可在每列顶部添加小图标增强识别性",
+        "如果允许，顶部标题可以拆成两行增加呼吸感"
+      ]
+    },
+    {
+      "page_key": "page_03",
+      "layout_id": "L09",
+      "page_mode": "rational",
+      "visual_density": "balanced",
+      "grid": "6-6",
+      "wireframe": [
+        {"label": "标题区", "x": 60, "y": 60, "w": 1800, "h": 120, "zone": "header"},
+        {"label": "Before: 手动入驻", "x": 60, "y": 200, "w": 870, "h": 500, "zone": "main_left"},
+        {"label": "After: 自动入驻", "x": 990, "y": 200, "w": 870, "h": 500, "zone": "main_right"},
+        {"label": "对比表格", "x": 60, "y": 740, "w": 1800, "h": 200, "zone": "main"},
+        {"label": "结论条", "x": 60, "y": 960, "w": 1800, "h": 60, "zone": "footer"}
+      ],
+      "copy_handling": {
+        "final_on_slide": {
+          "title": "Automation changed onboarding from waiting time into working time",
+          "subtitle": "The before/after contrast should make the operational gain immediately visible.",
+          "body": ["Before: manual setup took 3 days", "After: automated setup takes 4 hours"],
+          "footer_takeaway": "The win is not only speed; it is predictability."
+        },
+        "kept_on_slide": ["action_title", "core_message", "body_blocks", "tables"],
+        "compression_rationale": [
+          "保留 Before/After 的时间差，因为这是页面主证据。",
+          "将流程细节放进左右状态图和底部表格，不在正文里重复解释。"
+        ],
+        "compressed": [],
+        "moved_to_notes": []
+      },
+      "visual_asset_strategy": {
+        "asset_need": "optional",
+        "asset_type": "svg_illustration",
+        "placement": "inline_diagram",
+        "reason": "Before/After 对比可用左右状态图形增强差异，但底部表格已经承担精确信息。",
+        "prompt_or_source": "用 SVG 绘制 Before 手动流程与 After 自动流程的简化路径图。"
+      },
+      "layout_reason": "PageMode: rational\nPurpose: compare\nTone: strategy-frame\nAnchor: Before/After 对比\nReason: 6-6对开对比页让左列Before和右列After形成公平对照。底部表格提供精确数据对比，balanced密度在信息量和可读性之间取中。",
+      "design_risks": [
+        "对比表格如果行数过多可能挤压上部空间"
+      ],
+      "review_suggestions": [
+        "考虑Before列使用灰色底色、After列使用白色底色增强视觉区分",
+        "时间节省'3天→4小时'可作为大字数据在右列单独强调"
+      ]
+    }
+  ]
+}

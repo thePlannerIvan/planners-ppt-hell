@@ -1,0 +1,20 @@
+Planner's PPT Hell
+Copyright (C) 2026 阿祖不看 TVC
+
+Author: 阿祖不看 TVC
+Xiaohongshu: 阿祖不看 TVC
+Email: Lawyif@163.com
+Website: https://demyth.info
+
+Canonical project name: Planner's PPT Hell
+Skill identifier: planners-ppt-hell
+
+This project is an open-source, review-gated PPT workflow Skill.
+It includes workflow instructions, validation scripts, local review pages,
+and conversion tooling for generating editable PPT pages from structured
+content and SVG page sources.
+
+Attribution and source identification may appear in repository documents,
+process HTML pages, review server pages, validation pages, and developer
+workflow surfaces. The Skill should not add project branding to final client
+deliverables by default unless the user explicitly requests it.

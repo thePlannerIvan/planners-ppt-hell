@@ -1,0 +1,5 @@
+interface:
+  display_name: "Planner's PPT Hell"
+  short_description: "用审阅闸门把方案文案变成可编辑 PPT"
+  brand_color: "#D46A00"
+  default_prompt: "Use $planners-ppt-hell to turn this Markdown proposal into a review-gated editable PPT, starting with content extraction and layout review."
