@@ -15,10 +15,13 @@ from pptx.enum.shapes import MSO_SHAPE
 from pptx.util import Inches, Pt
 
 SCRIPT = Path(__file__).resolve().parents[1] / "native_svg_to_ppt.py"
+sys.path.insert(0, str(SCRIPT.parent))
 SPEC = importlib.util.spec_from_file_location("native_svg_to_ppt", SCRIPT)
 CONVERTER = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = CONVERTER
 SPEC.loader.exec_module(CONVERTER)
+
+import validate_svg_layout as VALIDATOR  # noqa: E402  (shares the converter's coordinate model)
 
 
 def png_bytes(width, height):
@@ -45,8 +48,31 @@ class ConverterGeometryTests(unittest.TestCase):
         self.assertGreater(max(abs(y - 100.0) for _, y in arc), 45.0)
 
     def test_transform_order_and_nested_translation(self):
-        self.assertEqual(CONVERTER._parse_axis_aligned_transform("translate(100 50) scale(2)"), (100.0, 50.0, 2.0, 2.0))
-        self.assertEqual(CONVERTER._parse_axis_aligned_transform("scale(2) translate(100 50)"), (200.0, 100.0, 2.0, 2.0))
+        self.assertEqual(CONVERTER.parse_axis_aligned_transform("translate(100 50) scale(2)"), (100.0, 50.0, 2.0, 2.0))
+        self.assertEqual(CONVERTER.parse_axis_aligned_transform("scale(2) translate(100 50)"), (200.0, 100.0, 2.0, 2.0))
+        self.assertEqual(CONVERTER.parse_axis_aligned_transform("translate(5 5) scale(2) translate(10 10)"), (25.0, 25.0, 2.0, 2.0))
+        self.assertEqual(CONVERTER.compose_axis_aligned((5.0, 5.0, 1.0, 1.0), (20.0, 20.0, 2.0, 2.0)), (25.0, 25.0, 2.0, 2.0))
+
+    def test_validator_asks_the_converter_for_coordinates(self):
+        """检查画面不得再自己算坐标：两条路径必须给出同一个答案。
+
+        两份实现曾经分歧到同一份输入差 100px（scale(2) translate(100 50)）。
+        """
+        root = etree.fromstring(
+            '<svg><g transform="translate(5 5)"><g transform="scale(2) translate(10 10)">'
+            '<rect x="7" y="3" width="10" height="10"/></g></g></svg>')
+        parent_map = VALIDATOR.build_parent_map(root)
+        rect = root.find(".//rect")
+        self.assertEqual(tuple(VALIDATOR.get_accumulated_transform(rect, parent_map)), (25.0, 25.0, 2.0, 2.0))
+        # the box the validator predicts is where the converter's own rule puts it
+        self.assertEqual(tuple(VALIDATOR.rect_box(rect, parent_map)), (39.0, 31.0, 20.0, 20.0))
+        # the historical 100px disagreement: one <g transform="scale(2) translate(100 50)">
+        old = etree.fromstring(
+            '<svg><g transform="scale(2) translate(100 50)"><rect x="0" y="0" width="10" height="10"/></g></svg>')
+        old_map = VALIDATOR.build_parent_map(old)
+        old_rect = old.find(".//rect")
+        self.assertEqual(tuple(VALIDATOR.get_accumulated_transform(old_rect, old_map)), (200.0, 100.0, 2.0, 2.0))
+        self.assertEqual(tuple(VALIDATOR.rect_box(old_rect, old_map)), (200.0, 100.0, 20.0, 20.0))
 
     def test_picture_meet_and_slice_preserve_ratio(self):
         with tempfile.TemporaryDirectory() as temp:

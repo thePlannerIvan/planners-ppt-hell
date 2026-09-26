@@ -1,10 +1,23 @@
 #!/usr/bin/env python3
-"""Machine gate for the Template Worker's source-vs-canvas visual judgment."""
+"""Machine gate for the Template Worker's source-vs-canvas visual judgment.
+
+判据与逐页审阅**不同**，不要照搬同一句自检话术：
+
+- 逐页审阅（`inspect --first-glance/--design-check`）问的是「**这个 PPT 做得好不好**」——
+  重心、层级、节奏、可读性。
+- 这里问的是「**有没有提炼出足够的模板规律**」——这套 canvas 是否真的复刻了源模板
+  可复用的规律（`retained_features`、`compared_source_pages`、`visual_similarity`），
+  而不是这套幻灯片本身好不好看。
+"""
 
 import hashlib
 import json
 import argparse
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from canvas_frame import FRAME_H_INT, FRAME_W_INT  # noqa: E402
 
 
 def read_json(path, default=None):
@@ -45,7 +58,7 @@ def review_issues(project_root):
     if not expected_layouts:
         return ["fidelity registry has no layouts for visual comparison"]
     if review.get("status") != "completed" or review.get("vision_available") is not True:
-        issues.append("template canvas visual review is not completed with vision_available=true")
+        issues.append("template extraction self-check is not completed with vision_available=true: judge whether enough template regularity was extracted, not whether the deck looks good")
     if review.get("source_contact_sheet_viewed") is not True or review.get("canvas_contact_sheet_viewed") is not True:
         issues.append("both source and canvas contact sheets must be viewed")
     if int(review.get("inspection_rounds", 0) or 0) < 1:
@@ -85,7 +98,7 @@ def review_issues(project_root):
         for item in preview_manifest.get("generated_files", [])
     }
     if preview_stems != expected_layouts or preview_manifest.get("all_valid_size") is not True:
-        issues.append("canvas preview manifest does not contain one valid 1920x1080 PNG per layout")
+        issues.append(f"canvas preview manifest does not contain one valid {FRAME_W_INT}x{FRAME_H_INT} PNG per layout")
     return issues
 
 

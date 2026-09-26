@@ -1,14 +1,16 @@
-# SVG 与可编辑 PPT 兼容
+# SVG 画面的技术规则
 
-模型负责画面判断，技术规则用于防止渲染和转换事故。使用 1920×1080、viewBox="0 0 1920 1080"，同套保持一致。
+模型负责画面判断；这里只写技术规则，用来防止渲染事故。**两个出口——可编辑 PPT 与视频静态画面——都读这一份**；只有幻灯片出口才需要的额外约束在 `svg_to_ppt_rules.md`。
 
-**单位换算（写死在这里，别每次重算）**：画布 1920px 对应 13.333in 宽的幻灯片，所以 **1 SVG px = 0.5pt**。32px = 16pt，48px = 24pt，96px = 48pt。字号下限按页面 `mode` 判：`讲` 页 ≥18px（9pt），`读` 页 ≥12px（6pt）。
+## 画幅
+
+默认 16:9：`width="1920" height="1080"`、`viewBox="0 0 1920 1080"`，开局与用户确认一次，同一套保持一致。机器取值只有一个 owner：`scripts/canvas_frame.py`（归做画面），改画幅只改那里。
 
 ## 基础表达
 
-使用 rect、line、circle、ellipse、polygon、path、text、image 及少量 g。文字显式写 x、y、font-family、font-size、font-weight、fill；深色背景文字不要依赖组继承颜色。中文长句显式换行，每行独立 text，预留足够行距。
+使用 rect、line、circle、ellipse、polygon、path、text、image 及少量 g。文字显式写 x、y、font-family、font-size、font-weight、fill；深色背景上的文字显式给颜色，不依赖组继承。中文长句显式换行，每行独立 text，预留足够行距。
 
-禁用转换器不能可靠处理的 foreignObject、filter、use、style、marker、mask、animate，以及 stroke-dasharray、textLength、lengthAdjust 和 marker-*。使用显式属性，不依赖 CSS。避免 rotate、skew、matrix；简单 translate / scale 也要核对转换结果。渐变、clipPath 和复杂 path 必须跑实际转换验证。用几何箭头替代 marker，不能把标签藏进图片。
+**视频静态画面可以额外用 `<style>`、动画和视觉效果**——它的出口是 PNG，承载得住；可编辑 PPT 的出口承载不住，那些约束归 `svg_to_ppt_rules.md`。风格 token 以内联 `:root` 块 + `var(--…)` 取值的方式落进画面，取值的落点是页内 `<style>` 的 class 规则（或元素自己的 `style`／属性），见 `03_video_route.md`；页里引用了没定义的 token 会被检查画面点名。
 
 标题、正文、图表数据标签和来源都是可编辑 text；图形以原生 SVG 表达。无需额外写布局类型、密度或设计理由 metadata。
 
@@ -30,12 +32,12 @@
 
 ## 技术检查与视觉判断
 
-check 只保留两类检查：**转成 PPT 会坏**的（画布契约、禁用元素与属性、图片必须是真实存在的项目内文件且不得拉伸、tspan 换行、文字缺 fill 或 font-weight 非法、元素出画布），和**在任何风格下都是缺陷**的（文字压文字、空页）。它**不再**评价密度、字号档位、容器选择、留白多少或配色——那些是设计决定，由你看渲染图判断。
+**检查画面**（`validate_svg_layout.py`）只拦**在任何风格下都是缺陷**的那些：文字压文字、**元素出画布（含文字）**、空页、`<text>` 缺填色或 `font-weight` 非法、图片必须是真实存在的项目内文件且不得被拉伸。它**不**评价密度、字号档位、容器选择、留白多少或配色——那些是设计决定，由你看渲染图判断。
 
-因此：技术报告干净不等于页面好看。实际查看每页 PNG 大图，按 `style_system.md` 的五个自检问题核对。`OUTSIDE_SAFE_MARGIN` 这类 info 级提示只是提醒（满版出血是正当的设计手法），不要为消除提示改设计。
+字号可读性在视频出口上由你看渲染图判断：屏幕上的字号合不合适，取决于这一屏要让观众读到什么，脚本不替你定档。
 
-遇到容量不足，重排、断行、拆页、调整内容与 notes，不以不断缩字解决。关键事实、来源和限定条件仍受保护。修订后检查新渲染；只要有实质进展就继续，不限制一次修复。
+它和转换 PPT **共用同一套坐标几何**：校验器直接调用转换器的坐标模型（`native_svg_to_ppt.parse_axis_aligned_transform` / `compose_axis_aligned`），不自己再算一份。
 
-严格模板下保留 data-template-lock 层、required components、data-layout-id 和 data-template-content-layer="replace"。指定 canvas 从脚本实例化；检查锁层与真实资产，不能用近似重绘冒充复用。
+因此：技术报告干净不等于页面好看。**实际查看每页 PNG 大图**——不是联系表里的缩略格——核对阅读层级、截断、重叠、图表标签、图片主体和来源；再看整套 contact sheet 检查构图重复与节奏。`OUTSIDE_SAFE_MARGIN` 是提示级（满版出血是正当的设计手法），不要为消除提示改设计。
 
-SVG 显示正确不证明 PPTX 正确。圆弧、折线、图片裁剪、字体和透明度在最终 PPTX 渲染中再次核对。
+遇到容量不足，重排、断行、拆页、调整内容，不以不断缩字解决。关键事实、来源和限定条件仍受保护。修订后检查新渲染；只要有实质进展就继续，不限制一次修复。

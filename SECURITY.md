@@ -4,19 +4,27 @@ Planner's PPT Hell includes a local review server for human approval and feedbac
 
 ## Local-Only Assumption
 
-`scripts/review_server.py` is intended for local review workflows. Do not expose it to the public internet unless you have added your own authentication, access control, and deployment hardening.
+Review pages are served by the shared seam's local host (`planners-review-core`: `serve-review.mjs` /
+`review-host.mjs`), bound to loopback. Do not expose it to the public internet unless you have added your
+own authentication, access control, and deployment hardening. (The Skill used to ship its own
+`scripts/review_server.py`; it was retired on 2026-09-26 once both review faces moved onto the seam.)
 
-## Approval Keys
+## Approvals
 
-The one-time approval key is used to separate real human approval from model-generated state. Do not store, reuse, or publish approval keys.
+There is **no approval key or passphrase**. The requirement was retired: the old server discarded any
+`approval_key` field in the payload, so any document claiming a key is required would describe a path
+that does not exist. The page skips it too (the seam's host writes what the page sends, and the Skill
+re-derives what counts).
 
-Formal workflows require:
+What actually separates human approval from model-generated state is the review handshake:
 
-- `approval_key_required: true`
-- `approval_key_verified: true`
-- review server provenance
-
-Any no-key approval path is considered invalid for formal delivery.
+- The review page is generated against a snapshot, and the submission must carry the matching
+  one-time `review_id`. An old browser tab cannot approve a new version.
+- Approval is bound to the exact artifacts it was given for: per-page version and PNG hash for
+  page review; review-page hash, rendered source pages and template package hashes for template
+  review.
+- To cite human approval in a formal workflow, cite the review server provenance in the feedback
+  file, not a key.
 
 ## Reporting Security Issues
 

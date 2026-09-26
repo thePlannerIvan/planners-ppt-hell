@@ -12,8 +12,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from layout_canvas import ensure_layout_canvases, registry_canvases_ready
-from template_visual_gate import review_issues as template_canvas_review_issues
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from layout_canvas import ensure_layout_canvases, registry_canvases_ready  # noqa: E402
+from project_state import template_review_snapshot  # noqa: E402
+from template_visual_gate import review_issues as template_canvas_review_issues  # noqa: E402
 
 SKILL_ROOT = Path(__file__).resolve().parents[2]
 LIBRARY_ROOT = SKILL_ROOT / "assets" / "template_library"
@@ -99,10 +101,18 @@ def require_approved_feedback(project):
         raise ValueError("approved template feedback requires every abstract layout to be marked Yes")
     provenance = feedback.get("provenance", {})
     project_root = project.parents[1]
+    # 与页面审阅同一条消费侧保护：批准必须来自当前这一版审阅页（快照 + review_id）。
+    snapshot = template_review_snapshot(project_root)
+    if not snapshot or str(feedback.get("review_id", "")) != str(snapshot.get("review_id", "")):
+        raise ValueError("template approval is not bound to the current review page; rerun template-review and decide again")
     review_html = project_root / "00_template_review.html"
-    if (provenance.get("source") != "review_server" or provenance.get("route") != "/template-feedback"
+    # 写者从服务器换成**页面**（经宿主落盘）→ 收件层盖章；`review_server` 那份继续认，
+    # 因为老项目里那份 approvals 是人真的给过的（删掉它等于静默作废一次人工批准）。
+    source = provenance.get("source")
+    if (source not in {"review_server", "template_review_page"}
+            or (source == "review_server" and provenance.get("route") != "/template-feedback")
             or not review_html.is_file() or provenance.get("html_sha256") != sha256(review_html)):
-        raise ValueError("template approval is not bound to the current server review HTML")
+        raise ValueError("template approval is not bound to the current review page HTML")
     visuals = project / "template_visuals"
     current_png = {path.name: sha256(path) for path in visuals.glob("*.png")}
     if not current_png or provenance.get("png_sha256") != current_png:

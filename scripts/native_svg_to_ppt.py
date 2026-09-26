@@ -32,7 +32,13 @@ import re
 import math
 import argparse
 import xml.etree.ElementTree as ET
+from pathlib import Path as _Path
 from urllib.parse import urlparse, unquote
+
+sys.path.insert(0, str(_Path(__file__).resolve().parent))
+from canvas_frame import FRAME_H_INT, FRAME_W_INT  # noqa: E402
+from canvas_frame import SLIDE_H_IN as FRAME_SLIDE_H_IN  # noqa: E402
+from canvas_frame import SLIDE_W_IN as FRAME_SLIDE_W_IN  # noqa: E402
 
 from pptx import Presentation
 from pptx.util import Inches, Pt, Emu
@@ -45,10 +51,13 @@ from pptx.parts.image import Image as PptxImage
 from lxml import etree
 
 # ── 画布参数 ──
-SVG_W = 1920
-SVG_H = 1080
-SLIDE_W_IN = 13.333
-SLIDE_H_IN = 7.5
+# 默认值来自画幅的唯一 owner（`canvas_frame.py`，归「做画面」）。
+# set_canvas() 仍然能把它们改成任何尺寸——转换器能出任何画幅是既有能力，
+# 不改；这里只是不再自己写一份 1920/1080。
+SVG_W = FRAME_W_INT
+SVG_H = FRAME_H_INT
+SLIDE_W_IN = FRAME_SLIDE_W_IN
+SLIDE_H_IN = FRAME_SLIDE_H_IN
 SCALE = SLIDE_W_IN / SVG_W
 FONT_SCALE = SCALE * 72
 
@@ -65,7 +74,7 @@ SLIDE_H = Inches(SLIDE_H_IN)
 # 画布/比例动态配置
 # ═══════════════════════════════════════
 
-def set_canvas(svg_w, svg_h, slide_w_in=13.333, slide_h_in=7.5):
+def set_canvas(svg_w, svg_h, slide_w_in=FRAME_SLIDE_W_IN, slide_h_in=FRAME_SLIDE_H_IN):
     """动态设置 SVG 画布尺寸与 PPT 页尺寸，并同步 SCALE/FONT_SCALE。"""
     global SVG_W, SVG_H, SLIDE_W_IN, SLIDE_H_IN, SCALE, FONT_SCALE, SLIDE_W, SLIDE_H
     SVG_W = float(svg_w)
@@ -492,8 +501,12 @@ def add_missing_image_placeholder(slide, x, y, w, h, href):
     run.font.color.rgb = RGBColor(153, 153, 153)
 
 
-def _parse_axis_aligned_transform(transform):
-    """Compose SVG translate/scale operations without losing nested offsets."""
+def parse_axis_aligned_transform(transform):
+    """Compose one SVG transform string's translate/scale operations without losing nested offsets.
+
+    这是本包的**唯一坐标模型**。检查画面（validate_svg_layout）必须从这里取，
+    不允许自己再写一份——两份曾经分歧到同一份输入差 100px。
+    """
     sx = sy = 1.0
     ox = oy = 0.0
     for name, raw_args in re.findall(r"(translate|scale)\s*\(([^)]*)\)", transform or ""):
@@ -509,6 +522,17 @@ def _parse_axis_aligned_transform(transform):
             sx *= values[0]
             sy *= values[1] if len(values) > 1 else values[0]
     return ox, oy, sx, sy
+
+
+def compose_axis_aligned(parent, local):
+    """(ox,oy,sx,sy) of an outer transform composed with an inner one.
+
+    这是 add_elements 在 <g> 递归里实际使用的合成规则，也是检查画面沿祖先链
+    累计时必须用的同一条规则。
+    """
+    ox, oy, sx, sy = parent
+    local_ox, local_oy, local_sx, local_sy = local
+    return ox + sx * local_ox, oy + sy * local_oy, sx * local_sx, sy * local_sy
 
 
 def _image_anchor_fractions(preserve_aspect_ratio):
@@ -901,7 +925,7 @@ def add_elements(slide, parent_node, offset_x=0, offset_y=0,
                     unsupported.append(name)
             if unsupported:
                 warn(f"unsupported transform ignored on <g>: {', '.join(unsupported)} in {transform!r}")
-            local_ox, local_oy, local_sx, local_sy = _parse_axis_aligned_transform(transform)
+            local = parse_axis_aligned_transform(transform)
 
             g_opacity = float(node.attrib.get('opacity', 1.0))
 
@@ -912,10 +936,8 @@ def add_elements(slide, parent_node, offset_x=0, offset_y=0,
                 if val:
                     new_inherited[attr_name] = val
 
-            new_ox = offset_x + scale_x * local_ox
-            new_oy = offset_y + scale_y * local_oy
-            new_sx = scale_x * local_sx
-            new_sy = scale_y * local_sy
+            new_ox, new_oy, new_sx, new_sy = compose_axis_aligned(
+                (offset_x, offset_y, scale_x, scale_y), local)
 
             add_elements(slide, node, new_ox, new_oy,
                          parent_opacity * g_opacity, new_inherited,

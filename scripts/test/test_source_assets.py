@@ -10,8 +10,13 @@ import unittest
 import zipfile
 import zlib
 from pathlib import Path
+import sys
 
-from scripts.prepare_source_material import prepare_source_material
+# 这条测试以前写 `from scripts.prepare_source_material import ...`，隐含要求 CWD = Skill 根。
+# 现在自己把 Skill 根放进 sys.path，从任何目录跑都成立。
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from scripts.prepare_source_material import prepare_source_material  # noqa: E402
 
 
 def png_bytes(width=40, height=20):

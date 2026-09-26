@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Normalize Markdown or DOCX input and register every source image."""
+"""Register every source image: from a Markdown/DOCX document, or from a loose image folder."""
 
 import argparse
 import hashlib
@@ -11,6 +11,7 @@ import shutil
 import struct
 import subprocess
 import tempfile
+import unicodedata
 import zipfile
 from pathlib import Path
 from xml.etree import ElementTree as ET
@@ -21,6 +22,52 @@ R_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 PR_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
 WP_NS = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
 IMAGE_RE = re.compile(r"!\[([^\]]*)\]\((<[^>]+>|[^)\s]+)(?:\s+[\"'][^\"']*[\"'])?\)")
+IMAGE_SUFFIXES = {
+    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tif", ".tiff", ".svg", ".avif", ".heic", ".heif",
+}
+
+
+def image_name_key(name):
+    """Comparison key for a file name: NFC-normalized and case-folded.
+
+    macOS filesystems are case- and normalization-insensitive, so the same file can
+    reach us as NFC or NFD spelling. Both spellings mean one name; two files that share
+    a key are genuinely ambiguous and must be reported, never picked between.
+    """
+    return unicodedata.normalize("NFC", str(name)).casefold()
+
+
+def index_file_names(names):
+    """Map comparison key to the original file name, refusing ambiguous folders."""
+    index = {}
+    for name in names:
+        key = image_name_key(name)
+        if key in index:
+            raise ValueError(
+                f"Ambiguous file names in the folder: {index[key]} and {name} count as the same "
+                "name; rename one of them so references are unambiguous"
+            )
+        index[key] = name
+    return index
+
+
+def folder_files(folder):
+    """List a flat folder: ``{file name: Path}``.
+
+    Flat, non-recursive: only files directly inside ``folder`` are listed, and a
+    subdirectory is an error rather than a silent skip. Two names that count as one name
+    make every reference ambiguous, so the folder is refused outright.
+    """
+    folder = Path(folder).expanduser().resolve()
+    if not folder.is_dir():
+        raise ValueError(f"Image folder not found: {folder}")
+    entries = sorted(folder.iterdir(), key=lambda item: item.name)
+    subdirectories = [entry.name for entry in entries if entry.is_dir()]
+    if subdirectories:
+        raise ValueError("Image folder must be flat; found subdirectories: " + ", ".join(subdirectories))
+    files = [entry for entry in entries if entry.is_file()]
+    index_file_names([entry.name for entry in files])
+    return {entry.name: entry for entry in files}
 
 
 def sha256_bytes(data):
@@ -189,6 +236,49 @@ def normalize_docx(source, writer):
     return "\n\n".join(lines).strip() + "\n"
 
 
+def write_asset_manifest(output_root, writer, *, source_type, original_source, normalized_source):
+    """Write the one source_assets.json schema both intake routes share."""
+    manifest = {
+        "schema": "planners-ppt-hell.source-assets.v1",
+        "source_type": source_type,
+        "original_source": original_source,
+        "normalized_source": normalized_source,
+        "has_images": bool(writer.assets),
+        "image_count": len(writer.assets),
+        "assets": writer.assets,
+    }
+    (Path(output_root) / "source_assets.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    return manifest
+
+
+def register_image_folder(project_root, folder, output_root=None):
+    """Register a flat folder of loose images: the intake route with no source document.
+
+    Same AssetWriter and same manifest schema as ``prepare_source_material``; the only
+    difference is that there is no document to normalize, so ``normalized_source`` stays
+    empty and no ``source.md`` is ever written.
+
+    Only image files are registered; other files in the folder (``.DS_Store``, scripts,
+    data) are left alone. Asset IDs follow the folder's sorted file names.
+    """
+    project_root = Path(project_root).resolve()
+    files = folder_files(folder)
+    images = [path for path in files.values() if path.suffix.lower() in IMAGE_SUFFIXES]
+    output_root = Path(output_root) if output_root else project_root / "_internal" / "00_project" / "source"
+    output_root.mkdir(parents=True, exist_ok=True)
+    writer = AssetWriter(project_root, output_root)
+    for entry in images:
+        writer.add(entry.read_bytes(), entry.suffix, entry.name, "", "image_folder")
+    return write_asset_manifest(
+        output_root, writer,
+        source_type="image_folder",
+        original_source=str(Path(folder).expanduser().resolve()),
+        normalized_source="",
+    )
+
+
 def prepare_source_material(project_root, source, output_root=None):
     project_root = Path(project_root).resolve()
     source = Path(source).expanduser().resolve()
@@ -223,18 +313,12 @@ def prepare_source_material(project_root, source, output_root=None):
 
     normalized_path = output_root / "source.md"
     normalized_path.write_text(normalized, encoding="utf-8")
-    manifest = {
-        "schema": "planners-ppt-hell.source-assets.v1",
-        "source_type": source_type,
-        "original_source": str(source),
-        "normalized_source": normalized_path.relative_to(project_root).as_posix(),
-        "has_images": bool(writer.assets),
-        "image_count": len(writer.assets),
-        "assets": writer.assets,
-    }
-    manifest_path = output_root / "source_assets.json"
-    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return manifest
+    return write_asset_manifest(
+        output_root, writer,
+        source_type=source_type,
+        original_source=str(source),
+        normalized_source=normalized_path.relative_to(project_root).as_posix(),
+    )
 
 
 def main():

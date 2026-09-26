@@ -9,8 +9,12 @@ by the SVG stage. It never guesses missing source components.
 
 import argparse
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from canvas_frame import FRAME_H, FRAME_W  # noqa: E402
 
 from layout_canvas import component_markup, ensure_layout_canvases
 
@@ -91,7 +95,7 @@ def main():
     components = []
     used_source_ids = set()
     default_source_canvas = parse_canvas(facts.get("canvas"))
-    target_canvas = (1920.0, 1080.0)
+    target_canvas = (FRAME_W, FRAME_H)
     for approval in decision.get("approved_components", []):
         source_id = approval.get("source_id")
         source = candidates.get(source_id) or assets.get(source_id)

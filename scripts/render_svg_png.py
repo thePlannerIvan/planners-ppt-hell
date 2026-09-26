@@ -7,11 +7,17 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from canvas_frame import FRAME_H_INT, FRAME_W_INT  # noqa: E402
+
 
 PLAYWRIGHT_SNIPPET = r'''
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 import sys
+
+sys.path.insert(0, __CANVAS_FRAME_DIR__)
+from canvas_frame import FRAME_H_INT, FRAME_W_INT
 
 out_dir = Path(sys.argv[1])
 svg_files = [Path(p) for p in sys.argv[2:]]
@@ -20,7 +26,7 @@ written = []
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True)
-    page = browser.new_page(viewport={"width": 1920, "height": 1080})
+    page = browser.new_page(viewport={"width": FRAME_W_INT, "height": FRAME_H_INT})
     for svg in svg_files:
         out_file = out_dir / f"{svg.stem}.png"
         page.goto(svg.resolve().as_uri())
@@ -30,7 +36,7 @@ with sync_playwright() as p:
     browser.close()
 
 print("\n".join(written))
-'''
+'''.replace("__CANVAS_FRAME_DIR__", repr(str(Path(__file__).resolve().parent)))
 
 
 def load_json(path):
@@ -178,7 +184,7 @@ def main():
             "width": w,
             "height": h,
             "bytes": p.stat().st_size if p.exists() else 0,
-            "valid_size": w == 1920 and h == 1080,
+            "valid_size": w == FRAME_W_INT and h == FRAME_H_INT,
         })
 
     if args.update_manifest and args.manifest:

@@ -128,13 +128,14 @@
         "x": 90,
         "y": 1010,
         "width": 1740,
-        "height": 2
+        "height": 0
       },
       "style": {
-        "fill": "#CBD3DC"
+        "fill": "#CBD3DC",
+        "stroke_width": 2
       },
       "shape": {
-        "preset": "rect"
+        "preset": "line"
       },
       "file": null
     }
@@ -157,7 +158,7 @@
       ],
       "optional_components": [],
       "canvas_file": "layout_canvases/contents_light.svg",
-      "locked_sha256": "7807935196b770e09e0a1b066cd442c79c7632eed1768f91a035c106f9cf6bdb"
+      "locked_sha256": "0b7eefde40a84f502e4ad6473f72dfdc910b46f9f646f0797d0f9cd6157d5427"
     },
     "section_dark": {
       "required_components": [
@@ -176,7 +177,7 @@
       ],
       "optional_components": [],
       "canvas_file": "layout_canvases/content_base.svg",
-      "locked_sha256": "7807935196b770e09e0a1b066cd442c79c7632eed1768f91a035c106f9cf6bdb"
+      "locked_sha256": "0b7eefde40a84f502e4ad6473f72dfdc910b46f9f646f0797d0f9cd6157d5427"
     },
     "closing_dark": {
       "required_components": [

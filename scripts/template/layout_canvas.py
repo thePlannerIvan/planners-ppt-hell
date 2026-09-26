@@ -6,8 +6,16 @@ import html
 import json
 import re
 import argparse
+import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from canvas_frame import FRAME_H_INT, FRAME_VIEWBOX, FRAME_W_INT  # noqa: E402
+
+# canvas 形状的这一代编号。它写在 canvas 根上，页面实例化时继承，
+# 检查画面拿页面与 canvas 的这一项对照——不写下来，两边代数不同也看不出来。
+TEMPLATE_CANVAS_VERSION = "1"
 
 
 def component_markup(component):
@@ -23,9 +31,12 @@ def component_markup(component):
     stroke = style.get("stroke") or "none"
     stroke_width = float(style.get("stroke_width") or 0)
     if component.get("shape", {}).get("preset") == "line":
+        # 一条线没有填充：着色落在 stroke 上。写 fill="none" 而不是留空，
+        # 因为检查画面按「这个元素实际会画的属性」对照声明。
         return (f'<line {attrs} x1="{geometry["x"]}" y1="{geometry["y"]}" '
                 f'x2="{geometry["x"] + geometry["width"]}" y2="{geometry["y"] + geometry["height"]}" '
-                f'stroke="{stroke if stroke != "none" else fill}" stroke-width="{max(stroke_width, 1):.2f}"/>')
+                f'fill="none" stroke="{stroke if stroke != "none" else fill}" '
+                f'stroke-width="{max(stroke_width, 1):.2f}"/>')
     if component.get("shape", {}).get("preset") == "roundRect":
         radius = min(geometry["width"], geometry["height"]) * 0.18
         return (f'<rect {attrs} x="{geometry["x"]}" y="{geometry["y"]}" '
@@ -46,10 +57,10 @@ def build_layout_canvas(layout_id, layout, component_map):
     components = [component_map[cid] for cid in ids if cid in component_map]
     backgrounds = [item for item in components if item.get("placement") == "background"]
     foregrounds = [item for item in components if item.get("placement") != "background"]
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" '
-            f'data-layout-id="{html.escape(layout_id, quote=True)}" data-template-canvas-version="1">'
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{FRAME_W_INT}" height="{FRAME_H_INT}" viewBox="{FRAME_VIEWBOX}" '
+            f'data-layout-id="{html.escape(layout_id, quote=True)}" data-template-canvas-version="{TEMPLATE_CANVAS_VERSION}">'
             '<g data-template-lock="background">'
-            '<rect width="1920" height="1080" fill="#F7F8FA"/>'
+            f'<rect width="{FRAME_W_INT}" height="{FRAME_H_INT}" fill="#F7F8FA"/>'
             + ''.join(component_markup(item) for item in backgrounds)
             + '</g><g data-template-content-layer="replace">'
             + ''
@@ -66,9 +77,17 @@ def _canonical_node(node):
 
 
 def locked_sha256(svg_or_path):
+    """锁层内容的 hash。
+
+    没有任何 `data-template-lock` 层时**报错**，不再返回空串的 hash：
+    空串会让一个根本没锁层的页面与另一个同样没锁层的页面「hash 相同」，
+    把「锁层丢了」降级成「一致」。
+    """
     value = Path(svg_or_path).read_text(encoding="utf-8") if isinstance(svg_or_path, Path) else str(svg_or_path)
     root = ET.fromstring(value)
     locked = [node for node in root.iter() if node.get("data-template-lock")]
+    if not locked:
+        raise ValueError(f"no data-template-lock layer to compare: {svg_or_path}")
     canonical = ''.join(_canonical_node(node) for node in locked)
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
@@ -100,6 +119,11 @@ def ensure_layout_canvases(registry, fidelity_dir):
 
 
 def registry_canvases_ready(registry, fidelity_dir):
+    """每个 layout 的 canvas 都在、都是这一代、锁层 hash 都对得上。
+
+    canvas 自己声明的代数也要是当前的：换了一代形状却沿用旧 canvas 文件，
+    光比锁层 hash 是看不出来的。
+    """
     layouts = registry.get("layouts", {}) if isinstance(registry, dict) else {}
     if not layouts:
         return False
@@ -108,7 +132,14 @@ def registry_canvases_ready(registry, fidelity_dir):
         canvas_file = layout.get("canvas_file", "")
         expected = layout.get("locked_sha256", "")
         path = fidelity_dir / canvas_file if canvas_file else None
-        if not path or not path.is_file() or not expected or locked_sha256(path) != expected:
+        if not path or not path.is_file() or not expected:
+            return False
+        if ET.parse(path).getroot().attrib.get("data-template-canvas-version") != TEMPLATE_CANVAS_VERSION:
+            return False
+        try:
+            if locked_sha256(path) != expected:
+                return False
+        except ValueError:
             return False
     return True
 

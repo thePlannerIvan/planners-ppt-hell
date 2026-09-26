@@ -19,16 +19,16 @@
     "fidelity_template/canvas_previews/pages/cover_dark.png": "b1be196eba2f173e06c4d8163d886b5d5476cdb97c90a1bc17feabd29f47e6de",
     "fidelity_template/canvas_previews/pages/section_dark.png": "b1be196eba2f173e06c4d8163d886b5d5476cdb97c90a1bc17feabd29f47e6de",
     "fidelity_template/canvas_previews/png_manifest.json": "08aeaf5c2c28ee763cd9c5788651fb98ba5d6e7da54784c32356736d98ac717e",
-    "fidelity_template/components.svg": "9b8fcedabf348fd6e9daa48dec2b95d4eedfa12bad4152b48b9c32f98f1f9be4",
+    "fidelity_template/components.svg": "e66f827cd1ea405cd8dac83eeeacd3d258e46b2b3f2fc4d183fe32261285f2cd",
     "fidelity_template/layout_canvases/closing_dark.svg": "9439a84c0accfb6ebd6e2c59efeab7a467eebf101a14ef28f0f49c3d10426ce0",
-    "fidelity_template/layout_canvases/content_base.svg": "a809c13c4a1bb35cee74ed2a77c17cec71c514c8c79dd4aaf7306e6c417f2f5f",
-    "fidelity_template/layout_canvases/contents_light.svg": "1f4a3fd04352978b0de43d9b51b7b9207e5e0d9867de3973af08d9c310cb34ab",
+    "fidelity_template/layout_canvases/content_base.svg": "9578393cf442683d3cf3da12686f33eaf094c7f51f7efaefa03ae8f848472373",
+    "fidelity_template/layout_canvases/contents_light.svg": "cf928b947b94757e7cb68dda125117477f975ca812337b7385582eaa1e7beb2c",
     "fidelity_template/layout_canvases/cover_dark.svg": "28c944302b8c37595094f6b81889e0b5b1c154039b58e27d43da981da92c6e59",
     "fidelity_template/layout_canvases/section_dark.svg": "f303c3a86174cd020fdb9355beffcd5f0b2f47e96a7908a21352839ecc17cc36",
-    "fidelity_template/template_registry.json": "b2c2470cf5cf3cac34e551a8934b0676628e3b7180c95722fbda9e5ef24915fb",
+    "fidelity_template/template_registry.json": "5cf2dce356b3f958d31d5dc4da40186fd72f89e66b794260bf85e27b864d97be",
     "template_asset_registry.json": "2b7c6948ce7a031ec305fefed6c1226801714f1fb3ffa0076eea838b132cb948",
     "template_profile.json": "ebff720f9cb0d8936ab3b4c3a3068dc01477e614f2e647db61323ec374e51372",
     "template_worker_result.json": "02a135a293f0042fce890c11b42c4779a81385398fc63ad91d2b0d27b6e3a86d"
   },
-  "package_sha256": "40de283e42890c66bf114c9c1278b0f4443f6f1aa31f76591f769880b720a56a"
+  "package_sha256": "553a50b5e7df6f752044e4b521d476becaadf3d15f2d754704d12d80d0dc0dbe"
 }

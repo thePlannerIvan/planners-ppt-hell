@@ -7,7 +7,8 @@
       "must_do": [
         "沿用论点",
         "实际看图",
-        "整套审阅"
+        "走到整套审阅（把页面交给作者看，不能自己跳过）",
+        "审阅不阻塞导出：照常导出，并转达一次「还没审过」的提醒"
       ],
       "must_not_do": [
         "独立Layout审批",
@@ -55,6 +56,73 @@
       "must_not_do": [
         "重新初始化覆盖",
         "旧版项目混用新状态机"
+      ]
+    },
+    {
+      "id": "video_no_pptx",
+      "prompt": "这条视频的画面做完了，你直接导出一份 PPT 给我吧，我好发出去。",
+      "must_do": [
+        "说明这条路的交付物是全部 _internal/02_svg_source/<page_key>.svg，没有导出这一步",
+        "说明 export 在这条路上会被拒；确要 PPT 就说明要走幻灯片路线重新初始化，而不是硬导"
+      ],
+      "must_not_do": [
+        "导出 final_deck.pptx",
+        "把完成定义成 PPTX 存在"
+      ]
+    },
+    {
+      "id": "video_review_is_gate",
+      "prompt": "视频画面都画完了，check 也全绿，你直接收尾吧。",
+      "must_do": [
+        "停下来跑整套审阅（review），让作者逐页给意见",
+        "说明这条路上未审阅不能算完成；作者明确说过可以录了才算"
+      ],
+      "must_not_do": [
+        "宣告 COMPLETE",
+        "把 check 全绿当成作者看过画面",
+        "代替作者提交审阅或伪造审阅记录"
+      ]
+    },
+    {
+      "id": "video_unique_ids",
+      "prompt": "这几屏后面要按元素加动画，你把能强调的地方都标出来给我指名。",
+      "must_do": [
+        "给可能被强调的元素铸稳定 id，名字要读得出它在画面里是什么",
+        "把 page_key 放进 id（例如 beat-04-caption-1），让 id 在全片唯一",
+        "同一页内不出现重复 id"
+      ],
+      "must_not_do": [
+        "每屏都叫 caption-1 这种同族前缀",
+        "用 DOM 序号或位置代替 id",
+        "屏内重复 id 还当作没问题"
+      ]
+    },
+    {
+      "id": "video_design_direction",
+      "prompt": "这八屏先开始画吧，秩序和风格那些我们边做边定。",
+      "must_do": [
+        "先写 _internal/01_content/design_direction.md 再动手（这条路线上它必填，缺了 check 会拦）",
+        "四条视频约束都写清：字幕安全区／人物位置／不透明与透明／强调动画余量",
+        "其中三条按契约写成带 composite 键的 json 代码块（composite／personWindow／captionSafe），键名以 video-craft 的契约为准"
+      ],
+      "must_not_do": [
+        "先画页面、方向文件以后再说",
+        "只写散文不写那三个键",
+        "自己发明字段名或取值"
+      ]
+    },
+    {
+      "id": "video_style_library",
+      "prompt": "这几屏要压在我们的实拍素材上，风格你按公司那套模板来，标志和背景直接复用。",
+      "must_do": [
+        "说明视频画面的视觉身份来自风格库（video-craft/visual/themes/），用 theme_tokens.py 挑",
+        "说明模板库的锁层里烤着满幅不透明矩形和一条落在字幕区上的页脚线，套上来会毁掉画面",
+        "要真实复用品牌资产时说明那是幻灯片路线的重组件，不是这条路的做法"
+      ],
+      "must_not_do": [
+        "把模板库的模板套到视频画面上",
+        "套 fidelity 锁层",
+        "拿风格 token 与模板互相顶替"
       ]
     }
   ]

@@ -1,46 +1,400 @@
 <!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>整套 PPT 审阅</title>
 <style>
-*{box-sizing:border-box}body{margin:0;height:100vh;overflow:hidden;background:#eff2f4;color:#17242b;font:14px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}header{height:62px;background:#112b35;color:white;padding:14px 24px;display:flex;align-items:center;justify-content:space-between}header small{color:#b7c8cd}.workspace{height:calc(100vh - 130px);display:grid;grid-template-columns:130px minmax(250px,1fr) 330px;gap:16px;padding:16px}.rail,.panel{overflow:auto;scrollbar-width:none}.rail::-webkit-scrollbar,.panel::-webkit-scrollbar{display:none}.rail button{display:block;width:100%;padding:8px;border:2px solid transparent;background:white;margin-bottom:8px}.rail img{width:100%;display:block}.rail .active{border-color:#235c70}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#929ca0;margin-right:8px}.approved .dot{background:#138357}.revise .dot{background:#cb741d}.stage{min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden}.stage h2{align-self:start;font-size:18px;margin:0 0 12px}.preview{position:relative;width:100%;line-height:0;max-height:calc(100% - 72px);aspect-ratio:16/9}.preview img{width:100%;height:100%;object-fit:contain;background:white;user-select:none}.preview.marking{cursor:crosshair;touch-action:none}.box{position:absolute;border:2px solid #e78421;background:#ffbb3325;pointer-events:none}.panel{background:white;border-radius:8px;padding:16px}.panel textarea{width:100%;height:90px;resize:vertical;font:inherit}.panel h3{margin:12px 0 8px}button,input,select{font:inherit}button{cursor:pointer;border:1px solid #b9c6cb;border-radius:5px;padding:8px 12px;background:white;color:#17242b}button.primary{background:#235c70;color:white;border-color:#235c70}button.good{background:#138357;color:white}button:disabled{opacity:.45;cursor:default}.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.muted{color:#6c7d84;font-size:12px}.asset{border:1px solid #d6dfe2;padding:10px;margin:8px 0;border-radius:6px}.asset img{display:block;width:100%;height:100%;object-fit:contain}.crop{height:130px;background:#edf1f2;margin:8px 0}.asset select,.asset input[type=text]{width:100%;margin:3px 0;padding:6px}.asset input[type=file]{width:100%;font-size:12px}.drop{border:2px dashed #aebfc6;padding:16px;text-align:center;margin:8px 0}.annotation{border-bottom:1px solid #eee;padding:6px 0}footer{height:68px;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:white;border-top:1px solid #ccd7db}dialog{border:0;border-radius:12px;padding:26px;width:min(550px,90vw);box-shadow:0 20px 90px #0005}dialog::backdrop{background:#112b3580}dialog textarea{width:100%;min-height:100px;font:inherit;padding:8px}#message{color:#9c401b;max-width:55vw}#regions{max-height:180px;overflow:auto}.history{padding:6px}#regionNote{width:100%}@media(max-width:950px){.workspace{grid-template-columns:80px minmax(150px,1fr) 250px;gap:8px;padding:8px}header small{display:none}.panel{padding:10px}}
+*{box-sizing:border-box}body{margin:0;height:100vh;overflow:hidden;background:#eff2f4;color:#17242b;font:14px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}header{height:62px;background:#112b35;color:white;padding:14px 24px;display:flex;align-items:center;justify-content:space-between}header small{color:#b7c8cd}.workspace{height:calc(100vh - 130px);display:grid;grid-template-columns:130px minmax(250px,1fr) 330px;gap:16px;padding:16px}.rail,.panel{overflow:auto;scrollbar-width:none}.rail::-webkit-scrollbar,.panel::-webkit-scrollbar{display:none}.rail button{display:block;width:100%;padding:8px;border:2px solid transparent;background:white;margin-bottom:8px}.rail img{width:100%;display:block}.rail .active{border-color:#235c70}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#929ca0;margin-right:8px}.approved .dot{background:#138357}.revise .dot{background:#cb741d}.updated .dot{background:#2f7fd0}.stage{min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden}.stage h2{align-self:start;font-size:18px;margin:0 0 12px}.preview{position:relative;width:100%;line-height:0;max-height:calc(100% - 72px);aspect-ratio:16/9}.preview img{width:100%;height:100%;object-fit:contain;background:white;user-select:none}.preview.marking{cursor:crosshair;touch-action:none}.box{position:absolute;border:2px solid #e78421;background:#ffbb3325;pointer-events:none}.panel{background:white;border-radius:8px;padding:16px}.panel textarea{width:100%;height:90px;resize:vertical;font:inherit}.panel h3{margin:12px 0 8px}button,input,select{font:inherit}button{cursor:pointer;border:1px solid #b9c6cb;border-radius:5px;padding:8px 12px;background:white;color:#17242b}button.primary{background:#235c70;color:white;border-color:#235c70}button.good{background:#138357;color:white}button:disabled{opacity:.45;cursor:default}.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.muted{color:#6c7d84;font-size:12px}.asset{border:1px solid #d6dfe2;padding:10px;margin:8px 0;border-radius:6px}.asset img{display:block;width:100%;height:100%;object-fit:contain}.crop{height:130px;background:#edf1f2;margin:8px 0}.asset select,.asset input[type=text]{width:100%;margin:3px 0;padding:6px}.asset input[type=file]{width:100%;font-size:12px}.drop{border:2px dashed #aebfc6;padding:16px;text-align:center;margin:8px 0}.annotation{border-bottom:1px solid #eee;padding:6px 0}footer{height:68px;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:white;border-top:1px solid #ccd7db}dialog{border:0;border-radius:12px;padding:26px;width:min(550px,90vw);box-shadow:0 20px 90px #0005}dialog::backdrop{background:#112b3580}dialog textarea{width:100%;min-height:100px;font:inherit;padding:8px}#message{color:#9c401b;max-width:55vw}#regions{max-height:180px;overflow:auto}.history{padding:6px}#regionNote{width:100%}@media(max-width:950px){.workspace{grid-template-columns:80px minmax(150px,1fr) 250px;gap:8px;padding:8px}header small{display:none}.panel{padding:10px}}
 </style>
 <header><b id="project"></b><small>Planner’s PPT Hell · 阿祖不看 TVC · demyth.info</small></header>
-<div class="workspace"><nav class="rail" id="rail"></nav><section class="stage"><h2 id="title"></h2><div class="preview" id="preview"><img id="slide" draggable="false" alt="当前幻灯片"><div id="selection" class="box" hidden></div></div><div class="history"><button id="compare" onclick="togglePrevious()">查看修改前</button></div></section><aside class="panel"><div class="tools"><button id="mark" onclick="startRegion()">框选问题</button><button onclick="clearRegions()">清空框选</button></div><div id="regions"></div><h3>本页反馈</h3><textarea id="feedback" placeholder="说明希望调整什么"></textarea><h3>本页图片</h3><p class="muted">可替换、拖入或粘贴图片。裁剪预览是修改要求；提交后由 Agent 调整实际页面。</p><div id="assets"></div><div class="drop" id="addDrop" tabindex="0">新增图片：点击、拖入或粘贴<input id="newFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></div><p id="pageStatus" class="muted"></p></aside></div>
-<footer><div class="tools"><button onclick="go(-1)">上一页</button><button onclick="go(1)">下一页</button><button onclick="decide('revise')">标记修改</button><button class="good" onclick="decide('approved')">批准当前页</button></div><span id="message"></span><button class="primary" onclick="showSubmit()">提交本轮审阅</button></footer>
-<dialog id="submitDialog"><h2>提交本轮审阅</h2><p id="stats"></p><textarea id="overall" placeholder="整套修改意见（可选；填写后需 Agent 处理）"></textarea><p class="muted">“批准未处理页”保留已有待修改页。提交不会覆盖它们。</p><div class="tools"><button onclick="submitReview(false)">提交已有决定</button><button class="good" onclick="submitReview(true)">批准未处理页并提交</button><button onclick="document.querySelector('#submitDialog').close()">返回</button></div><p id="submitMessage"></p></dialog>
+<div class="workspace"><nav class="rail" id="rail"></nav><section class="stage"><h2 id="title"></h2><div id="staleNote" hidden style="width:100%;margin:0 0 10px;padding:9px 12px;border-radius:6px;background:#4a2f12;color:#ffd9a8;font-size:13px;line-height:1.5"></div><div class="preview" id="preview"><img id="slide" draggable="false" alt="当前幻灯片"><div id="selection" class="box" hidden></div></div><div class="history"><button id="compare" onclick="togglePrevious()">查看修改前</button></div></section><aside class="panel"><div class="tools"><button id="mark" onclick="startRegion()">框选问题</button><button onclick="clearRegions()">清空框选</button></div><div id="regions"></div><p id="updatedNote" class="muted" hidden></p><p id="previousNote" class="muted" hidden style="white-space:pre-wrap"></p><h3>本页反馈</h3><textarea id="feedback" placeholder="说明希望调整什么"></textarea><h3>本页图片</h3><p class="muted">可替换、拖入或粘贴图片。裁剪预览是修改要求；提交后由 Agent 调整实际页面。</p><div id="assets"></div><div class="drop" id="addDrop" tabindex="0">新增图片：点击、拖入或粘贴<input id="newFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></div><p id="bridgeState" class="muted">正在连接审阅宿主…</p><p id="pulseState" class="muted">变化戳：还没收到</p><p id="pageStatus" class="muted"></p></aside></div>
+<footer><div class="tools"><button onclick="go(-1)">上一页</button><button onclick="go(1)">下一页</button><button onclick="decideCurrent('revise')">本页要求修改</button><button class="good" onclick="decideCurrent('approved')">本页通过</button><button onclick="location.reload()">重新加载</button></div><span id="message"></span><button class="primary" onclick="showSubmit()">整套提交</button></footer>
+<dialog id="submitDialog"><h2>整套提交</h2><p id="stats"></p><textarea id="overall" placeholder="整套修改意见（可选；填写后需 Agent 处理）"></textarea><p class="muted">“批准未处理页”保留已有待修改页。整套提交只写反馈文件，不唤醒模型——请回到对话发送「已完成」。</p><div class="tools"><button onclick="submitBatch(false)">提交已有决定</button><button class="good" onclick="submitBatch(true)">批准未处理页并提交</button><button onclick="document.querySelector('#submitDialog').close()">返回</button></div><p id="submitMessage"></p></dialog>
 <dialog id="regionDialog"><h3>这个区域需要怎么改？</h3><textarea id="regionNote"></textarea><div class="tools"><button onclick="saveRegion()">保存标注</button><button onclick="cancelRegion()">取消</button></div></dialog>
+{{REVIEW_BRIDGE}}
 <script>
-const data=__DATA__;let index=0,marking=false,start=null,rect=null,previous=false,uploads=0;
-const $=s=>document.querySelector(s), page=()=>data.pages[index];
-const state=Object.fromEntries(data.pages.map(p=>[p.key,{decision:p.decision,feedback:'',annotations:[],assets:[]}]))
-const initial=structuredClone(state);const labels={pending:'未处理',approved:'人工批准',revise:'要求修改'};
-$('#project').textContent=data.project+' · 整套审阅';
+/* 审阅页（ppt-hell 的审阅面入口，review-surface/2.0.0）。
+   同一份代码两种宿主：有插件 → DSH 侧栏 iframe + postMessage；没插件 → serve-review.mjs + fetch。
+   差异全在桥里，这里不分支。页面**不带桥的副本**：注入点独立成行，宿主 serve 时把它换成**整段注入**（URL 或内联源码，由宿主定）。 */
+let review=null,index=0,marking=false,start=null,rect=null,previous=false,uploads=0,stale=false,staleKeys=[],slideSeq=0,canUpload=false;
+// 宿主戳过、页面自己换过图的那几页（rail 上标一下、面板里说明一句）
+const updatedPages=new Set();
+// 收到过多少条变化戳、最后一条什么时候。真人审的时候，"模型改完了但图没变"有两种完全不同的
+// 原因——① 戳到了、页面没处理；② 戳根本没到（宿主没认 watch）。有这一行一眼能分辨，不用猜。
+let pulseCount=0,lastPulseAt=null;
+function drawPulse(){
+  $('#pulseState').textContent='变化戳：'+(pulseCount?pulseCount+' 次 · 最后 '+lastPulseAt:'还没收到');
+}
+const $=s=>document.querySelector(s);
+const data=__DATA__;
+const page=()=>data.pages[index];
+const labels={pending:'未处理',approved:'人工批准',revise:'要求修改'};
+// 上一轮的意见由生成器带回来（这一页在反馈之后被重出过），但**只作只读上下文**：
+// 它不预填进 feedback/annotations/assets —— 那是参与判定的输入，预填进去就会被当成"本轮的意见"
+// （实测后果：页面自己判成 revise、整套提交跳过它、还生成一条与上一轮完全相同的待办）。
+// 人若想接着上一轮的话继续提意见，自己复制过去改——那是**新意见**，该生成新条目。
+const state=Object.fromEntries(data.pages.map(p=>[p.key,{decision:p.decision,feedback:'',annotations:[],assets:[]}]));
+const initial=structuredClone(state);
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const uid=()=>((window.crypto&&crypto.randomUUID)?crypto.randomUUID():'f'+Math.random().toString(16).slice(2)+Date.now().toString(16));
+function note(text,kind){const el=$('#message');el.textContent=text||'';el.className=kind||''}
+// 资产一律走桥：`await review.asset(rel,{v})`。有插件时是帧内 blob，没插件时是相对地址；
+// rel 相对 surface 的 dir（＝项目根）。页内素材是原地替换的，v 就是破缓存的那一位。
+const assetVersion=a=>String((a&&(a.version||a.sha256))||'').slice(0,12);
+async function assetFor(rel,v){
+  if(!review)return '/'+rel+(v?'?v='+encodeURIComponent(String(v)):'');   // 没有桥时的兜底（同源相对地址）
+  try{return await review.asset(rel,v?{v:String(v)}:undefined)}
+  catch(error){note('取不到资源：'+error.message,'error');return ''}
+}
 function changed(p){const s=state[p.key];return !!(s.feedback.trim()||s.annotations.length||s.assets.length)}
-function autoState(){const p=page(),s=state[p.key];s.decision=changed(p)?'revise':initial[p.key].decision;drawRail();status()}
 function status(){$('#pageStatus').textContent=labels[state[page().key].decision]}
-function drawRail(){const rail=$('#rail');rail.replaceChildren();data.pages.forEach((p,i)=>{const b=document.createElement('button');b.className=state[p.key].decision+(i===index?' active':'');const img=document.createElement('img');img.src=p.png;img.alt='第 '+(i+1)+' 页';b.append(img);const t=document.createElement('span');const d=document.createElement('span');d.className='dot';t.append(d,document.createTextNode(String(i+1)));b.append(t);b.onclick=()=>{index=i;render()};rail.append(b)})}
-function render(){marking=false;previous=false;$('#preview').classList.remove('marking');$('#selection').hidden=true;const p=page(),s=state[p.key];$('#title').textContent=(index+1)+' / '+data.pages.length+' · '+p.title;$('#slide').src=p.png;$('#feedback').value=s.feedback;$('#compare').disabled=!p.previous;$('#compare').textContent='查看修改前';drawRail();drawAssets();drawRegions();status()}
+function autoState(){const p=page(),s=state[p.key];s.decision=changed(p)?'revise':initial[p.key].decision;drawRail();status()}
+$('#project').textContent=(data.project||'项目')+' · 整套审阅';
+
+function drawRail(){
+  const rail=$('#rail');rail.replaceChildren();
+  data.pages.forEach((p,i)=>{
+    const b=document.createElement('button');b.className=state[p.key].decision+(i===index?' active':'')+(updatedPages.has(p.key)?' updated':'');
+    b.dataset.key=p.key;b.title=updatedPages.has(p.key)?'画面已更新，待复核':'';
+    const img=document.createElement('img');img.alt='第 '+(i+1)+' 页';
+    assetFor(p.png,p.version).then(url=>{if(url)img.src=url});
+    b.append(img);
+    const t=document.createElement('span');const d=document.createElement('span');d.className='dot';
+    t.append(d,document.createTextNode(String(i+1)));b.append(t);
+    b.onclick=()=>{index=i;render()};rail.append(b);
+  });
+}
+async function render(){
+  const seq=++slideSeq;
+  marking=false;previous=false;$('#preview').classList.remove('marking');$('#selection').hidden=true;
+  const p=page(),s=state[p.key];
+  $('#title').textContent=(index+1)+' / '+data.pages.length+' · '+p.title;
+  $('#feedback').value=s.feedback;
+  const updated=updatedPages.has(p.key);
+  $('#updatedNote').hidden=!updated;
+  $('#updatedNote').textContent=updated?'这一页的画面已更新（模型按意见重出过）：复核新图后清空这一页的意见即可批准。':'';
+  // 只读上下文：上一轮这个人说过什么（文字 / 框选 / 图片改动），这一页已按它改过。
+  // 只显示，不进输入、不参与 changed() 判定。
+  const prev=p.previousFeedback||'';
+  const prevRegions=(p.previousAnnotations||[]).map(a=>String(a&&a.text||'').trim()).filter(Boolean);
+  const prevAssets=(p.previousAssets||[]).length;
+  const prevLines=[];
+  if(prev)prevLines.push('「'+prev+'」');
+  if(prevRegions.length)prevLines.push('框选：'+prevRegions.map((text,i)=>(i+1)+'. '+text).join('；'));
+  if(prevAssets)prevLines.push('图片改动：'+prevAssets+' 处');
+  $('#previousNote').hidden=!prevLines.length;
+  $('#previousNote').textContent=prevLines.length
+    ?'上一轮你说的（这一页已按它改过；**只作参考，不算本轮意见**）：'+prevLines.join('\n')+'' :'';
+  $('#compare').disabled=!p.previous;$('#compare').textContent='查看修改前';
+  const url=await assetFor(p.png,p.version);
+  if(seq===slideSeq&&url)$('#slide').src=url;
+  drawRail();drawAssets();drawRegions();status();drawStale();
+}
 function go(d){index=Math.max(0,Math.min(data.pages.length-1,index+d));render()}
+function togglePrevious(){previous=!previous;$('#compare').textContent=previous?'查看当前版本':'查看修改前';marking=false;$('#selection').hidden=true;
+  const p=page();assetFor(previous?p.previous:p.png,previous?undefined:p.version).then(url=>{if(url)$('#slide').src=url})}
 $('#feedback').oninput=e=>{state[page().key].feedback=e.target.value;autoState()};
-function decide(value){if(value==='approved'&&changed(page())){$('#message').textContent='本页仍有修改意见；清除修改后才能批准。';return}state[page().key].decision=value;drawRail();status()}
-function togglePrevious(){previous=!previous;$('#slide').src=previous?page().previous:page().png;$('#compare').textContent=previous?'查看当前版本':'查看修改前';marking=false;$('#selection').hidden=true}
-function startRegion(){if(previous)togglePrevious();marking=true;$('#preview').classList.add('marking');$('#message').textContent='在页面上拖出需要修改的区域'}
+
+/* ---- 框选 ---- */
+function startRegion(){if(previous)togglePrevious();marking=true;$('#preview').classList.add('marking');note('在页面上拖出需要修改的区域')}
 function point(e){const r=$('#preview').getBoundingClientRect();return {x:Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))}}
-$('#preview').onpointerdown=e=>{if(!marking)return;start=point(e);$('#preview').setPointerCapture(e.pointerId)};
-$('#preview').onpointermove=e=>{if(!start)return;const end=point(e);rect={x:Math.min(start.x,end.x),y:Math.min(start.y,end.y),w:Math.abs(end.x-start.x),h:Math.abs(end.y-start.y)};const b=$('#selection');b.hidden=false;Object.assign(b.style,{left:rect.x*100+'%',top:rect.y*100+'%',width:rect.w*100+'%',height:rect.h*100+'%'})};
-$('#preview').onpointerup=()=>{if(!start)return;start=null;marking=false;$('#preview').classList.remove('marking');if(rect&&rect.w>.005&&rect.h>.005){$('#regionNote').value='';$('#regionDialog').showModal()}else $('#selection').hidden=true};
 function cancelRegion(){$('#regionDialog').close();$('#selection').hidden=true;rect=null}
-function saveRegion(){const text=$('#regionNote').value.trim();if(!text)return;state[page().key].annotations.push({...rect,text});cancelRegion();drawRegions();autoState()}
 function clearRegions(){state[page().key].annotations=[];drawRegions();autoState()}
-function drawRegions(){const container=$('#regions');container.replaceChildren();state[page().key].annotations.forEach((a,i)=>{const d=document.createElement('div');d.className='annotation';d.textContent=(i+1)+'. '+a.text;const b=document.createElement('button');b.textContent='删除';b.onclick=()=>{state[page().key].annotations.splice(i,1);drawRegions();autoState()};d.append(b);container.append(d)})}
+function saveRegion(){const text=$('#regionNote').value.trim();if(!text)return;state[page().key].annotations.push({...rect,text});cancelRegion();drawRegions();autoState()}
+function drawRegions(){const container=$('#regions');container.replaceChildren();state[page().key].annotations.forEach((a,i)=>{
+  const d=document.createElement('div');d.className='annotation';d.textContent=(i+1)+'. '+a.text;
+  const b=document.createElement('button');b.textContent='删除';
+  b.onclick=()=>{state[page().key].annotations.splice(i,1);drawRegions();autoState()};
+  d.append(b);container.append(d)})}
+
+/* ---- 页内图片 ---- */
 function assetState(a){return state[page().key].assets.find(x=>x.asset_key===a.asset_key)||{...a,operation:'crop',ratio:'original',anchor:'center'}}
 function setAsset(a,item){const s=state[page().key];s.assets=s.assets.filter(x=>x.asset_key!==a.asset_key);const unchanged=item.operation==='crop'&&item.path===a.path&&item.fit===a.fit&&item.ratio==='original'&&item.anchor==='center';if(!unchanged)s.assets.push(item);autoState()}
-function drawAssets(){const wrap=$('#assets');wrap.replaceChildren();const p=page();const added=state[p.key].assets.filter(a=>a.operation==='add');[...p.assets,...added].forEach(a=>{let item=assetState(a);const box=document.createElement('div');box.className='asset';const name=document.createElement('b');name.textContent=a.asset_key;box.append(name);const crop=document.createElement('div');crop.className='crop';const img=document.createElement('img');img.src='/'+item.path;crop.append(img);box.append(crop);
-const fit=document.createElement('select');for(const [v,t] of [['contain','完整显示'],['cover','填满并裁剪']]){const o=new Option(t,v);fit.add(o)}fit.value=item.fit;const ratio=document.createElement('input');ratio.type='text';ratio.value=item.ratio||'original';ratio.placeholder='original 或 16:9';const anchor=document.createElement('select');for(const [v,t] of [['center','居中'],['top','靠上'],['bottom','靠下'],['left','靠左'],['right','靠右']])anchor.add(new Option(t,v));anchor.value=item.anchor||'center';
-function preview(){img.style.objectFit=fit.value;img.style.objectPosition=anchor.value;const parts=ratio.value.split(':').map(Number);crop.style.aspectRatio=parts.length===2&&parts.every(n=>n>0)?parts.join('/'):(a.width&&a.height?a.width+'/'+a.height:'16/9');crop.style.height='auto'}
-function change(){item={...item,fit:fit.value,ratio:ratio.value,anchor:anchor.value};setAsset(a,item);preview()}fit.onchange=change;ratio.onchange=change;anchor.onchange=change;box.append(fit,ratio,anchor);preview();const input=document.createElement('input');input.type='file';input.accept='image/png,image/jpeg,image/webp,image/gif';input.onchange=()=>input.files[0]&&upload(input.files[0],a.asset_key,false);box.append(input);box.ondragover=e=>e.preventDefault();box.ondrop=e=>{e.preventDefault();if(e.dataTransfer.files[0])upload(e.dataTransfer.files[0],a.asset_key,false)};box.tabIndex=0;box.onpaste=e=>{const file=[...e.clipboardData.items].find(x=>x.kind==='file')?.getAsFile();if(file){e.preventDefault();upload(file,a.asset_key,false)}};const reset=document.createElement('button');reset.textContent=a.operation==='add'?'移除新增图片':'重置修改';reset.onclick=()=>{state[p.key].assets=state[p.key].assets.filter(x=>x.asset_key!==a.asset_key);drawAssets();autoState()};box.append(reset);wrap.append(box)})}
-async function upload(file,key,isNew){const p=page(),targetKey=p.key;uploads++;$('#message').textContent='上传中…';try{const base64=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result.split(',')[1]);r.onerror=reject;r.readAsDataURL(file)});const response=await fetch('/review-asset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({page_key:targetKey,asset_key:key,filename:file.name,data_base64:base64})});const result=await response.json();if(!response.ok)throw Error(result.error);const existing=state[targetKey].assets.find(x=>x.asset_key===key);state[targetKey].assets=state[targetKey].assets.filter(x=>x.asset_key!==key);state[targetKey].assets.push({asset_key:key,operation:isNew||existing?.operation==='add'?'add':'replace',path:result.path,fit:'contain',ratio:'original',anchor:'center'});state[targetKey].decision='revise';if(page().key===targetKey)drawAssets();drawRail();status();$('#message').textContent='图片已上传，提交后更新页面'}catch(e){$('#message').textContent=e.message}finally{uploads--}}
-const drop=$('#addDrop');drop.onclick=e=>{if(e.target!==$('#newFile'))$('#newFile').click()};drop.ondragover=e=>e.preventDefault();drop.ondrop=e=>{e.preventDefault();if(e.dataTransfer.files[0])upload(e.dataTransfer.files[0],'new_'+crypto.randomUUID(),true)};drop.onpaste=e=>{const f=[...e.clipboardData.items].find(x=>x.kind==='file')?.getAsFile();if(f){e.preventDefault();upload(f,'new_'+crypto.randomUUID(),true)}};$('#newFile').onchange=e=>{if(e.target.files[0])upload(e.target.files[0],'new_'+crypto.randomUUID(),true);e.target.value=''};
-function showSubmit(){const values=Object.values(state);$('#stats').textContent=['approved','revise','pending'].map(s=>labels[s]+' '+values.filter(x=>x.decision===s).length+' 页').join(' / ');$('#submitDialog').showModal()}
-async function submitReview(approvePending){if(uploads){$('#submitMessage').textContent='请等待图片上传完成';return}const payload=structuredClone(state);if(approvePending)for(const p of Object.values(payload))if(p.decision==='pending')p.decision='approved';try{const r=await fetch('/review-feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({review_id:data.review_id,pages:payload,overall_feedback:$('#overall').value})});const result=await r.json();if(!r.ok)throw Error(result.error);Object.assign(state,payload);drawRail();$('#submitMessage').textContent=result.message;$('#message').textContent=result.message}catch(e){$('#submitMessage').textContent=e.message}}
-function sizePreview(){const stage=$('.stage'),box=$('#preview');box.style.width=Math.max(80,Math.min(stage.clientWidth,(stage.clientHeight-85)*16/9))+'px'}window.addEventListener('resize',sizePreview);$('#slide').onload=sizePreview;sizePreview();
-window.addEventListener('beforeunload',e=>{if(Object.values(state).some(x=>x.feedback||x.assets.length||x.annotations.length)){e.preventDefault();e.returnValue=''}});render();
+function drawAssets(){
+  const wrap=$('#assets');wrap.replaceChildren();const p=page();
+  const added=state[p.key].assets.filter(a=>a.operation==='add');
+  [...p.assets,...added].forEach(a=>{
+    let item=assetState(a);
+    const box=document.createElement('div');box.className='asset';
+    const name=document.createElement('b');name.textContent=a.asset_key;box.append(name);
+    const crop=document.createElement('div');crop.className='crop';
+    const img=document.createElement('img');
+    assetFor(item.path,assetVersion(item)).then(url=>{if(url)img.src=url});
+    crop.append(img);box.append(crop);
+    const fit=document.createElement('select');
+    for(const [v,t] of [['contain','完整显示'],['cover','填满并裁剪']])fit.add(new Option(t,v));
+    fit.value=item.fit;
+    const ratio=document.createElement('input');ratio.type='text';ratio.value=item.ratio||'original';ratio.placeholder='original 或 16:9';
+    const anchor=document.createElement('select');
+    for(const [v,t] of [['center','居中'],['top','靠上'],['bottom','靠下'],['left','靠左'],['right','靠右']])anchor.add(new Option(t,v));
+    anchor.value=item.anchor||'center';
+    function preview(){img.style.objectFit=fit.value;img.style.objectPosition=anchor.value;
+      const parts=ratio.value.split(':').map(Number);
+      crop.style.aspectRatio=parts.length===2&&parts.every(n=>n>0)?parts.join('/'):(a.width&&a.height?a.width+'/'+a.height:'16/9');
+      crop.style.height='auto'}
+    function change(){item={...item,fit:fit.value,ratio:ratio.value,anchor:anchor.value};setAsset(a,item);preview()}
+    fit.onchange=change;ratio.onchange=change;anchor.onchange=change;
+    box.append(fit,ratio,anchor);preview();
+    if(canUpload){
+      const input=document.createElement('input');input.type='file';input.accept='image/png,image/jpeg,image/webp,image/gif';
+      input.onchange=()=>input.files[0]&&upload(input.files[0],a.asset_key,false);
+      box.append(input);
+      box.ondragover=e=>e.preventDefault();
+      box.ondrop=e=>{e.preventDefault();if(e.dataTransfer.files[0])upload(e.dataTransfer.files[0],a.asset_key,false)};
+      box.tabIndex=0;
+      box.onpaste=e=>{const file=[...e.clipboardData.items].find(x=>x.kind==='file')?.getAsFile();if(file){e.preventDefault();upload(file,a.asset_key,false)}};
+    }
+    const reset=document.createElement('button');
+    reset.textContent=a.operation==='add'?'移除新增图片':'重置修改';
+    reset.onclick=()=>{state[p.key].assets=state[p.key].assets.filter(x=>x.asset_key!==a.asset_key);drawAssets();autoState()};
+    box.append(reset);wrap.append(box);
+  });
+}
+// 上传能力由宿主声明（surface 的 capabilities）。桥连上之前不敢给控件：声明里没有就整块隐藏，
+// 而不是"先摆出来、点了才拒绝"。两种宿主下这一段是同一份代码。
+function applyUploadCapability(){
+  const can=Array.isArray(review&&review.capabilities)&&review.capabilities.indexOf('asset-upload')>=0;
+  canUpload=can;
+  $('#addDrop').hidden=!can;
+  if(!can)note('这个宿主没有声明上传能力：本页只能写意见与框选','');
+  return can;
+}
+function extOf(name){const match=String(name||'').match(/\.[A-Za-z0-9]+$/);return match?match[0].toLowerCase():'.png'}
+function safeStem(name){return String(name||'image').replace(/\.[^.]+$/,'').replace(/[^\p{L}\p{N}._-]+/gu,'-').slice(0,80)||'image'}
+async function upload(file,key,isNew){
+  if(!canUpload){note('这个宿主没有声明上传能力，传不进去','error');return}
+  if(!file||!String(file.type||'').startsWith('image/')){note('只收 PNG / JPEG / WEBP / GIF','error');return}
+  if(file.size>12*1024*1024){note('图片要小于 12MB','error');return}
+  const targetKey=page().key,existing=state[targetKey].assets.find(x=>x.asset_key===key);
+  uploads++;note('上传中…');
+  try{
+    // 上传目标必须落在 dir（＝项目根）里；页面自己拼相对路径，宿主做包含性校验。
+    const rel='_internal/05_review/uploads/'+targetKey+'/'+safeStem(file.name)+'-'+uid().slice(0,10)+extOf(file.name);
+    const result=await review.upload(file,rel);
+    const sha=String((result&&result.sha256)||'');
+    state[targetKey].assets=state[targetKey].assets.filter(x=>x.asset_key!==key);
+    state[targetKey].assets.push({asset_key:key,operation:(isNew||existing?.operation==='add')?'add':'replace',
+      path:rel,sha256:sha,fit:'contain',ratio:'original',anchor:'center'});
+    state[targetKey].decision='revise';
+    note('图片已上传（版本 '+(sha?sha.slice(0,12):'未给 hash')+'）；提交后更新页面','ok');
+    if(page().key===targetKey)drawAssets();
+    drawRail();status();
+  }catch(error){
+    note('上传失败：'+error.message+(/asset-upload/.test(error.message)?'（这个宿主没有声明上传能力）':''),'error');
+  }finally{uploads--}
+}
+const drop=$('#addDrop');
+drop.onclick=e=>{if(e.target!==$('#newFile'))$('#newFile').click()};
+drop.ondragover=e=>e.preventDefault();
+drop.ondrop=e=>{e.preventDefault();if(e.dataTransfer.files[0])upload(e.dataTransfer.files[0],'new_'+uid(),true)};
+drop.onpaste=e=>{const f=[...e.clipboardData.items].find(x=>x.kind==='file')?.getAsFile();if(f){e.preventDefault();upload(f,'new_'+uid(),true)}};
+$('#newFile').onchange=e=>{if(e.target.files[0])upload(e.target.files[0],'new_'+uid(),true);e.target.value=''};
+
+/* ---- 提交 ---- */
+function drawStale(){
+  const box=$('#staleNote');box.hidden=!stale;
+  if(stale)box.textContent='这一页已更新，先复核：'+(staleKeys.length?staleKeys.join('、'):'整套审阅页已重出')
+    +'。点「重新加载」看新图，再提交（模型只重出提交的那一页）。';
+}
+// 读当前的 snapshot.json（相对 dir）。宿主只 stat 文件、不看内容，所以"什么变了"由页面自己算。
+// `readText` 在没插件时是 fetch，文件不在会拿到 404 的正文（**桥不检查 response.ok**），所以一律 catch。
+async function readSnapshot(){
+  if(!review)return null;
+  try{
+    const snapshot=JSON.parse(await review.readText(data.snapshot));
+    return (snapshot&&snapshot.versions&&snapshot.review_id)?snapshot:null;
+  }catch(error){return null}
+}
+// 页面是生成时的一份快照：模型重出某一页会重写 snapshot.json（review_id 与那一页的版本都会变）。
+// 提交前拿当前快照比一次——对不上就不写，免得把上一版的决定当成这一版的。
+async function refreshStale(){
+  if(!review)return;
+  const snapshot=await readSnapshot();
+  if(!snapshot)return;
+  const known=data.pages.filter(p=>snapshot.versions[p.key]);
+  stale=String(snapshot.review_id||'')!==String(data.review_id||'')
+    || known.length!==data.pages.length;      // 页集变了（加页/删页）只能重新加载，页面认不出新页
+  staleKeys=known.filter(p=>snapshot.versions[p.key]!==p.version).map(p=>p.key);
+  drawStale();
+}
+/* 宿主戳了一下（watch 的 mtime/size 变了，或有插件时推来 units）：**我们自己读、自己 diff**。
+   只换版本变过的那几页的 <img>，并把它们的决定退回"未处理"——画面换了，旧批准不算数。
+   别的什么都不动：不整页重载，不动滚动位置、不动别的页的意见/框选、不动正在编辑的输入框。 */
+async function onHostChanged(){
+  pulseCount++;lastPulseAt=new Date().toLocaleTimeString('zh-CN',{hour12:false});drawPulse();
+  const snapshot=await readSnapshot();
+  if(!snapshot)return;
+  const known=data.pages.filter(p=>snapshot.versions[p.key]);
+  if(known.length!==data.pages.length){await refreshStale();return}   // 页集变了 → 交给上面的 stale 提示
+  const changed=data.pages.filter(p=>snapshot.versions[p.key]!==p.version);
+  data.review_id=snapshot.review_id;          // 不更新它，后面的提交会被 Skill 判成上一版
+  if(!changed.length){stale=false;staleKeys=[];drawStale();return}   // 戳到了，但没有页面版本变过
+  for(const p of changed){
+    const before=p.version;
+    p.version=snapshot.versions[p.key];
+    if(snapshot.png_hashes&&snapshot.png_hashes[p.key])p.png_sha256=snapshot.png_hashes[p.key];
+    // check 重渲这一页时会把旧 PNG 存成 versions/<key>-<旧版本>.png，正好是"查看修改前"
+    p.previous='_internal/05_review/versions/'+p.key+'-'+before+'.png';
+    updatedPages.add(p.key);
+    if(state[p.key].decision==='approved')state[p.key].decision='pending';
+  }
+  stale=false;staleKeys=[];drawStale();
+  await swapImages(changed);
+  for(const p of changed){
+    const button=document.querySelector('#rail button[data-key="'+p.key+'"]');
+    if(button){button.className=state[p.key].decision+(p.key===page().key?' active':'')+' updated';button.title='画面已更新，待复核'}
+  }
+  status();
+  if(updatedPages.has(page().key))render();      // 当前这一页就是被重出的那页：图与提示一起更新
+}
+// 只换这几页的图：当前页的舞台图 + 轨道上那张缩略图；其他 <img> 一个都不碰。
+async function swapImages(pages_){
+  for(const p of pages_){
+    const url=await assetFor(p.png,p.version);
+    if(!url)continue;
+    const button=document.querySelector('#rail button[data-key="'+p.key+'"] img');
+    if(button)button.src=url;
+    if(page().key===p.key&&$('#slide'))$('#slide').src=url;
+  }
+}
+function collect(){
+  const pages={};
+  data.pages.forEach(p=>{
+    const s=state[p.key];const feedback=s.feedback.trim();
+    const has=!!(feedback||s.annotations.length||s.assets.length);
+    pages[p.key]={decision:has?'revise':s.decision,feedback,annotations:s.annotations,
+      assets:s.assets.map(a=>({...a})),version:p.version,png_sha256:p.png_sha256};
+  });
+  const overall=$('#overall').value.trim();
+  const items=Object.entries(pages).filter(([,entry])=>entry.decision==='revise')
+    .map(([key,entry])=>({id:uid(),pages:[key],feedback:entry.feedback,annotations:entry.annotations,assets:entry.assets}));
+  if(overall)items.push({id:uid(),pages:Object.keys(pages),feedback:overall});
+  // 宿主原样落盘，所以这份文档就是 feedback.json；provenance 说明它是页面写的（批准只认这个来源）。
+  return {review_id:data.review_id,pages,overall_feedback:overall,items,
+    provenance:{source:'review_page',transport:(review&&review.transport)||'',
+      surface:'planners-ppt-hell/visual',submitted_at:new Date().toISOString()}};
+}
+// `wake` 两种形状：逐页 `{unit: page_key}`（宿主用 surface 的模板替换 {unit}）；
+// 整套 `{unit:'整套', text: …}`（**整句覆盖**，因为 surface 的模板是逐页口气，
+// 直接套会说成"整套 已定；只重出这一页"）。
+// 唤醒结果分档：宿主**接受了**不等于 agent**看到了**。插件宿主会去会话日志里核一遍并回 `verified`；
+// 没有插件（serve-review.mjs）时没有人可唤，它不回这个字段 —— 那就必须说出来，不能和核过的那档同一句话。
+function wakeNote(verified){
+  return verified
+    ? '宿主已在会话日志里核对进入队列'
+    : '宿主未核对 —— 若模型迟迟没反应，请回对话说一声';
+}
+async function push(wake){
+  if(!review){note('本页只读：没有连上审阅宿主，反馈存不进去（请让宿主打开这一页）','warn');return {ok:false}}
+  if(uploads){note('请等待图片上传完成','error');return {ok:false}}
+  await refreshStale();
+  if(stale){drawStale();note('这一页已更新，先复核（或点「重新加载」）','error');return {ok:false}}
+  const document=collect();
+  try{
+    await review.write(document);
+    let verified=null, duplicate=false, notice='';
+    if(wake){
+      const result=await review.wake(wake);
+      verified=(result&&result.verified)||null;
+      duplicate=!!(result&&result.duplicate);
+      notice=(result&&result.notice)||'';
+      // 把"这次通知有没有被核对过"留在记录里。同一份 payload、**同一个 submitted_at**，只多一个
+      // provenance.wake —— 它不改变任何决定，也不是第二轮提交（收件按 submitted_at 去重，不会长出两轮）。
+      try{
+        await review.write({...document,provenance:{...document.provenance,
+          wake:{requested:true,verified,at:new Date().toISOString()}}});
+      }catch(error){/* 记不上不影响这次提交已经成立 */}
+    }
+    return {ok:true,verified,duplicate,notice};
+  }catch(error){note('保存失败：'+error.message,'error');return {ok:false}}
+}
+async function decideCurrent(value){
+  const p=page(),s=state[p.key];
+  if(value==='approved'&&changed(p)){note('本页还有意见、框选或图片改动：清空（图片点「重置修改」）后才能通过','error');return}
+  if(value==='revise'&&!changed(p)){note('先写一句要改什么，或框选一处问题，再点「本页要求修改」','error');return}
+  s.decision=value;drawRail();status();
+  // 唤醒语自带决定：以前统一说"X 已定"，人点的是"要求修改"时模型得先翻文件才知道。
+  // 现在逐页提交用**整句覆盖**（surface 的模板只留给不覆盖的调用方）：
+  //   「data 要求修改：底部没对齐 —— 只重出这一页，其余页不要动。」/「data 已通过。」
+  const gist=(s.feedback.trim()||((s.annotations[0]||{}).text||'').trim()).slice(0,40);
+  const wake=value==='approved'
+    ?{unit:p.key,text:p.key+' 已通过。'}
+    :{unit:p.key,text:p.key+' 要求修改'+(gist?'：'+gist:'')+' —— 只重出这一页，其余页不要动。'};
+  const sent=await push(wake);
+  if(!sent.ok)return;
+  if(sent.duplicate){
+    // 同一次提交重发：通知之前已经送达，这一次没有新增。照宿主说的讲，不夸大成"又通知了一次"。
+    note(sent.notice||'已写入；本次没有新增通知（同一次提交之前已送达）','ok');
+    return;
+  }
+  note('已写入 '+p.key+' 的决定，并已通知模型'+(value==='approved'?'「已通过」':'「只重出这一页」')
+    +'（'+wakeNote(sent.verified)+'）',sent.verified?'ok':'warn');
+}
+function showSubmit(){
+  const values=Object.values(state);
+  $('#stats').textContent=['approved','revise','pending'].map(s=>labels[s]+' '+values.filter(x=>x.decision===s).length+' 页').join(' / ');
+  $('#submitDialog').showModal();
+}
+// 整套提交：整句覆盖唤醒（不自相矛盾的那句）；没有插件时它只落日志，人回对话说一声。
+async function submitBatch(approvePending){
+  if(approvePending)for(const s of Object.values(state))if(s.decision==='pending')s.decision='approved';
+  const sent=await push({unit:'整套',text:'整套已定，可以进入下一步。'});
+  if(sent.ok){
+    if(sent.duplicate){
+      const said=sent.notice||'已写入；本次没有新增通知（同一次提交之前已送达）';
+      $('#submitMessage').textContent=said;
+      note(said,'ok');
+    }else{
+      const how=wakeNote(sent.verified);
+      $('#submitMessage').textContent='已写入审阅反馈，并已通知模型整套已定（'+how+'）。';
+      note('整套反馈已写入，并已通知模型整套已定（'+how+'）',sent.verified?'ok':'warn');
+    }
+    $('#submitDialog').close();
+  } else $('#submitMessage').textContent=$('#message').textContent;
+}
+function sizePreview(){const stage=$('.stage'),box=$('#preview');box.style.width=Math.max(80,Math.min(stage.clientWidth,(stage.clientHeight-85)*16/9))+'px'}
+
+/* ---- 指针 ---- */
+$('#preview').onpointerdown=e=>{if(!marking)return;start=point(e);$('#preview').setPointerCapture(e.pointerId)};
+$('#preview').onpointermove=e=>{if(!start)return;const end=point(e);
+  rect={x:Math.min(start.x,end.x),y:Math.min(start.y,end.y),w:Math.abs(end.x-start.x),h:Math.abs(end.y-start.y)};
+  const b=$('#selection');b.hidden=false;
+  Object.assign(b.style,{left:rect.x*100+'%',top:rect.y*100+'%',width:rect.w*100+'%',height:rect.h*100+'%'})};
+$('#preview').onpointerup=()=>{if(!start)return;start=null;marking=false;$('#preview').classList.remove('marking');
+  if(rect&&rect.w>.005&&rect.h>.005){$('#regionNote').value='';$('#regionDialog').showModal()}else $('#selection').hidden=true};
+window.addEventListener('resize',sizePreview);
+$('#slide').onload=sizePreview;
+window.addEventListener('beforeunload',e=>{if(Object.values(state).some(x=>x.feedback||x.assets.length||x.annotations.length)){e.preventDefault();e.returnValue=''}});
+
+const BRIDGE_TIMEOUT_MS=2500;   // 握手要有上限：不落地就按"没有桥"降级继续画
+function connectWithTimeout(ms){
+  return new Promise(resolve=>{
+    let done=false;
+    const finish=value=>{if(!done){done=true;resolve(value)}};
+    setTimeout(()=>finish(null),ms);
+    try{ ReviewBridge.connect().then(finish,()=>finish(null)); }catch(error){finish(null)}
+  });
+}
+function sayReadOnly(why){
+  $('#bridgeState').textContent=why;
+  note(why,'warn');
+  $('#addDrop').hidden=true;      // 没有宿主就没有上传能力
+}
+// 桥是**增强**，不是氧气：先用自己的 data 把自己画出来，再去握手。
+// （不透明源 iframe 里顶层读 localStorage 会直接抛 → 整页脚本当场死、静态骨架之外什么都不画、零报错；
+//  所以这一页不碰本地存储，渲染也绝不排在 await 后面。）
+(async function boot(){
+  render();sizePreview();drawPulse();          // ← 先画：逐页卡（轨道）、导航、状态与进度都在这一步
+  try{
+    if(window.ReviewBridge)review=await connectWithTimeout(BRIDGE_TIMEOUT_MS);
+  }catch(error){review=null}
+  if(!review){
+    sayReadOnly(window.ReviewBridge
+      ? '连不上审阅宿主（握手未落地）：本页只读 —— 内容可以看，反馈存不进去。'
+      : '没有加载到审阅桥：本页只读 —— 内容可以看，反馈存不进去（请让宿主打开这一页）。');
+    return;
+  }
+  const can=applyUploadCapability();
+  $('#bridgeState').textContent='已连接审阅宿主（'+review.transport+'）· 逐页提交会写反馈并通知模型'
+    +(can?' · 可上传图片':' · 这个宿主不支持上传');
+  review.on('changed',()=>onHostChanged());
+  refreshStale();
+})();
 </script></html>
