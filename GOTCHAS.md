@@ -21,7 +21,7 @@
   ③ 每屏都叫 `caption-1`：各屏被内联进**同一个 DOM** 后，全局选择器 `#caption-1` 只命中**第一个**——想强调第 4 屏，实际打到第 1 屏（`hyperframes check` 的对比度警告把 `#caption-1` 对到了落在第 3 屏的 `t=11.556s`，就是这个碰撞的旁证）。
 - **原因**：出口契约把「按 id 指名」写成了下游的责任，产出侧**没有任何东西检查 id 存不存在、唯不唯一**；文档还教「跨页重复的元素沿用同一族前缀」，等于主动制造 ③。
 - **行为修正**：文案与规则都改成「把 `page_key` 放进 id、全片唯一」（`beat-04-caption-1`），保留「用 id 不用 DOM 序号」与「名字要读得出它在画面里是什么」。产出侧两条闸门：`MISSING_ELEMENT_ID`（没有可指名的元素）与 `DUPLICATE_ELEMENT_ID`（页内 id 不唯一，**含根 `<svg>` 的 id**）。跨页碰撞不在这里判（一次只读一页），由导入器在导入前报告。
-- **证据**：`.scratch/matt-pocock-video/issues/19-svg-page-animation.md`（44 页 0 id；序号静默错绑的实测）；`05-VideoProject/06-测试-Vans-20260926/_测试报告.md` §11.2（4 屏 55 个 id 全按 id 指名、`hyperframes check` passed）与 §11.4（`#caption-1` 被当成全片唯一）。
+- **证据**：`.scratch/matt-pocock-video/issues/19-svg-page-animation.md`（44 页 0 id；序号静默错绑的实测）；`<项目>/_测试报告.md` §11.2（4 屏 55 个 id 全按 id 指名、`hyperframes check` passed）与 §11.4（`#caption-1` 被当成全片唯一）。
 - **状态**：已升级（v5.5）
 
 ---
