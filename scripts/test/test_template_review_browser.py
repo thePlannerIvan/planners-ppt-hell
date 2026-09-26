@@ -238,7 +238,7 @@ class TemplateReviewBrowserTests(unittest.TestCase):
             frame.locator(f'fieldset[data-decision="{plugin_target}"] label.choice.pass').click()
             for layout in layouts[1:]:
                 frame.locator(f'fieldset[data-decision="{layout}"] label.choice.pass').click()
-            frame.locator('#templateName').fill('Vans 测试模板')
+            frame.locator('#templateName').fill('某品牌测试模板')
             frame.locator('#overall').fill('')
             frame.get_by_text('提交批次反馈', exact=True).click()
             harness.wait_for_function("() => (window.__hostWrites||[]).length > 0")

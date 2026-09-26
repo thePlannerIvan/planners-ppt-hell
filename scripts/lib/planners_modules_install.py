@@ -20,6 +20,8 @@
 ⑥ 不静默：每条动作都往 stderr 打一行 [planners-modules] 日志（来源 / 目标 / candidate /
    command / commit）。失败时抛出**带可复制手动命令**的错误。
 ⑦ 可关掉：$PLANNERS_NO_AUTO_INSTALL=1 → 只报不装（仍给可复制手动命令）。
+   版本：默认装**默认分支 HEAD**（跟着最新走）；设 $PLANNERS_MODULES_REF=<tag 或分支> 则钉在那上面。
+   日志里**永远打 commit**；HEAD 恰好被某个 tag 指着时把 tag 一并打出来。
 ⑧ 永不往模组目录里写文件（不写 INSTALLED.json、不改模组一个字）——provenance 只出现在日志里。
 ===========================================================================================
 """
@@ -60,11 +62,25 @@ MODULE_SPECS = {
     ),
 }
 
-FORBIDDEN_SYSTEM_DIRS = ('/usr', '/etc', '/System', '/Library', '/bin', '/sbin', '/var', '/opt')
+#: 禁地：这些目录**本身及其下**都不许装。注意**不含 /var** —— macOS 的临时目录是
+#: /var/folders/…（$TMPDIR），顶层 /var 只是指向 /private/var 的符号链接，一刀切会误杀合法临时路径。
+FORBIDDEN_SYSTEM_DIRS = ('/usr', '/etc', '/bin', '/sbin', '/System', '/Library', '/opt')
+
+#: 禁地：这两个**本身上下**不许装，但它们的子目录（如 /var/folders/…）是合法临时区。
+FORBIDDEN_SYSTEM_DIRS_EXACT = ('/var', '/tmp')
 
 
 def repo_url(name):
     return 'https://github.com/' + REPO_OWNER + '/' + name + '.git'
+
+
+def module_ref(env=None):
+    """要钉的 ref（tag 或分支）。不设 = 装默认分支 HEAD（跟着最新走）。
+
+    设了却不存在 → git clone 会如实失败，不会悄悄退回 HEAD。
+    """
+    env = os.environ if env is None else env
+    return (env.get('PLANNERS_MODULES_REF') or '').strip() or None
 
 
 def module_spec(name):
@@ -131,6 +147,11 @@ def assert_install_target_allowed(target, home=None, library_root=None):
                 raise ValueError(
                     LOG_PREFIX + ' 拒绝安装：目标 ' + variant + ' 位于系统目录 ' + system_dir + ' 之下。'
                 )
+        for system_dir in FORBIDDEN_SYSTEM_DIRS_EXACT:
+            if _normalize(os.path.abspath(variant)) == _normalize(os.path.abspath(system_dir)):
+                raise ValueError(
+                    LOG_PREFIX + ' 拒绝安装：目标就是系统目录 ' + system_dir + ' 本身。'
+                )
     return raw
 
 
@@ -155,9 +176,12 @@ def install_root_for(name, env=None, home=None):
 
 def manual_commands(name, env=None, home=None):
     root, _source, _configured = install_root_for(name, env=env, home=home)
+    ref = module_ref(env)
+    branch = ' --branch ' + ref if ref else ''
     return {
         'npx': 'npx skills add ' + repo_url(name)[:-4] + ' --skill ' + name,
-        'git': 'git clone --depth 1 ' + repo_url(name) + ' "' + str(root / name) + '"',
+        'git': 'git clone --depth 1' + branch + ' ' + repo_url(name) + ' "' + str(root / name) + '"',
+        'pinned': 'PLANNERS_MODULES_REF=v1.0.0 npx skills add ' + repo_url(name)[:-4] + ' --skill ' + name,
         'root': str(root),
     }
 
@@ -193,11 +217,23 @@ def verify_install(directory, name):
 
 
 def find_library_root(start):
-    """从 start 往上找 02-skills-library 工作树根，找不到返回 None。
-    适配器拿它喂 assert_install_target_allowed 的 library_root（硬约束：禁止装进库里）。"""
+    """从 start 往上找 skills 库的工作树根，找不到返回 None。
+
+    判据三条（不依赖本文件在库里的深度，也不依赖目录被改名）：
+      ① 名字就是库目录；
+      ② 这一层**装着**一个叫 02-skills-library 的子目录；
+      ③ 这一层同时住着本 Skill 与已知公共模组分发目录（说明它就是 skills 根）。
+    适配器拿它喂 assert_install_target_allowed 的 library_root（硬约束：禁止装进库里）。
+    """
     current = Path(start).resolve()
     for _ in range(12):
-        if current.name == LIBRARY_DIR_NAME:
+        try:
+            subdirs = {entry.name for entry in current.iterdir() if entry.is_dir()}
+        except OSError:
+            subdirs = set()
+        if current.name == LIBRARY_DIR_NAME or LIBRARY_DIR_NAME in subdirs:
+            return str(current)
+        if {'planners-review-core', 'planners-source-index'} <= subdirs:
             return str(current)
         parent = current.parent
         if parent == current:
@@ -282,7 +318,10 @@ def ensure_module(name, env=None, home=None, runner=None, library_root=None,
 
     log_fn('缺少公共模组 ' + name + '；已找过：'
            + (' , '.join(str(path) for path in candidates) if candidates else '（候选列表未传）'))
-    log_fn('正在安装：来源 ' + repo_url(name) + '（默认分支；该仓库当前**没有 tag 可钉**）→ 目标 ' + str(target))
+    ref = module_ref(env)
+    log_fn('正在安装：来源 ' + repo_url(name) + '（'
+           + ('PLANNERS_MODULES_REF=' + ref + '，钉在这个 ref 上' if ref else '默认分支；装的是 HEAD，不钉 tag')
+           + '）→ 目标 ' + str(target))
     log_fn('安装命令：' + method)
 
     try:
@@ -301,7 +340,8 @@ def ensure_module(name, env=None, home=None, runner=None, library_root=None,
             else:
                 log_fn('npx skills add 成功；但它不带 .git、也不能指定安装根，故仍以 git clone 的副本为准（可追溯 commit）')
 
-        clone = run('git', ['clone', '--depth', '1', repo_url(name), str(staging)], cwd=root, env=env)
+        clone_args = ['clone', '--depth', '1'] + (['--branch', ref] if ref else []) + [repo_url(name), str(staging)]
+        clone = run('git', clone_args, cwd=root, env=env)
         if clone.returncode != 0:
             lines = [line for line in ((clone.stderr or '') + (clone.stdout or '')).split('\n') if line.strip()]
             reason = ' / '.join(lines[-3:]) if lines else '退出码 ' + str(clone.returncode)
@@ -312,6 +352,8 @@ def ensure_module(name, env=None, home=None, runner=None, library_root=None,
             raise RuntimeError('装下来的内容没通过验证：' + check['reason'])
 
         info = describe_install(staging, run)
+        if not info['tags']:
+            log_fn('该仓库这个 commit 上没有 tag 可钉 —— 装的是默认分支 HEAD，可追溯性靠上面的 commit')
         assert_install_target_allowed(target, home=home_dir, library_root=library_root)
         try:
             # ③ rename 原子就位；同目录同文件系统，不会出现半成品
@@ -332,9 +374,11 @@ def ensure_module(name, env=None, home=None, runner=None, library_root=None,
             raise RuntimeError('就位后复验失败：' + final['reason'])
 
         log_fn('已安装 ' + name + ' ✓ commit ' + str(info['commit'] or '未知') + '｜tag：'
-               + ('、'.join(info['tags']) if info['tags'] else '（无，仓库没有 tag）'))
-        log_fn('落点：' + str(target) + '（安装根来源：' + source + '）｜npx 可用性：'
-               + ('可用' if npx_available else '不可用（已退化为 git clone）'))
+               + ('、'.join(info['tags']) + '（默认分支当前 HEAD 正好被这个 tag 指着；适配器仍按默认分支装）'
+                  if info['tags'] else '（该仓库这个 commit 上没有 tag 可钉，装的是默认分支）'))
+        log_fn('落点：' + str(target) + '（安装根来源：' + source + '）｜版本：'
+               + ('钉在 PLANNERS_MODULES_REF=' + ref if ref else '默认分支 HEAD')
+               + '｜npx 可用性：' + ('可用' if npx_available else '不可用（已退化为 git clone）'))
 
         # ⑥ 回验：让**本适配器自己**再解析一次，确认下次一定找得到。
         if verify_path:
