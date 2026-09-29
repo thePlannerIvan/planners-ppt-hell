@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="var(--font-sans)">
+  <defs>
+    <style>
+:root {
+  /* 75% Neutral Canvas and Surfaces */
+  --canvas-bg: #F4F5F7;
+  --canvas-pure: #FFFFFF;
+  --surface-card: #FFFFFF;
+  --surface-muted: #EBECEE;
+  --surface-zebra: #F8F9FB;
+  --surface-dark: #111111;
+  --surface-dark-elevated: #1E2024;
+  --surface-accent-tint: #FFF1F2;
+
+  /* 20% Charcoal and Ink Hierarchy */
+  --ink-primary: #111111;
+  --ink-secondary: #4B5563;
+  --ink-muted: #8C94A0;
+  --ink-watermark: #EAECEF;
+  --ink-on-dark: #FFFFFF;
+  --ink-on-dark-muted: #A1A8B3;
+
+  /* 5% Brand Accent (Strict Single-Hue Discipline) */
+  --accent-brand: #E60012;
+  --accent-secondary: #2B2D33;
+
+  /* Hairlines and Dividers */
+  --border-subtle: #E2E5EA;
+  --border-strong: #111111;
+
+  /* Font Stacks */
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Arial Black", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Courier New", monospace;
+
+  /* 6-Tier 1080p Font Scale */
+  --size-watermark: 136px;
+  --size-hero-kpi: 56px;
+  --size-action-title: 42px;
+  --size-card-title: 26px;
+  --size-subtitle: 21px;
+  --size-body: 18px;
+  --size-caption: 14px;
+}
+
+      text { font-family: var(--font-sans); }
+      .mono { font-family: var(--font-mono); }
+      .display { font-family: var(--font-display); }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1920" height="1080" fill="var(--canvas-bg)"/>
+  <!-- Global Skyline Header -->
+  <g id="skyline-header">
+    <rect x="80" y="64" width="8" height="54" rx="4" fill="var(--accent-brand)"/>
+    <text x="106" y="102" font-size="40" font-weight="900" fill="var(--ink-primary)">月度作战大表：将年度美学精准切片为 7 大战役波峰与达人配比计划</text>
+    <text x="106" y="144" font-size="20" font-weight="500" fill="var(--ink-secondary)">采用 <tspan fill="var(--accent-brand)" font-weight="700">无竖线斑马纹矩阵 + S级战役高亮</tspan> 设计，4月/6月/9月/双11四大S级节点集中爆破，平峰期蓄水搜索词</text>
+    <rect x="1560" y="64" width="280" height="34" rx="6" fill="var(--surface-dark)"/>
+    <text x="1700" y="86" class="mono" font-size="14" font-weight="700" fill="var(--ink-on-dark)" text-anchor="middle" letter-spacing="1">PART 04 // BATTLE CALENDAR</text>
+    <line x1="80" y1="172" x2="1840" y2="172" stroke="var(--border-subtle)" stroke-width="1.5"/>
+  </g>
+
+  <!-- Global Skyline Bottom Takeaway Banner -->
+  <g id="skyline-takeaway">
+    <rect x="80" y="918" width="1760" height="76" rx="12" fill="var(--surface-dark)"/>
+    <rect x="104" y="937" width="164" height="38" rx="6" fill="var(--accent-brand)"/>
+    <text x="186" y="962" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle" letter-spacing="1">EXECUTION RULE</text>
+    <text x="288" y="964" font-size="22" font-weight="700" fill="var(--ink-on-dark)">波峰节奏控制：每个 S 级战役提前 <tspan fill="var(--accent-brand)" font-weight="900">21 天启动达人种草蓄水</tspan>，大促前 7 天切换高转化红宝书与搜索截流卡位</text>
+  </g>
+
+  <!-- Global Skyline Footer -->
+  <g id="skyline-footer">
+    <text x="80" y="1034" font-size="14" font-weight="500" fill="var(--ink-muted)">Source: 2026 全年媒介排期与大促脉冲节奏规划表</text>
+    <text x="1840" y="1036" class="display" font-size="20" font-weight="900" fill="var(--ink-primary)" text-anchor="end">P.06</text>
+  </g>
+  <!-- Table Header Bar (x=80, y=198, w=1760, h=56) -->
+  <g id="table-header">
+    <rect x="80" y="198" width="1760" height="56" rx="10" fill="var(--surface-dark)"/>
+    <text x="112" y="233" class="mono" font-size="15" font-weight="800" fill="var(--ink-on-dark)">作战月份</text>
+    <text x="369" y="233" class="mono" font-size="15" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">战役等级</text>
+    <text x="468" y="233" class="mono" font-size="15" font-weight="800" fill="var(--ink-on-dark)">核心传播主题 (CAMPAIGN THEME)</text>
+    <text x="860" y="233" class="mono" font-size="15" font-weight="800" fill="var(--ink-on-dark)">主推尖货矩阵 (HERO SKU)</text>
+    <text x="1220" y="233" class="mono" font-size="15" font-weight="800" fill="var(--ink-on-dark)">达人金字塔配比 (KOL MIX)</text>
+    <text x="1724" y="233" class="mono" font-size="15" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">核心考核锚点</text>
+  </g>
+  <!-- Table Row 1 -->
+  <g id="battle-row-1">
+    <rect x="80" y="264" width="1760" height="80" rx="8" fill="var(--surface-accent-tint)"/>
+    <rect x="80" y="264" width="6" height="80" rx="3" fill="var(--accent-brand)"/>
+    <text x="112" y="312" font-size="20" font-weight="900" fill="var(--ink-primary)">4月 · 春季焕新</text>
+    <rect x="310" y="287" width="118" height="34" rx="17" fill="var(--accent-brand)"/>
+    <text x="369" y="310" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">S级引爆</text>
+    <text x="468" y="312" font-size="20" font-weight="800" fill="var(--ink-primary)">先锋训练季 · 破圈立型格</text>
+    <text x="860" y="312" font-size="18" font-weight="600" fill="var(--ink-secondary)">复古银跑鞋 / 综合训练鞋</text>
+    <text x="1220" y="312" font-size="18" font-weight="500" fill="var(--ink-secondary)">腰部穿搭 60% + 垂类运动 40%</text>
+    <rect x="1636" y="286" width="176" height="36" rx="8" fill="var(--surface-card)" stroke="var(--accent-brand)" stroke-width="1.5"/>
+    <text x="1724" y="310" class="mono" font-size="15" font-weight="800" fill="var(--accent-brand)" text-anchor="middle">曝光 3,500w+</text>
+  </g>
+  <!-- Table Row 2 -->
+  <g id="battle-row-2">
+    <rect x="80" y="352" width="1760" height="80" rx="8" fill="var(--surface-zebra)"/>
+    
+    <text x="112" y="400" font-size="20" font-weight="900" fill="var(--ink-primary)">5月 · 初夏出行</text>
+    <rect x="310" y="375" width="118" height="34" rx="17" fill="var(--surface-dark)"/>
+    <text x="369" y="398" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">A级续航</text>
+    <text x="468" y="400" font-size="20" font-weight="800" fill="var(--ink-primary)">五一暴走两万步神鞋实测</text>
+    <text x="860" y="400" font-size="18" font-weight="600" fill="var(--ink-secondary)">轻量透气跑鞋 / 户外徒步鞋</text>
+    <text x="1220" y="400" font-size="18" font-weight="500" fill="var(--ink-secondary)">旅行街拍 50% + 测评党 50%</text>
+    <rect x="1636" y="374" width="176" height="36" rx="8" fill="var(--surface-card)" stroke="var(--surface-dark)" stroke-width="1.5"/>
+    <text x="1724" y="398" class="mono" font-size="15" font-weight="800" fill="var(--ink-primary)" text-anchor="middle">搜索 +180%</text>
+  </g>
+  <!-- Table Row 3 -->
+  <g id="battle-row-3">
+    <rect x="80" y="440" width="1760" height="80" rx="8" fill="var(--surface-accent-tint)"/>
+    <rect x="80" y="440" width="6" height="80" rx="3" fill="var(--accent-brand)"/>
+    <text x="112" y="488" font-size="20" font-weight="900" fill="var(--ink-primary)">6月 · 618大促</text>
+    <rect x="310" y="463" width="118" height="34" rx="17" fill="var(--accent-brand)"/>
+    <text x="369" y="486" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">S级收割</text>
+    <text x="468" y="488" font-size="20" font-weight="800" fill="var(--ink-primary)">年中运动尖货必买红宝书</text>
+    <text x="860" y="488" font-size="18" font-weight="600" fill="var(--ink-secondary)">全系主力爆款 + 礼盒联名款</text>
+    <text x="1220" y="488" font-size="18" font-weight="500" fill="var(--ink-secondary)">头部背书 20% + KOC铺量 80%</text>
+    <rect x="1636" y="462" width="176" height="36" rx="8" fill="var(--surface-card)" stroke="var(--accent-brand)" stroke-width="1.5"/>
+    <text x="1724" y="486" class="mono" font-size="15" font-weight="800" fill="var(--accent-brand)" text-anchor="middle">ROI ≥ 3.2</text>
+  </g>
+  <!-- Table Row 4 -->
+  <g id="battle-row-4">
+    <rect x="80" y="528" width="1760" height="80" rx="8" fill="var(--surface-zebra)"/>
+    
+    <text x="112" y="576" font-size="20" font-weight="900" fill="var(--ink-primary)">7月 · 盛夏夜跑</text>
+    <rect x="310" y="551" width="118" height="34" rx="17" fill="var(--surface-dark)"/>
+    <text x="369" y="574" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">A级深耕</text>
+    <text x="468" y="576" font-size="20" font-weight="800" fill="var(--ink-primary)">夏夜多巴胺刷街训练计划</text>
+    <text x="860" y="576" font-size="18" font-weight="600" fill="var(--ink-secondary)">竞速透气跑鞋 / 速干训练服</text>
+    <text x="1220" y="576" font-size="18" font-weight="500" fill="var(--ink-secondary)">跑团主理人 60% + 健身 40%</text>
+    <rect x="1636" y="550" width="176" height="36" rx="8" fill="var(--surface-card)" stroke="var(--surface-dark)" stroke-width="1.5"/>
+    <text x="1724" y="574" class="mono" font-size="15" font-weight="800" fill="var(--ink-primary)" text-anchor="middle">互动率 ≥ 9%</text>
+  </g>
+  <!-- Table Row 5 -->
+  <g id="battle-row-5">
+    <rect x="80" y="616" width="1760" height="80" rx="8" fill="var(--surface-card)"/>
+    
+    <text x="112" y="664" font-size="20" font-weight="900" fill="var(--ink-primary)">8月 · 秋季上新</text>
+    <rect x="310" y="639" width="118" height="34" rx="17" fill="var(--surface-dark)"/>
+    <text x="369" y="662" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">A级蓄水</text>
+    <text x="468" y="664" font-size="20" font-weight="800" fill="var(--ink-primary)">早秋复古美拉德球鞋档案</text>
+    <text x="860" y="664" font-size="18" font-weight="600" fill="var(--ink-secondary)">美拉德配色复刻 / 经典板鞋</text>
+    <text x="1220" y="664" font-size="18" font-weight="500" fill="var(--ink-secondary)">高街潮流 70% + 档案控 30%</text>
+    <rect x="1636" y="638" width="176" height="36" rx="8" fill="var(--surface-card)" stroke="var(--surface-dark)" stroke-width="1.5"/>
+    <text x="1724" y="662" class="mono" font-size="15" font-weight="800" fill="var(--ink-primary)" text-anchor="middle">收藏率 ≥ 38%</text>
+  </g>
+  <!-- Table Row 6 -->
+  <g id="battle-row-6">
+    <rect x="80" y="704" width="1760" height="80" rx="8" fill="var(--surface-accent-tint)"/>
+    <rect x="80" y="704" width="6" height="80" rx="3" fill="var(--accent-brand)"/>
+    <text x="112" y="752" font-size="20" font-weight="900" fill="var(--ink-primary)">9月 · 黄金赛期</text>
+    <rect x="310" y="727" width="118" height="34" rx="17" fill="var(--accent-brand)"/>
+    <text x="369" y="750" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">S级引爆</text>
+    <text x="468" y="752" font-size="20" font-weight="800" fill="var(--ink-primary)">秋季马拉松与城市漫游季</text>
+    <text x="860" y="752" font-size="18" font-weight="600" fill="var(--ink-secondary)">旗舰碳板跑鞋 / 联名限定款</text>
+    <text x="1220" y="752" font-size="18" font-weight="500" fill="var(--ink-secondary)">精英跑者 40% + 明星街拍 60%</text>
+    <rect x="1636" y="726" width="176" height="36" rx="8" fill="var(--surface-card)" stroke="var(--accent-brand)" stroke-width="1.5"/>
+    <text x="1724" y="750" class="mono" font-size="15" font-weight="800" fill="var(--accent-brand)" text-anchor="middle">声量 TOP 3</text>
+  </g>
+  <!-- Table Row 7 -->
+  <g id="battle-row-7">
+    <rect x="80" y="792" width="1760" height="80" rx="8" fill="var(--surface-accent-tint)"/>
+    <rect x="80" y="792" width="6" height="80" rx="3" fill="var(--accent-brand)"/>
+    <text x="112" y="840" font-size="20" font-weight="900" fill="var(--ink-primary)">10–11月 · 双11</text>
+    <rect x="310" y="815" width="118" height="34" rx="17" fill="var(--accent-brand)"/>
+    <text x="369" y="838" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">S级收割</text>
+    <text x="468" y="840" font-size="20" font-weight="800" fill="var(--ink-primary)">年度全域种草脉冲总决战</text>
+    <text x="860" y="840" font-size="18" font-weight="600" fill="var(--ink-secondary)">秋冬保暖尖货 + 全年爆款返场</text>
+    <text x="1220" y="840" font-size="18" font-weight="500" fill="var(--ink-secondary)">全链路追投 + 搜索词全包揽</text>
+    <rect x="1636" y="814" width="176" height="36" rx="8" fill="var(--surface-card)" stroke="var(--accent-brand)" stroke-width="1.5"/>
+    <text x="1724" y="838" class="mono" font-size="15" font-weight="800" fill="var(--accent-brand)" text-anchor="middle">GMV 破峰</text>
+  </g>
+</svg>

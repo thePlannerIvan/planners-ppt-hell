@@ -1,0 +1,69 @@
+{
+  "schema": "planner.multimodal-template-pack.v2",
+  "template_id": "agency-social-proposal",
+  "name": "整合营销与社媒种草提案旗舰 (Agency Social Proposal)",
+  "description": "源自美津浓种草全案与官号提案 90 分去框化升级版：黑红灰高对比杂志编辑风，含 1:2 锚点拆解、瑞士无框水印网格、咨询话题屋、小红书笔记 Mockup 双栏与无竖线斑马纹作战表。",
+  "status": "approved",
+  "is_default": true,
+  "published_at": "2026-09-29T16:37:16.560501+00:00",
+  "canvas_size": "1920x1080",
+  "four_piece_contract": {
+    "tokens_css": "tokens.css",
+    "skyline_shell_svg": "skyline_shell.svg",
+    "primitives": [
+      "primitives/p01_cover.svg",
+      "primitives/p02_asymmetric_insight.svg",
+      "primitives/p03_swiss_editorial_grid.svg",
+      "primitives/p04_strategy_house.svg",
+      "primitives/p05_xhs_evidence_split.svg",
+      "primitives/p06_zebra_battle_table.svg"
+    ],
+    "spec_md": "SPEC.md",
+    "anchors": [
+      "anchors/mizuno_ops_svg_p11_architecture_6pillars.png",
+      "anchors/mizuno_v2_pdf_p02_3in1_system.png",
+      "anchors/mizuno_v2_pdf_p13_architecture_house.png",
+      "anchors/mizuno_v2_pdf_p32_table_calendar.png",
+      "anchors/mizuno_v2_pdf_p43_evidence_xhs_demo.png"
+    ]
+  },
+  "palette_summary": {
+    "canvas": "#F4F5F7 / #FFFFFF",
+    "ink": "#111111",
+    "accent": "#E60012",
+    "ratio": "75:20:5"
+  },
+  "recommended_scenarios": [
+    "小红书/社媒种草代运营提案",
+    "品牌年度整合营销全案",
+    "KFS内容矩阵与战役排期",
+    "潮流消费品/运动户外品牌比稿"
+  ],
+  "preview": "previews/full_deck_contact_sheet.png",
+  "files": {
+    "SPEC.md": "f5da3a144a6756ad62ffd7bf930c2469a680df4b7a5849630910dec09aafaecd",
+    "anchors/mizuno_ops_svg_p11_architecture_6pillars.png": "5678cece6821cd9fc84559d768ceee527884f6b2ce6eaa2f895dccce5345aba1",
+    "anchors/mizuno_v2_pdf_p02_3in1_system.png": "530d80c9c8fd3efb4a99a9263489efd930252ae546dbd8da667355bdaec7b7a5",
+    "anchors/mizuno_v2_pdf_p13_architecture_house.png": "1170c570904da4807a2b6dd2398791347f736d966691010affde952d0f038e68",
+    "anchors/mizuno_v2_pdf_p32_table_calendar.png": "f10042fdf954f0a1b6284e66c1dba82b4a6994876349fa0e10b3d034cb7641eb",
+    "anchors/mizuno_v2_pdf_p43_evidence_xhs_demo.png": "02eed107189c4f69691d853e0715f4d50fd33060420805dc8b9866f81c2aba7a",
+    "previews/full_deck_contact_sheet.png": "cd4d596277ea46490770f31393a595a38623d3b288350eac0b3bde1ebf02759a",
+    "previews/pages/p00_skyline_shell.png": "3608de28b0e7d9dab73bb8b6b8376fa0002f73edcb185bb7d0cc3266bc4f467e",
+    "previews/pages/p01_cover.png": "b781bf73221c8a5682317d69a125d583462c2a383b270850bd0d28d9448f0eee",
+    "previews/pages/p02_asymmetric_insight.png": "0f7faddc1ca9a1c1d9678487319e1b332401538494edd2795a484396baefa7b2",
+    "previews/pages/p03_swiss_editorial_grid.png": "404aa386e0e5a638a879c627c8df09f5b36489b1ac5a7d6e64869f563c545f04",
+    "previews/pages/p04_strategy_house.png": "bcb6222a89e555407591fde58db5cd7559ecfd6da1d157cee8c9c766e3709ae3",
+    "previews/pages/p05_xhs_evidence_split.png": "f93e4b79ccd66ae37820881a507492dcef3dbb684ba40d514c88853776c082ba",
+    "previews/pages/p06_zebra_battle_table.png": "a0fb3db58be2a09a50f0d2d60034757e41b8ca3703bc17558c86c74ae143e351",
+    "previews/png_manifest.json": "986248eeac22160bef7cd2fe31535f53a02dc52ea543953b989d297fb190ec57",
+    "primitives/p01_cover.svg": "ef59e4a081961a901f22deede15659061b76c1a275006b01159ef4a8ce211ad8",
+    "primitives/p02_asymmetric_insight.svg": "1bdccd3493407ceb7481d98bd79967753972ac7b519157f58e3e959a666f50ca",
+    "primitives/p03_swiss_editorial_grid.svg": "18c539a39f211cb7ba33d1c575131c9756fc12fe3ec1b04d9a6be1da5411018d",
+    "primitives/p04_strategy_house.svg": "30cd6ba222d815b878676ccebd5b8771af770e31d3f7a1ac110a65312700940a",
+    "primitives/p05_xhs_evidence_split.svg": "5aa423eeaee41dcf4cdf445998b57c6b5ef6d03c7b94b083472fa403c1ee424c",
+    "primitives/p06_zebra_battle_table.svg": "455b33d31d7c70372a68550b84710a176a1d0a15a94f596ce83724740cae173b",
+    "skyline_shell.svg": "5c3308f835f6b1606821b28df66808d708f92eb7e24fe7fa19f8defc05900865",
+    "tokens.css": "d158e6f04064d93b1d2f46acf636e35b9b043bc22fad060d0fd3c58510f4a463"
+  },
+  "package_sha256": "1c9c58e0b688aa17540f76760ee39b5b947c01e79f6888341531715ca254130c"
+}

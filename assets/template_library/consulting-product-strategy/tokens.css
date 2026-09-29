@@ -1,0 +1,33 @@
+:root {
+  /* 75% Neutral Canvas and Surfaces */
+  --canvas-bg: #F8FAFC;
+  --canvas-pure: #FFFFFF;
+  --surface-card: #FFFFFF;
+  --surface-muted: #F1F5F9;
+  --surface-zebra: #F8FAFC;
+  --surface-dark: #0F172A;
+  --surface-dark-elevated: #1E293B;
+  --surface-accent-tint: #EFF6FF;
+
+  /* 20% Deep Slate Ink Hierarchy */
+  --ink-primary: #0F172A;
+  --ink-secondary: #475569;
+  --ink-muted: #94A3B8;
+  --ink-watermark: #E2E8F0;
+  --ink-on-dark: #FFFFFF;
+  --ink-on-dark-muted: #94A3B8;
+
+  /* 5% Executive Cobalt Blue and Cyan Highlight */
+  --accent-brand: #0052D9;
+  --accent-secondary: #0284C7;
+  --accent-cyan-on-dark: #38BDF8;
+
+  /* Hairlines and Dividers */
+  --border-subtle: #E2E8F0;
+  --border-strong: #0F172A;
+
+  /* Font Stacks */
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Arial Black", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Courier New", monospace;
+}

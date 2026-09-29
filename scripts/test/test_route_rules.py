@@ -186,21 +186,21 @@ class RouteRuleTests(unittest.TestCase):
                    '<text id="t" class="title" x="180" y="240" font-size="48">标题</text>')
         self.assertIn("INVALID_FONT_WEIGHT", self.codes(validate_file(self.svg, route="video")))
 
-    def test_slides_route_still_demands_explicit_attributes(self):
+    def test_slides_route_also_resolves_stylesheet_and_css_vars(self):
+        """v6.0 升级后，native_svg_to_ppt.py 原生解析 <style> 与 :root var(--...)，幻灯片与视频双路线一致通过。"""
         self.write(self.THEMED)
         report = validate_file(self.svg, route="slides")
         codes = self.codes(report)
-        self.assertIn("MISSING_FILL", codes)
-        self.assertIn("MISSING_FONT_FAMILY", codes)
-        # 幻灯片出口连 <style> 本身都不允许。
-        self.assertIn("PROHIBITED_STYLE", codes)
+        self.assertNotIn("MISSING_FILL", codes)
+        self.assertNotIn("MISSING_FONT_FAMILY", codes)
+        self.assertNotIn("PROHIBITED_STYLE", codes)
         self.assertNotIn("UNDEFINED_CSS_VAR", codes)
 
     # ---- A2 按路线选规则 ----
 
     def video_demo_page(self):
         # 视频出口上这些都合法：<style>、<animate>、rotate、10px 小字。
-        # 幻灯片出口上它们每一条都是 error。
+        # 幻灯片出口上 <animate>、rotate、10px 小字是 error（<style> 在 v6.0 已双路线支持）。
         return self.write('<style>.k { font-weight: 700; }</style>'
                           '<rect id="stage" width="1920" height="1080" fill="#ffffff"/>'
                           '<text id="caption-1" class="k" x="180" y="300" font-size="10" '
@@ -215,7 +215,7 @@ class RouteRuleTests(unittest.TestCase):
         self.assertEqual(report["status"], "pass")
         skipped = {item["rule"]: item for item in report["skipped_rules"]}
         for rule in ("TEXT_BELOW_READABILITY_FLOOR", "PROHIBITED_ELEMENTS", "PROHIBITED_ATTRIBUTES",
-                     "PROHIBITED_TRANSFORM", "TSPAN_LINEBREAK", "FIDELITY_TEMPLATE"):
+                     "PROHIBITED_TRANSFORM", "SLIDE_LAYOUT_GUARDS", "FIDELITY_TEMPLATE"):
             self.assertIn(rule, skipped)
             self.assertTrue(skipped[rule]["why"].strip(), rule)
         self.assertIn("animate", skipped["PROHIBITED_ELEMENTS"]["why"])
@@ -224,7 +224,7 @@ class RouteRuleTests(unittest.TestCase):
         self.video_demo_page()
         report = validate_file(self.svg, route="slides")
         codes = self.codes(report)
-        for code in ("PROHIBITED_STYLE", "PROHIBITED_ANIMATE", "PROHIBITED_TRANSFORM",
+        for code in ("PROHIBITED_ANIMATE", "PROHIBITED_TRANSFORM",
                      "TEXT_BELOW_READABILITY_FLOOR"):
             self.assertIn(code, codes)
         # 幻灯片路线不跑 PPT 专属检查（它就是 PPT 出口），只跳过视频出口独有的那两条。
@@ -239,10 +239,10 @@ class RouteRuleTests(unittest.TestCase):
         self.assertIn("PROHIBITED_TRANSFORM", self.codes(validate_file(self.svg, route="slides")))
         self.assertEqual(validate_file(self.svg, route="video")["summary"]["errors"], 0)
 
-    def test_tspan_linebreak_is_ppt_only(self):
+    def test_tspan_linebreak_supported_on_both_routes(self):
         self.write('<rect width="1920" height="1080" fill="#ffffff"/>'
-                   '<text x="180" y="300" font-size="48" font-family="Arial" fill="#111111">甲<tspan dy="10">乙</tspan></text>')
-        self.assertIn("TSPAN_LINEBREAK", self.codes(validate_file(self.svg, route="slides")))
+                   '<text x="180" y="300" font-size="48" font-family="Arial" fill="#111111"><tspan x="180" dy="0">甲</tspan><tspan x="180" dy="56">乙</tspan></text>')
+        self.assertNotIn("TSPAN_LINEBREAK", self.codes(validate_file(self.svg, route="slides")))
         self.assertNotIn("TSPAN_LINEBREAK", self.codes(validate_file(self.svg, route="video")))
 
     def test_shared_half_runs_on_both_routes(self):

@@ -1,43 +1,68 @@
-# SVG 画面的技术规则
+# SVG 画面的技术规则（SVG Rules v6.0）
 
-模型负责画面判断；这里只写技术规则，用来防止渲染事故。**两个出口——可编辑 PPT 与视频静态画面——都读这一份**；只有幻灯片出口才需要的额外约束在 `svg_to_ppt_rules.md`。
+模型负责画面判断；本文件规定通用技术契约与自动检查防线，用来防止渲染与排版事故。**两个出口——可编辑 PPT（`slides`）与视频静态画面（`video`）——均读取本文件**；可编辑 PPT 出口的专属转换契约见 `svg_to_ppt_rules.md`。
 
-## 画幅
+---
 
-默认 16:9：`width="1920" height="1080"`、`viewBox="0 0 1920 1080"`，开局与用户确认一次，同一套保持一致。机器取值只有一个 owner：`scripts/canvas_frame.py`（归做画面），改画幅只改那里。
+## 1. 画幅与天际线基准
 
-## 基础表达
+- 默认 16:9 画布：`width="1920" height="1080"`、`viewBox="0 0 1920 1080"`，同一套项目保持一致。机器取值唯一 owner 为 `scripts/canvas_frame.py`。
+- 常规内容页遵循 `style_system.md` 的 **1920×1080 全局天际线坐标**：
+  - 页眉区：`y = 56..175`（左竖条 `x=80, y=64, w=8, h=54` + Action Title `x=106, y=102` + 副标题 `x=106, y=144` + 右上章节锚点 `x=1540..1560, y=64`）
+  - 正文安全区：`x = 80..1840 (或 60..1860), y = 196..896`
+  - 底部定海神针收口横幅：`x = 80, y = 918, width = 1760, height = 76`
+  - 页脚来源与页码：`y = 1034..1036`
 
-使用 rect、line、circle、ellipse、polygon、path、text、image 及少量 g。文字显式写 x、y、font-family、font-size、font-weight、fill；深色背景上的文字显式给颜色，不依赖组继承。中文长句显式换行，每行独立 text，预留足够行距。
+---
 
-**视频静态画面可以额外用 `<style>`、动画和视觉效果**——它的出口是 PNG，承载得住；可编辑 PPT 的出口承载不住，那些约束归 `svg_to_ppt_rules.md`。风格 token 以内联 `:root` 块 + `var(--…)` 取值的方式落进画面，取值的落点是页内 `<style>` 的 class 规则（或元素自己的 `style`／属性），见 `03_video_route.md`；页里引用了没定义的 token 会被检查画面点名。
+## 2. 基础表达与 `<style>` / `:root` CSS 变量支持
 
-标题、正文、图表数据标签和来源都是可编辑 text；图形以原生 SVG 表达。无需额外写布局类型、密度或设计理由 metadata。
+- **核心图元**：使用 `rect`、`line`、`circle`、`ellipse`、`polygon`、`polyline`、`path`、`text`、`image`、`linearGradient`、`radialGradient` 及结构化的 `g`。
+- **双出口原生支持 `<style>` 与 `:root` `var(--...)` 设计令牌**：
+  - `slides`（可编辑 PPT）与 `video`（视频静态画面）现在**均原生支持**页内 `<style>` 块与 `:root { --token: value; }` CSS 变量！
+  - `native_svg_to_ppt.py` 与 `validate_svg_layout.py` 会在解析阶段自动展开 `:root` 变量并将 `.class`、`#id`、`tag` 选择器内联到元素属性上，从而让模板包的 `tokens.css` 在 SVG 渲染与 PPTX 导出两端 100% 同步生效。
+  - 页面内若引用了未在 `:root` 中定义的 `var(--...)`（且无 fallback），会被检查器以 `UNDEFINED_CSS_VAR` 拦截。
+- **文本与多行排版**：
+  - 优先使用每行独立 `<text>` 或带 `<tspan x="..." dy="...">` 的显式多行段落（转换器会将带正 `dy` 的 `<tspan>` 自动拆分为 PowerPoint 文本框内的独立段落）。
+  - 同一行内需要局部变色/加粗时，使用无 `dy`（或 `dy="0"`）的内联 `<tspan fill="var(--accent-brand)">`。
+- **支持叶子节点与分组的轴对齐 `transform`**：
+  - `<g>` 及叶子节点（`<rect>`、`<text>`、`<path>`、`<circle>`、`<ellipse>`、`<line>`、`<polygon>`、`<polyline>`、`<image>`）均支持轴对齐 `transform="translate(tx, ty) scale(sx, sy)"`，转换器与校验器共用同一套矩阵累乘模型。
 
-## 纵向构造
+---
 
-页内纵向位置从 `design_direction.md` 里定下的**一条纵向步长**导出，而不是先摆元素再让它们看起来齐（中文的字面方块天然构成这种步长，见 `style_system.md` 规则 13）。跨页重复的元素——页眉、页脚、页码、栏目名——各页使用**同一组坐标**，让它们落在同一条水平线上。
-
-中西文混排会打断纯方块网格，这是正常的；要稳定的是**行的对齐关系**（段首、段末、栏目起点），不是让每个字符落在网格上。
-
-## 图片
+## 3. 图片与可剥离占位层规范
 
 ```xml
+<!-- 贴入真实图片时 -->
 <image href="../00_project/source/assets/asset_001.png"
-       x="100" y="220" width="900" height="600"
-       data-asset-key="evidence" preserveAspectRatio="xMidYMid meet"/>
+       x="104" y="276" width="472" height="380"
+       data-asset-key="evidence" preserveAspectRatio="xMidYMid slice"/>
+
+<!-- 尚未贴入真图、仅作占位提示时，必须包在可剥离组中 -->
+<g data-slot="image-placeholder" class="slot-hint-removable">
+  <rect x="104" y="276" width="472" height="380" rx="12" fill="#F1F5F9" stroke="#CBD5E1" stroke-dasharray="6 4"/>
+  <text x="340" y="466" text-anchor="middle" font-size="16" fill="#64748B">[产品实拍图槽位 472×380]</text>
+</g>
 ```
 
-使用项目内文件，完整显示用 meet，填满用 slice，可用 xMin/xMid/xMax 与 YMin/YMid/YMax 选择焦点。禁止 none 拉伸。`data-asset-key` 用于最终审阅中的换图与裁剪；全页位置以实际 SVG 为准。
+- 必须引用项目内真实存在的图片文件；完整显示用 `meet`，裁切铺满用 `slice`，**严禁使用 `none` 非等比拉伸**（会被 `IMAGE_STRETCHED` 拦截）。
+- **卫生铁律**：一旦贴入真实 `<image>`，必须移除对应的 `<g data-slot="image-placeholder" class="slot-hint-removable">`，严禁在真照片底下残留 `[图片占位]` 文字。
 
-## 技术检查与视觉判断
+---
 
-**检查画面**（`validate_svg_layout.py`）只拦**在任何风格下都是缺陷**的那些：文字压文字、**元素出画布（含文字）**、空页、`<text>` 缺填色或 `font-weight` 非法、图片必须是真实存在的项目内文件且不得被拉伸。它**不**评价密度、字号档位、容器选择、留白多少或配色——那些是设计决定，由你看渲染图判断。
+## 4. 自动化检查防线（`validate_svg_layout.py` v6.0）
 
-字号可读性在视频出口上由你看渲染图判断：屏幕上的字号合不合适，取决于这一屏要让观众读到什么，脚本不替你定档。
+`validate_svg_layout.py` 与 `native_svg_to_ppt.py` **共用完全相同的坐标变换、`<style>` 展开与多行 `<tspan dy>` 文本框估算模型**，在 `check` 与 `export` 阶段自动拦截以下硬缺陷：
 
-它和转换 PPT **共用同一套坐标几何**：校验器直接调用转换器的坐标模型（`native_svg_to_ppt.parse_axis_aligned_transform` / `compose_axis_aligned`），不自己再算一份。
+1. **`LINE_CROSSES_TEXT`（error，横线/分割线切字拦截）**：
+   - 检测水平/垂直 `<line>` 或细长分割线 `<rect>`（厚 ≤ 6px、长 ≥ 60px）是否横穿任何 `<text>`（含多行 `<tspan dy>`）的包围盒内部。分割线必须严格走在容器或段落之间的留白通道内。
+2. **`EMOJI_IN_SLIDE_TEXT`（error，幻灯片禁用系统 Emoji）**：
+   - 拦截 `<text>` 中混入的 `🛡️💧🎯⚠️🔥` 等系统位图 Emoji。图标一律用原生 SVG 几何图形或等宽数字编号替代。
+3. **`TEXT_OVERFLOWS_CONTAINER`（warning，胶囊/卡片文字溢出预警）**：
+   - 当单行 `<text>` 位于胶囊标签或卡片 `<rect>` 内部，但估算字宽超出容器可用宽度时报警，防止转入 PowerPoint 后末字自动折行掉出胶囊。
+4. **`TEXT_OVERLAP` / `OUT_OF_BOUNDS` / `TEXT_OUT_OF_BOUNDS`（error，文字重叠与出画布拦截）**：
+   - 精确计入叶子节点 `transform`、`dominant-baseline` 与多行 `<tspan dy>` 高度，拦截同层文字互相踩踏或元素捅出 1920×1080 画布。
+5. **图片与样式完整性（`MISSING_IMAGE` / `IMAGE_STRETCHED` / `UNDEFINED_CSS_VAR` / `INVALID_FONT_WEIGHT`）**：
+   - 拦截缺失图片、拉伸变形、未定义 CSS 变量与非法属性。
 
-因此：技术报告干净不等于页面好看。**实际查看每页 PNG 大图**——不是联系表里的缩略格——核对阅读层级、截断、重叠、图表标签、图片主体和来源；再看整套 contact sheet 检查构图重复与节奏。`OUTSIDE_SAFE_MARGIN` 是提示级（满版出血是正当的设计手法），不要为消除提示改设计。
-
-遇到容量不足，重排、断行、拆页、调整内容，不以不断缩字解决。关键事实、来源和限定条件仍受保护。修订后检查新渲染；只要有实质进展就继续，不限制一次修复。
+> **技术报告零报错 ≠ 页面已经好看**。通过脚本检查后，必须实际打开每页渲染出的 **PNG 大图** 与整套联系表，按 `style_system.md` 核对 75:20:5 配比、天际线对齐、卡片下半截饱和度与视觉重心。

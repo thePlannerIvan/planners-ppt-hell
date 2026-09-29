@@ -57,10 +57,12 @@
 | `references/workflow/03_video_route.md` | Stage·视频画面路线（接手 → 逐屏 → 整套） | 这条路线自己的 V1／V2／V3 与完成标准、**四条视频约束**（字幕安全区／人物位置／不透明与透明／强调动画余量）、交给动画层的接口 | 读适配后的底稿与风格库（`theme_tokens.py`）；出口物被 `video-craft` 消费 | 不做内容判断、不重新编号、不套模板库、不给页面加动画 |
 | `references/workflow/04_svg_stage.md` | Stage·制作与逐页自检（两条路线共用） | 逐页制作顺序、**看图是必填动作**的判据（含 `inspect` 的字段）、`design_direction.md` 里该写的秩序 | `ppt_pipeline check`／`inspect`；被 03 引用（视频路线的额外三条） | 不评价设计（判断框架在 `references/domain/`）；自检不代替人审 |
 | `references/workflow/07_visual_review.md` | Stage·整套审阅与交付 | 审阅的跑法与否决语义、**交付与复核**：幻灯片路线的导出复核与证据强度措辞，视频路线的「审阅是门」 | `ppt_pipeline review`／`export`／`export-inspect`；被 `next` 的 VISUAL_REVIEW／EXPORT／EXPORT_VERIFY 指向 | 不代替作者批准；不把机器绿灯当成内容正确 |
+| `references/workflow/08_video_style_extraction_sop.md` | Stage·从参考画板提炼新视频风格与预埋动效模板 | 六步提取与验证流程（一手采集与视频抽帧 → 静态/动态双路子代理拆解 → 四域×Solo/Multi 呼吸阀收敛 → 复合子元素动效契约 → 真项目 `/prototype` 压测 → 双 Skill 落盘）与 6 条实测技术避坑 | 用户提供 Pinterest 画板或视频/排版参考集、要求沉淀新视频风格模板时读 | 不替代幻灯片 PPTX 严格模板提取（那条走 `01_template_intake.md` 的 D 路线） |
 | `references/contracts/*` | 机器接口清单 | 「哪个文件、谁写、谁读、最小职责」 | 被代码注释与 Stage 文档引用 | 不是设计思考问卷；不写判断方法 |
-| `references/domain/*` | 判断框架与领域规则 | 设计判断（`style_system`／`layout_taxonomy`）与技术规则的理由（`svg_rules`／`svg_to_ppt_rules`） | 被 Stage 文档指向 | 不写命令、不写字段名 |
+| `references/domain/*` | 判断框架与领域规则 | 设计判断（`style_system`／`layout_taxonomy`／`video_style_editorial_archive`）与技术规则的理由（`svg_rules`／`svg_to_ppt_rules`） | 被 Stage 文档指向 | 不写命令、不写字段名 |
 | `SKILL.md` | 触发面与分派 | 两条路线的对照、阶段表入口、责任边界 | 模型入口 | 不复述子文档的规则（单一真相源） |
-| `assets/template_library/*` | 内置模板**数据** | 内置模板包与它的 manifest 哈希 | 被 `template_library.apply` 读 | 不是代码、不是文档 |
+| `assets/template_library/*` | 内置模板**数据**（幻灯片路线） | 内置模板包与它的 manifest 哈希 | 被 `template_library.apply` 读 | 不是代码、不是文档；不服务视频路线 |
+| `assets/video_style_references/*` | 视频风格**多模态参考图库**（视频路线） | 各视频风格（如 `editorial-archive`）的四域与 Solo/Multi 代表性原图及 7 屏实测联系表 | 制作视频 SVG 前由多模态模型 `view_file` 读图对齐 | 不进 `video-craft/visual/themes/`（避免破坏 `check_themes.py` 目录扫描） |
 | `scripts/test/*` | 判据的可执行形态 | 每条规则的回归 | `python -m unittest discover -s scripts/test` | 不是规格来源（规格在 Stage 文档与 contract） |
 | `evals/evals.json` | 评测用例集：十条 prompt 与它们的 `must_do`／`must_not_do`（幻灯片出口五条、视频画面路线五条）——**作者在干净会话里按它测这个 Skill 的行为** | 用例与判据本身（那是作者的测试标准） | 人读、人跑；机器**不执行**它（文件里 `status: not_run_user_will_test_elsewhere`，如实状态） | 不是自动测试（那在 `scripts/test/`）；不代替人审；改它的判据等于替作者重定标准 |
 

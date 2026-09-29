@@ -1,24 +1,60 @@
-# 可复用模板子流程接口
+# 多模态 PPT 模板包契约（`template_package.md`）
 
-只在新建严格模板包时使用。模型完成视觉选择，现有 builder / template library 消费下列文件；自主视觉不进入此协议。
+> 替代旧版「8 步机械 XML 审批 + 4 份冗余 JSON 账本（`template_asset_registry.json`、`template_worker_result.json`、`template_canvas_self_review.json`、空壳 `content_base.svg`）」。无论输入是 `.pptx`、`.pdf` 还是页面截图，统一收敛为**「标准四件套（Four-Piece Template Pack）」**。
 
-所有模板工作文件位于 `_internal/00_project/`。
+---
 
-1. `prepare_visual_references.py <source> --project <project>` 生成 template_visuals；按实际 --help 核对参数。查看全部渲染页，结合结构提取的候选判断什么是稳定品牌身份。
-2. `extract_template_assets.py` 提取 template_profile.json 的 structural_extraction 候选。原始 XML 和坐标只提供事实；用实际画面确认，而非把它们当设计结论。
-3. 模型补充 profile 的 design_direction 和来源；写 template_asset_registry.json 的 reviewed_source_ids，完整列出 structural_extraction.assets 的 asset_id 与 native_shapes 的 candidate_id，approved/rejected 条目及原因。确保现有背景和标志真实复用。
-4. 模型写 template_worker_result.json（保留这一名称以匹配模板库消费者，并不要求子 Agent）：
+## 一、 标准四件套目录结构
 
-```json
-{"status":"completed","mode":"fidelity","approved_components":[{"component_id":"brand_accent","source_id":"实际候选ID","role":"decoration","placement":"background","geometry_policy":"fixed","text_handling":"strip"}],"layouts":[{"layout_id":"content_base","required_components":["brand_accent"],"optional_components":[]}]}
+每个模板包（位于内置库 `assets/template_library/<template_id>/` 或项目工作区 `_internal/00_project/template_pack/`）包含以下 4 件核心资产与 `manifest.json`：
+
+```text
+<template_id>/
+├── tokens.css                  # [件 1] 全局设计令牌 (:root CSS 变量：75:20:5 色盘、字体族、6 档字号)
+├── skyline_shell.svg           # [件 2] 1920x1080 全局天际线底壳（页眉左竖条+Action Title+副标+右上锚点+正文安全区+底部定海神针+页脚）
+├── assets/                     # [件 2 附属] 从源 PPTX 母版/版式/幻灯片无损提取去重的 Logo 与矢量底纹（可为空目录）
+├── primitives/                 # [件 3] 6–8 个带精确坐标与 var(--*) 变量的 1920x1080 内页 SVG 版式原语骨架
+│   ├── p01_cover.svg
+│   ├── p02_*.svg
+│   └── ...
+├── anchors/                    # [件 4] 4–6 张精选源参考页高清 PNG（供多模态模型在画页时直接看图对齐质感）
+├── SPEC.md                     # [件 4] 一页纸排版标尺、原语选型表与「五减五加」防丑红线
+└── manifest.json               # 包元数据、推荐场景、预览图路径与全文件 SHA256 校验和
 ```
 
-builder 使用源 geometry 和 style 自动换算坐标；改动 geometry_override 必须说明 override_reason，不能把源形状改成另一种东西。content_base 必须开放正文；只锁定真实品牌身份，不锁业务关系和示例文字。一份源候选只定义一个 component。
+---
 
-5. 运行 `scripts/template/build_fidelity_template.py --project <project>`，再运行 `scripts/render_svg_png.py <project>/_internal/00_project/fidelity_template/layout_canvases <project>/_internal/00_project/fidelity_template/canvas_previews`。
-6. 查看源页、canvas 大图与两套 contact sheet。模型写 template_canvas_self_review.json 的语义观察：status="completed"、vision_available=true、source_contact_sheet_viewed=true、canvas_contact_sheet_viewed=true、inspection_rounds、source_pages_reviewed（visual manifest 中 image 的文件 stem）、layouts（每个 ID 的 canvas_png_reviewed、compared_source_pages、usable、visual_similarity="pass"、must_fix=[]、retained_features）。这些观察必须源自实际看图。运行 seal_template_review.py <project> 由机器绑定证据 hash。
-   **这一步的判据与逐页审阅不同**：逐页审阅问「这个 PPT 做得好不好」，这里问「有没有提炼出足够的模板规律」。别套用同一句结论。
-7. `ppt_pipeline.py <project> template --mode fidelity`，然后 `template-review` 打开人审（它是**独立的一个审阅面**：单位 `layout_id`、决定词表 `pass`/`discard`/`revise`、粒度整批、不声明上传能力——与页面审阅逐条独立判过，见 `review_surface.TEMPLATE`）。生成审阅页时写 `template_review_snapshot.json`（review_id、生成时的 template_version、审阅页 HTML hash、**被审的 layout 集合**），页面提交必须带该 `review_id`；**收件层（`template_feedback.consume`）与发布都对照这份快照**，因此旧标签页不能批准新版本。用户逐 canvas 通过／舍弃／返修并命名，结果经宿主原样落盘成 `template_feedback.json`，由 `ppt_pipeline next` 收件、校验、重算派生量并盖章；按所有反馈修订后重建与审阅。
-8. 全部通过后 `scripts/template/template_library.py publish <project>`。库发布会验证当前批准与全部证据，其中 **`template_feedback.json` 是唯一的批准凭据**（写者：review server；读者：本发布命令），且它的 `review_id` 必须对应当前这一版审阅页。没有可安全复用的品牌组件时明确说明，用户选择参考模式或新模板，不静默假装 fidelity 成功。
+## 二、 四件套各组件硬性规格
 
-保留：素材、锁层、required components、源页与 canvas 的视觉比较、当前版本人审。无需内容 Layout 审批。模板库发布是显式模板任务的一部分；普通制作不自行扩充库。
+### 1. `tokens.css`（全局设计令牌）
+- 必须在 `:root` 下定义语义化色彩变量，严格执行 **75% 中性灰白底 : 20% 炭黑墨色 : 5% 唯一品牌强调色** 纪律：
+  - 画布与表面色（75%）：`--canvas-bg`、`--surface-card`、`--surface-muted`、`--surface-dark`、`--surface-accent-tint`
+  - 墨色与文字层级（20%）：`--ink-primary`、`--ink-secondary`、`--ink-muted`、`--ink-on-dark`
+  - 品牌强调色（5%）：`--accent-brand`、`--accent-secondary`
+  - 线条与分割：`--border-subtle`、`--border-strong`
+- 配合支持 `:root` `var(--*)` 展开的 `native_svg_to_ppt.py`，所有内页 SVG 直接内联或引用这套变量，彻底根除跨批次生成的“彩虹糖色漂移”。
+
+### 2. `skyline_shell.svg` + `assets/`（1920×1080 全局天际线底壳）
+- 锁死 `viewBox="0 0 1920 1080"` 全局天际线坐标：
+  - **页眉左竖条**：`x="80" y="68" width="8" height="56" rx="4" fill="var(--accent-brand)"`
+  - **Action Title 主标题基线**：`x="108" y="104" font-size="44" font-weight="900"`（限 1 行 ≤26 字，必须是观点结论句）
+  - **副标题 / 导语基线**：`x="108" y="148" font-size="22" fill="var(--ink-secondary)"`（核心词 `<tspan fill="var(--accent-brand)" font-weight="700">`）
+  - **右上角章节锚点**：`x="1840" y="92" text-anchor="end"` 等宽大写编号（如 `SECTION 01 // MARKET INSIGHT`）
+  - **页眉分割线**：`x1="80" y1="176" x2="1840" y2="176" stroke="var(--border-subtle)"`
+  - **正文安全区（Safe Zone）**：`x = 80..1840`（宽 `1760px`），`y = 200..896`（高 `696px`）
+  - **底部定海神针横幅（Takeaway Banner）**：`x="80" y="916" width="1760" height="76" rx="12" fill="var(--surface-dark)"`
+  - **页脚来源与页码**：左下 `x="80" y="1032"` 数据口径，右下 `x="1840" y="1032"` 页码。
+
+### 3. `primitives/*.svg`（内页版式原语骨架）
+- 每个原语文件本身就是一张合法、零重叠、可直接用 `render_svg_png.py` 渲染成 `1920×1080` PNG 并用 `native_svg_to_ppt.py` 转为可编辑 PPTX 的完整 SVG。
+- 遵守「五减五加」工程纪律：
+  1. 容器嵌套 ≤ 2 层（禁止框套框超过 2 层）；
+  2. 零系统 Emoji（全部使用纯矢量几何 `<path>`/`<circle>`/`<polygon>` 或等宽大数字编号 `01` `02`）；
+  3. 胶囊宽度留足余量（满足 `width >= zh_chars * font_size * 1.15 + en_chars * font_size * 0.65 + 2 * pad_x`）；
+  4. 分割线绝不穿过任何 `<text>` 包围盒；
+  5. 凡涉及图片槽位，占位提示文字必须独立封装在 `<g class="slot-hint-removable">` 中。
+
+### 4. `SPEC.md` + `anchors/` + `manifest.json`
+- `SPEC.md` 用一页纸列出：色彩与字号速查表、全局天际线坐标表、各原语的适用叙事场景与字数上限、以及防翻车红线。
+- `anchors/` 保留 4–6 张高清参考页 PNG。
+- `manifest.json` 由 `template_library.py` 自动生成并校验 SHA256。

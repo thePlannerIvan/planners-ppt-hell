@@ -324,41 +324,160 @@ def design_observations(root, page_key):
 
     Facts about the page, not judgements: no pass/fail, no thresholds. They exist so
     the self-check in style_system.md can be done against numbers instead of memory.
+    v6.0: Honors <g>/leaf transform, inline <style>/:root vars, and measures
+    lowest_content_bottom across <text>, <rect>, <image>, <circle>, <ellipse>, <line>, <path>.
     """
     svg = root / SVG / (page_key + '.svg')
     if not svg.is_file():
         return {}
-    root_el = ET.parse(svg).getroot()
+    raw_text = svg.read_text(encoding='utf-8-sig')
+    root_el = ET.fromstring(raw_text)
+
+    try:
+        from native_svg_to_ppt import (
+            _parse_path_to_points,
+            compose_axis_aligned,
+            inline_svg_styles_and_vars,
+            parse_axis_aligned_transform,
+        )
+        inline_svg_styles_and_vars(root_el, raw_text)
+    except Exception:
+        def parse_axis_aligned_transform(_t):
+            return (0.0, 0.0, 1.0, 1.0)
+        def compose_axis_aligned(p, l):
+            return (p[0] + p[2] * l[0], p[1] + p[3] * l[1], p[2] * l[2], p[3] * l[3])
+        def _parse_path_to_points(*_a, **_kw):
+            return []
+
+    parent_map = {child: parent for parent in root_el.iter() for child in parent}
 
     def tag(n):
         return n.tag.split('}')[-1]
 
-    def num(n, attr):
-        try:
-            return float(n.get(attr, 0) or 0)
-        except (TypeError, ValueError):
-            return 0.0
+    def num(n, attr, default=0.0):
+        val = n.get(attr)
+        if val is None:
+            return default
+        m = re.search(r"[-+]?(?:\d*\.)?\d+(?:[eE][-+]?\d+)?", str(val))
+        return float(m.group(0)) if m else default
+
+    def acc_tf(n):
+        chain = []
+        cur = n
+        while cur is not None:
+            chain.append(cur)
+            cur = parent_map.get(cur)
+        chain.reverse()
+        acc = (0.0, 0.0, 1.0, 1.0)
+        for item in chain:
+            acc = compose_axis_aligned(acc, parse_axis_aligned_transform(item.get('transform', '')))
+        return acc
+
+    def eff_font_size(n, sx, sy):
+        fs = num(n, 'font-size', 0.0)
+        if fs <= 0:
+            cur = parent_map.get(n)
+            while cur is not None:
+                fs = num(cur, 'font-size', 0.0)
+                if fs > 0:
+                    break
+                cur = parent_map.get(cur)
+        return fs * min(sx, sy)
 
     texts = [n for n in root_el.iter() if tag(n) == 'text']
     rects = [n for n in root_el.iter() if tag(n) == 'rect']
+    images_el = [n for n in root_el.iter() if tag(n) == 'image']
+    circles = [n for n in root_el.iter() if tag(n) in ('circle', 'ellipse')]
+    lines_el = [n for n in root_el.iter() if tag(n) == 'line']
+    paths_el = [n for n in root_el.iter() if tag(n) == 'path']
 
-    sizes = sorted({round(num(n, 'font-size')) for n in texts if num(n, 'font-size') > 0})
+    sizes = set()
+    for n in texts:
+        _, _, sx, sy = acc_tf(n)
+        fs = eff_font_size(n, sx, sy)
+        if fs > 0:
+            sizes.add(round(fs))
+        for child in n:
+            if tag(child) == 'tspan':
+                cfs = num(child, 'font-size', 0.0) * min(sx, sy)
+                if cfs > 0:
+                    sizes.add(round(cfs))
+    sizes = sorted(sizes)
     scale_ratio = round(sizes[-1] / sizes[0], 2) if len(sizes) > 1 else None
 
     groups = {}
     for n in rects:
-        w, h = num(n, 'width'), num(n, 'height')
+        _, _, sx, sy = acc_tf(n)
+        w, h = num(n, 'width') * sx, num(n, 'height') * sy
         if (w >= canvas_frame.CONTAINER_MIN_W and h >= canvas_frame.CONTAINER_MIN_H
                 and not (w >= canvas_frame.FULL_BLEED_W and h >= canvas_frame.FULL_BLEED_H)):
             groups[(round(w), round(h))] = groups.get((round(w), round(h)), 0) + 1
     equal_containers = [f'{w}x{h}×{c}' for (w, h), c in sorted(groups.items()) if c >= 2]
 
-    body = [n for n in texts if num(n, 'y') < canvas_frame.BODY_TEXT_MAX_Y]
-    lowest = round(max((num(n, 'y') + num(n, 'font-size') * 0.2) for n in body), 1) if body else None
+    bottom_candidates = []
+    for n in texts:
+        dx, dy, sx, sy = acc_tf(n)
+        ey = dy + num(n, 'y') * sy
+        efs = eff_font_size(n, sx, sy)
+        if ey < canvas_frame.BODY_TEXT_MAX_Y:
+            bottom_candidates.append(ey + efs * 0.2)
+
+    for n in rects + images_el:
+        dx, dy, sx, sy = acc_tf(n)
+        ey = dy + num(n, 'y') * sy
+        ew = num(n, 'width') * sx
+        eh = num(n, 'height') * sy
+        if ew <= 0 or eh <= 0:
+            continue
+        if ew >= canvas_frame.FULL_BLEED_W and eh >= canvas_frame.FULL_BLEED_H:
+            continue
+        # Ignore full-height vertical grid rules
+        if ew <= 4 and eh >= canvas_frame.FRAME_H * 0.75:
+            continue
+        if ey < canvas_frame.BODY_TEXT_MAX_Y and (ey + eh) <= canvas_frame.FOOTER_RULE_Y + 10:
+            bottom_candidates.append(ey + eh)
+
+    for n in circles:
+        dx, dy, sx, sy = acc_tf(n)
+        cy = dy + num(n, 'cy') * sy
+        ry = (num(n, 'ry') or num(n, 'r')) * sy
+        if ry > 0 and cy < canvas_frame.BODY_TEXT_MAX_Y and (cy + ry) <= canvas_frame.FOOTER_RULE_Y + 10:
+            bottom_candidates.append(cy + ry)
+
+    for n in lines_el:
+        dx, dy, sx, sy = acc_tf(n)
+        y1 = dy + num(n, 'y1') * sy
+        y2 = dy + num(n, 'y2') * sy
+        max_y = max(y1, y2)
+        if max_y < canvas_frame.BODY_TEXT_MAX_Y:
+            bottom_candidates.append(max_y)
+
+    for n in paths_el:
+        d = n.get('d', '')
+        if not d:
+            continue
+        dx, dy, sx, sy = acc_tf(n)
+        subpaths = _parse_path_to_points(d, dx, dy, sx, sy)
+        pts = [pt for sp in subpaths for pt in sp]
+        if pts:
+            max_y = max(py for _, py in pts)
+            min_y = min(py for _, py in pts)
+            if min_y < canvas_frame.BODY_TEXT_MAX_Y and max_y <= canvas_frame.FOOTER_RULE_Y + 10:
+                bottom_candidates.append(max_y)
+
+    lowest = round(max(bottom_candidates), 1) if bottom_candidates else None
     void = round(canvas_frame.FOOTER_RULE_Y - lowest, 1) if lowest is not None else None
 
     # Include footer text too: the footer/folio baselines are themselves cross-page anchors.
-    small = sorted({round(num(n, 'y')) for n in texts if 0 < num(n, 'font-size') <= canvas_frame.SMALL_TEXT_MAX_PX})
+    small = []
+    for n in texts:
+        dx, dy, sx, sy = acc_tf(n)
+        ey = dy + num(n, 'y') * sy
+        efs = eff_font_size(n, sx, sy)
+        if 0 < efs <= canvas_frame.SMALL_TEXT_MAX_PX:
+            small.append(round(ey))
+    small = sorted(set(small))
+
     return {
         'type_tiers': sizes,
         'scale_ratio': scale_ratio,

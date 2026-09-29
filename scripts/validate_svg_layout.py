@@ -38,11 +38,21 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent / "template"))
 from canvas_frame import FRAME_H, FRAME_H_INT, FRAME_VIEWBOX, FRAME_W, FRAME_W_INT  # noqa: E402
-from layout_canvas import TEMPLATE_CANVAS_VERSION, locked_sha256  # noqa: E402
+try:
+    from layout_canvas import TEMPLATE_CANVAS_VERSION, locked_sha256  # noqa: E402
+except ImportError:
+    TEMPLATE_CANVAS_VERSION = "2"
+
+    def locked_sha256(_path):
+        raise ValueError("legacy layout_canvas module not present")
+
 from native_svg_to_ppt import compose_axis_aligned, parse_axis_aligned_transform  # noqa: E402
 from project_state import DEFAULT_ROUTE, ROUTES, project_root_of, route as project_route  # noqa: E402
 
 TEXT_RE = re.compile(r"\s+")
+EMOJI_RE = re.compile(
+    r"[\U0001F300-\U0001FAFF\u2600-\u26FF\u2700-\u27BF\u2B50\u23F0-\u23FA]"
+)
 
 CANVAS_W = FRAME_W
 CANVAS_H = FRAME_H
@@ -54,12 +64,13 @@ VALID_FONT_WEIGHTS = {"normal", "bold", "100", "200", "300", "400", "500", "600"
 MODE_FLOOR = {"讲": 18.0, "读": 12.0}
 DEFAULT_MODE = "读"
 
-PROHIBITED_ELEMENTS = ["foreignObject", "filter", "use", "style", "marker", "mask", "animate"]
+# v6.0: <style>, :root var(--...), stroke-dasharray, and <tspan dy> are natively supported by native_svg_to_ppt.py!
+PROHIBITED_ELEMENTS = ["foreignObject", "filter", "use", "marker", "mask", "animate"]
 PROHIBITED_ATTRIBUTES = [
-    "stroke-dasharray", "textLength", "lengthAdjust",
+    "textLength", "lengthAdjust",
     "marker-start", "marker-mid", "marker-end",
 ]
-PROHIBITED_TRANSFORMS = ["rotate(", "skew(", "matrix("]
+PROHIBITED_TRANSFORMS = ["rotate(", "skew(", "skewX(", "skewY(", "matrix("]
 
 
 # ── Which half runs on which route ────────────────────────────────
@@ -83,16 +94,16 @@ def skipped_rules_for_route(route):
             {"rule": "PROHIBITED_ELEMENTS",
              "codes": [f"PROHIBITED_{name.upper()}" for name in PROHIBITED_ELEMENTS],
              "why": f"这一组唯一的原因是「转换器处理不了」（{', '.join(PROHIBITED_ELEMENTS)}）；"
-                    "视频出口是 PNG，<style> 与动画都承载得住。"},
+                    "视频出口是 PNG，滤镜与动画都承载得住。"},
             {"rule": "PROHIBITED_ATTRIBUTES",
              "codes": [f"PROHIBITED_{attr.replace('-', '_').upper()}" for attr in PROHIBITED_ATTRIBUTES],
              "why": "这些属性同样只因转换器不支持而被禁；PNG 渲染不受影响。"},
             {"rule": "PROHIBITED_TRANSFORM",
              "codes": ["PROHIBITED_TRANSFORM"],
              "why": "rotate／skew／matrix 只在转 PPT 时不可靠；视频出口按页面自己的坐标渲染。"},
-            {"rule": "TSPAN_LINEBREAK",
-             "codes": ["TSPAN_LINEBREAK"],
-             "why": "tspan 换行是 PPT 文本解析器的要求，PNG 渲染没有这道限制。"},
+            {"rule": "SLIDE_LAYOUT_GUARDS",
+             "codes": ["LINE_CROSSES_TEXT", "EMOJI_IN_SLIDE_TEXT", "TEXT_OVERFLOWS_CONTAINER"],
+             "why": "这三道防线针对幻灯片排版与转 PPTX 溢出/Emoji 位图失真；视频出口按 PNG 画面审阅。"},
             {"rule": "FIDELITY_TEMPLATE",
              "codes": ["FIDELITY_*", "REQUIRED_FIDELITY_COMPONENT_MISSING", "UNKNOWN_FIDELITY_LAYOUT"],
              "why": "严格模板锁层属于模板库，只服务幻灯片出口；视频路线不套模板库。"},
@@ -115,30 +126,17 @@ def _element_ids(root, include_root):
 
 
 def element_ids_below_svg(root):
-    """`<svg>` 之下每个元素自己的 `id`——回答「有没有可指名的元素」。
-
-    不算数的三样：根 `<svg>` 自己的 id（它指不了页面内的东西）、`data-*-id` 这类属性
-    （`data-layout-id`／`data-template-*` 是别的语义，实测那 8 页里有 16 个这样的值）、
-    注释里的一切（`ET` 解析时就不产生注释节点）。
-    """
+    """`<svg>` 之下每个元素自己的 `id`——回答「有没有可指名的元素」。"""
     return _element_ids(root, include_root=False)
 
 
 def document_ids(root):
-    """整份 SVG 里所有元素的 `id`，**含根 `<svg>`**——回答「这份 id 合法且不歧义吗」。
-
-    根也是一个 id：`<svg id="page">` 与子元素撞车时 `#page` 只命中第一个（根），
-    那个子元素再也指不到。所以页内 id 唯一要连根一起看。
-    """
+    """整份 SVG 里所有元素的 `id`，**含根 `<svg>`**——回答「这份 id 合法且不歧义吗」。"""
     return _element_ids(root, include_root=True)
 
 
 def duplicated_ids(ids):
-    """出现过一次以上的 id：[(名字, 次数)]，按名字排序。
-
-    只看这一页。跨页碰撞不在这里管——一次只读一页，那是各屏被内联进同一个 DOM 之后
-    才看得出来的事（导入器负责在导入前报告待导入页面之间的 id 碰撞）。
-    """
+    """出现过一次以上的 id：[(名字, 次数)]，按名字排序。"""
     counts = {}
     for name in ids:
         counts[name] = counts.get(name, 0) + 1
@@ -160,8 +158,8 @@ def resolve_route(explicit, path):
 def parse_float(value, default=0.0):
     if value is None:
         return default
-    cleaned = re.sub(r"[^\d.\-]", "", value)
-    return float(cleaned) if cleaned else default
+    m = re.search(r"[-+]?(?:\d*\.)?\d+(?:[eE][-+]?\d+)?", str(value))
+    return float(m.group(0)) if m else default
 
 
 def parse_color(value):
@@ -175,21 +173,18 @@ def parse_color(value):
 
 def get_accumulated_transform(node, parent_map):
     """A node's absolute translate/scale, using 转换 PPT's own coordinate model.
-
-    This no longer mirrors native_svg_to_ppt by hand — it calls it. The hand-written
-    copy silently disagreed (same input, answers 100px apart), which is exactly the
-    class of failure a second implementation always eventually produces.
+    v6.0: Includes both ancestor <g> transforms AND the leaf node's own transform.
     """
-    ancestors = []
+    chain = [node]
     current = node
     while current in parent_map:
         current = parent_map[current]
-        ancestors.append(current)
-    ancestors.reverse()
+        chain.append(current)
+    chain.reverse()
     accumulated = (0.0, 0.0, 1.0, 1.0)
-    for ancestor in ancestors:
+    for item in chain:
         accumulated = compose_axis_aligned(
-            accumulated, parse_axis_aligned_transform(ancestor.get("transform", "")))
+            accumulated, parse_axis_aligned_transform(item.get("transform", "")))
     return accumulated
 
 
@@ -199,6 +194,17 @@ def build_parent_map(root):
         for child in parent:
             pm[child] = parent
     return pm
+
+
+def is_in_non_rendering_container(node, parent_map):
+    """Return True if node is inside <defs>, <clipPath>, <mask>, <pattern>, or <symbol>."""
+    cur = parent_map.get(node)
+    while cur is not None:
+        tag = cur.tag.split("}")[-1] if "}" in cur.tag else cur.tag
+        if tag in ("defs", "clipPath", "mask", "pattern", "symbol"):
+            return True
+        cur = parent_map.get(cur)
+    return False
 
 
 # ── 同一份 SVG 里内联的 <style> ─────────────────────────────────
@@ -299,17 +305,24 @@ def stylesheet_value(node, parent_map, rules, prop):
 
 
 def text_style_value(node, parent_map, rules, prop):
-    """一个文字属性最终取到的值：元素属性 > 元素 style > class 命中的样式表规则。
-
-    这个优先序与 CSS 一致（presentation attribute 的优先级低于作者样式，但这里
-    只回答「有没有取到值」，所以先看更明确的那一处）。
-    """
+    """一个文字属性最终取到的值：元素属性 > 元素 style > class 命中的样式表规则 > 祖先 <g> 继承。"""
     if node.get(prop) is not None:
         return node.get(prop)
     inline = css_declarations(node.get("style"))
     if prop in inline:
         return inline[prop]
-    return stylesheet_value(node, parent_map, rules, prop)
+    val = stylesheet_value(node, parent_map, rules, prop)
+    if val is not None:
+        return val
+    cur = parent_map.get(node)
+    while cur is not None:
+        if cur.get(prop) is not None:
+            return cur.get(prop)
+        c_inline = css_declarations(cur.get("style"))
+        if prop in c_inline:
+            return c_inline[prop]
+        cur = parent_map.get(cur)
+    return None
 
 
 def text_style_source(node, parent_map, rules, prop):
@@ -321,7 +334,12 @@ def text_style_source(node, parent_map, rules, prop):
     value = stylesheet_value(node, parent_map, rules, prop)
     if value is not None:
         return "class 命中的 <style> 规则"
-    return "三处都没有"
+    cur = parent_map.get(node)
+    while cur is not None:
+        if cur.get(prop) is not None or prop in css_declarations(cur.get("style")):
+            return "祖先 <g> 继承属性"
+        cur = parent_map.get(cur)
+    return "四处都没有"
 
 
 def undefined_css_vars(value, custom_properties):
@@ -339,22 +357,67 @@ def estimate_text_width(content, font_size):
     return w
 
 
-def estimate_text_box(node, parent_map):
-    """Estimated ink box. Honors text-anchor, so centred/right-aligned text is not
-    reported as overflowing the right margin or colliding with a neighbour."""
+def estimate_text_box(node, parent_map, rules=None):
+    """Estimated ink box. Honors text-anchor, <tspan dy> multi-line height/width,
+    <tspan font-size>, and letter-spacing."""
     dx, dy, sx, sy = get_accumulated_transform(node, parent_map)
+    scale_f = min(sx, sy)
     x = dx + parse_float(node.get("x")) * sx
     y = dy + parse_float(node.get("y")) * sy
-    font_size = parse_float(node.get("font-size"), 24.0) * min(sx, sy)
-    content = TEXT_RE.sub(" ", "".join(node.itertext())).strip()
-    w = estimate_text_width(content, font_size) if content else 0.0
-    h = font_size * 1.18
-    anchor = (node.get("text-anchor") or "start").strip()
+
+    raw_fs = text_style_value(node, parent_map, rules or [], "font-size")
+    base_fs = parse_float(raw_fs, 24.0) * scale_f
+    base_ls = parse_float(text_style_value(node, parent_map, rules or [], "letter-spacing"), 0.0) * scale_f
+
+    # Split into logical lines when child <tspan> has non-zero dy
+    lines = [{"dy": 0.0, "w": 0.0, "max_fs": base_fs}]
+    if node.text and node.text.strip():
+        txt = TEXT_RE.sub(" ", node.text.strip())
+        lines[-1]["w"] += estimate_text_width(txt, base_fs) + max(0.0, base_ls) * len(txt)
+
+    for child in node:
+        ctag = child.tag.split("}")[-1] if "}" in child.tag else child.tag
+        if ctag == "tspan":
+            cfs = parse_float(child.get("font-size"), base_fs / scale_f if scale_f else 24.0) * scale_f
+            cls_val = parse_float(child.get("letter-spacing"), base_ls / scale_f if scale_f else 0.0) * scale_f
+            cdy_str = child.get("dy")
+            cdy = 0.0
+            if cdy_str:
+                if str(cdy_str).strip().lower().endswith("em"):
+                    cdy = parse_float(cdy_str, 0.0) * cfs
+                else:
+                    cdy = parse_float(cdy_str, 0.0) * sy
+            if abs(cdy) > 1e-3:
+                if lines[-1]["w"] > 0:
+                    lines.append({"dy": cdy, "w": 0.0, "max_fs": cfs})
+                else:
+                    y += cdy
+            if child.text and child.text.strip():
+                ctxt = TEXT_RE.sub(" ", child.text.strip())
+                lines[-1]["w"] += estimate_text_width(ctxt, cfs) + max(0.0, cls_val) * len(ctxt)
+                lines[-1]["max_fs"] = max(lines[-1]["max_fs"], cfs)
+        if child.tail and child.tail.strip():
+            ttxt = TEXT_RE.sub(" ", child.tail.strip())
+            lines[-1]["w"] += estimate_text_width(ttxt, base_fs) + max(0.0, base_ls) * len(ttxt)
+
+    non_empty_lines = [ln for ln in lines if ln["w"] > 0]
+    if not non_empty_lines:
+        return (x, y - base_fs, 0.0, base_fs * 1.18)
+
+    w = max(ln["w"] for ln in non_empty_lines)
+    total_dy = sum(max(0.0, ln["dy"]) for ln in non_empty_lines[1:])
+    first_fs = non_empty_lines[0]["max_fs"]
+    if total_dy > 0:
+        h = first_fs * 1.55 + total_dy
+    else:
+        h = first_fs * 1.18
+
+    anchor = (text_style_value(node, parent_map, rules or [], "text-anchor") or "start").strip()
     if anchor == "middle":
         x -= w / 2.0
     elif anchor == "end":
         x -= w
-    return (x, y - font_size, w, h)
+    return (x, y - first_fs, w, h)
 
 
 def rect_box(node, parent_map):
@@ -374,6 +437,16 @@ def image_box(node, parent_map):
         dy + parse_float(node.get("y")) * sy,
         parse_float(node.get("width")) * sx,
         parse_float(node.get("height")) * sy,
+    )
+
+
+def line_coords(node, parent_map):
+    dx, dy, sx, sy = get_accumulated_transform(node, parent_map)
+    return (
+        dx + parse_float(node.get("x1")) * sx,
+        dy + parse_float(node.get("y1")) * sy,
+        dx + parse_float(node.get("x2")) * sx,
+        dy + parse_float(node.get("y2")) * sy,
     )
 
 
@@ -467,8 +540,6 @@ def fidelity_component_node_errors(component, node):
 
     if expected_tag != "image":
         style = component.get("style", {})
-        # 一条 line 没有「填充」这回事：拿 fill 去比会永远对不上。比的是这个元素
-        # 实际会画的那些属性。
         keys = ("stroke", "stroke_width") if expected_tag == "line" else ("fill", "stroke", "stroke_width")
         for key in keys:
             if key == "stroke_width":
@@ -488,6 +559,7 @@ def fidelity_component_node_errors(component, node):
 
 def validate_file(path, page_mode=DEFAULT_MODE, margin=MARGIN, quick_mode=False, route=DEFAULT_ROUTE):
     content = Path(path).read_text(encoding="utf-8-sig")
+    uncommented = XML_COMMENT_RE.sub("", content)
     root = ET.fromstring(content)
     parent_map = build_parent_map(root)
 
@@ -507,21 +579,28 @@ def validate_file(path, page_mode=DEFAULT_MODE, margin=MARGIN, quick_mode=False,
 
     # ── SVG → PPT compatibility (slides route only) ──
     if slides:
+        seen_els = {n.tag.split("}")[-1].lower() for n in root.iter()}
         for el_name in PROHIBITED_ELEMENTS:
-            if f"<{el_name}".lower() in content.lower():
+            if el_name.lower() in seen_els or f"<{el_name}".lower() in uncommented.lower():
                 E(f"PROHIBITED_{el_name.upper()}", f"SVG uses <{el_name}> — unsupported in PPT conversion",
                   target="svg_structure")
+        seen_attrs = {k.split("}")[-1].lower() for n in root.iter() for k in n.attrib}
         for attr in PROHIBITED_ATTRIBUTES:
-            if attr.lower() in content.lower():
+            if attr.lower() in seen_attrs:
                 E(f"PROHIBITED_{attr.replace('-', '_').upper()}",
                   f"SVG uses {attr} — unsupported in PPT conversion", target="svg_structure")
+        all_transforms = " ".join((n.get("transform") or "") for n in root.iter()).lower()
         for tf in PROHIBITED_TRANSFORMS:
-            if tf.lower() in content.lower():
+            if tf.lower() in all_transforms:
                 E("PROHIBITED_TRANSFORM", f"SVG uses transform with {tf} — unsupported in PPT conversion",
                   target="svg_structure")
+                break
 
     # ── Images must be real local project files, never stretched (both routes) ──
-    image_nodes = list(root.findall(".//{http://www.w3.org/2000/svg}image")) or list(root.findall(".//image"))
+    image_nodes = [
+        n for n in (list(root.findall(".//{http://www.w3.org/2000/svg}image")) or list(root.findall(".//image")))
+        if not is_in_non_rendering_container(n, parent_map)
+    ]
     for idx, node in enumerate(image_nodes, 1):
         href = (node.get("href") or node.get("{http://www.w3.org/1999/xlink}href") or "").strip()
         if not href or href.startswith(("data:", "http://", "https://", "#")):
@@ -537,8 +616,6 @@ def validate_file(path, page_mode=DEFAULT_MODE, margin=MARGIN, quick_mode=False,
               target=f"image_{idx}")
 
     # ── 元素必须可被指名、且指得准（视频出口独有） ──
-    # 视频出口交出去的不是几张图，是一个能被按元素指名的活结构：后面要按实测音频做
-    # 「讲到哪强调哪」的轻动画。实测 44 张真实页面 0 个 id，所以这一条必须有人核。
     if not slides:
         ids = element_ids_below_svg(root)
         if not ids:
@@ -558,69 +635,65 @@ def validate_file(path, page_mode=DEFAULT_MODE, margin=MARGIN, quick_mode=False,
               detail="重复的是这份 SVG 里的元素 id（含根 <svg> 自己的 id；data-*-id 与注释不计）。",
               hint=f"把 page_key 放进 id（例如 {page_key}-caption-1），让每一页的 id 在全片唯一。")
 
-    # ── tspan line breaks break the PPT text parser (slides route only) ──
-    if slides:
-        tspans = re.findall(r"<tspan\b[^>]*>", content, re.I)
-        if any("dy=" in t.lower() for t in tspans):
-            E("TSPAN_LINEBREAK",
-              "SVG uses <tspan> with dy for line breaks — causes PPT parse errors; use separate <text> elements",
-              target="svg_structure")
-
-    # ── Text: fill / family / weight ──
-    # 幻灯片出口要显式字面值（转换器写进 PPTX 的就是这些属性本身）。
-    # 视频出口是 PNG，风格 token 按 `03_video_route.md` 经内联 <style> 的 class 规则落地，
-    # 所以「取到值」的三种方式都算：元素属性、元素 style=""、class 命中的同页 <style> 规则。
-    # 三处都取不到才是 MISSING_*；三处里出现没定义的 var(--x) 是硬错误。
-    text_nodes = list(root.findall(".//{http://www.w3.org/2000/svg}text")) or list(root.findall(".//text"))
+    # ── Text: fill / family / weight / CSS vars (both routes support <style> + :root var(--...)) ──
+    text_nodes = [
+        n for n in (list(root.findall(".//{http://www.w3.org/2000/svg}text")) or list(root.findall(".//text")))
+        if not is_in_non_rendering_container(n, parent_map)
+    ]
     font_families, font_sizes = [], []
-    stylesheet_rules, custom_properties = ({}, {}) if slides else parse_stylesheet(content)
-    if not slides:
-        # 元素 style="" 上声明的 token 也算「这一页定义了」。
-        custom_properties = {**element_custom_properties(root), **custom_properties}
+    stylesheet_rules, custom_properties = parse_stylesheet(content)
+    custom_properties = {**element_custom_properties(root), **custom_properties}
+
     for idx, node in enumerate(text_nodes, 1):
         tid = f"text_{idx}"
-        snippet = "".join(node.itertext()).strip()[:40]
-        if slides:
-            fill_value = node.get("fill")
-            family_value = node.get("font-family")
-            weight_value = (node.get("font-weight") or "").strip()
-        else:
-            fill_value = text_style_value(node, parent_map, stylesheet_rules, "fill")
-            family_value = text_style_value(node, parent_map, stylesheet_rules, "font-family")
-            weight_value = (text_style_value(node, parent_map, stylesheet_rules, "font-weight") or "").strip()
+        full_txt = "".join(node.itertext())
+        snippet = full_txt.strip()[:40]
+        fill_value = text_style_value(node, parent_map, stylesheet_rules, "fill")
+        family_value = text_style_value(node, parent_map, stylesheet_rules, "font-family")
+        weight_value = (text_style_value(node, parent_map, stylesheet_rules, "font-weight") or "").strip()
+
         if fill_value is None:
             E("MISSING_FILL",
-              (f"<text> missing explicit fill: '{snippet}…'" if slides else
-               f"<text> 没有取到填色：元素上没有 fill、style 里没有、class 命中的 <style> 规则里也没有: "
-               f"'{snippet}…'"), target=tid)
+              f"<text> 没有取到填色：元素上没有 fill、style 里没有、class 命中的 <style> 规则里也没有: "
+              f"'{snippet}…'", target=tid)
         if family_value is None:
             W("MISSING_FONT_FAMILY",
-              (f"<text> missing explicit font-family: '{snippet}…'" if slides else
-               f"<text> 没有取到字体：元素上没有 font-family、style 里没有、class 命中的 <style> 规则里也没有: "
-               f"'{snippet}…'"), target=tid)
+              f"<text> 没有取到字体：元素上没有 font-family、style 里没有、class 命中的 <style> 规则里也没有: "
+              f"'{snippet}…'", target=tid)
         else:
             font_families.append(str(family_value).strip())
         if weight_value and weight_value not in VALID_FONT_WEIGHTS:
             E("INVALID_FONT_WEIGHT", f"font-weight '{weight_value}' is not a valid value", target=tid)
-        if not slides:
-            for prop, value in (("fill", fill_value), ("font-family", family_value),
-                                ("font-weight", weight_value)):
-                for token, fallback in undefined_css_vars(value, custom_properties):
-                    source = text_style_source(node, parent_map, stylesheet_rules, prop)
-                    if fallback:
-                        # 回退值让它看起来正常，但代价是这一处不再跟着主题走——
-                        # 那正是风格库存在的理由，所以它也是 error，只是要把后果说清楚。
-                        detail = (f"取值方式：{source}；这一处用了没定义的 token {token}"
-                                  f"（回退值 {fallback.strip()} 让它看起来正常）"
-                                  f"——但换主题时这一处不会跟着变，风格库对它失效。")
-                    else:
-                        detail = f"取值方式：{source}；这一处没有回退值，实际取不到颜色。"
-                    E("UNDEFINED_CSS_VAR",
-                      f"这一页用了没定义的 token：<text> 的 {prop} 取 var({token})，"
-                      f"但同一份 SVG 里没有定义 {token}: '{snippet}…'",
-                      target=tid, detail=detail,
-                      hint=f"在页内 <style> 的 :root 里定义 {token}（值从风格库取），或改用一个已定义的 token。")
-        fs = parse_float(node.get("font-size"), 0)
+
+        for prop, value in (("fill", fill_value), ("font-family", family_value),
+                            ("font-weight", weight_value)):
+            for token, fallback in undefined_css_vars(value, custom_properties):
+                source = text_style_source(node, parent_map, stylesheet_rules, prop)
+                if fallback:
+                    detail = (f"取值方式：{source}；这一处用了没定义的 token {token}"
+                              f"（回退值 {fallback.strip()} 让它看起来正常）"
+                              f"——但换主题时这一处不会跟着变，风格库对它失效。")
+                else:
+                    detail = f"取值方式：{source}；这一处没有回退值，实际取不到颜色。"
+                E("UNDEFINED_CSS_VAR",
+                  f"这一页用了没定义的 token：<text> 的 {prop} 取 var({token})，"
+                  f"但同一份 SVG 里没有定义 {token}: '{snippet}…'",
+                  target=tid, detail=detail,
+                  hint=f"在页内 <style> 的 :root 里定义 {token}（值从风格库取），或改用一个已定义的 token。")
+
+        # ── Guard 2 (slides only): EMOJI_IN_SLIDE_TEXT ──
+        if slides:
+            found_emojis = sorted(set(EMOJI_RE.findall(full_txt)))
+            if found_emojis:
+                E("EMOJI_IN_SLIDE_TEXT",
+                  f"<text> contains system bitmap emoji ({''.join(found_emojis)}): '{snippet}…' — "
+                  "use native SVG geometric icons or monospace index numbers (01, 02) instead",
+                  target=tid,
+                  hint="严禁用 🛡️💧🎯⚠️ 等系统 Emoji 当图标；请改用原生 SVG 几何路径或等宽数字编号。")
+
+        _, _, sx, sy = get_accumulated_transform(node, parent_map)
+        raw_fs = text_style_value(node, parent_map, stylesheet_rules, "font-size")
+        fs = parse_float(raw_fs, 0) * min(sx, sy)
         if fs > 0:
             font_sizes.append(fs)
 
@@ -628,7 +701,9 @@ def validate_file(path, page_mode=DEFAULT_MODE, margin=MARGIN, quick_mode=False,
     if slides:
         floor = MODE_FLOOR.get(page_mode, MODE_FLOOR[DEFAULT_MODE])
         for idx, node in enumerate(text_nodes, 1):
-            fs = parse_float(node.get("font-size"), 0)
+            _, _, sx, sy = get_accumulated_transform(node, parent_map)
+            raw_fs = text_style_value(node, parent_map, stylesheet_rules, "font-size")
+            fs = parse_float(raw_fs, 0) * min(sx, sy)
             if 0 < fs < floor:
                 snippet = "".join(node.itertext()).strip()[:30]
                 E("TEXT_BELOW_READABILITY_FLOOR",
@@ -637,17 +712,49 @@ def validate_file(path, page_mode=DEFAULT_MODE, margin=MARGIN, quick_mode=False,
                   target=f"text_{idx}",
                   hint="Raise the size, or declare this page as a 读 page if it is meant to be read up close.")
 
-    # ── Text overlapping text: wrong on any page, any style ──
+    visible_rect_nodes = [
+        n for n in (root.findall(".//{http://www.w3.org/2000/svg}rect") or root.findall(".//rect"))
+        if not is_in_non_rendering_container(n, parent_map)
+    ]
+    visible_line_nodes = [
+        n for n in (root.findall(".//{http://www.w3.org/2000/svg}line") or root.findall(".//line"))
+        if not is_in_non_rendering_container(n, parent_map)
+    ]
+
+    # ── Text overlapping text & slide geometry guards ──
     if not quick_mode:
         text_boxes = []
         for idx, node in enumerate(text_nodes, 1):
-            tbox = estimate_text_box(node, parent_map)
+            tbox = estimate_text_box(node, parent_map, stylesheet_rules)
             if tbox[2] > 0:
-                text_boxes.append((f"text_{idx}", tbox, "".join(node.itertext())[:30]))
+                text_boxes.append((f"text_{idx}", node, tbox, "".join(node.itertext()).strip()[:30]))
+        def _is_decorative_watermark(t_node):
+            _, _, sx, sy = get_accumulated_transform(t_node, parent_map)
+            raw_fs = text_style_value(t_node, parent_map, stylesheet_rules, "font-size") or "20"
+            for tok, fb in CSS_DECLARATION_RE.findall(str(raw_fs)):
+                raw_fs = custom_properties.get(tok, fb or raw_fs)
+            t_fs = parse_float(raw_fs, 20.0) * min(sx, sy)
+            if t_fs < 88.0:
+                return False
+            t_op = parse_float(text_style_value(t_node, parent_map, stylesheet_rules, "opacity"), 1.0)
+            if t_op <= 0.75:
+                return True
+            raw_fill = str(text_style_value(t_node, parent_map, stylesheet_rules, "fill") or "").strip()
+            for tok, fb in CSS_DECLARATION_RE.findall(raw_fill):
+                raw_fill = custom_properties.get(tok, fb or raw_fill)
+            t_fill = raw_fill.strip().upper()
+            if re.fullmatch(r"#[0-9A-F]{6}", t_fill):
+                r, g, b = int(t_fill[1:3], 16), int(t_fill[3:5], 16), int(t_fill[5:7], 16)
+                if min(r, g, b) >= 216:
+                    return True
+            return False
+
         for i in range(len(text_boxes)):
             for j in range(i + 1, len(text_boxes)):
-                tid_a, box_a, txt_a = text_boxes[i]
-                tid_b, box_b, txt_b = text_boxes[j]
+                tid_a, node_a, box_a, txt_a = text_boxes[i]
+                tid_b, node_b, box_b, txt_b = text_boxes[j]
+                if _is_decorative_watermark(node_a) or _is_decorative_watermark(node_b):
+                    continue
                 if not intersects(box_a, box_b):
                     continue
                 overlap_x = min(box_a[0] + box_a[2], box_b[0] + box_b[2]) - max(box_a[0], box_b[0])
@@ -660,17 +767,133 @@ def validate_file(path, page_mode=DEFAULT_MODE, margin=MARGIN, quick_mode=False,
                       hint="Estimated boxes are approximate — confirm on the rendered PNG before rewriting the page.")
 
         # ── Safe margin: advisory only (full-bleed art direction is legitimate) ──
-        for idx, node in enumerate(text_nodes, 1):
-            tbox = estimate_text_box(node, parent_map)
+        for tid_a, _, tbox, _ in text_boxes:
             if tbox[2] > 0 and outside_safe_margin(tbox, margin):
                 I("OUTSIDE_SAFE_MARGIN",
                   f"Text sits outside the {margin:.0f}px safe margin — verify on the PNG",
-                  target=f"text_{idx}", detail=box_to_dict(tbox))
+                  target=tid_a, detail=box_to_dict(tbox))
+
+        if slides:
+            # ── Guard 1 (slides only): LINE_CROSSES_TEXT ──
+            # Build DOM z-order index so lines masked behind opaque pill/card <rect>s are not false positives
+            dom_order = {n: idx for idx, n in enumerate(root.iter())}
+            opaque_rects = []
+            for r_node in visible_rect_nodes:
+                fill_v = (text_style_value(r_node, parent_map, stylesheet_rules, "fill") or "").strip().lower()
+                if not fill_v or fill_v in ("none", "transparent"):
+                    continue
+                op_v = parse_float(text_style_value(r_node, parent_map, stylesheet_rules, "opacity"), 1.0)
+                fop_v = parse_float(text_style_value(r_node, parent_map, stylesheet_rules, "fill-opacity"), 1.0)
+                if op_v * fop_v < 0.75:
+                    continue
+                rbox = rect_box(r_node, parent_map)
+                if not is_full_canvas_rect(rbox) and rbox[2] >= 20.0 and rbox[3] >= 16.0:
+                    opaque_rects.append((dom_order.get(r_node, 0), rbox))
+
+            # Collect horizontal and vertical divider segments from <line> and thin <rect>
+            divider_segments = []
+            for l_idx, l_node in enumerate(visible_line_nodes, 1):
+                stroke_v = text_style_value(l_node, parent_map, stylesheet_rules, "stroke")
+                if stroke_v == "none":
+                    continue
+                x1, y1, x2, y2 = line_coords(l_node, parent_map)
+                l_z = dom_order.get(l_node, 0)
+                if abs(y1 - y2) <= 2.0 and abs(x2 - x1) >= 40.0:
+                    divider_segments.append(("horizontal", f"line_{l_idx}", min(x1, x2), max(x1, x2), (y1 + y2) / 2.0, l_z))
+                elif abs(x1 - x2) <= 2.0 and abs(y2 - y1) >= 40.0:
+                    divider_segments.append(("vertical", f"line_{l_idx}", min(y1, y2), max(y1, y2), (x1 + x2) / 2.0, l_z))
+
+            for r_idx, r_node in enumerate(visible_rect_nodes, 1):
+                fill_v = text_style_value(r_node, parent_map, stylesheet_rules, "fill")
+                if fill_v == "none":
+                    continue
+                rx, ry, rw, rh = rect_box(r_node, parent_map)
+                r_z = dom_order.get(r_node, 0)
+                if 0.5 <= rh <= 4.0 and rw >= 40.0:
+                    divider_segments.append(("horizontal", f"rect_{r_idx}", rx, rx + rw, ry + rh / 2.0, r_z))
+                elif 0.5 <= rw <= 4.0 and rh >= 40.0:
+                    divider_segments.append(("vertical", f"rect_{r_idx}", ry, ry + rh, rx + rw / 2.0, r_z))
+
+            for tid_a, t_node, tbox, txt_a in text_boxes:
+                tx, ty, tw, th = tbox
+                t_z = dom_order.get(t_node, 0)
+                _, _, sx, sy = get_accumulated_transform(t_node, parent_map)
+                t_fs = parse_float(text_style_value(t_node, parent_map, stylesheet_rules, "font-size"), 20.0) * min(sx, sy)
+                t_op = parse_float(text_style_value(t_node, parent_map, stylesheet_rules, "opacity"), 1.0)
+                t_fill = (text_style_value(t_node, parent_map, stylesheet_rules, "fill") or "").strip().upper()
+                # Skip giant decorative background watermark numbers (e.g. 140px #F0F0F0 or opacity <= 0.25)
+                if t_fs >= 80.0 or t_op <= 0.25 or (t_fs >= 56.0 and t_fill in ("#F0F0F0", "#EEEEEE", "#F5F5F5", "#EAECEF")):
+                    continue
+
+                for kind, seg_id, s_min, s_max, s_pos, seg_z in divider_segments:
+                    # If the line was drawn BEFORE an opaque pill/card rect that sits behind this text, the line is occluded
+                    if seg_z < t_z and any(
+                        seg_z < rz < t_z
+                        and rb[0] - 4.0 <= tx + tw / 2.0 <= rb[0] + rb[2] + 4.0
+                        and rb[1] - 4.0 <= ty + th / 2.0 <= rb[1] + rb[3] + 4.0
+                        and rb[2] < 600.0 and rb[3] < 120.0
+                        for rz, rb in opaque_rects
+                    ):
+                        continue
+                    if kind == "horizontal":
+                        overlap_w = min(s_max, tx + tw) - max(s_min, tx)
+                        # Multi-line <tspan dy> text blocks expand downward in PPTX (+2px buffer); single-line text stops at baseline
+                        max_y_cut = (ty + th + 2.0) if th > t_fs * 1.5 else (ty + th - 1.5)
+                        if overlap_w > 8.0 and (ty + 2.0) <= s_pos <= max_y_cut:
+                            E("LINE_CROSSES_TEXT",
+                              f"Horizontal divider ({seg_id} at y={s_pos:.0f}) cuts across <text> "
+                              f"(y={ty:.0f}..{ty + th:.0f}): '{txt_a}…'",
+                              target=tid_a,
+                              detail={"divider": seg_id, "line_y": round(s_pos, 1), "text_box": box_to_dict(tbox)},
+                              hint="调整分割线 y 坐标或上移/精简文本，严禁分割线切过文字包围盒。")
+                            break
+                    else:
+                        overlap_h = min(s_max, ty + th) - max(s_min, ty)
+                        if overlap_h > 6.0 and (tx + 4.0) <= s_pos <= (tx + tw - 4.0):
+                            E("LINE_CROSSES_TEXT",
+                              f"Vertical divider ({seg_id} at x={s_pos:.0f}) cuts across <text> "
+                              f"(x={tx:.0f}..{tx + tw:.0f}): '{txt_a}…'",
+                              target=tid_a,
+                              detail={"divider": seg_id, "line_x": round(s_pos, 1), "text_box": box_to_dict(tbox)},
+                              hint="调整竖向分割线 x 坐标或缩短文本，避免竖线从字中间劈开。")
+                            break
+
+            # ── Guard 3 (slides only): TEXT_OVERFLOWS_CONTAINER ──
+            container_rects = []
+            for r_idx, r_node in enumerate(visible_rect_nodes, 1):
+                rbox = rect_box(r_node, parent_map)
+                rx, ry, rw, rh = rbox
+                if is_full_canvas_rect(rbox):
+                    continue
+                if 36.0 <= rw <= 1760.0 and 22.0 <= rh <= 860.0:
+                    container_rects.append((f"rect_{r_idx}", rbox))
+
+            for tid_a, t_node, tbox, txt_a in text_boxes:
+                tx, ty, tw, th = tbox
+                dx, dy, sx, sy = get_accumulated_transform(t_node, parent_map)
+                anchor_x = dx + parse_float(t_node.get("x")) * sx
+                anchor_y = dy + parse_float(t_node.get("y")) * sy
+                enclosing = [
+                    (rid, rb) for rid, rb in container_rects
+                    if (rb[0] <= anchor_x <= rb[0] + rb[2]) and (rb[1] <= anchor_y <= rb[1] + rb[3])
+                ]
+                if not enclosing:
+                    continue
+                smallest_id, smallest_box = min(enclosing, key=lambda item: item[1][2] * item[1][3])
+                rx, ry, rw, rh = smallest_box
+                # For small pill badges (rh <= 56), require at least 2px horizontal fit; for cards, allow 4px tolerance
+                limit_w = rw if rh <= 56.0 else rw + 4.0
+                if tw > limit_w:
+                    W("TEXT_OVERFLOWS_CONTAINER",
+                      f"<text> estimated width ({tw:.0f}px) exceeds enclosing container {smallest_id} "
+                      f"width ({rw:.0f}px): '{txt_a}…'",
+                      target=tid_a,
+                      detail={"container": smallest_id, "container_box": box_to_dict(smallest_box),
+                              "text_box": box_to_dict(tbox)},
+                      hint="加宽胶囊/卡片容器（建议 width >= 字数×字号 + 32px）、缩短文案或用 <tspan dy> 换行，防止导出 PPTX 后折行溢出。")
 
     # ── Nothing may leave the canvas: rect, image, and text alike ──
-    # 文字此前只有一条 info 级的 OUTSIDE_SAFE_MARGIN，一条伸出画布 640px 的标题
-    # 也能判 pass。安全区是美术方向（保持 info）；画布不是。
-    for rect_node in (root.findall(".//{http://www.w3.org/2000/svg}rect") or root.findall(".//rect")):
+    for rect_node in visible_rect_nodes:
         rbox = rect_box(rect_node, parent_map)
         if rbox[2] > 0 and rbox[3] > 0 and outside_canvas(rbox):
             x, y, w, h = rbox
@@ -686,7 +909,7 @@ def validate_file(path, page_mode=DEFAULT_MODE, margin=MARGIN, quick_mode=False,
               f"<image> at ({x:.0f},{y:.0f}) {w:.0f}x{h:.0f} extends beyond canvas",
               target="svg_structure", detail=box_to_dict(ibox))
     for idx, node in enumerate(text_nodes, 1):
-        tbox = estimate_text_box(node, parent_map)
+        tbox = estimate_text_box(node, parent_map, stylesheet_rules)
         if tbox[2] > 0 and outside_canvas(tbox):
             x, y, w, h = tbox
             snippet = "".join(node.itertext()).strip()[:30]
@@ -697,10 +920,6 @@ def validate_file(path, page_mode=DEFAULT_MODE, margin=MARGIN, quick_mode=False,
               hint="重排、断行或换表达，不要靠缩字塞回去；框是估算的，先在渲染 PNG 上确认这一处。")
 
     # ── Empty slide ──
-    # The genuinely blank page is the one with nothing to look at: neither text nor image.
-    # The old `visible < 3` element count was written for slides, where one or two elements
-    # are suspicious; it misreads a screen that is one full-bleed picture, and a title-only
-    # page, as empty. Still a warning: it flags, it does not block.
     if not text_nodes and not image_nodes:
         W("EMPTY_SLIDE", "Page has neither text nor image — nothing to look at",
           target="svg_structure")

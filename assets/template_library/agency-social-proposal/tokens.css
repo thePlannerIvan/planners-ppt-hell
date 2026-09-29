@@ -1,0 +1,41 @@
+:root {
+  /* 75% Neutral Canvas and Surfaces */
+  --canvas-bg: #F4F5F7;
+  --canvas-pure: #FFFFFF;
+  --surface-card: #FFFFFF;
+  --surface-muted: #EBECEE;
+  --surface-zebra: #F8F9FB;
+  --surface-dark: #111111;
+  --surface-dark-elevated: #1E2024;
+  --surface-accent-tint: #FFF1F2;
+
+  /* 20% Charcoal and Ink Hierarchy */
+  --ink-primary: #111111;
+  --ink-secondary: #4B5563;
+  --ink-muted: #8C94A0;
+  --ink-watermark: #EAECEF;
+  --ink-on-dark: #FFFFFF;
+  --ink-on-dark-muted: #A1A8B3;
+
+  /* 5% Brand Accent (Strict Single-Hue Discipline) */
+  --accent-brand: #E60012;
+  --accent-secondary: #2B2D33;
+
+  /* Hairlines and Dividers */
+  --border-subtle: #E2E5EA;
+  --border-strong: #111111;
+
+  /* Font Stacks */
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Arial Black", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Courier New", monospace;
+
+  /* 6-Tier 1080p Font Scale */
+  --size-watermark: 136px;
+  --size-hero-kpi: 56px;
+  --size-action-title: 42px;
+  --size-card-title: 26px;
+  --size-subtitle: 21px;
+  --size-body: 18px;
+  --size-caption: 14px;
+}

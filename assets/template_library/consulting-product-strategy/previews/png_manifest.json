@@ -1,0 +1,58 @@
+{
+  "png_dir": ".",
+  "generated_files": [
+    "pages/p01_cover.png",
+    "pages/p02_kpi_closed_loop.png",
+    "pages/p03_quadrant_2x2.png",
+    "pages/p04_mechanism_pipeline.png",
+    "pages/p05_asymmetric_comparison.png",
+    "pages/p06_chart_and_takeaway.png"
+  ],
+  "files": [
+    {
+      "file": "pages/p01_cover.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 152272,
+      "valid_size": true
+    },
+    {
+      "file": "pages/p02_kpi_closed_loop.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 346894,
+      "valid_size": true
+    },
+    {
+      "file": "pages/p03_quadrant_2x2.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 344668,
+      "valid_size": true
+    },
+    {
+      "file": "pages/p04_mechanism_pipeline.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 236946,
+      "valid_size": true
+    },
+    {
+      "file": "pages/p05_asymmetric_comparison.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 236877,
+      "valid_size": true
+    },
+    {
+      "file": "pages/p06_chart_and_takeaway.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 263407,
+      "valid_size": true
+    }
+  ],
+  "count": 6,
+  "all_valid_size": true,
+  "contact_sheet": "full_deck_contact_sheet.png"
+}

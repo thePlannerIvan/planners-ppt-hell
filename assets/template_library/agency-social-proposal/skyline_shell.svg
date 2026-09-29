@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="var(--font-sans)">
+  <defs>
+    <style>
+:root {
+  /* 75% Neutral Canvas and Surfaces */
+  --canvas-bg: #F4F5F7;
+  --canvas-pure: #FFFFFF;
+  --surface-card: #FFFFFF;
+  --surface-muted: #EBECEE;
+  --surface-zebra: #F8F9FB;
+  --surface-dark: #111111;
+  --surface-dark-elevated: #1E2024;
+  --surface-accent-tint: #FFF1F2;
+
+  /* 20% Charcoal and Ink Hierarchy */
+  --ink-primary: #111111;
+  --ink-secondary: #4B5563;
+  --ink-muted: #8C94A0;
+  --ink-watermark: #EAECEF;
+  --ink-on-dark: #FFFFFF;
+  --ink-on-dark-muted: #A1A8B3;
+
+  /* 5% Brand Accent (Strict Single-Hue Discipline) */
+  --accent-brand: #E60012;
+  --accent-secondary: #2B2D33;
+
+  /* Hairlines and Dividers */
+  --border-subtle: #E2E5EA;
+  --border-strong: #111111;
+
+  /* Font Stacks */
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Arial Black", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Courier New", monospace;
+
+  /* 6-Tier 1080p Font Scale */
+  --size-watermark: 136px;
+  --size-hero-kpi: 56px;
+  --size-action-title: 42px;
+  --size-card-title: 26px;
+  --size-subtitle: 21px;
+  --size-body: 18px;
+  --size-caption: 14px;
+}
+
+      text { font-family: var(--font-sans); }
+      .mono { font-family: var(--font-mono); }
+      .display { font-family: var(--font-display); }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1920" height="1080" fill="var(--canvas-bg)"/>
+  <!-- Global Skyline Header -->
+  <g id="skyline-header">
+    <rect x="80" y="64" width="8" height="54" rx="4" fill="var(--accent-brand)"/>
+    <text x="106" y="102" font-size="40" font-weight="900" fill="var(--ink-primary)">观点型主标题（Action Title）：单行控制在 24 字以内直给结论</text>
+    <text x="106" y="144" font-size="20" font-weight="500" fill="var(--ink-secondary)">副标题补充推导逻辑或数据口径，核心概念用 <tspan fill="var(--accent-brand)" font-weight="700">品牌红高亮强调</tspan>，严禁空洞套话</text>
+    <rect x="1560" y="64" width="280" height="34" rx="6" fill="var(--surface-dark)"/>
+    <text x="1700" y="86" class="mono" font-size="14" font-weight="700" fill="var(--ink-on-dark)" text-anchor="middle" letter-spacing="1">SECTION 01 // STRATEGY</text>
+    <line x1="80" y1="172" x2="1840" y2="172" stroke="var(--border-subtle)" stroke-width="1.5"/>
+  </g>
+
+  <!-- Global Skyline Bottom Takeaway Banner -->
+  <g id="skyline-takeaway">
+    <rect x="80" y="918" width="1760" height="76" rx="12" fill="var(--surface-dark)"/>
+    <rect x="104" y="937" width="164" height="38" rx="6" fill="var(--accent-brand)"/>
+    <text x="186" y="962" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle" letter-spacing="1">KEY TAKEAWAY</text>
+    <text x="288" y="964" font-size="22" font-weight="700" fill="var(--ink-on-dark)">底部定海神针收口：上半场擺出拆解证据，底部用一句 <tspan fill="var(--accent-brand)" font-weight="900">可执行、可验证的策略铁律</tspan> 一锤定音</text>
+  </g>
+
+  <!-- Global Skyline Footer -->
+  <g id="skyline-footer">
+    <text x="80" y="1034" font-size="14" font-weight="500" fill="var(--ink-muted)">Source: 品牌方提供 / 小红书灵犀平台数据口径 (2025.01–2025.12)</text>
+    <text x="1840" y="1036" class="display" font-size="20" font-weight="900" fill="var(--ink-primary)" text-anchor="end">P.01</text>
+  </g>
+  <!-- Safe Content Zone Guide (x=80..1840, y=196..896) -->
+  <g id="content-safe-zone" opacity="0.85">
+    <rect x="80" y="196" width="1760" height="700" rx="16" fill="var(--surface-card)" stroke="var(--border-subtle)" stroke-width="2" stroke-dasharray="8,6"/>
+    <text x="960" y="530" font-size="28" font-weight="800" fill="var(--ink-muted)" text-anchor="middle">CONTENT SAFE ZONE (x: 80..1840, y: 196..896, 1760×700px)</text>
+    <text x="960" y="574" font-size="18" font-weight="500" fill="var(--ink-muted)" text-anchor="middle">从 primitives/ 选择对应版式原语填入此安全区 · 容器嵌套 ≤ 2 层 · 严禁系统 Emoji</text>
+  </g>
+</svg>

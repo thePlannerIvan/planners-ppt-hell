@@ -6,6 +6,27 @@
 
 ---
 
+## 2026-09-30 · 幻灯片（PPT）全链路升级（v6.0）：多模态四件套模板包、SVG→PPTX 转换器与校验器协同、极简 PPT 式审阅工作台
+
+**起因**：视频路线（`route == "video"`）稳定后，幻灯片（PPT）路线（`route == "slides"`）暴露出四大瓶颈：① 原模板提取只机械抠取 XML 边缘装饰，产出空壳 `<g data-template-content-layer="replace"></g>`，完全丢失内部版式骨架与比例；② 领域规则偏抽象哲学，换模型或长链路下极易退化为千篇一律的「三等分描边卡片 + 边框套边框」；③ `native_svg_to_ppt.py` 不支持 `<style>`/`:root` `var(--...)`、`<tspan dy>` 多行段落、叶子节点 `transform`、`1px` 细分割线、文字/分组 `opacity` 与 `<linearGradient>`，反向倒逼模型写冗长死板的内联 SVG；④ 审阅页交互弱（框选后画布无常驻标记、模型不知道框中了哪个 SVG 节点、改一个错字或删一个色块也得唤醒模型重画整页）。
+
+| 动了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| **多模态模板提取与四件套模板包契约（v2）+ 2 套内置 90 分旗舰模板包** | 用一条命令完成多模态预处理（`extract_template_pack.py`），将模板包收敛为「`tokens.css` + `skyline_shell.svg` + `primitives/*.svg`（7 套无碰撞版式原语）+ `SPEC.md`/`anchors/`」四件套，并内置 `agency-social-proposal`（社媒种草提案风）与 `consulting-product-strategy`（咨询产品战略风）两套旗舰包 | `scripts/template/extract_template_pack.py`（新）、`scripts/template/template_library.py`（v2 四件套 + v1 兼容）、`assets/template_library/agency-social-proposal/*`（新）、`assets/template_library/consulting-product-strategy/*`（新）、`references/workflow/01_template_intake.md`、`references/contracts/template_package.md` | 新建模板时繁琐的八步中间 JSON 手工拼装（旧 v1 仍保留向后兼容以通过历史回归） |
+| **去玄学化四大领域规则文档** | 将好 PPT 的规律固化为可量化的「5 条黄金铁律 + 6 条反丑红线」（Card-in-Card 禁令、75:20:5 色彩配比、12 列栅格、连续同构禁令、数据页去装饰框）与 7 类可执行版式原语配方 | `references/domain/style_system.md`、`references/domain/layout_taxonomy.md`、`references/domain/svg_rules.md`、`references/domain/svg_to_ppt_rules.md` | 旧 `svg_to_ppt_rules.md` 中因旧转换器缺陷导致的 `<style>`/`:root`、`stroke-dasharray`、`<linearGradient>`、`<tspan dy>` 历史禁令 |
+| **`native_svg_to_ppt.py` 六大能力升级与 Bug 修复 + `validate_svg_layout.py` 三项硬拦截** | 转换器原生支持 `<style>`/`:root` `var(--...)` 展开、`<tspan dy>` 多段落拆行、全部叶子节点 `transform` 合成、`1px` `<rect>` 细分割线保真、`<text>`/`<g>` `opacity` + `letter-spacing * FONT_SCALE` + `dominant-baseline` + `rgba()`、以及 `<linearGradient>` → 原生 DrawingML `<a:gradFill>`；校验器新增 `LINE_CROSSES_TEXT`、`EMOJI_IN_SLIDE_TEXT`、`TEXT_OVERFLOWS_CONTAINER` | `scripts/native_svg_to_ppt.py`、`scripts/validate_svg_layout.py`、`scripts/project_state.py`、`scripts/test/test_slides_upgrade.py`（新） | — |
+| **极简 PPT 式视觉审阅工作台（画布常驻编号框 + 元素命中 + 舞台直改/按键删除写回）** | 在完全保留 `planners-review-core` 接缝的前提下，升级为顶部单行防变形工具栏 + 画布常驻带编号框（`① ②`）+ 自动命中 `data-review-id` 节点 + 舞台直改（改字、`A-/A+` 调字号、拖拽位移、`Delete`/`Backspace` 删除元素），`consume(root)` 收件时确定性写回 `.svg` 并重算 hash，纯微调可 0 轮直接通过导出 | `assets/review/review.html`、`scripts/generate_review_html.py`、`scripts/review_feedback.py` | 页面上冗余的工程连接话术、节点树路径标签（`#0.4.1` / `<rect>`）与百分比坐标串 |
+
+## 2026-09-29 · 新增 `editorial-archive` 四域视频风格、预埋子元素动效交接与新风格提取 SOP
+
+**起因**：视频路线此前虽能读取 `video-craft/visual/themes/` 的配色 token 并给元素加 `id`，但缺少两件关键能力：① 面对同一条视频里的不同信息形态（金句、流程模型、图文证据、历史原件），模型容易画出毫无起伏的三行文字表或把每页塞得过满；② 静态 SVG 没有在制作时按动作拆好子元素层级（`.anim-*`）与路径（`pathLength="1"`），导致下游 `video-craft` 只能做生硬的整块浮现或被迫重画。
+
+| 动了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| 新增 `references/domain/video_style_editorial_archive.md` 与 `assets/video_style_references/editorial-archive/`（11 张多模态参考图 + 7 屏实测联系表） | 将 34 个 Pinterest 样本收敛为「文字凸显 / 模型构建 / 图文混排 / 图片为主」四域 × `Solo（独奏极简）/ Multi（群像展开）` 密度矩阵，确立 6 条反杂乱与防刺眼护栏（重音反转屏用深炭墨底 `#181715` + `≤12%` 氧化砖红 `#C8553D`，严禁满屏刺眼红；全片 Solo 屏 `≥30%`），并保留原图供多模态模型直接对齐 | `references/domain/video_style_editorial_archive.md`（新）、`assets/video_style_references/editorial-archive/*`（新）、`references/workflow/03_video_route.md`、`SKILL.md` | — |
+| 升级视频路线 SVG 交接要求：支持预埋 `data-step` + `data-anim` + `.anim-*` 复合子元素动效钩子 | 与 `video-craft/references/svg-animation-contract.md` 对齐，在静态 SVG 生成时一步写好子元素类名、`pathLength="1"` 与绝对坐标（`<g data-step>` 严禁挂定位 `transform`），下游按实测音频零返工驱动 3~4 阶段复合动效 | `references/workflow/03_video_route.md`、`SKILL.md` | 「页面里完全不加任何动画结构说明」的旧口径（改为不写死毫秒时长，但预埋声明式 `data-step` / `data-anim` 子元素钩子） |
+| 新增 `references/workflow/08_video_style_extraction_sop.md` | 把本次从参考画板逆向提取视频风格与预埋动效模板的完整六步流程（采集抽帧 → 双路并行拆解 → 四域×Solo/Multi 收敛 → 复合子元素动效契约 → 真项目 `/prototype` 压测 → 双端落盘）及 6 条实测技术避坑沉淀为标准 SOP，供后续提取更多视频模板复用 | `references/workflow/08_video_style_extraction_sop.md`（新）、`references/architecture.md` | — |
+
 
 ## 2026-09-26 · 宿主生命周期搬进公共模组（只留一份）
 

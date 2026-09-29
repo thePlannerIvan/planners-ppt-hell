@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="var(--font-sans)">
+  <defs>
+    <style>
+:root {
+  /* 75% Neutral Canvas and Surfaces */
+  --canvas-bg: #F4F5F7;
+  --canvas-pure: #FFFFFF;
+  --surface-card: #FFFFFF;
+  --surface-muted: #EBECEE;
+  --surface-zebra: #F8F9FB;
+  --surface-dark: #111111;
+  --surface-dark-elevated: #1E2024;
+  --surface-accent-tint: #FFF1F2;
+
+  /* 20% Charcoal and Ink Hierarchy */
+  --ink-primary: #111111;
+  --ink-secondary: #4B5563;
+  --ink-muted: #8C94A0;
+  --ink-watermark: #EAECEF;
+  --ink-on-dark: #FFFFFF;
+  --ink-on-dark-muted: #A1A8B3;
+
+  /* 5% Brand Accent (Strict Single-Hue Discipline) */
+  --accent-brand: #E60012;
+  --accent-secondary: #2B2D33;
+
+  /* Hairlines and Dividers */
+  --border-subtle: #E2E5EA;
+  --border-strong: #111111;
+
+  /* Font Stacks */
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Arial Black", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Courier New", monospace;
+
+  /* 6-Tier 1080p Font Scale */
+  --size-watermark: 136px;
+  --size-hero-kpi: 56px;
+  --size-action-title: 42px;
+  --size-card-title: 26px;
+  --size-subtitle: 21px;
+  --size-body: 18px;
+  --size-caption: 14px;
+}
+
+      text { font-family: var(--font-sans); }
+      .mono { font-family: var(--font-mono); }
+      .display { font-family: var(--font-display); }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1920" height="1080" fill="var(--canvas-bg)"/>
+  <!-- Left 62% Dark Charcoal Panel -->
+  <rect x="0" y="0" width="1220" height="1080" fill="var(--surface-dark)"/>
+  <!-- Subtle Editorial Grid Lines on Dark Panel -->
+  <line x1="100" y1="0" x2="100" y2="1080" stroke="#22252A" stroke-width="1"/>
+  <line x1="0" y1="140" x2="1220" y2="140" stroke="#22252A" stroke-width="1"/>
+  <line x1="0" y1="880" x2="1220" y2="880" stroke="#22252A" stroke-width="1"/>
+
+  <!-- Oversized Watermark Year -->
+  <text x="1160" y="840" class="display" font-size="220" font-weight="900" fill="#181A1F" text-anchor="end">2026</text>
+
+  <!-- Top Brand Pill & Proposal Code -->
+  <rect x="100" y="64" width="180" height="38" rx="6" fill="var(--accent-brand)"/>
+  <text x="190" y="89" class="mono" font-size="15" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle" letter-spacing="2">ANNUAL PITCH</text>
+  <text x="304" y="89" class="mono" font-size="15" font-weight="600" fill="var(--ink-on-dark-muted)" letter-spacing="2">SOCIAL SEEDING &amp; BRAND ECOSYSTEM</text>
+
+  <!-- Main Cover Thesis Title -->
+  <rect x="100" y="250" width="12" height="190" rx="4" fill="var(--accent-brand)"/>
+  <text x="140" y="315" font-size="64" font-weight="900" fill="var(--ink-on-dark)">破局 2026：从垂类专业底座</text>
+  <text x="140" y="405" font-size="64" font-weight="900" fill="var(--ink-on-dark)">到大众运动美学的<tspan fill="var(--accent-brand)">全域种草跃迁</tspan></text>
+
+  <text x="140" y="490" font-size="26" font-weight="500" fill="var(--ink-on-dark-muted)">品牌小红书官号矩阵 × KFS 内容种草年度全案策略</text>
+
+  <!-- Bottom Metadata Matrix on Dark Panel -->
+  <text x="100" y="935" class="mono" font-size="14" font-weight="700" fill="var(--accent-brand)" letter-spacing="1">CORE PILLARS</text>
+  <text x="100" y="970" font-size="20" font-weight="700" fill="var(--ink-on-dark)">人群破圈 · 话题屋架构 · 爆文资产闭环</text>
+
+  <text x="640" y="935" class="mono" font-size="14" font-weight="700" fill="var(--accent-brand)" letter-spacing="1">DELIVERABLE SCOPE</text>
+  <text x="640" y="970" font-size="20" font-weight="700" fill="var(--ink-on-dark)">Q1–Q4 全域种草排期与 KPI 考核模型</text>
+
+  <!-- Right 38% Warm Stone Panel with 4 Chapter Preview Cards -->
+  <rect x="1220" y="0" width="700" height="1080" fill="var(--canvas-bg)"/>
+  <rect x="1220" y="0" width="10" height="1080" fill="var(--accent-brand)"/>
+
+  <text x="1290" y="96" class="mono" font-size="16" font-weight="800" fill="var(--ink-primary)" letter-spacing="2">EXECUTIVE AGENDA // 01–04</text>
+  <line x1="1290" y1="120" x2="1840" y2="120" stroke="var(--border-subtle)" stroke-width="2"/>
+
+  <!-- Chapter Card 01 -->
+  <g transform="translate(1290, 165)">
+    <rect x="0" y="0" width="550" height="175" rx="14" fill="var(--surface-card)"/>
+    <rect x="0" y="0" width="8" height="175" rx="4" fill="var(--accent-brand)"/>
+    <text x="480" y="130" class="display" font-size="88" font-weight="900" fill="var(--ink-watermark)" text-anchor="end">01</text>
+    <text x="36" y="54" class="mono" font-size="14" font-weight="800" fill="var(--accent-brand)">PART 01 // MARKET DIAGNOSIS</text>
+    <text x="36" y="96" font-size="28" font-weight="900" fill="var(--ink-primary)">生态位诊断与搜索链路还原</text>
+    <text x="36" y="136" font-size="18" font-weight="500" fill="var(--ink-secondary)">拆解存量漏斗流失症结，锁定高溢价破圈人群</text>
+  </g>
+
+  <!-- Chapter Card 02 -->
+  <g transform="translate(1290, 375)">
+    <rect x="0" y="0" width="550" height="175" rx="14" fill="var(--surface-card)"/>
+    <rect x="0" y="0" width="8" height="175" rx="4" fill="var(--surface-dark)"/>
+    <text x="480" y="130" class="display" font-size="88" font-weight="900" fill="var(--ink-watermark)" text-anchor="end">02</text>
+    <text x="36" y="54" class="mono" font-size="14" font-weight="800" fill="var(--ink-muted)">PART 02 // CONTENT ARCHITECTURE</text>
+    <text x="36" y="96" font-size="28" font-weight="900" fill="var(--ink-primary)">年度话题屋与六大栏目矩阵</text>
+    <text x="36" y="136" font-size="18" font-weight="500" fill="var(--ink-secondary)">用四大内容支柱挂住尖货曝光与日常穿搭场景</text>
+  </g>
+
+  <!-- Chapter Card 03 -->
+  <g transform="translate(1290, 585)">
+    <rect x="0" y="0" width="550" height="175" rx="14" fill="var(--surface-card)"/>
+    <rect x="0" y="0" width="8" height="175" rx="4" fill="var(--surface-dark)"/>
+    <text x="480" y="130" class="display" font-size="88" font-weight="900" fill="var(--ink-watermark)" text-anchor="end">03</text>
+    <text x="36" y="54" class="mono" font-size="14" font-weight="800" fill="var(--ink-muted)">PART 03 // SEEDING EXECUTION</text>
+    <text x="36" y="96" font-size="28" font-weight="900" fill="var(--ink-primary)">单品推演链路与视觉笔记样板</text>
+    <text x="36" y="136" font-size="18" font-weight="500" fill="var(--ink-secondary)">黄金达人金字塔配比 × 高赞笔记钩子标准化拆解</text>
+  </g>
+
+  <!-- Chapter Card 04 -->
+  <g transform="translate(1290, 795)">
+    <rect x="0" y="0" width="550" height="175" rx="14" fill="var(--surface-card)"/>
+    <rect x="0" y="0" width="8" height="175" rx="4" fill="var(--surface-dark)"/>
+    <text x="480" y="130" class="display" font-size="88" font-weight="900" fill="var(--ink-watermark)" text-anchor="end">04</text>
+    <text x="36" y="54" class="mono" font-size="14" font-weight="800" fill="var(--ink-muted)">PART 04 // BATTLE CALENDAR</text>
+    <text x="36" y="96" font-size="28" font-weight="900" fill="var(--ink-primary)">月度作战大表与资产协同机制</text>
+    <text x="36" y="136" font-size="18" font-weight="500" fill="var(--ink-secondary)">全年 S 级战役波峰规划、预算分配与投流风控</text>
+  </g>
+</svg>

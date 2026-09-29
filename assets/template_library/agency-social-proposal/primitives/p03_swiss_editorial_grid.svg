@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="var(--font-sans)">
+  <defs>
+    <style>
+:root {
+  /* 75% Neutral Canvas and Surfaces */
+  --canvas-bg: #F4F5F7;
+  --canvas-pure: #FFFFFF;
+  --surface-card: #FFFFFF;
+  --surface-muted: #EBECEE;
+  --surface-zebra: #F8F9FB;
+  --surface-dark: #111111;
+  --surface-dark-elevated: #1E2024;
+  --surface-accent-tint: #FFF1F2;
+
+  /* 20% Charcoal and Ink Hierarchy */
+  --ink-primary: #111111;
+  --ink-secondary: #4B5563;
+  --ink-muted: #8C94A0;
+  --ink-watermark: #EAECEF;
+  --ink-on-dark: #FFFFFF;
+  --ink-on-dark-muted: #A1A8B3;
+
+  /* 5% Brand Accent (Strict Single-Hue Discipline) */
+  --accent-brand: #E60012;
+  --accent-secondary: #2B2D33;
+
+  /* Hairlines and Dividers */
+  --border-subtle: #E2E5EA;
+  --border-strong: #111111;
+
+  /* Font Stacks */
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Arial Black", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Courier New", monospace;
+
+  /* 6-Tier 1080p Font Scale */
+  --size-watermark: 136px;
+  --size-hero-kpi: 56px;
+  --size-action-title: 42px;
+  --size-card-title: 26px;
+  --size-subtitle: 21px;
+  --size-body: 18px;
+  --size-caption: 14px;
+}
+
+      text { font-family: var(--font-sans); }
+      .mono { font-family: var(--font-mono); }
+      .display { font-family: var(--font-display); }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1920" height="1080" fill="var(--canvas-pure)"/>
+  <!-- Global Skyline Header -->
+  <g id="skyline-header">
+    <rect x="80" y="64" width="8" height="54" rx="4" fill="var(--accent-brand)"/>
+    <text x="106" y="102" font-size="40" font-weight="900" fill="var(--ink-primary)">内容体系：六大栏目价值分工矩阵，兼顾「专业立身」与「穿搭破圈」</text>
+    <text x="106" y="144" font-size="20" font-weight="500" fill="var(--ink-secondary)">摒弃零散随缘发帖，以 <tspan fill="var(--accent-brand)" font-weight="700">瑞士无框网格与 3:2:1 黄金产能配比</tspan> 构建可理解、可收藏、可持续关注的官号资产库</text>
+    <rect x="1560" y="64" width="280" height="34" rx="6" fill="var(--surface-dark)"/>
+    <text x="1700" y="86" class="mono" font-size="14" font-weight="700" fill="var(--ink-on-dark)" text-anchor="middle" letter-spacing="1">PART 02 // EDITORIAL MATRIX</text>
+    <line x1="80" y1="172" x2="1840" y2="172" stroke="var(--border-subtle)" stroke-width="1.5"/>
+  </g>
+
+  <!-- Global Skyline Bottom Takeaway Banner -->
+  <g id="skyline-takeaway">
+    <rect x="80" y="918" width="1760" height="76" rx="12" fill="var(--surface-dark)"/>
+    <rect x="104" y="937" width="164" height="38" rx="6" fill="var(--accent-brand)"/>
+    <text x="186" y="962" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle" letter-spacing="1">MATRIX RULE</text>
+    <text x="288" y="964" font-size="22" font-weight="700" fill="var(--ink-on-dark)">栏目纪律：01–02 为核心流量与转化双引擎（合计占 <tspan fill="var(--accent-brand)" font-weight="900">55% 产能</tspan>），03–06 负责社群粘性、文化溢价与搜索截流</text>
+  </g>
+
+  <!-- Global Skyline Footer -->
+  <g id="skyline-footer">
+    <text x="80" y="1034" font-size="14" font-weight="500" fill="var(--ink-muted)">Source: 2026 品牌官号内容 SOP 与栏目排期配比模型</text>
+    <text x="1840" y="1036" class="display" font-size="20" font-weight="900" fill="var(--ink-primary)" text-anchor="end">P.03</text>
+  </g>
+  <!-- Clean Swiss Editorial Crosshair Dividers (Strictly between cells, zero text intersection!) -->
+  <line x1="640" y1="200" x2="640" y2="888" stroke="var(--border-subtle)" stroke-width="1.5" stroke-dasharray="6,6"/>
+  <line x1="1240" y1="200" x2="1240" y2="888" stroke="var(--border-subtle)" stroke-width="1.5" stroke-dasharray="6,6"/>
+  <line x1="80" y1="518" x2="1840" y2="518" stroke="var(--border-subtle)" stroke-width="1.5" stroke-dasharray="6,6"/>
+  <!-- Swiss Cell 01 -->
+  <g id="swiss-cell-01" transform="translate(80, 208)">
+    <text x="0" y="108" class="display" font-size="132" font-weight="900" fill="var(--ink-watermark)">01</text>
+    <text x="0" y="62" font-size="30" font-weight="900" fill="var(--ink-primary)">装备解构局 <tspan class="mono" font-size="16" font-weight="700" fill="var(--ink-muted)">/ GEAR LAB</tspan></text>
+    <rect x="0" y="80" width="44" height="5" rx="2.5" fill="var(--accent-brand)"/>
+    <rect x="56" y="70" width="216" height="24" rx="4" fill="var(--surface-accent-tint)"/>
+    <text x="164" y="87" class="mono" font-size="12" font-weight="800" fill="var(--accent-brand)" text-anchor="middle">ARCHIVE REF // 30% SHARE</text>
+    <text x="0" y="132" font-size="21" font-weight="800" fill="var(--ink-primary)">硬核科技可视化，立住专业选鞋标尺</text>
+    <text x="0" y="168" font-size="17" font-weight="400" fill="var(--ink-secondary)">拆解中底波浪片、鞋楦工程与耐磨橡胶实测数据，</text>
+    <text x="0" y="196" font-size="17" font-weight="400" fill="var(--ink-secondary)">用解剖级微距图文喂饱装备党与理性参数控。</text>
+    <rect x="0" y="218" width="520" height="44" rx="8" fill="var(--canvas-bg)"/>
+    <rect x="0" y="218" width="4" height="44" rx="2" fill="var(--accent-brand)"/>
+    <text x="16" y="246" font-size="15" font-weight="600" fill="var(--ink-secondary)">Case: 《一刀切开旗舰跑鞋：为什么它能抗住1000公里》</text>
+  </g>
+  <!-- Swiss Cell 02 -->
+  <g id="swiss-cell-02" transform="translate(680, 208)">
+    <text x="0" y="108" class="display" font-size="132" font-weight="900" fill="var(--ink-watermark)">02</text>
+    <text x="0" y="62" font-size="30" font-weight="900" fill="var(--ink-primary)">先锋型格录 <tspan class="mono" font-size="16" font-weight="700" fill="var(--ink-muted)">/ STYLE EDITORIAL</tspan></text>
+    <rect x="0" y="80" width="44" height="5" rx="2.5" fill="var(--ink-primary)"/>
+    <rect x="56" y="70" width="216" height="24" rx="4" fill="var(--surface-muted)"/>
+    <text x="164" y="87" class="mono" font-size="12" font-weight="800" fill="var(--ink-primary)" text-anchor="middle">ARCHIVE REF // 25% SHARE</text>
+    <text x="0" y="132" font-size="21" font-weight="800" fill="var(--ink-primary)">高街复古混搭，引爆 OOTD 社交货币</text>
+    <text x="0" y="168" font-size="17" font-weight="400" fill="var(--ink-secondary)">联合潮流主理人与高审美穿搭博主，示范都会通勤、</text>
+    <text x="0" y="196" font-size="17" font-weight="400" fill="var(--ink-secondary)">复古运动风等高赞出片公式，拉升年轻女性占比。</text>
+    <rect x="0" y="218" width="520" height="44" rx="8" fill="var(--canvas-bg)"/>
+    <rect x="0" y="218" width="4" height="44" rx="2" fill="var(--ink-primary)"/>
+    <text x="16" y="246" font-size="15" font-weight="600" fill="var(--ink-secondary)">Case: 《早春银色系神鞋：一套不费力的 CleanFit 模板》</text>
+  </g>
+  <!-- Swiss Cell 03 -->
+  <g id="swiss-cell-03" transform="translate(1280, 208)">
+    <text x="0" y="108" class="display" font-size="132" font-weight="900" fill="var(--ink-watermark)">03</text>
+    <text x="0" y="62" font-size="30" font-weight="900" fill="var(--ink-primary)">训练在场志 <tspan class="mono" font-size="16" font-weight="700" fill="var(--ink-muted)">/ TRAINING FIELD</tspan></text>
+    <rect x="0" y="80" width="44" height="5" rx="2.5" fill="var(--ink-primary)"/>
+    <rect x="56" y="70" width="216" height="24" rx="4" fill="var(--surface-muted)"/>
+    <text x="164" y="87" class="mono" font-size="12" font-weight="800" fill="var(--ink-primary)" text-anchor="middle">ARCHIVE REF // 15% SHARE</text>
+    <text x="0" y="132" font-size="21" font-weight="800" fill="var(--ink-primary)">真实汗水共振，绑定高粘性运动社群</text>
+    <text x="0" y="168" font-size="17" font-weight="400" fill="var(--ink-secondary)">直击夜跑团、综合体能馆与球场实战高光时刻，</text>
+    <text x="0" y="196" font-size="17" font-weight="400" fill="var(--ink-secondary)">以第一视角强化「专业运动陪伴者」的品牌体感。</text>
+    <rect x="0" y="218" width="520" height="44" rx="8" fill="var(--canvas-bg)"/>
+    <rect x="0" y="218" width="4" height="44" rx="2" fill="var(--ink-primary)"/>
+    <text x="16" y="246" font-size="15" font-weight="600" fill="var(--ink-secondary)">Case: 《凌晨五点的上海世纪公园，这群人穿什么刷圈》</text>
+  </g>
+  <!-- Swiss Cell 04 -->
+  <g id="swiss-cell-04" transform="translate(80, 562)">
+    <text x="0" y="108" class="display" font-size="132" font-weight="900" fill="var(--ink-watermark)">04</text>
+    <text x="0" y="62" font-size="30" font-weight="900" fill="var(--ink-primary)">百年匠心志 <tspan class="mono" font-size="16" font-weight="700" fill="var(--ink-muted)">/ HERITAGE ARCHIVE</tspan></text>
+    <rect x="0" y="80" width="44" height="5" rx="2.5" fill="var(--ink-primary)"/>
+    <rect x="56" y="70" width="216" height="24" rx="4" fill="var(--surface-muted)"/>
+    <text x="164" y="87" class="mono" font-size="12" font-weight="800" fill="var(--ink-primary)" text-anchor="middle">ARCHIVE REF // 10% SHARE</text>
+    <text x="0" y="132" font-size="21" font-weight="800" fill="var(--ink-primary)">大师档案寻踪，赋能高端联名稀缺溢价</text>
+    <text x="0" y="168" font-size="17" font-weight="400" fill="var(--ink-secondary)">深挖 1906 品牌编年史、日本工坊匠人故事与经典复刻，</text>
+    <text x="0" y="196" font-size="17" font-weight="400" fill="var(--ink-secondary)">为限量发售款与高客单尖货提供文化叙事厚度。</text>
+    <rect x="0" y="218" width="520" height="44" rx="8" fill="var(--canvas-bg)"/>
+    <rect x="0" y="218" width="4" height="44" rx="2" fill="var(--ink-primary)"/>
+    <text x="16" y="246" font-size="15" font-weight="600" fill="var(--ink-secondary)">Case: 《跨越 40 年的设计手稿：一双传奇球鞋的诞生》</text>
+  </g>
+  <!-- Swiss Cell 05 -->
+  <g id="swiss-cell-05" transform="translate(680, 562)">
+    <text x="0" y="108" class="display" font-size="132" font-weight="900" fill="var(--ink-watermark)">05</text>
+    <text x="0" y="62" font-size="30" font-weight="900" fill="var(--ink-primary)">选鞋指南针 <tspan class="mono" font-size="16" font-weight="700" fill="var(--ink-muted)">/ BUYER MATRIX</tspan></text>
+    <rect x="0" y="80" width="44" height="5" rx="2.5" fill="var(--ink-primary)"/>
+    <rect x="56" y="70" width="216" height="24" rx="4" fill="var(--surface-muted)"/>
+    <text x="164" y="87" class="mono" font-size="12" font-weight="800" fill="var(--ink-primary)" text-anchor="middle">ARCHIVE REF // 10% SHARE</text>
+    <text x="0" y="132" font-size="21" font-weight="800" fill="var(--ink-primary)">一图看懂矩阵，精准截流搜索决策词</text>
+    <text x="0" y="168" font-size="17" font-weight="400" fill="var(--ink-secondary)">按脚型、配速、足弓高低与穿搭场景制作结构化对比表，</text>
+    <text x="0" y="196" font-size="17" font-weight="400" fill="var(--ink-secondary)">直接降低新客选购门槛，带动高收藏率与长尾搜索。</text>
+    <rect x="0" y="218" width="520" height="44" rx="8" fill="var(--canvas-bg)"/>
+    <rect x="0" y="218" width="4" height="44" rx="2" fill="var(--ink-primary)"/>
+    <text x="16" y="246" font-size="15" font-weight="600" fill="var(--ink-secondary)">Case: 《2026 全系跑鞋红宝书：大体重/扁平足对号入座》</text>
+  </g>
+  <!-- Swiss Cell 06 -->
+  <g id="swiss-cell-06" transform="translate(1280, 562)">
+    <text x="0" y="108" class="display" font-size="132" font-weight="900" fill="var(--ink-watermark)">06</text>
+    <text x="0" y="62" font-size="30" font-weight="900" fill="var(--ink-primary)">球员共创站 <tspan class="mono" font-size="16" font-weight="700" fill="var(--ink-muted)">/ COMMUNITY HUB</tspan></text>
+    <rect x="0" y="80" width="44" height="5" rx="2.5" fill="var(--ink-primary)"/>
+    <rect x="56" y="70" width="216" height="24" rx="4" fill="var(--surface-muted)"/>
+    <text x="164" y="87" class="mono" font-size="12" font-weight="800" fill="var(--ink-primary)" text-anchor="middle">ARCHIVE REF // 10% SHARE</text>
+    <text x="0" y="132" font-size="21" font-weight="800" fill="var(--ink-primary)">UGC 翻牌宠粉，激活评论区活水互动</text>
+    <text x="0" y="168" font-size="17" font-weight="400" fill="var(--ink-secondary)">每月发起装备晒单挑战、旧鞋故事征集与新品内测众测，</text>
+    <text x="0" y="196" font-size="17" font-weight="400" fill="var(--ink-secondary)">把单向广播官号改造成高互动的品牌死忠俱乐部。</text>
+    <rect x="0" y="218" width="520" height="44" rx="8" fill="var(--canvas-bg)"/>
+    <rect x="0" y="218" width="4" height="44" rx="2" fill="var(--ink-primary)"/>
+    <text x="16" y="246" font-size="15" font-weight="600" fill="var(--ink-secondary)">Case: 《晒出你穿得最旧的一双战靴，抽送新款首发》</text>
+  </g>
+</svg>

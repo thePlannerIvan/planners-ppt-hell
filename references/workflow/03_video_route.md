@@ -39,7 +39,9 @@ python scripts/init_svg_project.py <项目>/<画面目录> \
    python scripts/style/theme_tokens.py list          # 库里有什么
    python scripts/style/theme_tokens.py show <theme-id>   # 这一个展开成什么样
    ```
-   选定后把该主题的 `:root` token 块内联进每页的 `<style>`，元素的颜色与字体经那份 `<style>` 里的 class 规则取（`.title { fill: var(--text); font-family: var(--font-body); }`，元素写 `class="title"`）。`show` 会把 `var()` 全部展开成实际值，**并报出解析不掉的 token**——那些是主题自己的缺陷，别默默当没有。
+   - **默认旗舰推荐：`editorial-archive`（瑞士编辑档案 · 四域×独奏/群像节奏系统）**。若选用 `editorial-archive`，**制作前必读** `../domain/video_style_editorial_archive.md` 并查看其随包多模态参考图（`../../assets/video_style_references/editorial-archive/`），按「文字凸显 / 模型构建 / 图文混排 / 图片为主」四域与 `Solo / Multi` 密度呼吸阀排布，并在 SVG 中预埋复合子元素动效类名（见最后一节）。
+   - **若用户给了一批新的参考图/视频画板（如 Pinterest 链接）要求提炼一套新视频风格模板**：走 `08_video_style_extraction_sop.md` 的六步逆向提取与 `/prototype` 验证流程。
+   - 选定后把该主题的 `:root` token 块内联进每页的 `<style>`，元素的颜色与字体经那份 `<style>` 里的 class 规则取（`.title { fill: var(--text); font-family: var(--font-body); }`，元素写 `class="title"`）。`show` 会把 `var()` 全部展开成实际值，**并报出解析不掉的 token**——那些是主题自己的缺陷，别默默当没有。
    检查画面认这三种取法：元素属性、元素 `style="…"`、class 命中的同页 `<style>` 规则；三处都没有才算缺填色／缺字体。**页里引用了没定义的 token 是硬错误**（会点名哪个元素、哪个 token），所以 token 名从 `show` 的输出里抄，别手打。
    库里没有贴合的，就走自主设计，并在 `design_direction.md` 里写清这套画面的色与字从哪来。
 2. **画幅** — 默认 16:9，确认一次。要给人物留窗口时**仍然是这张 16:9**，留窗口是排版选择，不是换画幅。
@@ -130,15 +132,19 @@ python scripts/init_svg_project.py <项目>/<画面目录> \
 ### 页面这一侧的责任
 
 - **可能被强调的元素带稳定 `id`，且 id 在全片唯一**（把 `page_key` 放进名字里；见 V2 第 1 条）。
-- **页面里不加动画。** 动画在录后、在页面之外加。
+- **在静态 SVG 上预埋声明式动效钩子（不写死实测毫秒数）**：
+  - 按 `video-craft/references/svg-animation-contract.md` 拆好 `#<page_key>-anchor`（第 0 帧常驻层）与 `#<page_key>-step-1..K`（按口播触发的递进层）；
+  - 在每个递进 `<g>` 上标注 `data-step="1..K"` 与 `data-anim="bar-wipe | draw-stroke | pop-card | z-stack-drop | stamp-in | slot-expand | paper-unroll | highlight-sweep"`；
+  - 在 `<g data-step>` 内部标出语义子选择器（`.anim-bar` / `.anim-mask` / `.anim-bg` / `.anim-border` / `.anim-title` / `.anim-photo` 等），所有描边动画路径预埋 `pathLength="1"`，且 **`<g data-step>` 自身不挂定位 `transform`**（坐标直接烘进子元素 `x/y/d`）。
+  - 静态渲染成 PNG 时所有图层默认 `opacity="1"` 完全可见，保证静态审阅图就是最终完整构图。
 - **图片 href 保持页面自己的相对形式**，那是给幻灯片出口用的；**导入时的前缀改写归导入器**，不要为了让导入器好写而改页面的 href。
-- 页面可以用 `<style>`、动画与视觉效果——它的出口是 PNG，承载得住（见 `../domain/svg_rules.md`）。
+- 页面可以用 `<style>`、视觉滤镜与效果——它的出口是 PNG 与合成器，承载得住（见 `../domain/svg_rules.md`）。
 
 ### 剪辑那一侧的责任（写在这里，好让两边对得上）
 
 - 把页面**逐字内联**进 composition，**只改写图片 href 前缀**，页面标记一字不动；生成器要能证明只回写那一处 href 就能还原原文一字不差。
-- 动画**只加在外层**（包裹层上的 clipPath／stroke-dasharray／transform）。
-- **按 `id` 指名元素**，不用 DOM 序号。
+- 直接按 `video-craft/references/svg-animation-contract.md` 与 `visual/assets/svg-anim-engine.js`（`VideoCraftAnimEngine.registerGsapTimeline`）把预埋的 `data-step` 绑到实测口播时间点上，**不再重新研究或重画 SVG**。
+- **按 `id` 与 `data-step` 指名元素**，不用 DOM 序号。
 - 从 `design_direction.md` 读合成方式、人物窗口位置与字幕安全区。
 
 ## 不要做什么
@@ -146,5 +152,5 @@ python scripts/init_svg_project.py <项目>/<画面目录> \
 - **不导出 PPTX。** 这条路的产物是页面源，没有下游消费者需要 PPT。
 - **不为过闸去删源素材。** `--assets` 报「文件夹里有图没被引用」时，正确的解法是指向交付包 `<包>/assets/`；作者的素材库不是交付包，删它就是这个工作区刚丢掉 6.9 GB 的那类操作。
 - **不判断内容。** 声明是上游给的，照它画；发现声明本身有问题，反馈回上游，不自行改写。
-- **不给页面加动画。** 那要等实测音频。
+- **不在静态阶段写死绝对毫秒时长。** 静态阶段只预埋 `data-step` 顺序、`data-anim` 类型与 `.anim-*` 子元素结构，真时长要等实测音频。
 - **不套模板库。** 理由见上面「为什么单独一条路线」第 2 条。

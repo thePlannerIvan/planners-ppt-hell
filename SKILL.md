@@ -16,10 +16,10 @@ description: 把材料或上游交来的画面契约做成有证据、可读的�
 | 什么时候走 | 要做一份可编辑 PPT | 上游 `video-idea-system` 交了画面契约，要做**录制前**的静态画面 |
 | 入口 | `init_svg_project.py --source <doc>` | `init_svg_project.py --assets <包>/assets --plan <visual-plan.json>` |
 | 内容从哪来 | 上游的逐页内容稿（`planners-bypage`）／本路线的**轻量切片降级** | 上游契约适配而来；**本路线不做内容判断** |
-| 视觉身份 | 模板库／视觉参考／自主设计 | **风格库**（`video-craft/visual/themes/`）或自主设计 |
-| 出口 | `final_deck.pptx` | 全部 `_internal/02_svg_source/<page_key>.svg`，**且可能被强调的元素都带稳定 `id`**（不导出 PPT） |
+| 视觉身份 | 模板库／视觉参考／自主设计 | **风格库**（`video-craft/visual/themes/`，旗舰四域风格见 `references/domain/video_style_editorial_archive.md`；从参考画板提炼新视频风格见 `references/workflow/08_video_style_extraction_sop.md`）或自主设计 |
+| 出口 | `final_deck.pptx` | 全部 `_internal/02_svg_source/<page_key>.svg`，**且可能被强调的元素都带稳定 `id` 与预埋 `data-step` / `data-anim` 子元素钩子**（不导出 PPT） |
 | 完成 | 导出并复核过 PPTX | 画面全部做完，**且作者看过**——这条路上审阅是门，不是可选项 |
-| 额外要读 | `references/domain/svg_to_ppt_rules.md` | — |
+| 额外要读 | `references/domain/svg_to_ppt_rules.md` | `references/domain/video_style_editorial_archive.md`（选用 `editorial-archive` 时） |
 
 **两条路线共享**：画布几何（`scripts/canvas_frame.py`）、校验器（`scripts/validate_svg_layout.py`）、渲染与看图、`references/domain/svg_rules.md`、设计判断框架（`style_system.md`、`layout_taxonomy.md`）、版本绑定与恢复。
 

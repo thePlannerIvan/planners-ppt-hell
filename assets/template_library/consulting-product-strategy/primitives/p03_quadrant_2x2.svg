@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="var(--font-sans)">
+  <defs>
+    <style>
+:root {
+  /* 75% Neutral Canvas and Surfaces */
+  --canvas-bg: #F8FAFC;
+  --canvas-pure: #FFFFFF;
+  --surface-card: #FFFFFF;
+  --surface-muted: #F1F5F9;
+  --surface-zebra: #F8FAFC;
+  --surface-dark: #0F172A;
+  --surface-dark-elevated: #1E293B;
+  --surface-accent-tint: #EFF6FF;
+
+  /* 20% Deep Slate Ink Hierarchy */
+  --ink-primary: #0F172A;
+  --ink-secondary: #475569;
+  --ink-muted: #94A3B8;
+  --ink-watermark: #E2E8F0;
+  --ink-on-dark: #FFFFFF;
+  --ink-on-dark-muted: #94A3B8;
+
+  /* 5% Executive Cobalt Blue and Cyan Highlight */
+  --accent-brand: #0052D9;
+  --accent-secondary: #0284C7;
+  --accent-cyan-on-dark: #38BDF8;
+
+  /* Hairlines and Dividers */
+  --border-subtle: #E2E8F0;
+  --border-strong: #0F172A;
+
+  /* Font Stacks */
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Arial Black", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Courier New", monospace;
+}
+
+      text { font-family: var(--font-sans); }
+      .mono { font-family: var(--font-mono); }
+      .display { font-family: var(--font-display); }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1920" height="1080" fill="var(--canvas-bg)"/>
+  <!-- Consulting Global Skyline Header -->
+  <g id="skyline-header">
+    <rect x="80" y="64" width="8" height="54" rx="4" fill="var(--accent-brand)"/>
+    <text x="106" y="102" font-size="40" font-weight="900" fill="var(--ink-primary)">竞争格局重构：在「感性悦己体验 × 专精技术壁垒」象限，本品拥有绝对蓝海</text>
+    <text x="106" y="144" font-size="20" font-weight="500" fill="var(--ink-secondary)">传统巨头扎堆左下/左上象限卷参数与低价，本品以 <tspan fill="var(--accent-brand)" font-weight="700">“三暗一亮”象限错位卡位</tspan> 直接收割高溢价品质人群</text>
+    <rect x="1500" y="64" width="340" height="34" rx="6" fill="var(--surface-accent-tint)"/>
+    <text x="1670" y="86" class="mono" font-size="14" font-weight="800" fill="var(--accent-brand)" text-anchor="middle" letter-spacing="1">SECTION 02 // COMPETITIVE LANDSCAPE</text>
+    <line x1="80" y1="172" x2="1840" y2="172" stroke="var(--border-subtle)" stroke-width="1.5"/>
+  </g>
+
+  <!-- Consulting Global Skyline Bottom Takeaway Banner -->
+  <g id="skyline-takeaway">
+    <rect x="80" y="918" width="1760" height="76" rx="12" fill="var(--surface-dark)"/>
+    <rect x="104" y="937" width="176" height="38" rx="6" fill="var(--accent-brand)"/>
+    <text x="192" y="962" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle" letter-spacing="1">POSITIONING RULE</text>
+    <text x="300" y="964" font-size="22" font-weight="700" fill="var(--ink-on-dark)">战略纪律：绝不退回左半区与传统家电巨头拼「滤芯寿命价格战」，全系资源锁死右上角 <tspan fill="var(--accent-cyan-on-dark)" font-weight="900">“专业技术 × 审美生活”</tspan> 唯一胜出象限</text>
+  </g>
+
+  <!-- Consulting Global Skyline Footer -->
+  <g id="skyline-footer">
+    <text x="80" y="1034" font-size="14" font-weight="500" fill="var(--ink-muted)">Source: 行业前四大品牌社媒内容编码分析与消费者品牌感知映射 (N=1,800)</text>
+    <text x="1840" y="1036" class="display" font-size="20" font-weight="900" fill="var(--ink-primary)" text-anchor="end">03</text>
+  </g>
+  <!-- Left 2x2 Coordinate Matrix Canvas (x=80, y=196, w=1160, h=696) -->
+  <g id="quadrant-matrix" transform="translate(80, 196)">
+    <rect x="0" y="0" width="1160" height="696" rx="16" fill="var(--surface-card)"/>
+
+    <!-- Upper-Right Winner Zone Highlight Background -->
+    <rect x="580" y="36" width="544" height="312" rx="12" fill="var(--surface-accent-tint)" stroke="var(--accent-brand)" stroke-width="2" stroke-dasharray="6,4"/>
+    <rect x="900" y="50" width="204" height="30" rx="6" fill="var(--accent-brand)"/>
+    <text x="1002" y="70" class="mono" font-size="13" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">STRATEGIC BLUE OCEAN</text>
+
+    <!-- Axes Lines -->
+    <line x1="60" y1="348" x2="1100" y2="348" stroke="var(--ink-primary)" stroke-width="2.5"/>
+    <line x1="580" y1="40" x2="580" y2="656" stroke="var(--ink-primary)" stroke-width="2.5"/>
+
+    <!-- Axis Pills -->
+    <rect x="448" y="16" width="264" height="36" rx="18" fill="var(--surface-dark)"/>
+    <text x="580" y="40" font-size="16" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">▲ 专精净水技术心智</text>
+
+    <rect x="448" y="644" width="264" height="36" rx="18" fill="var(--surface-muted)"/>
+    <text x="580" y="668" font-size="16" font-weight="700" fill="var(--ink-secondary)" text-anchor="middle">▼ 综合大家电泛心智</text>
+
+    <rect x="24" y="330" width="210" height="36" rx="18" fill="var(--surface-muted)"/>
+    <text x="129" y="354" font-size="16" font-weight="700" fill="var(--ink-secondary)" text-anchor="middle">◀ 理性参数防御导向</text>
+
+    <rect x="926" y="330" width="210" height="36" rx="18" fill="var(--accent-brand)"/>
+    <text x="1031" y="354" font-size="16" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">感性生活进攻导向 ▶</text>
+
+    <!-- Quadrant 2 (Top-Left, Muted): Traditional Pro Parameter Brands -->
+    <g transform="translate(96, 86)">
+      <rect x="0" y="0" width="430" height="210" rx="12" fill="var(--surface-muted)"/>
+      <text x="28" y="42" class="mono" font-size="13" font-weight="700" fill="var(--ink-muted)">COMPETITOR CLUSTER A // 传统专业派</text>
+      <text x="28" y="84" font-size="24" font-weight="800" fill="var(--ink-primary)">硬核技术控：死磕安全与脱盐率</text>
+      <text x="28" y="124" font-size="17" font-weight="500" fill="var(--ink-secondary)">• 优势：工程研发背书强，老房改造信任度高</text>
+      <text x="28" y="156" font-size="17" font-weight="500" fill="var(--ink-secondary)">• 盲区：视觉老化、沟通冰冷，难以打动年轻审美人群</text>
+    </g>
+
+    <!-- Quadrant 3 (Bottom-Left, Muted): Mass Appliance Giants -->
+    <g transform="translate(96, 396)">
+      <rect x="0" y="0" width="430" height="210" rx="12" fill="var(--surface-muted)"/>
+      <text x="28" y="42" class="mono" font-size="13" font-weight="700" fill="var(--ink-muted)">COMPETITOR CLUSTER B // 国民家电派</text>
+      <text x="28" y="84" font-size="24" font-weight="800" fill="var(--ink-primary)">大众性价比：全屋套系与换芯算账</text>
+      <text x="28" y="124" font-size="17" font-weight="500" fill="var(--ink-secondary)">• 优势：渠道铺货广、售后网点密、国民认知度高</text>
+      <text x="28" y="156" font-size="17" font-weight="500" fill="var(--ink-secondary)">• 盲区：深陷低价促销红海，缺乏高端矿泉差异化心智</text>
+    </g>
+
+    <!-- Quadrant 4 (Bottom-Right, Muted): Design Lifestyle Gadgets -->
+    <g transform="translate(626, 396)">
+      <rect x="0" y="0" width="470" height="210" rx="12" fill="var(--surface-muted)"/>
+      <text x="28" y="42" class="mono" font-size="13" font-weight="700" fill="var(--ink-muted)">COMPETITOR CLUSTER C // 颜值网红派</text>
+      <text x="28" y="84" font-size="24" font-weight="800" fill="var(--ink-primary)">桌面轻颜值：主打免安装与租房党</text>
+      <text x="28" y="124" font-size="17" font-weight="500" fill="var(--ink-secondary)">• 优势：高颜值工业设计，切入下午茶与泡茶桌面场景</text>
+      <text x="28" y="156" font-size="17" font-weight="500" fill="var(--ink-secondary)">• 盲区：通量小、核心滤芯技术弱，无法满足全屋主厨水需求</text>
+    </g>
+
+    <!-- Quadrant 1 (Top-Right, HERO): Target Brand Winner Card -->
+    <g transform="translate(626, 94)">
+      <rect x="0" y="0" width="470" height="206" rx="14" fill="var(--accent-brand)"/>
+      <text x="28" y="42" class="mono" font-size="14" font-weight="800" fill="var(--accent-cyan-on-dark)">OUR TARGET POSITIONING // 唯一蓝海占位</text>
+      <text x="28" y="86" font-size="28" font-weight="900" fill="var(--ink-on-dark)">专精矿泉科技 × 悦己生活美学</text>
+      <text x="28" y="128" font-size="18" font-weight="600" fill="var(--ink-on-dark)">• 以「AI 矿物质缓释技术」筑高专业壁垒；</text>
+      <text x="28" y="160" font-size="18" font-weight="600" fill="var(--ink-on-dark)">• 以「晨起护肤/手冲咖啡/微气泡洗果蔬」引爆向往感。</text>
+    </g>
+  </g>
+
+  <!-- Right 1/3 Strategic Verdict & Action Panel (x=1272, y=196, w=568, h=696) -->
+  <g id="quadrant-verdict-panel" transform="translate(1272, 196)">
+    <rect x="0" y="0" width="568" height="696" rx="16" fill="var(--surface-dark)"/>
+    <rect x="0" y="0" width="568" height="10" rx="4" fill="var(--accent-brand)"/>
+
+    <text x="40" y="64" class="mono" font-size="15" font-weight="800" fill="var(--accent-cyan-on-dark)" letter-spacing="1.5">STRATEGIC IMPLICATIONS</text>
+    <text x="40" y="114" font-size="32" font-weight="900" fill="var(--ink-on-dark)">三大错位竞争抓手</text>
+    <line x1="40" y1="146" x2="528" y2="146" stroke="#334155" stroke-width="1.5"/>
+
+    <!-- Verdict Item 01 -->
+    <text x="40" y="198" class="display" font-size="36" font-weight="900" fill="var(--accent-cyan-on-dark)">01</text>
+    <text x="104" y="196" font-size="22" font-weight="800" fill="var(--ink-on-dark)">话术升维：从「避害」转向「趋利」</text>
+    <text x="104" y="232" font-size="17" font-weight="400" fill="var(--ink-on-dark-muted)">竞品在渲染「自来水重金属焦虑」，我们直接定义</text>
+    <text x="104" y="260" font-size="17" font-weight="400" fill="var(--ink-on-dark-muted)">「在家喝阿尔卑斯山偏硅酸矿泉水」的品质跃迁。</text>
+
+    <!-- Verdict Item 02 -->
+    <text x="40" y="342" class="display" font-size="36" font-weight="900" fill="var(--accent-cyan-on-dark)">02</text>
+    <text x="104" y="340" font-size="22" font-weight="800" fill="var(--ink-on-dark)">人群提纯：锁死三类「生活策展人」</text>
+    <text x="104" y="376" font-size="17" font-weight="400" fill="var(--ink-on-dark-muted)">聚焦精品咖啡玩家、成分党护肤女性、高敏体质宝妈，</text>
+    <text x="104" y="404" font-size="17" font-weight="400" fill="var(--ink-on-dark-muted)">用高审美场景笔记带动高客单旗舰机型转化。</text>
+
+    <!-- Verdict Item 03 -->
+    <text x="40" y="486" class="display" font-size="36" font-weight="900" fill="var(--accent-cyan-on-dark)">03</text>
+    <text x="104" y="484" font-size="22" font-weight="800" fill="var(--ink-on-dark)">防御反击：用数显龙头直观证言</text>
+    <text x="104" y="520" font-size="17" font-weight="400" fill="var(--ink-on-dark-muted)">把抽象的矿物质含量转化为水龙头实时可见的</text>
+    <text x="104" y="548" font-size="17" font-weight="400" fill="var(--ink-on-dark-muted)">pH/TDS 双数显，让每次接水都成为技术实证。</text>
+
+    <rect x="40" y="592" width="488" height="68" rx="10" fill="var(--surface-dark-elevated)"/>
+    <text x="284" y="634" font-size="18" font-weight="800" fill="var(--accent-cyan-on-dark)" text-anchor="middle">预计带动高端机型毛利率提升 +11.5pct</text>
+  </g>
+</svg>

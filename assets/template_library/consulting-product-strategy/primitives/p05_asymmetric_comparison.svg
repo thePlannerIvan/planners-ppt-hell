@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="var(--font-sans)">
+  <defs>
+    <style>
+:root {
+  /* 75% Neutral Canvas and Surfaces */
+  --canvas-bg: #F8FAFC;
+  --canvas-pure: #FFFFFF;
+  --surface-card: #FFFFFF;
+  --surface-muted: #F1F5F9;
+  --surface-zebra: #F8FAFC;
+  --surface-dark: #0F172A;
+  --surface-dark-elevated: #1E293B;
+  --surface-accent-tint: #EFF6FF;
+
+  /* 20% Deep Slate Ink Hierarchy */
+  --ink-primary: #0F172A;
+  --ink-secondary: #475569;
+  --ink-muted: #94A3B8;
+  --ink-watermark: #E2E8F0;
+  --ink-on-dark: #FFFFFF;
+  --ink-on-dark-muted: #94A3B8;
+
+  /* 5% Executive Cobalt Blue and Cyan Highlight */
+  --accent-brand: #0052D9;
+  --accent-secondary: #0284C7;
+  --accent-cyan-on-dark: #38BDF8;
+
+  /* Hairlines and Dividers */
+  --border-subtle: #E2E8F0;
+  --border-strong: #0F172A;
+
+  /* Font Stacks */
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Arial Black", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Courier New", monospace;
+}
+
+      text { font-family: var(--font-sans); }
+      .mono { font-family: var(--font-mono); }
+      .display { font-family: var(--font-display); }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1920" height="1080" fill="var(--canvas-bg)"/>
+  <!-- Consulting Global Skyline Header -->
+  <g id="skyline-header">
+    <rect x="80" y="64" width="8" height="54" rx="4" fill="var(--accent-brand)"/>
+    <text x="106" y="102" font-size="40" font-weight="900" fill="var(--ink-primary)">战略范式切换：全面告别「参数防御旧逻辑」，切换至「生活方式进攻新范式」</text>
+    <text x="106" y="144" font-size="20" font-weight="500" fill="var(--ink-secondary)">采用 <tspan fill="var(--accent-brand)" font-weight="700">非对称攻防对比矩阵（左窄暗灰 vs 右宽亮蓝）</tspan>，清晰界定四大维度的资源取舍与动作转向</text>
+    <rect x="1500" y="64" width="340" height="34" rx="6" fill="var(--surface-accent-tint)"/>
+    <text x="1670" y="86" class="mono" font-size="14" font-weight="800" fill="var(--accent-brand)" text-anchor="middle" letter-spacing="1">SECTION 03 // PARADIGM SHIFT</text>
+    <line x1="80" y1="172" x2="1840" y2="172" stroke="var(--border-subtle)" stroke-width="1.5"/>
+  </g>
+
+  <!-- Consulting Global Skyline Bottom Takeaway Banner -->
+  <g id="skyline-takeaway">
+    <rect x="80" y="918" width="1760" height="76" rx="12" fill="var(--surface-dark)"/>
+    <rect x="104" y="937" width="176" height="38" rx="6" fill="var(--accent-brand)"/>
+    <text x="192" y="962" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle" letter-spacing="1">SHIFT MANDATE</text>
+    <text x="300" y="964" font-size="22" font-weight="700" fill="var(--ink-on-dark)">执行纪律：凡是仍按左侧「旧范式」撰写的达人 Brief 一律驳回重写，确保 <tspan fill="var(--accent-cyan-on-dark)" font-weight="900">100% 预算流向新范式四大动作</tspan></text>
+  </g>
+
+  <!-- Consulting Global Skyline Footer -->
+  <g id="skyline-footer">
+    <text x="80" y="1034" font-size="14" font-weight="500" fill="var(--ink-muted)">Source: 2026 品类突围战略路线图与营销范式转型矩阵</text>
+    <text x="1840" y="1036" class="display" font-size="20" font-weight="900" fill="var(--ink-primary)" text-anchor="end">05</text>
+  </g>
+  <!-- Column Headers (y=196, h=86) -->
+  <g id="comp-headers" transform="translate(80, 196)">
+    <rect x="0" y="0" width="280" height="86" rx="12" fill="var(--surface-dark-elevated)"/>
+    <text x="140" y="52" class="mono" font-size="16" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">对比维度 // DIMENSION</text>
+
+    <rect x="304" y="0" width="620" height="86" rx="12" fill="var(--surface-muted)"/>
+    <text x="614" y="52" font-size="24" font-weight="800" fill="var(--ink-secondary)" text-anchor="middle">行业存量旧范式（参数内卷 / 防御逻辑）</text>
+
+    <rect x="948" y="0" width="812" height="86" rx="12" fill="var(--accent-brand)"/>
+    <text x="1354" y="52" font-size="26" font-weight="900" fill="var(--ink-on-dark)" text-anchor="middle">本品破局新范式（生活方式 / 进攻逻辑）</text>
+  </g>
+  <!-- Comparison Row 1 -->
+  <g id="comp-row-1" transform="translate(80, 304)">
+    <!-- Dimension Label Column (w=280) -->
+    <rect x="0" y="0" width="280" height="124" rx="12" fill="var(--surface-dark)"/>
+    <text x="28" y="70" font-size="20" font-weight="800" fill="var(--ink-on-dark)">01 // 核心沟通逻辑</text>
+
+    <!-- Old Paradigm Column (Muted Grey, w=620) -->
+    <rect x="304" y="0" width="620" height="124" rx="12" fill="var(--surface-muted)"/>
+    <rect x="328" y="44" width="64" height="34" rx="6" fill="#CBD5E1"/>
+    <text x="360" y="67" class="mono" font-size="13" font-weight="800" fill="var(--ink-secondary)" text-anchor="middle">OLD</text>
+    <text x="412" y="70" font-size="19" font-weight="600" fill="var(--ink-secondary)">防御逻辑：渲染水垢与重金属焦虑（怕中毒）</text>
+
+    <!-- New Paradigm Column (Highlighted Cobalt Blue Tint + Left Bar, w=812) -->
+    <rect x="948" y="0" width="812" height="124" rx="12" fill="var(--surface-card)" stroke="var(--accent-brand)" stroke-width="2"/>
+    <rect x="948" y="0" width="10" height="124" rx="5" fill="var(--accent-brand)"/>
+    <rect x="980" y="44" width="76" height="34" rx="6" fill="var(--accent-brand)"/>
+    <text x="1018" y="67" class="mono" font-size="13" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">NEW</text>
+    <text x="1076" y="70" font-size="21" font-weight="900" fill="var(--ink-primary)">进攻逻辑：交付鲜活矿泉与悦己生活体验（想变美/更好喝）</text>
+  </g>
+  <!-- Comparison Row 2 -->
+  <g id="comp-row-2" transform="translate(80, 448)">
+    <!-- Dimension Label Column (w=280) -->
+    <rect x="0" y="0" width="280" height="124" rx="12" fill="var(--surface-dark)"/>
+    <text x="28" y="70" font-size="20" font-weight="800" fill="var(--ink-on-dark)">02 // 主打人群画像</text>
+
+    <!-- Old Paradigm Column (Muted Grey, w=620) -->
+    <rect x="304" y="0" width="620" height="124" rx="12" fill="var(--surface-muted)"/>
+    <rect x="328" y="44" width="64" height="34" rx="6" fill="#CBD5E1"/>
+    <text x="360" y="67" class="mono" font-size="13" font-weight="800" fill="var(--ink-secondary)" text-anchor="middle">OLD</text>
+    <text x="412" y="70" font-size="19" font-weight="600" fill="var(--ink-secondary)">泛家庭主妇与价格敏感型刚需装修客</text>
+
+    <!-- New Paradigm Column (Highlighted Cobalt Blue Tint + Left Bar, w=812) -->
+    <rect x="948" y="0" width="812" height="124" rx="12" fill="var(--surface-card)" stroke="var(--accent-brand)" stroke-width="2"/>
+    <rect x="948" y="0" width="10" height="124" rx="5" fill="var(--accent-brand)"/>
+    <rect x="980" y="44" width="76" height="34" rx="6" fill="var(--accent-brand)"/>
+    <text x="1018" y="67" class="mono" font-size="13" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">NEW</text>
+    <text x="1076" y="70" font-size="21" font-weight="900" fill="var(--ink-primary)">生活策展人：居家咖啡控、成分护肤党、精细化育儿宝妈</text>
+  </g>
+  <!-- Comparison Row 3 -->
+  <g id="comp-row-3" transform="translate(80, 592)">
+    <!-- Dimension Label Column (w=280) -->
+    <rect x="0" y="0" width="280" height="124" rx="12" fill="var(--surface-dark)"/>
+    <text x="28" y="70" font-size="20" font-weight="800" fill="var(--ink-on-dark)">03 // 达人投放结构</text>
+
+    <!-- Old Paradigm Column (Muted Grey, w=620) -->
+    <rect x="304" y="0" width="620" height="124" rx="12" fill="var(--surface-muted)"/>
+    <rect x="328" y="44" width="64" height="34" rx="6" fill="#CBD5E1"/>
+    <text x="360" y="67" class="mono" font-size="13" font-weight="800" fill="var(--ink-secondary)" text-anchor="middle">OLD</text>
+    <text x="412" y="70" font-size="19" font-weight="600" fill="var(--ink-secondary)">正漏斗铺量：泛生活达人海量铺稿，信息流低价冲曝光</text>
+
+    <!-- New Paradigm Column (Highlighted Cobalt Blue Tint + Left Bar, w=812) -->
+    <rect x="948" y="0" width="812" height="124" rx="12" fill="var(--surface-card)" stroke="var(--accent-brand)" stroke-width="2"/>
+    <rect x="948" y="0" width="10" height="124" rx="5" fill="var(--accent-brand)"/>
+    <rect x="980" y="44" width="76" height="34" rx="6" fill="var(--accent-brand)"/>
+    <text x="1018" y="67" class="mono" font-size="13" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">NEW</text>
+    <text x="1076" y="70" font-size="21" font-weight="900" fill="var(--ink-primary)">反漏斗提纯：重金砸向高浓度垂类专家与高审美视觉博主</text>
+  </g>
+  <!-- Comparison Row 4 -->
+  <g id="comp-row-4" transform="translate(80, 736)">
+    <!-- Dimension Label Column (w=280) -->
+    <rect x="0" y="0" width="280" height="124" rx="12" fill="var(--surface-dark)"/>
+    <text x="28" y="70" font-size="20" font-weight="800" fill="var(--ink-on-dark)">04 // 核心转化钩子</text>
+
+    <!-- Old Paradigm Column (Muted Grey, w=620) -->
+    <rect x="304" y="0" width="620" height="124" rx="12" fill="var(--surface-muted)"/>
+    <rect x="328" y="44" width="64" height="34" rx="6" fill="#CBD5E1"/>
+    <text x="360" y="67" class="mono" font-size="13" font-weight="800" fill="var(--ink-secondary)" text-anchor="middle">OLD</text>
+    <text x="412" y="70" font-size="19" font-weight="600" fill="var(--ink-secondary)">比拼通量数字、滤芯年限与大促满减赠品</text>
+
+    <!-- New Paradigm Column (Highlighted Cobalt Blue Tint + Left Bar, w=812) -->
+    <rect x="948" y="0" width="812" height="124" rx="12" fill="var(--surface-card)" stroke="var(--accent-brand)" stroke-width="2"/>
+    <rect x="948" y="0" width="10" height="124" rx="5" fill="var(--accent-brand)"/>
+    <rect x="980" y="44" width="76" height="34" rx="6" fill="var(--accent-brand)"/>
+    <text x="1018" y="67" class="mono" font-size="13" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">NEW</text>
+    <text x="1076" y="70" font-size="21" font-weight="900" fill="var(--ink-primary)">一机三水场景实拍 + 龙头实时 pH/TDS 数显眼见为实</text>
+  </g>
+</svg>

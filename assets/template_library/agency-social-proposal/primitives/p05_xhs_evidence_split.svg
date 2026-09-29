@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="var(--font-sans)">
+  <defs>
+    <style>
+:root {
+  /* 75% Neutral Canvas and Surfaces */
+  --canvas-bg: #F4F5F7;
+  --canvas-pure: #FFFFFF;
+  --surface-card: #FFFFFF;
+  --surface-muted: #EBECEE;
+  --surface-zebra: #F8F9FB;
+  --surface-dark: #111111;
+  --surface-dark-elevated: #1E2024;
+  --surface-accent-tint: #FFF1F2;
+
+  /* 20% Charcoal and Ink Hierarchy */
+  --ink-primary: #111111;
+  --ink-secondary: #4B5563;
+  --ink-muted: #8C94A0;
+  --ink-watermark: #EAECEF;
+  --ink-on-dark: #FFFFFF;
+  --ink-on-dark-muted: #A1A8B3;
+
+  /* 5% Brand Accent (Strict Single-Hue Discipline) */
+  --accent-brand: #E60012;
+  --accent-secondary: #2B2D33;
+
+  /* Hairlines and Dividers */
+  --border-subtle: #E2E5EA;
+  --border-strong: #111111;
+
+  /* Font Stacks */
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Arial Black", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Courier New", monospace;
+
+  /* 6-Tier 1080p Font Scale */
+  --size-watermark: 136px;
+  --size-hero-kpi: 56px;
+  --size-action-title: 42px;
+  --size-card-title: 26px;
+  --size-subtitle: 21px;
+  --size-body: 18px;
+  --size-caption: 14px;
+}
+
+      text { font-family: var(--font-sans); }
+      .mono { font-family: var(--font-mono); }
+      .display { font-family: var(--font-display); }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1920" height="1080" fill="var(--canvas-bg)"/>
+  <!-- Global Skyline Header -->
+  <g id="skyline-header">
+    <rect x="80" y="64" width="8" height="54" rx="4" fill="var(--accent-brand)"/>
+    <text x="106" y="102" font-size="40" font-weight="900" fill="var(--ink-primary)">高赞笔记样板拆解：用「反差场景首图 + 痛点实测钩子」打透通勤穿搭圈层</text>
+    <text x="106" y="144" font-size="20" font-weight="500" fill="var(--ink-secondary)">拒绝硬广摆拍，左侧还原 <tspan fill="var(--accent-brand)" font-weight="700">小红书高点击笔记视觉模版</tspan>，右侧锁死达人选角、视觉锚点与评论区收口SOP</text>
+    <rect x="1560" y="64" width="280" height="34" rx="6" fill="var(--surface-dark)"/>
+    <text x="1700" y="86" class="mono" font-size="14" font-weight="700" fill="var(--ink-on-dark)" text-anchor="middle" letter-spacing="1">PART 03 // NOTE DEMO PLAYBOOK</text>
+    <line x1="80" y1="172" x2="1840" y2="172" stroke="var(--border-subtle)" stroke-width="1.5"/>
+  </g>
+
+  <!-- Global Skyline Bottom Takeaway Banner -->
+  <g id="skyline-takeaway">
+    <rect x="80" y="918" width="1760" height="76" rx="12" fill="var(--surface-dark)"/>
+    <rect x="104" y="937" width="164" height="38" rx="6" fill="var(--accent-brand)"/>
+    <text x="186" y="962" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle" letter-spacing="1">CONVERSION SOP</text>
+    <text x="288" y="964" font-size="22" font-weight="700" fill="var(--ink-on-dark)">爆文放量标准：笔记发布 24h 自然互动率 <tspan fill="var(--accent-brand)" font-weight="900">≥ 8.5% 且收藏率 ≥ 35%</tspan> 立即接入聚光信息流追投放大并挂载置顶购买口令</text>
+  </g>
+
+  <!-- Global Skyline Footer -->
+  <g id="skyline-footer">
+    <text x="80" y="1034" font-size="14" font-weight="500" fill="var(--ink-muted)">Source: 小红书高赞种草笔记视觉实验与 KFS 投放 SOP</text>
+    <text x="1840" y="1036" class="display" font-size="20" font-weight="900" fill="var(--ink-primary)" text-anchor="end">P.05</text>
+  </g>
+  <!-- Left XHS Note Mockup Card (x=80, y=196, w=500, h=696) -->
+  <g id="xhs-mockup-card" transform="translate(80, 196)">
+    <rect x="0" y="0" width="500" height="696" rx="18" fill="var(--surface-card)" stroke="var(--border-subtle)" stroke-width="2"/>
+
+    <!-- Author Header Bar -->
+    <circle cx="48" cy="44" r="20" fill="var(--surface-dark)"/>
+    <text x="48" y="50" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">KOL</text>
+    <text x="80" y="40" font-size="17" font-weight="800" fill="var(--ink-primary)">林小野 CleanFit 日记</text>
+    <text x="80" y="60" font-size="13" font-weight="500" fill="var(--ink-muted)">时尚穿搭博主 · 粉丝 18.6w</text>
+    <rect x="392" y="28" width="80" height="32" rx="16" fill="var(--accent-brand)"/>
+    <text x="432" y="49" font-size="14" font-weight="700" fill="var(--ink-on-dark)" text-anchor="middle">已关注</text>
+
+    <!-- 3:4 Visual Slot with Styled Vector Scene & Removable Hint Layer -->
+    <rect x="24" y="82" width="452" height="380" rx="12" fill="#1F242D"/>
+    <!-- Geometric Stylized Sneaker & Streetwear Composition -->
+    <circle cx="250" cy="252" r="115" fill="#2B323F"/>
+    <path d="M 120 295 Q 210 230 355 270 L 385 315 L 115 315 Z" fill="var(--accent-brand)"/>
+    <rect x="115" y="312" width="275" height="22" rx="8" fill="#FFFFFF"/>
+    <!-- Cover Overlay Title Tag inside Photo -->
+    <rect x="44" y="104" width="218" height="36" rx="6" fill="var(--surface-dark)"/>
+    <text x="153" y="128" font-size="16" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">日行2万步 · 暴走不累脚</text>
+    <rect x="44" y="404" width="186" height="36" rx="6" fill="var(--accent-brand)"/>
+    <text x="137" y="428" font-size="16" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle">银色复古跑鞋神仙搭法</text>
+
+    <g class="slot-hint-removable" id="slot-xhs-cover-hint">
+      <text x="250" y="205" class="mono" font-size="13" font-weight="700" fill="#94A3B8" text-anchor="middle">[VISUAL SLOT: 3:4 达人实拍穿搭封面]</text>
+    </g>
+
+    <!-- Note Title & Copy -->
+    <text x="28" y="502" font-size="21" font-weight="900" fill="var(--ink-primary)">被追着问链接的银色神鞋！配阔腿裤绝了</text>
+    <text x="28" y="538" font-size="16" font-weight="400" fill="var(--ink-secondary)">本来冲着通勤暴走买的，没想到波浪底支撑感这么绝，</text>
+    <text x="28" y="566" font-size="16" font-weight="400" fill="var(--ink-secondary)">搭灰色西装裤秒变韩系画报，真香警告！</text>
+    <text x="28" y="600" font-size="15" font-weight="700" fill="var(--accent-brand)">#复古跑鞋穿搭 #通勤神鞋 #长期主义好物</text>
+
+    <line x1="28" y1="624" x2="472" y2="624" stroke="var(--border-subtle)" stroke-width="1"/>
+    <!-- Vector Metric Badges (Zero Emoji!) -->
+    <circle cx="44" cy="656" r="12" fill="var(--accent-brand)"/>
+    <text x="64" y="662" class="display" font-size="17" font-weight="900" fill="var(--ink-primary)">1.4w 赞</text>
+    <rect x="172" y="644" width="24" height="24" rx="5" fill="var(--surface-dark)"/>
+    <text x="204" y="662" class="display" font-size="17" font-weight="900" fill="var(--ink-primary)">6,820 收藏</text>
+    <text x="472" y="662" class="mono" font-size="14" font-weight="700" fill="var(--accent-brand)" text-anchor="end">CTR 11.8%</text>
+  </g>
+
+  <!-- Right Strategy Breakdown Panel (x=616, y=196, w=1224, h=696) -->
+  <g id="xhs-strategy-teardown" transform="translate(616, 196)">
+    <!-- Card 1: Persona & Visual Hook -->
+    <rect x="0" y="0" width="1224" height="214" rx="14" fill="var(--surface-card)"/>
+    <rect x="0" y="0" width="8" height="214" rx="4" fill="var(--accent-brand)"/>
+    <rect x="36" y="28" width="220" height="32" rx="6" fill="var(--surface-accent-tint)"/>
+    <text x="146" y="49" class="mono" font-size="14" font-weight="800" fill="var(--accent-brand)" text-anchor="middle">01 // VISUAL HOOK 视觉锚点</text>
+    <text x="36" y="98" font-size="26" font-weight="900" fill="var(--ink-primary)">首图 3 秒定生死：高街穿搭全身镜 + 鞋部微距双拼构图</text>
+    <text x="36" y="140" font-size="18" font-weight="500" fill="var(--ink-secondary)">• 拒绝单拍球鞋特写：上半幅展示「阔腿西装裤 + 银色跑鞋」显腿长比例，直接击中都市白领审美痛点；</text>
+    <text x="36" y="174" font-size="18" font-weight="500" fill="var(--ink-secondary)">• 封面花字控制在 10 字以内，用黑红撞色胶囊直接点出「日行2万步不累脚」体感利益点。</text>
+
+    <!-- Card 2: Copywriting & Search Keyword Matrix -->
+    <rect x="0" y="241" width="1224" height="214" rx="14" fill="var(--surface-card)"/>
+    <rect x="0" y="241" width="8" height="214" rx="4" fill="var(--surface-dark)"/>
+    <rect x="36" y="269" width="240" height="32" rx="6" fill="var(--surface-muted)"/>
+    <text x="156" y="290" class="mono" font-size="14" font-weight="800" fill="var(--ink-primary)" text-anchor="middle">02 // COPYWRITING 痛点转译</text>
+    <text x="36" y="339" font-size="26" font-weight="900" fill="var(--ink-primary)">文案公式：先讲「穿搭真香反差」，再落「中底科技支撑」</text>
+    <text x="36" y="381" font-size="18" font-weight="500" fill="var(--ink-secondary)">• 严禁背诵生硬说明书：把「机械波浪片减震」转译为「踩过石板路和地铁换乘也不塌足弓的安全感」；</text>
+    <text x="36" y="415" font-size="18" font-weight="500" fill="var(--ink-secondary)">• 预埋三大长尾搜索词：<tspan fill="var(--accent-brand)" font-weight="700">「银色复古跑鞋」「通勤百搭女鞋」「扁平足久走神鞋」</tspan> 抢占搜索首屏。</text>
+
+    <!-- Card 3: Comment Section & Search Conversion Loop -->
+    <rect x="0" y="482" width="1224" height="214" rx="14" fill="var(--surface-card)"/>
+    <rect x="0" y="482" width="8" height="214" rx="4" fill="var(--surface-dark)"/>
+    <rect x="36" y="510" width="248" height="32" rx="6" fill="var(--surface-muted)"/>
+    <text x="160" y="531" class="mono" font-size="14" font-weight="800" fill="var(--ink-primary)" text-anchor="middle">03 // CONVERSION 评论区收口</text>
+    <text x="36" y="580" font-size="26" font-weight="900" fill="var(--ink-primary)">闭环动作：达人置顶尺码建议 + 品牌官号空降翻牌引流</text>
+    <text x="36" y="622" font-size="18" font-weight="500" fill="var(--ink-secondary)">• 笔记发布 2 小时内，布置 3 条「求型号/偏码吗/宽脚能穿吗」种子热评，达人真实回复拉高停留时长；</text>
+    <text x="36" y="656" font-size="18" font-weight="500" fill="var(--ink-secondary)">• 品牌官号携蓝 V 身份进评论区补充官方选码口诀，挂载店铺商品卡承接即看即买流量。</text>
+  </g>
+</svg>

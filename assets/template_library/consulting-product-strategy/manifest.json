@@ -1,0 +1,69 @@
+{
+  "schema": "planner.multimodal-template-pack.v2",
+  "template_id": "consulting-product-strategy",
+  "name": "商业分析与产品战略报告旗舰 (Consulting Product Strategy)",
+  "description": "源自云米净水器战略方案与 McK 90 分去框化升级版：深空蓝黑与克莱因钴蓝高管报告风，含顶部 KPI 闭环验证卡、2x2 蓝海定位象限、四阶传导机制流、攻防范式对比矩阵与复合预测图表。",
+  "status": "approved",
+  "is_default": true,
+  "published_at": "2026-09-29T16:37:16.567978+00:00",
+  "canvas_size": "1920x1080",
+  "four_piece_contract": {
+    "tokens_css": "tokens.css",
+    "skyline_shell_svg": "skyline_shell.svg",
+    "primitives": [
+      "primitives/p01_cover.svg",
+      "primitives/p02_kpi_closed_loop.svg",
+      "primitives/p03_quadrant_2x2.svg",
+      "primitives/p04_mechanism_pipeline.svg",
+      "primitives/p05_asymmetric_comparison.svg",
+      "primitives/p06_chart_and_takeaway.svg"
+    ],
+    "spec_md": "SPEC.md",
+    "anchors": [
+      "anchors/mizuno_ops_svg_p05_evidence_competitor.png",
+      "anchors/viomi_v4_pdf_p03_comparison_offense_defense.png",
+      "anchors/viomi_v4_pdf_p04_data_table_evidence.png",
+      "anchors/viomi_v4_pdf_p12_competitor_teardown.png",
+      "anchors/viomi_v4_pdf_p23_quadrant_2x2.png"
+    ]
+  },
+  "palette_summary": {
+    "canvas": "#F8FAFC / #FFFFFF",
+    "ink": "#0F172A",
+    "accent": "#0052D9 / #38BDF8",
+    "ratio": "75:20:5"
+  },
+  "recommended_scenarios": [
+    "商业分析与市场研究报告",
+    "新产品上市定位与竞争突围策略",
+    "高客单耐用品/科技消费品战略拆解",
+    "高管述职与商业化ROI推演"
+  ],
+  "preview": "previews/full_deck_contact_sheet.png",
+  "files": {
+    "SPEC.md": "2e1eafdab706c7b0ddb2fe6e7376b5db1fa3f63ab78a3b9a7d1f06aac2ef6958",
+    "anchors/mizuno_ops_svg_p05_evidence_competitor.png": "88ddaccb2d530f27b776cbf03de620e43cf56dd2ba2df6151c697e61add01b3c",
+    "anchors/viomi_v4_pdf_p03_comparison_offense_defense.png": "e76ea73181c59ef632093e5a8361e094c8bcbd81a45f555a6c5f767a707b3c81",
+    "anchors/viomi_v4_pdf_p04_data_table_evidence.png": "82abd31e095f9ce9551b8fe9e923e8c032c6d28cfa69ba2e1968d266aa4eefae",
+    "anchors/viomi_v4_pdf_p12_competitor_teardown.png": "8114b47763dd185b13ea57b8c91f43a8369ab8c5c1bf3cab6838089f8a2611eb",
+    "anchors/viomi_v4_pdf_p23_quadrant_2x2.png": "6ccb9c20d607a11899e7e6bcd7a3f4a9beff973568c5f4bd5a392a87984c0fb2",
+    "previews/full_deck_contact_sheet.png": "a8f010371bec05ab8aec76ebc89257958639863a9d547bb66d9a07af8e008862",
+    "previews/pages/p00_skyline_shell.png": "91046b9f5d6cfe89db66a666515fbb097318753a656c7d55fdf79ddd8503642d",
+    "previews/pages/p01_cover.png": "7c775bfa2674a17cc1d02451498d58a1f2bc3a0213444c46c37914121a7375f3",
+    "previews/pages/p02_kpi_closed_loop.png": "e558f376fdd2efa86d18b0b4c0b68e519ef5a4b0274d5d11030fb2b5d6fde5c1",
+    "previews/pages/p03_quadrant_2x2.png": "d0a56785f42f253815bccd4f136acc43a828eeaa346e81de05a3e35bf5224cb1",
+    "previews/pages/p04_mechanism_pipeline.png": "8b9e8a358c824f56f0c1a6d85a5956785f6e969f6fbebe6cf48dc5d6eda952b2",
+    "previews/pages/p05_asymmetric_comparison.png": "a00120a3282ef1a98325c0dd4bf6536407bcda43bf31aea161a268ef948ba9d8",
+    "previews/pages/p06_chart_and_takeaway.png": "f01ea2b6f14266568280abd4088900fd625bcca90cc84e5c3ee9b1434a0d138b",
+    "previews/png_manifest.json": "47071b751e93a906da806440cdd38cf6c4ac02b0ca5ed14752d74131eb5accc3",
+    "primitives/p01_cover.svg": "71ef48c8265eb68ff2b3615975c2c4c6cda961e07cd46a2f8501f2b50b20890d",
+    "primitives/p02_kpi_closed_loop.svg": "f72be741ba477f9fbd927639000eb713115581e5fa4e3e670b9fbfbcb2141da1",
+    "primitives/p03_quadrant_2x2.svg": "b5a042e5e253f6f0b26118ec2943f18ceba2944f43dab7e430375106453f21cd",
+    "primitives/p04_mechanism_pipeline.svg": "b77a00a8e1bd6586046cf8ba49fefd6aeb9a4fa701d88a91f0cec3cbd8710a9b",
+    "primitives/p05_asymmetric_comparison.svg": "4f179a1fa31cc8a3407c4a8a56a79b9fff23096dcaf6c5667e36e2e353280617",
+    "primitives/p06_chart_and_takeaway.svg": "48ff51fbe93d40a2ebc63aad5aa01bce99acf6a39429dc1e1cd9862c0f6883d1",
+    "skyline_shell.svg": "bcddb4b73f1f930057e63cfe6c60a742ebcec52af640dcc0c457625940f5abec",
+    "tokens.css": "799ef5adcbf70e3250b08ca66d63724542db8c6091bcbe80325a2aaf86512928"
+  },
+  "package_sha256": "9a98aa07cc0af018ec4864d6d3430ed8609f8c8762ce1aebc5de0a06c29fab12"
+}

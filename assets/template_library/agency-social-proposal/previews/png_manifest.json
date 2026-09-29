@@ -1,0 +1,58 @@
+{
+  "png_dir": ".",
+  "generated_files": [
+    "pages/p01_cover.png",
+    "pages/p02_asymmetric_insight.png",
+    "pages/p03_swiss_editorial_grid.png",
+    "pages/p04_strategy_house.png",
+    "pages/p05_xhs_evidence_split.png",
+    "pages/p06_zebra_battle_table.png"
+  ],
+  "files": [
+    {
+      "file": "pages/p01_cover.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 195341,
+      "valid_size": true
+    },
+    {
+      "file": "pages/p02_asymmetric_insight.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 307003,
+      "valid_size": true
+    },
+    {
+      "file": "pages/p03_swiss_editorial_grid.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 312430,
+      "valid_size": true
+    },
+    {
+      "file": "pages/p04_strategy_house.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 269756,
+      "valid_size": true
+    },
+    {
+      "file": "pages/p05_xhs_evidence_split.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 316450,
+      "valid_size": true
+    },
+    {
+      "file": "pages/p06_zebra_battle_table.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 281830,
+      "valid_size": true
+    }
+  ],
+  "count": 6,
+  "all_valid_size": true,
+  "contact_sheet": "full_deck_contact_sheet.png"
+}

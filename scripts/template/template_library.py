@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish, list, and apply human-approved local template packages."""
+"""Publish, list, validate, and apply local template packages (v2 4-piece Multimodal Template Packs + v1 legacy support)."""
 
 import argparse
 import hashlib
@@ -19,12 +19,17 @@ from template_visual_gate import review_issues as template_canvas_review_issues 
 
 SKILL_ROOT = Path(__file__).resolve().parents[2]
 LIBRARY_ROOT = SKILL_ROOT / "assets" / "template_library"
+DEFAULT_LIBRARY_ROOT = LIBRARY_ROOT
+
 PROJECT_FILES = (
     "template_profile.json",
     "template_asset_registry.json",
     "template_worker_result.json",
 )
 PROJECT_DIRS = ("fidelity_template", "template_media")
+
+REQUIRED_PACK_FILES = ("tokens.css", "skyline_shell.svg", "SPEC.md")
+REQUIRED_PACK_DIRS = ("primitives", "anchors")
 
 
 def read_json(path, default=None):
@@ -42,16 +47,24 @@ def sha256(path):
     return digest.hexdigest()
 
 
+sha256_file = sha256
+
+
 def slugify(value):
     value = re.sub(r"[^a-zA-Z0-9\u4e00-\u9fff_-]+", "-", str(value).strip()).strip("-_")
     return value[:48] or "template"
 
 
 def package_files(root):
-    return sorted(path for path in root.rglob("*") if path.is_file() and path.name != "manifest.json")
+    root = Path(root)
+    return sorted(
+        path for path in root.rglob("*")
+        if path.is_file() and path.name != "manifest.json" and not path.name.startswith(".")
+    )
 
 
 def package_hashes(root):
+    root = Path(root)
     return {path.relative_to(root).as_posix(): sha256(path) for path in package_files(root)}
 
 
@@ -74,20 +87,117 @@ def validate_component_references(registry):
         raise ValueError(f"invalid layout component references: layouts={invalid}, unreferenced={unreferenced}")
 
 
-def list_templates():
+def validate_pack_dir(pack_dir, check_manifest_hashes=False):
+    """Validate a v2 4-piece multimodal template pack (`tokens.css`, `skyline_shell.svg`, `primitives/*.svg`, `SPEC.md` + `anchors/`)."""
+    pack_dir = Path(pack_dir).resolve()
+    issues = []
+    if not pack_dir.is_dir():
+        return {"valid": False, "issues": [f"Directory not found: {pack_dir}"]}
+
+    for req_file in REQUIRED_PACK_FILES:
+        if not (pack_dir / req_file).is_file():
+            issues.append(f"Missing required file: {req_file}")
+
+    for req_dir in REQUIRED_PACK_DIRS:
+        if not (pack_dir / req_dir).is_dir():
+            issues.append(f"Missing required directory: {req_dir}/")
+
+    primitives = sorted((pack_dir / "primitives").glob("*.svg")) if (pack_dir / "primitives").is_dir() else []
+    if len(primitives) < 5:
+        issues.append(f"Expected at least 5 SVG primitives in primitives/, found {len(primitives)}")
+
+    anchors = sorted((pack_dir / "anchors").glob("*.png")) if (pack_dir / "anchors").is_dir() else []
+    if len(anchors) < 1:
+        issues.append("Expected at least 1 reference PNG in anchors/")
+
+    tokens_path = pack_dir / "tokens.css"
+    if tokens_path.is_file():
+        tokens_text = tokens_path.read_text(encoding="utf-8")
+        if ":root" not in tokens_text or "--" not in tokens_text:
+            issues.append("tokens.css must define :root CSS custom properties (--*)")
+
+    if check_manifest_hashes:
+        manifest_path = pack_dir / "manifest.json"
+        if not manifest_path.is_file():
+            issues.append("Missing manifest.json")
+        else:
+            manifest = read_json(manifest_path, {})
+            actual_hashes = package_hashes(pack_dir)
+            if manifest.get("files") != actual_hashes:
+                issues.append("manifest.json file hash mismatch")
+            if manifest.get("package_sha256") != package_sha256(actual_hashes):
+                issues.append("manifest.json package_sha256 mismatch")
+
+    return {
+        "valid": len(issues) == 0,
+        "pack_dir": str(pack_dir),
+        "primitive_count": len(primitives),
+        "primitives": [p.name for p in primitives],
+        "anchor_count": len(anchors),
+        "issues": issues,
+    }
+
+
+def build_manifest(pack_dir, template_id, name, description="", is_default=False, palette_summary=None, scenarios=None):
+    pack_dir = Path(pack_dir).resolve()
+    hashes = package_hashes(pack_dir)
+    primitives = sorted((pack_dir / "primitives").glob("*.svg"))
+    anchors = sorted((pack_dir / "anchors").glob("*.png"))
+    preview = ""
+    if (pack_dir / "previews" / "full_deck_contact_sheet.png").is_file():
+        preview = "previews/full_deck_contact_sheet.png"
+    elif anchors:
+        preview = f"anchors/{anchors[0].name}"
+
+    manifest = {
+        "schema": "planner.multimodal-template-pack.v2",
+        "template_id": template_id,
+        "name": name,
+        "description": description,
+        "status": "approved",
+        "is_default": bool(is_default),
+        "published_at": datetime.now(timezone.utc).isoformat(),
+        "canvas_size": "1920x1080",
+        "four_piece_contract": {
+            "tokens_css": "tokens.css",
+            "skyline_shell_svg": "skyline_shell.svg",
+            "primitives": [f"primitives/{p.name}" for p in primitives],
+            "spec_md": "SPEC.md",
+            "anchors": [f"anchors/{a.name}" for a in anchors],
+        },
+        "palette_summary": palette_summary or {},
+        "recommended_scenarios": scenarios or [],
+        "preview": preview,
+        "files": hashes,
+        "package_sha256": package_sha256(hashes),
+    }
+    (pack_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return manifest
+
+
+def list_templates(library_root=None):
+    lib_root = Path(library_root).resolve() if library_root else LIBRARY_ROOT
     items = []
-    if LIBRARY_ROOT.is_dir():
-        for manifest_path in sorted(LIBRARY_ROOT.glob("*/manifest.json")):
+    if lib_root.is_dir():
+        for manifest_path in sorted(lib_root.glob("*/manifest.json")):
             data = read_json(manifest_path, {})
             if data.get("status") == "approved":
-                items.append({
+                entry = {
                     "template_id": data.get("template_id", manifest_path.parent.name),
                     "name": data.get("name", manifest_path.parent.name),
-                    "mode": data.get("mode", "reference"),
+                    "schema": data.get("schema", "planner.template-library.v1"),
+                    "mode": data.get("mode", "multimodal-pack" if "four_piece_contract" in data else "reference"),
                     "is_default": data.get("is_default") is True,
                     "published_at": data.get("published_at", ""),
                     "preview": str(manifest_path.parent / data.get("preview", "")) if data.get("preview") else "",
-                })
+                }
+                if "four_piece_contract" in data:
+                    entry["description"] = data.get("description", "")
+                    entry["primitive_count"] = len(data["four_piece_contract"].get("primitives", []))
+                    entry["primitives"] = data["four_piece_contract"].get("primitives", [])
+                    entry["palette_summary"] = data.get("palette_summary", {})
+                    entry["recommended_scenarios"] = data.get("recommended_scenarios", [])
+                items.append(entry)
     return sorted(items, key=lambda item: (not item.get("is_default"), item.get("name", "")))
 
 
@@ -101,13 +211,10 @@ def require_approved_feedback(project):
         raise ValueError("approved template feedback requires every abstract layout to be marked Yes")
     provenance = feedback.get("provenance", {})
     project_root = project.parents[1]
-    # 与页面审阅同一条消费侧保护：批准必须来自当前这一版审阅页（快照 + review_id）。
     snapshot = template_review_snapshot(project_root)
     if not snapshot or str(feedback.get("review_id", "")) != str(snapshot.get("review_id", "")):
         raise ValueError("template approval is not bound to the current review page; rerun template-review and decide again")
     review_html = project_root / "00_template_review.html"
-    # 写者从服务器换成**页面**（经宿主落盘）→ 收件层盖章；`review_server` 那份继续认，
-    # 因为老项目里那份 approvals 是人真的给过的（删掉它等于静默作废一次人工批准）。
     source = provenance.get("source")
     if (source not in {"review_server", "template_review_page"}
             or (source == "review_server" and provenance.get("route") != "/template-feedback")
@@ -131,9 +238,40 @@ def require_approved_feedback(project):
     return feedback
 
 
-def publish(project_root):
+def publish_template(project_root, template_id="", name="", description="", library_root=None):
+    """Publish a v2 4-piece multimodal template pack from `<project_root>/_internal/00_project/template_pack`."""
+    project_root = Path(project_root).resolve()
+    lib_root = Path(library_root).resolve() if library_root else LIBRARY_ROOT
+    source_pack = project_root / "_internal" / "00_project" / "template_pack"
+    validation = validate_pack_dir(source_pack, check_manifest_hashes=False)
+    if not validation["valid"]:
+        raise ValueError(f"Project template_pack is incomplete: {validation['issues']}")
+
+    feedback = read_json(project_root / "_internal" / "00_project" / "template_feedback.json", {})
+    final_name = name or feedback.get("template_name") or project_root.name
+    final_id = template_id or slugify(final_name)
+
+    dest = lib_root / final_id
+    if dest.exists():
+        shutil.rmtree(dest)
+    lib_root.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(source_pack, dest)
+
+    return build_manifest(
+        dest,
+        template_id=final_id,
+        name=final_name,
+        description=description or feedback.get("overall_feedback", ""),
+        is_default=False,
+    )
+
+
+def publish(project_root, template_id="", name="", description="", library_root=None):
     project_root = Path(project_root).resolve()
     project = project_root / "_internal" / "00_project"
+    if (project / "template_pack").is_dir() and not (project / "fidelity_template").is_dir():
+        return publish_template(project_root, template_id=template_id, name=name, description=description, library_root=library_root)
+
     feedback = require_approved_feedback(project)
     profile = read_json(project / "template_profile.json", {})
     mode = read_json(project_root / "_internal" / "00_project" / "page_manifest.json", {}).get("template_intake", {}).get("mode", "reference")
@@ -166,22 +304,22 @@ def publish(project_root):
         if visual_issues:
             raise ValueError("fidelity publication lacks completed source-vs-canvas visual judgment: " + "; ".join(visual_issues))
 
-    name = str(feedback["template_name"]).strip()
+    t_name = str(feedback["template_name"]).strip()
     digest_source = json.dumps({
         "profile": profile,
         "registry": read_json(project / "fidelity_template" / "template_registry.json", {}),
     }, ensure_ascii=False, sort_keys=True).encode("utf-8")
     digest = hashlib.sha256(digest_source).hexdigest()[:8]
-    template_id = f"{slugify(name)}-{digest}"
-    destination = LIBRARY_ROOT / template_id
+    t_id = f"{slugify(t_name)}-{digest}"
+    destination = LIBRARY_ROOT / t_id
     if destination.exists():
         existing = read_json(destination / "manifest.json", {})
-        if existing.get("template_id") == template_id and package_hashes(destination) == existing.get("files", {}):
+        if existing.get("template_id") == t_id and package_hashes(destination) == existing.get("files", {}):
             return existing
         raise ValueError(f"template library destination already exists: {destination}")
 
     LIBRARY_ROOT.mkdir(parents=True, exist_ok=True)
-    staging = Path(tempfile.mkdtemp(prefix=f".{template_id}.", dir=str(LIBRARY_ROOT)))
+    staging = Path(tempfile.mkdtemp(prefix=f".{t_id}.", dir=str(LIBRARY_ROOT)))
     try:
         for name_in_project in PROJECT_FILES:
             source = project / name_in_project
@@ -218,8 +356,8 @@ def publish(project_root):
         hashes = package_hashes(staging)
         manifest = {
             "schema": "planner.template-library.v1",
-            "template_id": template_id,
-            "name": str(feedback["template_name"]).strip(),
+            "template_id": t_id,
+            "name": t_name,
             "status": "approved",
             "mode": mode,
             "published_at": datetime.now(timezone.utc).isoformat(),
@@ -237,14 +375,36 @@ def publish(project_root):
             shutil.rmtree(staging)
 
 
-def apply_template(project_root, template_id):
+def apply_template(project_root, template_id, library_root=None):
     project_root = Path(project_root).resolve()
-    source = (LIBRARY_ROOT / template_id).resolve()
-    if source.parent != LIBRARY_ROOT.resolve() or not source.is_dir():
+    lib_root = Path(library_root).resolve() if library_root else LIBRARY_ROOT.resolve()
+    source = (lib_root / template_id).resolve()
+    if source.parent != lib_root or not source.is_dir():
         raise ValueError(f"unknown template_id: {template_id}")
     manifest = read_json(source / "manifest.json", {})
     if manifest.get("status") != "approved" or manifest.get("template_id") != template_id:
         raise ValueError("template library manifest is invalid")
+
+    # v2 4-piece multimodal template pack
+    if manifest.get("schema") == "planner.multimodal-template-pack.v2" or "four_piece_contract" in manifest:
+        validation = validate_pack_dir(source, check_manifest_hashes=True)
+        if not validation["valid"]:
+            raise ValueError(f"Template pack '{template_id}' failed validation: {validation['issues']}")
+        target = project_root / "_internal" / "00_project" / "template_pack"
+        if target.exists():
+            shutil.rmtree(target)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(source, target)
+        (project_root / "_internal" / "00_project" / "template_library_source.json").write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        return {
+            "applied_template_id": template_id,
+            "target_dir": str(target),
+            "primitives": manifest.get("four_piece_contract", {}).get("primitives", []),
+        }
+
+    # v1 legacy fidelity template package
     actual = package_hashes(source)
     if actual != manifest.get("files", {}):
         raise ValueError("template library package hash mismatch")
@@ -254,6 +414,7 @@ def apply_template(project_root, template_id):
     if registry:
         validate_component_references(registry)
     project = project_root / "_internal" / "00_project"
+    project.mkdir(parents=True, exist_ok=True)
     for filename in PROJECT_FILES:
         src = source / filename
         if src.is_file():
@@ -277,19 +438,38 @@ def apply_template(project_root, template_id):
 def main():
     parser = argparse.ArgumentParser(description="Manage Planner's local approved template library")
     sub = parser.add_subparsers(dest="command", required=True)
-    sub.add_parser("list")
-    p = sub.add_parser("publish")
-    p.add_argument("project_dir")
-    p = sub.add_parser("apply")
-    p.add_argument("project_dir")
-    p.add_argument("--template-id", required=True)
+    p_list = sub.add_parser("list")
+    p_list.add_argument("--library-root", default=None)
+
+    p_val = sub.add_parser("validate")
+    p_val.add_argument("pack_dir")
+    p_val.add_argument("--check-hashes", action="store_true")
+
+    p_pub = sub.add_parser("publish")
+    p_pub.add_argument("project_dir")
+    p_pub.add_argument("--template-id", default="")
+    p_pub.add_argument("--name", default="")
+    p_pub.add_argument("--description", default="")
+    p_pub.add_argument("--library-root", default=None)
+
+    p_app = sub.add_parser("apply")
+    p_app.add_argument("project_dir")
+    p_app.add_argument("--template-id", required=True)
+    p_app.add_argument("--library-root", default=None)
+
     args = parser.parse_args()
     if args.command == "list":
-        result = list_templates()
+        result = list_templates(args.library_root)
+    elif args.command == "validate":
+        result = validate_pack_dir(args.pack_dir, check_manifest_hashes=args.check_hashes)
+        if not result["valid"]:
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            sys.exit(1)
     elif args.command == "publish":
-        result = publish(args.project_dir)
+        result = publish(args.project_dir, template_id=args.template_id, name=args.name,
+                         description=args.description, library_root=args.library_root)
     else:
-        result = apply_template(args.project_dir, args.template_id)
+        result = apply_template(args.project_dir, args.template_id, library_root=args.library_root)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

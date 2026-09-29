@@ -110,39 +110,268 @@ def parse_svg_canvas_size(svg_file):
 
 
 # ═══════════════════════════════════════
-# 渐变解析 (v5.0)
+# CSS <style> 与 :root 变量展开 (v6.0)
 # ═══════════════════════════════════════
 
-def parse_gradients(root):
-    """预扫描 <defs> 中所有 linearGradient / radialGradient，
-    构建 gradient_map: {id → first_stop_color_hex}。
-    PPT 不支持 SVG 渐变，用第 1 个 stop-color 作为纯色回退。
+_XML_COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
+_STYLE_ELEMENT_RE = re.compile(r"<style\b[^>]*>(.*?)</style>", re.S | re.I)
+_CSS_COMMENT_RE = re.compile(r"/\*.*?\*/", re.S)
+_CSS_RULE_RE = re.compile(r"([^{}]+)\{([^{}]*)\}")
+_CSS_VAR_RE = re.compile(r"var\(\s*(--[A-Za-z0-9_-]+)\s*(?:,\s*([^()]*))?\)")
+_NUM_CLEAN_RE = re.compile(r"[-+]?(?:\d*\.)?\d+(?:[eE][-+]?\d+)?")
+
+
+def _parse_svg_num(val, default=0.0):
+    """Safely parse SVG numeric attribute (stripping px/pt/em/% suffixes)."""
+    if val is None:
+        return default
+    if isinstance(val, (int, float)):
+        return float(val)
+    m = _NUM_CLEAN_RE.search(str(val).strip())
+    return float(m.group(0)) if m else default
+
+
+def _css_declarations(text):
+    declarations = {}
+    for piece in str(text or "").split(";"):
+        if ":" not in piece:
+            continue
+        prop, value = piece.split(":", 1)
+        prop = prop.strip()
+        if not prop.startswith("--"):
+            prop = prop.lower()
+        value = value.strip()
+        if prop and value:
+            declarations[prop] = value
+    return declarations
+
+
+def _resolve_var_string(value, custom_props):
+    """Expand var(--token, fallback) references up to 10 levels deep."""
+    if not value or "var(" not in str(value):
+        return value
+    resolved = str(value)
+    for _ in range(10):
+        if "var(" not in resolved:
+            break
+        changed = False
+
+        def _repl(match):
+            nonlocal changed
+            token = match.group(1)
+            fallback = match.group(2)
+            if token in custom_props:
+                changed = True
+                return custom_props[token]
+            if fallback is not None and fallback.strip():
+                changed = True
+                return fallback.strip()
+            return match.group(0)
+
+        resolved = _CSS_VAR_RE.sub(_repl, resolved)
+        if not changed:
+            break
+    return resolved
+
+
+def _simple_compound_matches(node, compound):
+    """Check if a single selector compound (e.g. 'text.title#hero' or '.card' or ':root') matches node."""
+    if compound in (":root", "svg"):
+        tag = node.tag.split("}")[-1] if "}" in node.tag else node.tag
+        return tag == "svg"
+    tag = node.tag.split("}")[-1] if "}" in node.tag else node.tag
+    node_id = (node.attrib.get("id") or "").strip()
+    node_classes = set((node.attrib.get("class") or "").split())
+
+    # Extract tag if present at start
+    m_tag = re.match(r"^([A-Za-z][A-Za-z0-9_-]*)", compound)
+    if m_tag and m_tag.group(1) != tag:
+        return False
+    for m_id in re.findall(r"#([A-Za-z_][-\w]*)", compound):
+        if m_id != node_id:
+            return False
+    for m_cls in re.findall(r"\.([A-Za-z_][-\w]*)", compound):
+        if m_cls not in node_classes:
+            return False
+    return bool(m_tag or "#" in compound or "." in compound)
+
+
+def _selector_matches_node(node, parent_map, compounds):
+    """Match descendant selector compounds from right to left."""
+    current = node
+    for index, compound in enumerate(reversed(compounds)):
+        if index == 0:
+            if not _simple_compound_matches(current, compound):
+                return False
+        else:
+            while current is not None and not _simple_compound_matches(current, compound):
+                current = parent_map.get(current)
+            if current is None:
+                return False
+        current = parent_map.get(current)
+    return True
+
+
+def inline_svg_styles_and_vars(root, raw_svg_text=None):
+    """Expand inline <style> rules, inline style='' attributes, and :root CSS variables (var(--...))
+    directly onto SVG DOM element attributes before PPT conversion.
     """
-    gradient_map = {}
+    style_blocks = []
+    if raw_svg_text:
+        style_blocks.extend(_STYLE_ELEMENT_RE.findall(_XML_COMMENT_RE.sub("", raw_svg_text)))
+    for node in root.iter():
+        tag = node.tag.split("}")[-1] if "}" in node.tag else node.tag
+        if tag == "style":
+            txt = "".join(node.itertext())
+            if txt and txt not in style_blocks:
+                style_blocks.append(txt)
+
+    rules = []
+    custom_props = {}
+
+    for block in style_blocks:
+        clean_block = _CSS_COMMENT_RE.sub("", block)
+        for match in _CSS_RULE_RE.finditer(clean_block):
+            decls = _css_declarations(match.group(2))
+            if not decls:
+                continue
+            for k, v in decls.items():
+                if k.startswith("--"):
+                    custom_props[k] = v
+            selectors = []
+            for part in match.group(1).split(","):
+                compounds = [c.strip() for c in part.strip().split() if c.strip()]
+                if compounds:
+                    selectors.append(compounds)
+            if selectors:
+                rules.append((selectors, decls))
+
+    for node in root.iter():
+        for k, v in _css_declarations(node.attrib.get("style")).items():
+            if k.startswith("--"):
+                custom_props[k] = v
+
+    # Resolve transitive var(--...) inside custom_props
+    for _ in range(10):
+        changed = False
+        for k, v in list(custom_props.items()):
+            new_v = _resolve_var_string(v, custom_props)
+            if new_v != v:
+                custom_props[k] = new_v
+                changed = True
+        if not changed:
+            break
+
+    parent_map = {child: parent for parent in root.iter() for child in parent}
+
+    for node in root.iter():
+        tag = node.tag.split("}")[-1] if "}" in node.tag else node.tag
+        if tag == "style":
+            continue
+
+        # 1. Apply matched <style> rules (if attribute not explicitly set on element)
+        if rules:
+            matched_props = {}
+            for selectors, decls in rules:
+                if any(_selector_matches_node(node, parent_map, comp) for comp in selectors):
+                    for k, v in decls.items():
+                        if not k.startswith("--"):
+                            matched_props[k] = v
+            for k, v in matched_props.items():
+                if k not in node.attrib:
+                    node.set(k, v)
+
+        # 2. Apply inline style="..." declarations (overrides element attributes)
+        inline_decls = _css_declarations(node.attrib.get("style"))
+        for k, v in inline_decls.items():
+            if not k.startswith("--"):
+                node.set(k, v)
+
+        # 3. Expand var(--...) across all attributes on node
+        for attr_k, attr_v in list(node.attrib.items()):
+            if "var(" in str(attr_v):
+                node.set(attr_k, _resolve_var_string(attr_v, custom_props))
+
+    return custom_props
+
+
+# ═══════════════════════════════════════
+# 渐变解析 (v6.0: 原生 <a:gradFill> + 纯色回退)
+# ═══════════════════════════════════════
+
+def _parse_stop_offset(offset_str):
+    """Convert SVG stop offset ('50%' or '0.5') to DrawingML pos (0..100000)."""
+    if not offset_str:
+        return 0
+    s = str(offset_str).strip()
+    try:
+        if s.endswith("%"):
+            pct = float(s[:-1].strip()) / 100.0
+        else:
+            pct = float(s)
+        return max(0, min(100000, int(round(pct * 100000))))
+    except Exception:
+        return 0
+
+
+def parse_gradient_defs(root):
+    """预扫描 <defs> 中所有 linearGradient / radialGradient，
+    返回结构化渐变字典:
+    {id: {'type': 'linear'|'radial', 'angle': deg, 'stops': [{'pos': int, 'color': str, 'opacity': float}]}}
+    """
+    grad_defs = {}
     for node in root.iter():
         tag = node.tag.split('}')[-1] if '}' in node.tag else node.tag
         if tag in ('linearGradient', 'radialGradient'):
             gid = node.attrib.get('id')
-            if gid:
-                stops = []
-                for child in node:
-                    ctag = child.tag.split('}')[-1] if '}' in child.tag else child.tag
-                    if ctag == 'stop':
-                        color = child.attrib.get('stop-color', '')
-                        offset = child.attrib.get('offset', '0%')
-                        stops.append((offset, color))
-                if stops:
-                    # 使用第一个 stop-color 作为回退色
-                    gradient_map[gid] = stops[0][1]
-    return gradient_map
+            if not gid:
+                continue
+            x1 = _parse_stop_offset(node.attrib.get('x1', '0%')) / 100000.0
+            y1 = _parse_stop_offset(node.attrib.get('y1', '0%')) / 100000.0
+            x2 = _parse_stop_offset(node.attrib.get('x2', '100%')) / 100000.0
+            y2 = _parse_stop_offset(node.attrib.get('y2', '0%')) / 100000.0
+            dx = x2 - x1
+            dy = y2 - y1
+            angle_deg = math.degrees(math.atan2(dy, dx)) % 360.0 if (abs(dx) > 1e-6 or abs(dy) > 1e-6) else 0.0
+
+            stops = []
+            for child in node:
+                ctag = child.tag.split('}')[-1] if '}' in child.tag else child.tag
+                if ctag == 'stop':
+                    inline_st = _css_declarations(child.attrib.get('style'))
+                    color = child.attrib.get('stop-color') or inline_st.get('stop-color', '')
+                    op_str = child.attrib.get('stop-opacity') or inline_st.get('stop-opacity', '1')
+                    pos = _parse_stop_offset(child.attrib.get('offset', '0%'))
+                    try:
+                        stop_op = max(0.0, min(1.0, float(op_str)))
+                    except Exception:
+                        stop_op = 1.0
+                    if color:
+                        stops.append({'pos': pos, 'color': color, 'opacity': stop_op})
+            if stops:
+                grad_defs[gid] = {
+                    'type': 'linear' if tag == 'linearGradient' else 'radial',
+                    'angle': angle_deg,
+                    'stops': stops,
+                }
+    return grad_defs
+
+
+def parse_gradients(root):
+    """预扫描 <defs> 中所有 linearGradient / radialGradient，
+    构建 gradient_map: {id → first_stop_color_hex}（用于不支持渐变处的纯色回退）。
+    """
+    defs = parse_gradient_defs(root)
+    return {gid: info['stops'][0]['color'] for gid, info in defs.items() if info.get('stops')}
 
 
 # ═══════════════════════════════════════
 # 工具函数
 # ═══════════════════════════════════════
 
-# 全局 gradient_map，在 main() 中每页设置
+# 全局 gradient_map / _gradient_defs，在 main() 或 add_elements() 中每页设置
 _gradient_map = {}
+_gradient_defs = {}
 _current_svg_dir = None
 _conversion_errors = []
 _conversion_warnings = []
@@ -160,35 +389,62 @@ def error(msg):
     _conversion_errors.append(msg)
     print(f'  ERROR: {msg}')
 
-def parse_color(c):
-    """解析 SVG 颜色值为 RGBColor，不支持的返回 None。
-    v5.0: 支持 url(#id) 引用 gradient_map 回退。
+
+def parse_color_alpha(c):
+    """解析 SVG 颜色值为 (RGBColor, alpha_multiplier)。
+    支持 #RGB, #RRGGBB, rgb(r,g,b), rgba(r,g,b,a), 以及 url(#id) 回退。
     """
     if not c or c == 'none':
-        return None
-    c = c.strip()
-    # v5.0: url(#id) 引用渐变 → 回退首色
+        return None, 1.0
+    c = str(c).strip()
     if c.startswith('url('):
-        m = re.match(r'url\(#(.+?)\)', c)
+        m = re.match(r'url\(\s*[\'"]?#(.+?)[\'"]?\s*\)', c)
         if m:
             gid = m.group(1)
             fallback = _gradient_map.get(gid)
             if fallback:
-                return parse_color(fallback)
-        return None
-    if c.startswith('rgb('):
+                return parse_color_alpha(fallback)
+        return None, 1.0
+    if c.lower().startswith('rgba('):
+        try:
+            inner = c[5:].rstrip(')')
+            parts = [x.strip() for x in inner.split(',')]
+            r, g, b = int(float(parts[0])), int(float(parts[1])), int(float(parts[2]))
+            a = max(0.0, min(1.0, float(parts[3]))) if len(parts) > 3 else 1.0
+            return RGBColor(r, g, b), a
+        except Exception:
+            return None, 1.0
+    if c.lower().startswith('rgb('):
         try:
             inner = c[4:].rstrip(')')
-            parts = [int(x.strip()) for x in inner.split(',')]
-            return RGBColor(parts[0], parts[1], parts[2])
-        except:
-            return None
+            parts = [int(float(x.strip())) for x in inner.split(',')]
+            return RGBColor(parts[0], parts[1], parts[2]), 1.0
+        except Exception:
+            return None, 1.0
+    named = {
+        'white': (255, 255, 255),
+        'black': (0, 0, 0),
+        'red': (230, 0, 18),
+        'transparent': None,
+    }
+    if c.lower() in named:
+        rgb = named[c.lower()]
+        return (RGBColor(*rgb), 1.0) if rgb else (None, 0.0)
     c = c.lstrip('#')
     if len(c) == 3:
         c = c[0]*2 + c[1]*2 + c[2]*2
     if len(c) == 6:
-        return RGBColor(int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16))
-    return None
+        try:
+            return RGBColor(int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16)), 1.0
+        except Exception:
+            return None, 1.0
+    return None, 1.0
+
+
+def parse_color(c):
+    """解析 SVG 颜色值为 RGBColor，不支持的返回 None。"""
+    rgb, _ = parse_color_alpha(c)
+    return rgb
 
 
 def resolve_image_href(href):
@@ -258,21 +514,69 @@ def _apply_alpha(spPr, alpha_val):
     """
     if spPr is None or alpha_val is None or alpha_val >= 1.0:
         return
+    alpha_val = max(0.0, min(1.0, float(alpha_val)))
     sf = spPr.find(qn('a:solidFill'))
     if sf is not None:
         clr = sf.find(qn('a:srgbClr'))
         if clr is not None:
-            # 移除已有 alpha
             for old_a in clr.findall(qn('a:alpha')):
                 clr.remove(old_a)
             alpha_el = etree.SubElement(clr, qn('a:alpha'))
-            alpha_el.set('val', str(int(alpha_val * 100000)))
+            alpha_el.set('val', str(int(round(alpha_val * 100000))))
+
+
+def _apply_native_gradient_fill(shape, gid, base_alpha=1.0):
+    """将 _gradient_defs[gid] 转换为 PowerPoint 原生 <a:gradFill> XML 节点并替换 solidFill。"""
+    ginfo = _gradient_defs.get(gid)
+    if not ginfo or len(ginfo.get('stops', [])) < 2:
+        return False
+    valid_stops = []
+    for st in ginfo['stops']:
+        rgb, c_alpha = parse_color_alpha(st['color'])
+        if rgb is not None:
+            valid_stops.append((st['pos'], f"{rgb[0]:02X}{rgb[1]:02X}{rgb[2]:02X}", st['opacity'] * c_alpha * base_alpha))
+    if len(valid_stops) < 2:
+        return False
+
+    # 先调 shape.fill.solid() 确保 spPr 中按 OpenXML 规范位置生成 a:solidFill 占位节点
+    shape.fill.solid()
+    spPr = _find_spPr(shape)
+    if spPr is None:
+        return False
+    old_sf = spPr.find(qn('a:solidFill'))
+    if old_sf is None:
+        return False
+
+    grad_fill = etree.Element(qn('a:gradFill'))
+    grad_fill.set('flip', 'none')
+    grad_fill.set('rotWithShape', '1')
+    gs_lst = etree.SubElement(grad_fill, qn('a:gsLst'))
+    for pos, hex_val, stop_alpha in valid_stops:
+        gs = etree.SubElement(gs_lst, qn('a:gs'))
+        gs.set('pos', str(pos))
+        clr = etree.SubElement(gs, qn('a:srgbClr'))
+        clr.set('val', hex_val)
+        if stop_alpha < 1.0:
+            alpha_el = etree.SubElement(clr, qn('a:alpha'))
+            alpha_el.set('val', str(int(round(max(0.0, min(1.0, stop_alpha)) * 100000))))
+
+    if ginfo.get('type') == 'linear':
+        lin = etree.SubElement(grad_fill, qn('a:lin'))
+        ang = int(round((ginfo.get('angle', 0.0) % 360.0) * 60000))
+        lin.set('ang', str(ang))
+        lin.set('scaled', '1')
+    else:
+        path_el = etree.SubElement(grad_fill, qn('a:path'))
+        path_el.set('path', 'circle')
+
+    spPr.replace(old_sf, grad_fill)
+    return True
 
 
 def apply_fill_stroke(shape, node, inherited_attrs=None, parent_opacity=1.0):
     """将 SVG 节点的 fill / stroke / opacity / fill-opacity 属性映射到 PPT 形状。
     支持 inherited_attrs 回退（来自父级 <g>）。
-    v5.0: 新增 fill-opacity / stroke-opacity 支持。
+    v6.0: 支持原生 <linearGradient> → <a:gradFill>、rgba() 颜色及完整 stroke 透明度继承。
     """
     if inherited_attrs is None:
         inherited_attrs = {}
@@ -293,42 +597,55 @@ def apply_fill_stroke(shape, node, inherited_attrs=None, parent_opacity=1.0):
     if not stroke_dasharray and inherited_attrs:
         stroke_dasharray = inherited_attrs.get('stroke-dasharray')
 
-    # v4.3: opacity 支持
     opacity_val = node.attrib.get('opacity')
     if not opacity_val:
         opacity_val = inherited_attrs.get('opacity')
 
-    # v5.0: fill-opacity 支持
     fill_opacity_val = node.attrib.get('fill-opacity')
     if not fill_opacity_val:
         fill_opacity_val = inherited_attrs.get('fill-opacity')
 
-    # v5.0: stroke-opacity 支持
     stroke_opacity_val = node.attrib.get('stroke-opacity')
     if not stroke_opacity_val:
         stroke_opacity_val = inherited_attrs.get('stroke-opacity')
 
+    elem_opacity = 1.0 * parent_opacity
+    if opacity_val:
+        try:
+            elem_opacity *= float(opacity_val)
+        except Exception:
+            pass
+
     if hasattr(shape, 'fill'):
         if fill_val and fill_val != 'none':
-            shape.fill.solid()
-            c = parse_color(fill_val)
-            if c:
-                shape.fill.fore_color.rgb = c
-            # 计算最终 fill alpha
-            final_alpha = 1.0 * parent_opacity
-            if opacity_val:
-                try:
-                    final_alpha *= float(opacity_val)
-                except:
-                    pass
+            final_alpha = elem_opacity
             if fill_opacity_val:
                 try:
                     final_alpha *= float(fill_opacity_val)
-                except:
+                except Exception:
                     pass
-            if final_alpha < 1.0:
-                spPr = _find_spPr(shape)
-                _apply_alpha(spPr, final_alpha)
+
+            # v6.0: 优先尝试原生渐变 <a:gradFill>
+            m_grad = re.match(r'url\(\s*[\'"]?#(.+?)[\'"]?\s*\)', str(fill_val).strip())
+            if m_grad and _apply_native_gradient_fill(shape, m_grad.group(1), base_alpha=final_alpha):
+                pass
+            else:
+                c, rgba_alpha = parse_color_alpha(fill_val)
+                final_alpha *= rgba_alpha
+                if c and final_alpha > 0.0:
+                    shape.fill.solid()
+                    shape.fill.fore_color.rgb = c
+                    if final_alpha < 1.0:
+                        spPr = _find_spPr(shape)
+                        _apply_alpha(spPr, final_alpha)
+                elif final_alpha <= 0.0:
+                    spPr = _find_spPr(shape)
+                    if spPr is not None:
+                        for old_fill in list(spPr):
+                            tl = old_fill.tag.split('}')[-1] if '}' in old_fill.tag else old_fill.tag
+                            if 'Fill' in tl:
+                                spPr.remove(old_fill)
+                        etree.SubElement(spPr, qn('a:noFill'))
         else:
             try:
                 spPr = _find_spPr(shape)
@@ -338,37 +655,35 @@ def apply_fill_stroke(shape, node, inherited_attrs=None, parent_opacity=1.0):
                         if 'Fill' in tl:
                             spPr.remove(old_fill)
                     etree.SubElement(spPr, qn('a:noFill'))
-            except:
+            except Exception:
                 pass
 
     if hasattr(shape, 'line'):
         if stroke_val and stroke_val != 'none':
-            c = parse_color(stroke_val)
+            c, stroke_rgba_alpha = parse_color_alpha(stroke_val)
             if c:
                 shape.line.color.rgb = c
-            # stroke-width 以 SVG 画布 px 计；FONT_SCALE 已含 px→pt（SCALE * 72）。
-            # 这里不得再乘任何经验系数：批准稿 PNG 由 Chromium 按 SVG 声明的满权重渲染，
-            # 只要这里缩放一次，导出稿的每一根描边就永远对不上批准稿。
-            sw = float(stroke_width)
+            sw = _parse_svg_num(stroke_width, 1.0)
             line_pt = sw * FONT_SCALE
             shape.line.width = Pt(line_pt)
-            # 余量取 1e-4：SLIDE_W_IN 是 13⅓ 的近似值，1920 画布上的 1px 实际落在
-            # 0.49999pt，不加余量会把合法的发丝线误判成过细。
             if line_pt < MIN_STROKE_PT - 1e-4:
                 warn(
                     f"stroke-width {sw:g} 换算为 {line_pt:.2f}pt，低于 {MIN_STROKE_PT}pt；"
                     "部分渲染器不会绘制这么细的线，请在 SVG 中加粗"
                 )
-            if stroke_dasharray:
-                # Kept for legacy SVGs, but new generated SVGs should avoid it.
-                warn("stroke-dasharray encountered; converted to PPT dash style, but current SVG rules prohibit dasharray")
-                shape.line.dash_style = MSO_LINE.DASH
+            if stroke_dasharray and stroke_dasharray != 'none':
+                # v6.0: 原生支持 stroke-dasharray 转 PPT 虚线/点线样式
+                parts = [_parse_svg_num(p, 0.0) for p in re.split(r'[\s,]+', str(stroke_dasharray).strip()) if p]
+                if parts and parts[0] <= sw * 1.5:
+                    shape.line.dash_style = MSO_LINE.ROUND_DOT
+                else:
+                    shape.line.dash_style = MSO_LINE.DASH
 
-            so = 1.0 * parent_opacity
+            so = elem_opacity * stroke_rgba_alpha
             if stroke_opacity_val:
                 try:
                     so *= float(stroke_opacity_val)
-                except:
+                except Exception:
                     pass
             if so < 1.0:
                 try:
@@ -385,8 +700,8 @@ def apply_fill_stroke(shape, node, inherited_attrs=None, parent_opacity=1.0):
                                 for old_a in clr.findall(qn('a:alpha')):
                                     clr.remove(old_a)
                                 alpha_el = etree.SubElement(clr, qn('a:alpha'))
-                                alpha_el.set('val', str(int(so * 100000)))
-                except:
+                                alpha_el.set('val', str(int(round(max(0.0, min(1.0, so)) * 100000))))
+                except Exception:
                     pass
         else:
             try:
@@ -400,15 +715,13 @@ def apply_fill_stroke(shape, node, inherited_attrs=None, parent_opacity=1.0):
                             if 'Fill' in old_fill.tag:
                                 ln_elem.remove(old_fill)
                     etree.SubElement(ln_elem, qn('a:noFill'))
-            except:
+            except Exception:
                 pass
 
     try:
         remove_shadow(shape)
-    except:
+    except Exception:
         pass
-
-
 
 
 def svg_to_inches(v):
@@ -416,14 +729,7 @@ def svg_to_inches(v):
 
 
 def estimate_text_width(text, font_size_pt):
-    """估算文本宽度 (inches)，只用来给文本框定宽，不决定文字最终停在哪。
-
-    0.58 是西文平均字宽的粗估；ord > 0x2E7F 按全角计 1.0 字宽（CJK 正确）。
-    这个粗估是安全的：调用处给了 LEFT/CENTER/RIGHT 三种框内对齐，
-    框宽误差会在框内自我抵消（居中的仍居中，靠边的仍靠边），
-    所以不必在这里引入真实字体度量。若将来要精确测宽，用实际字体取字宽，
-    不要再叠经验系数。
-    """
+    """估算文本宽度 (inches)，只用来给文本框定宽，不决定文字最终停在哪。"""
     if not text:
         return 0
     w = 0
@@ -899,38 +1205,82 @@ def _node_fill_value(node, inherited_attrs=None):
 
 
 # ═══════════════════════════════════════
-# SVG 节点递归解析 (v5.0)
+# SVG 节点递归解析 (v6.0)
 # ═══════════════════════════════════════
+
+def _parse_spacing_px(spacing_val, font_size_svg=20.0):
+    """Parse letter-spacing / dy / dx value ('2', '2px', '0.1em', '120%') into SVG px."""
+    if not spacing_val:
+        return 0.0
+    s = str(spacing_val).strip().lower()
+    if not s or s == 'normal':
+        return 0.0
+    try:
+        if s.endswith('em'):
+            return float(s[:-2].strip()) * float(font_size_svg)
+        if s.endswith('%'):
+            return (float(s[:-1].strip()) / 100.0) * float(font_size_svg)
+        return _parse_svg_num(s, 0.0)
+    except Exception:
+        return 0.0
+
 
 def add_elements(slide, parent_node, offset_x=0, offset_y=0,
                  parent_opacity=1.0, inherited_attrs=None,
                  clip_rx_map=None, scale_x=1.0, scale_y=1.0):
-    """递归解析 SVG 节点。v5.0: 新增 scale_x/scale_y 参数。"""
+    """递归解析 SVG 节点。
+    v6.0:
+    - 支持根 <svg> 自动展开内联 <style> / :root CSS 变量与 <linearGradient>
+    - 支持所有叶子节点自身的 transform="translate(...) scale(...)" 累乘
+    - 修复 1px 分割线 <rect> (w/h < 1.44px) 被静默丢弃的问题
+    - 将 parent_opacity 传递给 <text>
+    """
+    global _gradient_map, _gradient_defs
+
     if inherited_attrs is None:
         inherited_attrs = {}
     if clip_rx_map is None:
         clip_rx_map = {}
 
-    for node in parent_node:
-        tag = node.tag.split('}')[-1]
+    parent_tag = parent_node.tag.split('}')[-1] if '}' in parent_node.tag else parent_node.tag
+    if parent_tag == 'svg':
+        inline_svg_styles_and_vars(parent_node)
+        if not clip_rx_map:
+            clip_rx_map = parse_clip_paths(parent_node)
+        new_grad_defs = parse_gradient_defs(parent_node)
+        if new_grad_defs:
+            _gradient_defs = new_grad_defs
+            _gradient_map = {gid: info['stops'][0]['color']
+                             for gid, info in new_grad_defs.items() if info.get('stops')}
 
-        if tag in ('defs', 'animate', 'animateTransform', 'animateMotion', 'set'):
+    # 1px in SVG is ~0.006944 inches on a 1920px / 13.333in canvas.
+    # Use 0.2px (~0.00138in) as the minimum geometry threshold so 1px divider rects are preserved.
+    min_inch = max(svg_to_inches(0.2), 0.0005)
+
+    for node in parent_node:
+        tag = node.tag.split('}')[-1] if '}' in node.tag else node.tag
+
+        if tag in ('defs', 'style', 'animate', 'animateTransform', 'animateMotion', 'set'):
             continue
 
-        if tag == 'g':
-            transform = node.attrib.get('transform', '')
+        # v6.0: 对 <g> 与所有叶子节点统一解析并累乘自身 transform
+        transform = node.attrib.get('transform', '')
+        if transform:
             unsupported = []
-            for name in ('rotate', 'skewX', 'skewY', 'matrix'):
+            for name in ('rotate', 'skewX', 'skewY', 'skew', 'matrix'):
                 if f'{name}(' in transform:
                     unsupported.append(name)
             if unsupported:
-                warn(f"unsupported transform ignored on <g>: {', '.join(unsupported)} in {transform!r}")
-            local = parse_axis_aligned_transform(transform)
+                warn(f"unsupported transform ignored on <{tag}>: {', '.join(unsupported)} in {transform!r}")
 
-            g_opacity = float(node.attrib.get('opacity', 1.0))
+        if tag == 'g':
+            local = parse_axis_aligned_transform(transform)
+            g_opacity = _parse_svg_num(node.attrib.get('opacity', 1.0), 1.0)
 
             new_inherited = dict(inherited_attrs)
-            for attr_name in ('fill', 'font-size', 'font-weight', 'stroke', 'stroke-width',
+            for attr_name in ('fill', 'font-size', 'font-weight', 'font-family',
+                              'letter-spacing', 'dominant-baseline', 'text-anchor',
+                              'stroke', 'stroke-width', 'stroke-dasharray',
                               'fill-opacity', 'stroke-opacity'):
                 val = node.attrib.get(attr_name)
                 if val:
@@ -942,45 +1292,54 @@ def add_elements(slide, parent_node, offset_x=0, offset_y=0,
             add_elements(slide, node, new_ox, new_oy,
                          parent_opacity * g_opacity, new_inherited,
                          clip_rx_map, new_sx, new_sy)
+            continue
 
-        elif tag == 'rect':
-            raw_x = offset_x + float(node.attrib.get('x', 0)) * scale_x
-            raw_y = offset_y + float(node.attrib.get('y', 0)) * scale_y
-            raw_w = float(node.attrib.get('width', 0)) * scale_x
-            raw_h = float(node.attrib.get('height', 0)) * scale_y
+        # For non-<text> leaf nodes, compose node's own transform here.
+        # (_add_text_element composes node's own transform internally so direct calls also work.)
+        if tag != 'text' and transform:
+            eff_ox, eff_oy, eff_sx, eff_sy = compose_axis_aligned(
+                (offset_x, offset_y, scale_x, scale_y),
+                parse_axis_aligned_transform(transform),
+            )
+        else:
+            eff_ox, eff_oy, eff_sx, eff_sy = offset_x, offset_y, scale_x, scale_y
+
+        if tag == 'rect':
+            raw_x = eff_ox + _parse_svg_num(node.attrib.get('x', 0)) * eff_sx
+            raw_y = eff_oy + _parse_svg_num(node.attrib.get('y', 0)) * eff_sy
+            raw_w = _parse_svg_num(node.attrib.get('width', 0)) * eff_sx
+            raw_h = _parse_svg_num(node.attrib.get('height', 0)) * eff_sy
 
             # ── v4.2: 全画布背景 rect → 设为 slide background ──
-            # Only opaque full-canvas rects are true slide backgrounds. A later
-            # translucent full-canvas rect is often a texture/wash overlay; if
-            # we treat it as the background it overwrites the real base color.
             if raw_w >= (SVG_W - 20) and raw_h >= (SVG_H - 20) and raw_x <= 10 and raw_y <= 10:
-                fill_val = node.attrib.get('fill')
-                if not fill_val:
-                    fill_val = inherited_attrs.get('fill')
+                fill_val = node.attrib.get('fill') or inherited_attrs.get('fill')
                 rect_opacity = parent_opacity
                 try:
-                    rect_opacity *= float(node.attrib.get('opacity', 1.0))
-                except:
+                    rect_opacity *= _parse_svg_num(node.attrib.get('opacity', 1.0), 1.0)
+                except Exception:
                     pass
                 try:
-                    rect_opacity *= float(node.attrib.get('fill-opacity', inherited_attrs.get('fill-opacity', 1.0)))
-                except:
+                    rect_opacity *= _parse_svg_num(
+                        node.attrib.get('fill-opacity', inherited_attrs.get('fill-opacity', 1.0)), 1.0
+                    )
+                except Exception:
                     pass
-                if fill_val and fill_val != 'none' and rect_opacity >= 0.99:
-                    c = parse_color(fill_val)
-                    if c:
+                is_grad = str(fill_val or '').strip().startswith('url(')
+                if fill_val and fill_val != 'none' and rect_opacity >= 0.99 and not is_grad:
+                    c, rgba_a = parse_color_alpha(fill_val)
+                    if c and rgba_a >= 0.99:
                         set_slide_background(slide, c)
-                    continue
+                        continue
 
             x = svg_to_inches(raw_x)
             y = svg_to_inches(raw_y)
             w = svg_to_inches(raw_w)
             h = svg_to_inches(raw_h)
-            if w <= 0.01 or h <= 0.01:
+            if w < min_inch or h < min_inch:
                 continue
 
             # ── v4.3: 检查 clip-path 引用的 rx ──
-            rx = node.attrib.get('rx')
+            rx = node.attrib.get('rx') or node.attrib.get('ry')
             if not rx:
                 clip_path = node.attrib.get('clip-path', '')
                 m = re.match(r'url\(#(.+?)\)', clip_path)
@@ -990,23 +1349,24 @@ def add_elements(slide, parent_node, offset_x=0, offset_y=0,
                 if not rx:
                     rx = parse_css_inset_clip_path(clip_path)
 
-            mso = MSO_SHAPE.ROUNDED_RECTANGLE if rx else MSO_SHAPE.RECTANGLE
+            rx_num = _parse_svg_num(rx, 0.0) if rx else 0.0
+            mso = MSO_SHAPE.ROUNDED_RECTANGLE if rx_num > 0 else MSO_SHAPE.RECTANGLE
             shape = slide.shapes.add_shape(mso, Inches(x), Inches(y), Inches(w), Inches(h))
             apply_fill_stroke(shape, node, inherited_attrs, parent_opacity)
-            if rx:
+            if rx_num > 0:
                 try:
-                    r_val = svg_to_inches(float(rx) * min(scale_x, scale_y))
+                    r_val = svg_to_inches(rx_num * min(eff_sx, eff_sy))
                     adj = min(r_val / min(w, h), 0.5)
                     shape.adjustments[0] = adj
-                except:
+                except Exception:
                     pass
 
         elif tag == 'circle':
-            cx = svg_to_inches(offset_x + float(node.attrib.get('cx', 0)) * scale_x)
-            cy = svg_to_inches(offset_y + float(node.attrib.get('cy', 0)) * scale_y)
-            rx = svg_to_inches(float(node.attrib.get('r', 0)) * scale_x)
-            ry = svg_to_inches(float(node.attrib.get('r', 0)) * scale_y)
-            if rx <= 0.01 or ry <= 0.01:
+            cx = svg_to_inches(eff_ox + _parse_svg_num(node.attrib.get('cx', 0)) * eff_sx)
+            cy = svg_to_inches(eff_oy + _parse_svg_num(node.attrib.get('cy', 0)) * eff_sy)
+            rx = svg_to_inches(_parse_svg_num(node.attrib.get('r', 0)) * eff_sx)
+            ry = svg_to_inches(_parse_svg_num(node.attrib.get('r', 0)) * eff_sy)
+            if rx < min_inch or ry < min_inch:
                 continue
             shape = slide.shapes.add_shape(
                 MSO_SHAPE.OVAL,
@@ -1016,12 +1376,11 @@ def add_elements(slide, parent_node, offset_x=0, offset_y=0,
             apply_fill_stroke(shape, node, inherited_attrs, parent_opacity)
 
         elif tag == 'ellipse':
-            # v5.0: 椭圆支持
-            ecx = svg_to_inches(offset_x + float(node.attrib.get('cx', 0)) * scale_x)
-            ecy = svg_to_inches(offset_y + float(node.attrib.get('cy', 0)) * scale_y)
-            erx = svg_to_inches(float(node.attrib.get('rx', 0)) * scale_x)
-            ery = svg_to_inches(float(node.attrib.get('ry', 0)) * scale_y)
-            if erx <= 0.01 or ery <= 0.01:
+            ecx = svg_to_inches(eff_ox + _parse_svg_num(node.attrib.get('cx', 0)) * eff_sx)
+            ecy = svg_to_inches(eff_oy + _parse_svg_num(node.attrib.get('cy', 0)) * eff_sy)
+            erx = svg_to_inches(_parse_svg_num(node.attrib.get('rx', 0)) * eff_sx)
+            ery = svg_to_inches(_parse_svg_num(node.attrib.get('ry', 0)) * eff_sy)
+            if erx < min_inch or ery < min_inch:
                 continue
             shape = slide.shapes.add_shape(
                 MSO_SHAPE.OVAL,
@@ -1031,10 +1390,10 @@ def add_elements(slide, parent_node, offset_x=0, offset_y=0,
             apply_fill_stroke(shape, node, inherited_attrs, parent_opacity)
 
         elif tag == 'line':
-            x1 = svg_to_inches(offset_x + float(node.attrib.get('x1', 0)) * scale_x)
-            y1 = svg_to_inches(offset_y + float(node.attrib.get('y1', 0)) * scale_y)
-            x2 = svg_to_inches(offset_x + float(node.attrib.get('x2', 0)) * scale_x)
-            y2 = svg_to_inches(offset_y + float(node.attrib.get('y2', 0)) * scale_y)
+            x1 = svg_to_inches(eff_ox + _parse_svg_num(node.attrib.get('x1', 0)) * eff_sx)
+            y1 = svg_to_inches(eff_oy + _parse_svg_num(node.attrib.get('y1', 0)) * eff_sy)
+            x2 = svg_to_inches(eff_ox + _parse_svg_num(node.attrib.get('x2', 0)) * eff_sx)
+            y2 = svg_to_inches(eff_oy + _parse_svg_num(node.attrib.get('y2', 0)) * eff_sy)
             connector = slide.shapes.add_connector(
                 MSO_CONNECTOR.STRAIGHT,
                 Inches(x1), Inches(y1), Inches(x2), Inches(y2)
@@ -1042,7 +1401,7 @@ def add_elements(slide, parent_node, offset_x=0, offset_y=0,
             apply_fill_stroke(connector, node, inherited_attrs, parent_opacity)
             try:
                 remove_shadow(connector)
-            except:
+            except Exception:
                 pass
 
         elif tag == 'polygon':
@@ -1050,23 +1409,21 @@ def add_elements(slide, parent_node, offset_x=0, offset_y=0,
             coords = []
             for i in range(0, len(pts), 2):
                 if i + 1 < len(pts):
-                    px = svg_to_inches(offset_x + float(pts[i]) * scale_x)
-                    py = svg_to_inches(offset_y + float(pts[i + 1]) * scale_y)
+                    px = svg_to_inches(eff_ox + float(pts[i]) * eff_sx)
+                    py = svg_to_inches(eff_oy + float(pts[i + 1]) * eff_sy)
                     coords.append((Inches(px), Inches(py)))
             if len(coords) >= 3:
                 builder = slide.shapes.build_freeform(coords[0][0], coords[0][1])
                 builder.add_line_segments(coords[1:] + [coords[0]])
                 shape = builder.convert_to_shape()
-
                 apply_fill_stroke(shape, node, inherited_attrs, parent_opacity)
 
         elif tag == 'path':
-            # v5.0: <path> 元素支持
             d = node.attrib.get('d', '')
             if not d:
                 continue
 
-            subpaths = _parse_path_to_points(d, offset_x, offset_y, scale_x, scale_y)
+            subpaths = _parse_path_to_points(d, eff_ox, eff_oy, eff_sx, eff_sy)
             fill_val = _node_fill_value(node, inherited_attrs)
             path_is_closed = _path_has_close_command(d)
             should_keep_close = path_is_closed and fill_val and fill_val != 'none'
@@ -1074,25 +1431,22 @@ def add_elements(slide, parent_node, offset_x=0, offset_y=0,
             for pts in subpaths:
                 if len(pts) < 2:
                     continue
-                # 转换为 Inches
                 inch_pts = [(Inches(svg_to_inches(px)), Inches(svg_to_inches(py)))
                             for px, py in pts]
                 builder = slide.shapes.build_freeform(inch_pts[0][0], inch_pts[0][1])
                 builder.add_line_segments(inch_pts[1:])
                 shape = builder.convert_to_shape()
-                # Open paths must stay open; filled closed paths need close preserved
-                # or PowerPoint can lose/alter the fill.
                 if not should_keep_close:
                     for close_el in shape._element.findall('.//' + qn('a:close')):
                         close_el.getparent().remove(close_el)
                 apply_fill_stroke(shape, node, inherited_attrs, parent_opacity)
 
         elif tag == 'image':
-            raw_x = offset_x + float(node.attrib.get('x', 0)) * scale_x
-            raw_y = offset_y + float(node.attrib.get('y', 0)) * scale_y
-            raw_w = float(node.attrib.get('width', 0)) * scale_x
-            raw_h = float(node.attrib.get('height', 0)) * scale_y
-            if raw_w <= 0.01 or raw_h <= 0.01:
+            raw_x = eff_ox + _parse_svg_num(node.attrib.get('x', 0)) * eff_sx
+            raw_y = eff_oy + _parse_svg_num(node.attrib.get('y', 0)) * eff_sy
+            raw_w = _parse_svg_num(node.attrib.get('width', 0)) * eff_sx
+            raw_h = _parse_svg_num(node.attrib.get('height', 0)) * eff_sy
+            if raw_w <= 0.2 or raw_h <= 0.2:
                 continue
 
             href = node.attrib.get('href') or node.attrib.get('{http://www.w3.org/1999/xlink}href')
@@ -1117,46 +1471,67 @@ def add_elements(slide, parent_node, offset_x=0, offset_y=0,
             pic = add_fitted_picture(slide, img_path, x, y, w, h, preserve)
             try:
                 remove_shadow(pic)
-            except:
+            except Exception:
                 pass
 
         elif tag == 'text':
             _add_text_element(slide, node, offset_x, offset_y, inherited_attrs,
-                              scale_x, scale_y)
+                              scale_x, scale_y, parent_opacity=parent_opacity)
 
         elif tag == 'polyline':
             pts = node.attrib.get('points', '').replace(',', ' ').split()
             coords = []
             for i in range(0, len(pts), 2):
                 if i + 1 < len(pts):
-                    px = svg_to_inches(offset_x + float(pts[i]) * scale_x)
-                    py = svg_to_inches(offset_y + float(pts[i + 1]) * scale_y)
+                    px = svg_to_inches(eff_ox + float(pts[i]) * eff_sx)
+                    py = svg_to_inches(eff_oy + float(pts[i + 1]) * eff_sy)
                     coords.append((Inches(px), Inches(py)))
             if len(coords) >= 2:
                 builder = slide.shapes.build_freeform(coords[0][0], coords[0][1])
                 builder.add_line_segments(coords[1:])
                 shape = builder.convert_to_shape()
-                # 强制移除 close，保留开放路径
                 for close_el in shape._element.findall('.//' + qn('a:close')):
                     close_el.getparent().remove(close_el)
                 apply_fill_stroke(shape, node, inherited_attrs, parent_opacity)
 
 
-def _apply_letter_spacing(run, spacing_val):
-    """v4.3: 通过 XML 注入 a:rPr spc 属性设置 letter-spacing。
-    spacing_val: SVG px 值 → PPT 百分之一点 (1/100 pt)
+def _apply_letter_spacing(run, spacing_val, font_size_svg=20.0):
+    """v6.0: 通过 XML 注入 a:rPr spc 属性设置 letter-spacing。
+    支持 '2', '2px', '0.1em'，并乘上 FONT_SCALE (0.5) 转换为 PPT 1/100 pt。
     """
-    if not spacing_val:
+    px_val = _parse_spacing_px(spacing_val, font_size_svg)
+    if abs(px_val) < 1e-6:
         return
     try:
-        spc = int(float(spacing_val) * 100)  # px → 百分之一点
+        # SVG px -> PPT pt (px * FONT_SCALE) -> 1/100 pt (* 100)
+        spc = int(round(px_val * FONT_SCALE * 100))
         rPr = run._r.find(qn('a:rPr'))
         if rPr is None:
             rPr = etree.SubElement(run._r, qn('a:rPr'))
-            # 移到第一个位置
             run._r.insert(0, rPr)
         rPr.set('spc', str(spc))
-    except:
+    except Exception:
+        pass
+
+
+def _apply_run_alpha(run, alpha_val):
+    """v6.0: 向文本 run 的 a:rPr > a:solidFill > a:srgbClr 注入 a:alpha 透明度。"""
+    if alpha_val is None or alpha_val >= 1.0:
+        return
+    alpha_val = max(0.0, min(1.0, float(alpha_val)))
+    try:
+        rPr = run._r.find(qn('a:rPr'))
+        if rPr is None:
+            return
+        sf = rPr.find(qn('a:solidFill'))
+        if sf is not None:
+            clr = sf.find(qn('a:srgbClr'))
+            if clr is not None:
+                for old_a in clr.findall(qn('a:alpha')):
+                    clr.remove(old_a)
+                alpha_el = etree.SubElement(clr, qn('a:alpha'))
+                alpha_el.set('val', str(int(round(alpha_val * 100000))))
+    except Exception:
         pass
 
 
@@ -1175,72 +1550,180 @@ def _set_run_font_family(run, family):
 
 
 def _add_text_element(slide, node, offset_x, offset_y, inherited_attrs=None,
-                      scale_x=1.0, scale_y=1.0):
+                      scale_x=1.0, scale_y=1.0, parent_opacity=1.0):
     """处理 <text> 节点，生成精确定位的原生文本框。
-    v5.0: 新增 scale_x/scale_y 支持。
+    v6.0 升级:
+    - 支持 <text> 自身的 transform="translate(...) scale(...)" 累乘
+    - 支持 <text> / <g> / <tspan> 的 opacity + fill-opacity + rgba() 透明度注入
+    - 支持 <tspan dy="..."> 拆分为独立 PPT 段落（多行文本）
+    - 支持按每个 <tspan> 实际字号与字距逐段估算宽度，并给胶囊/短标签留足防折行安全余量
+    - 支持 dominant-baseline / alignment-baseline (central/middle/hanging) 垂直偏移补偿
     """
     if inherited_attrs is None:
         inherited_attrs = {}
 
-    x_svg = offset_x + float(node.attrib.get('x', 0)) * scale_x
-    y_svg = offset_y + float(node.attrib.get('y', 0)) * scale_y
+    # 累乘 <text> 节点自身的 transform
+    node_tf = node.attrib.get('transform', '')
+    if node_tf:
+        eff_ox, eff_oy, eff_sx, eff_sy = compose_axis_aligned(
+            (offset_x, offset_y, scale_x, scale_y),
+            parse_axis_aligned_transform(node_tf),
+        )
+    else:
+        eff_ox, eff_oy, eff_sx, eff_sy = offset_x, offset_y, scale_x, scale_y
 
-    fs_svg = float(node.attrib.get('font-size',
-                   inherited_attrs.get('font-size', '20')))
-    # v5.0: scale 影响字号
-    fs_svg *= min(scale_x, scale_y)
+    scale_factor = min(eff_sx, eff_sy)
 
-    anchor = node.attrib.get('text-anchor', 'start')
+    x_svg = eff_ox + _parse_svg_num(node.attrib.get('x', 0)) * eff_sx
+    y_svg = eff_oy + _parse_svg_num(node.attrib.get('y', 0)) * eff_sy
 
-    fill_str = node.attrib.get('fill',
-               inherited_attrs.get('fill', '#333333'))
-    fill = parse_color(fill_str)
-
-    font_weight = node.attrib.get('font-weight',
-                  inherited_attrs.get('font-weight', 'normal'))
-    font_family = node.attrib.get('font-family',
-                  inherited_attrs.get('font-family', 'Microsoft YaHei'))
-    font_family = font_family.split(',')[0].strip().strip("'\"") or 'Microsoft YaHei'
-
-    # v4.3: letter-spacing
-    letter_spacing = node.attrib.get('letter-spacing',
-                     inherited_attrs.get('letter-spacing'))
-
+    base_fs_unscaled = _parse_svg_num(
+        node.attrib.get('font-size', inherited_attrs.get('font-size', '20')), 20.0
+    )
+    fs_svg = base_fs_unscaled * scale_factor
     fs_pt = fs_svg * FONT_SCALE
 
-    full_text = node.text or ''
+    anchor = (node.attrib.get('text-anchor') or inherited_attrs.get('text-anchor') or 'start').strip()
+    baseline = (
+        node.attrib.get('dominant-baseline')
+        or node.attrib.get('alignment-baseline')
+        or inherited_attrs.get('dominant-baseline')
+        or 'alphabetic'
+    ).strip().lower()
+
+    fill_str = node.attrib.get('fill') or inherited_attrs.get('fill') or '#333333'
+    base_fill, fill_rgba_alpha = parse_color_alpha(fill_str)
+
+    # 计算 <text> 级别基础透明度
+    text_opacity = float(parent_opacity) * fill_rgba_alpha
+    if node.attrib.get('opacity') is not None:
+        text_opacity *= _parse_svg_num(node.attrib.get('opacity'), 1.0)
+    if node.attrib.get('fill-opacity') is not None:
+        text_opacity *= _parse_svg_num(node.attrib.get('fill-opacity'), 1.0)
+    elif inherited_attrs.get('fill-opacity') is not None:
+        text_opacity *= _parse_svg_num(inherited_attrs.get('fill-opacity'), 1.0)
+    text_opacity = max(0.0, min(1.0, text_opacity))
+
+    font_weight = (node.attrib.get('font-weight') or inherited_attrs.get('font-weight') or 'normal').strip()
+    font_family = node.attrib.get('font-family') or inherited_attrs.get('font-family') or 'Microsoft YaHei'
+    font_family = font_family.split(',')[0].strip().strip("'\"") or 'Microsoft YaHei'
+    letter_spacing = node.attrib.get('letter-spacing') or inherited_attrs.get('letter-spacing')
+
+    # 将 <text> 及其子 <tspan> 拆解为逻辑行 (lines)，每行包含若干 run 字典
+    # run 字典: {text, fs_svg, weight, color, alpha, family, ls, dx_px}
+    lines = [{'dy_px': 0.0, 'runs': []}]
+
+    if node.text and node.text.strip():
+        lines[-1]['runs'].append({
+            'text': node.text.strip() if not list(node) else node.text,
+            'fs_svg': fs_svg,
+            'weight': font_weight,
+            'color': base_fill,
+            'alpha': text_opacity,
+            'family': font_family,
+            'ls': letter_spacing,
+            'dx_px': 0.0,
+        })
+
     for child in node:
-        ctag = child.tag.split('}')[-1]
+        ctag = child.tag.split('}')[-1] if '}' in child.tag else child.tag
         if ctag == 'tspan':
-            full_text += (child.text or '')
-        if child.tail:
-            full_text += child.tail
-    full_text = full_text.strip()
-    if not full_text:
+            c_fs_unscaled = _parse_svg_num(child.attrib.get('font-size'), base_fs_unscaled)
+            c_fs_svg = c_fs_unscaled * scale_factor
+            dy_attr = child.attrib.get('dy')
+            dy_px = _parse_spacing_px(dy_attr, c_fs_unscaled) * eff_sy if dy_attr else 0.0
+            dx_attr = child.attrib.get('dx')
+            dx_px = _parse_spacing_px(dx_attr, c_fs_unscaled) * eff_sx if dx_attr else 0.0
+
+            if abs(dy_px) > 1e-3:
+                if lines[-1]['runs']:
+                    lines.append({'dy_px': dy_px, 'runs': []})
+                else:
+                    # 第一个 <tspan> 就带 dy：整体下移起始基线
+                    y_svg += dy_px
+
+            if child.text:
+                c_weight = (child.attrib.get('font-weight') or font_weight).strip()
+                c_fill_str = child.attrib.get('fill')
+                if c_fill_str:
+                    c_color, c_rgba_a = parse_color_alpha(c_fill_str)
+                else:
+                    c_color, c_rgba_a = base_fill, 1.0
+                c_alpha = text_opacity * c_rgba_a
+                if child.attrib.get('opacity') is not None:
+                    c_alpha *= _parse_svg_num(child.attrib.get('opacity'), 1.0)
+                if child.attrib.get('fill-opacity') is not None:
+                    c_alpha *= _parse_svg_num(child.attrib.get('fill-opacity'), 1.0)
+                c_family = child.attrib.get('font-family') or font_family
+                c_ls = child.attrib.get('letter-spacing') if child.attrib.get('letter-spacing') is not None else letter_spacing
+
+                run_text = child.text
+                if dx_px > 2.0 and lines[-1]['runs']:
+                    # 用不间断空格近似行内 <tspan dx="..."> 间隔
+                    space_count = max(1, int(round(dx_px / max(c_fs_svg * 0.35, 4.0))))
+                    run_text = (" " * space_count) + run_text
+
+                lines[-1]['runs'].append({
+                    'text': run_text,
+                    'fs_svg': c_fs_svg,
+                    'weight': c_weight,
+                    'color': c_color or base_fill,
+                    'alpha': max(0.0, min(1.0, c_alpha)),
+                    'family': c_family,
+                    'ls': c_ls,
+                    'dx_px': max(0.0, dx_px),
+                })
+
+        if child.tail and child.tail.strip():
+            lines[-1]['runs'].append({
+                'text': child.tail,
+                'fs_svg': fs_svg,
+                'weight': font_weight,
+                'color': base_fill,
+                'alpha': text_opacity,
+                'family': font_family,
+                'ls': letter_spacing,
+                'dx_px': 0.0,
+            })
+
+    lines = [ln for ln in lines if ln['runs'] and "".join(r['text'] for r in ln['runs']).strip()]
+    if not lines:
         return
 
-    # v4.3: letter-spacing 影响文本宽度估算
-    ls_extra = 0
-    if letter_spacing:
-        try:
-            ls_extra = float(letter_spacing) * len(full_text) * SCALE
-        except:
-            pass
-    # 文本框宽度：估宽留 15% 余量（1.15），避免粗体/斜体把框挤爆。
-    # 框宽不决定文字停在哪——下面三种对齐都在框内对齐，误差自我抵消。
-    text_w = estimate_text_width(full_text, fs_pt) * 1.15 + ls_extra
-    text_w = max(text_w, 0.5)
-    # 1.6 是给文本框留的行高余量；word_wrap 与 auto_size 均关闭，所以它只影响框的
-    # 包围盒，不影响排版。
-    text_h = fs_pt / 72.0 * 1.6
+    # 逐行按每个 run 真实字号与字距估算宽度 (inches)
+    line_widths_in = []
+    line_heights_in = []
+    for idx_ln, ln in enumerate(lines):
+        w_in = 0.0
+        max_fs_pt = fs_pt
+        for r in ln['runs']:
+            r_pt = r['fs_svg'] * FONT_SCALE
+            max_fs_pt = max(max_fs_pt, r_pt)
+            r_ls_px = _parse_spacing_px(r['ls'], r['fs_svg'])
+            r_ls_in = r_ls_px * len(r['text']) * SCALE
+            r_dx_in = svg_to_inches(r['dx_px'])
+            w_in += estimate_text_width(r['text'], r_pt) * 1.20 + r_ls_in + r_dx_in
+        line_widths_in.append(w_in)
+        if idx_ln == 0:
+            line_heights_in.append((max_fs_pt / 72.0) * 1.55)
+        else:
+            dy_in = svg_to_inches(max(ln['dy_px'], max_fs_pt / FONT_SCALE * 1.15))
+            line_heights_in.append(dy_in)
+
+    # 给胶囊徽章与多 <tspan> 文本留足宽度余量 (+0.08in)，防止 PowerPoint 渲染字宽微增导致末字折行
+    text_w = max(max(line_widths_in) + 0.08, 0.5)
+    text_h = max(sum(line_heights_in), (fs_pt / 72.0) * 1.6)
 
     x_in = svg_to_inches(x_svg)
     y_in = svg_to_inches(y_svg)
-    # SVG 的 y 是基线，PPT 文本框的 y 是顶边，两者差一个上升部（ascender）。
-    # 0.85 是常见无衬线字体的粗略上升部比例（实际随字体在 0.75–0.9 之间）。
-    # 误差表现为整页统一的轻微垂直偏移，不改变页内元素的相对关系；
-    # 要精确就按实际字体读 hhea/OS2 的 ascender，不要再叠系数。
-    y_top = y_in - (fs_pt / 72.0) * 0.85
+
+    first_line_max_pt = max((r['fs_svg'] * FONT_SCALE for r in lines[0]['runs']), default=fs_pt)
+    if baseline in ('central', 'middle'):
+        y_top = y_in - (first_line_max_pt / 72.0) * 0.54
+    elif baseline in ('hanging', 'text-before-edge', 'top'):
+        y_top = y_in - (first_line_max_pt / 72.0) * 0.10
+    else:
+        y_top = y_in - (first_line_max_pt / 72.0) * 0.85
 
     if anchor == 'middle':
         tx = x_in - text_w / 2
@@ -1264,51 +1747,32 @@ def _add_text_element(slide, node, offset_x, offset_y, inherited_attrs=None,
     tf.margin_top = Emu(0)
     tf.margin_bottom = Emu(0)
 
-    p = tf.paragraphs[0]
-    p.alignment = align
+    prev_fs_svg = lines[0]['runs'][0]['fs_svg'] if lines[0]['runs'] else fs_svg
+    for idx_ln, ln in enumerate(lines):
+        p = tf.paragraphs[0] if idx_ln == 0 else tf.add_paragraph()
+        p.alignment = align
+        if idx_ln > 0 and ln['dy_px'] > 0:
+            extra_px = max(0.0, ln['dy_px'] - prev_fs_svg * 1.15)
+            if extra_px > 0:
+                p.space_before = Pt(extra_px * FONT_SCALE)
 
-    is_bold = font_weight in ('bold', '900', '800', '700')
-
-    if node.text and node.text.strip():
-        run = p.add_run()
-        run.text = node.text if node.text.strip() else ''
-        run.font.size = Pt(fs_pt)
-        run.font.bold = is_bold
-        _set_run_font_family(run, font_family)
-        if fill:
-            run.font.color.rgb = fill
-        _apply_letter_spacing(run, letter_spacing)
-
-    for child in node:
-        ctag = child.tag.split('}')[-1]
-        if ctag == 'tspan':
-            if child.text:
-                run = p.add_run()
-                run.text = child.text
-                child_fs = float(child.attrib.get('font-size', fs_svg / min(scale_x, scale_y)))
-                child_fs *= min(scale_x, scale_y)
-                run.font.size = Pt(child_fs * FONT_SCALE)
-                c_weight = child.attrib.get('font-weight', font_weight)
-                run.font.bold = c_weight in ('bold', '900', '800', '700')
-                c_color = parse_color(child.attrib.get('fill')) or fill
-                if c_color:
-                    run.font.color.rgb = c_color
-                _set_run_font_family(run, child.attrib.get('font-family', font_family))
-                child_ls = child.attrib.get('letter-spacing', letter_spacing)
-                _apply_letter_spacing(run, child_ls)
-        if child.tail and child.tail.strip():
+        for r in ln['runs']:
             run = p.add_run()
-            run.text = child.tail
-            run.font.size = Pt(fs_pt)
-            run.font.bold = is_bold
-            if fill:
-                run.font.color.rgb = fill
-            run.font.name = 'Microsoft YaHei'
-            _apply_letter_spacing(run, letter_spacing)
+            run.text = r['text']
+            run.font.size = Pt(r['fs_svg'] * FONT_SCALE)
+            run.font.bold = r['weight'] in ('bold', '900', '800', '700', '600')
+            _set_run_font_family(run, r['family'])
+            if r['color']:
+                run.font.color.rgb = r['color']
+            _apply_letter_spacing(run, r['ls'], font_size_svg=r['fs_svg'])
+            if r['alpha'] < 1.0:
+                _apply_run_alpha(run, r['alpha'])
+
+        prev_fs_svg = max((r['fs_svg'] for r in ln['runs']), default=fs_svg)
 
     try:
         remove_shadow(tb)
-    except:
+    except Exception:
         pass
 
 
@@ -1345,6 +1809,7 @@ def delete_all_slides(prs):
 
 def main():
     global _gradient_map
+    global _gradient_defs
     global _current_svg_dir
     global _conversion_errors
     global _conversion_warnings
@@ -1358,7 +1823,7 @@ def main():
         sys.exit(2)
 
     parser = argparse.ArgumentParser(
-        description='Smart SVG -> PPTX Converter v5.0')
+        description='Smart SVG -> PPTX Converter v6.0')
     parser.add_argument('svgs', nargs='+', help='SVG files (in slide order)')
     parser.add_argument('-o', '--output', default='final_deck.pptx',
                         help='Output PPTX path')
@@ -1461,11 +1926,11 @@ def main():
 
         try:
             _current_svg_dir = os.path.dirname(os.path.abspath(f))
-            tree = ET.parse(f)
-            root = tree.getroot()
-            # v4.2: 预解析 clipPath
+            raw_svg = _Path(f).read_text(encoding='utf-8-sig')
+            root = ET.fromstring(raw_svg)
+            inline_svg_styles_and_vars(root, raw_svg)
             clip_rx_map = parse_clip_paths(root)
-            # v5.0: 预解析渐变
+            _gradient_defs = parse_gradient_defs(root)
             _gradient_map = parse_gradients(root)
             add_elements(slide, root, clip_rx_map=clip_rx_map)
             print(f'  OK: {f}')

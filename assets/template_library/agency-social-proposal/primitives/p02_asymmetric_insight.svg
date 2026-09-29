@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="var(--font-sans)">
+  <defs>
+    <style>
+:root {
+  /* 75% Neutral Canvas and Surfaces */
+  --canvas-bg: #F4F5F7;
+  --canvas-pure: #FFFFFF;
+  --surface-card: #FFFFFF;
+  --surface-muted: #EBECEE;
+  --surface-zebra: #F8F9FB;
+  --surface-dark: #111111;
+  --surface-dark-elevated: #1E2024;
+  --surface-accent-tint: #FFF1F2;
+
+  /* 20% Charcoal and Ink Hierarchy */
+  --ink-primary: #111111;
+  --ink-secondary: #4B5563;
+  --ink-muted: #8C94A0;
+  --ink-watermark: #EAECEF;
+  --ink-on-dark: #FFFFFF;
+  --ink-on-dark-muted: #A1A8B3;
+
+  /* 5% Brand Accent (Strict Single-Hue Discipline) */
+  --accent-brand: #E60012;
+  --accent-secondary: #2B2D33;
+
+  /* Hairlines and Dividers */
+  --border-subtle: #E2E5EA;
+  --border-strong: #111111;
+
+  /* Font Stacks */
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Arial Black", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Courier New", monospace;
+
+  /* 6-Tier 1080p Font Scale */
+  --size-watermark: 136px;
+  --size-hero-kpi: 56px;
+  --size-action-title: 42px;
+  --size-card-title: 26px;
+  --size-subtitle: 21px;
+  --size-body: 18px;
+  --size-caption: 14px;
+}
+
+      text { font-family: var(--font-sans); }
+      .mono { font-family: var(--font-mono); }
+      .display { font-family: var(--font-display); }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1920" height="1080" fill="var(--canvas-bg)"/>
+  <!-- Global Skyline Header -->
+  <g id="skyline-header">
+    <rect x="80" y="64" width="8" height="54" rx="4" fill="var(--accent-brand)"/>
+    <text x="106" y="102" font-size="40" font-weight="900" fill="var(--ink-primary)">百年专业基因丰厚，但社媒声量困于「硬核参数」未能转化为穿搭溢价</text>
+    <text x="106" y="144" font-size="20" font-weight="500" fill="var(--ink-secondary)">对比行业破圈标杆，品牌急需将 <tspan fill="var(--accent-brand)" font-weight="700">“赛道级黑科技”转译为“日常可感知的先锋型格”</tspan>，打通大众搜索入口</text>
+    <rect x="1560" y="64" width="280" height="34" rx="6" fill="var(--surface-dark)"/>
+    <text x="1700" y="86" class="mono" font-size="14" font-weight="700" fill="var(--ink-on-dark)" text-anchor="middle" letter-spacing="1">PART 01 // BRAND DIAGNOSIS</text>
+    <line x1="80" y1="172" x2="1840" y2="172" stroke="var(--border-subtle)" stroke-width="1.5"/>
+  </g>
+
+  <!-- Global Skyline Bottom Takeaway Banner -->
+  <g id="skyline-takeaway">
+    <rect x="80" y="918" width="1760" height="76" rx="12" fill="var(--surface-dark)"/>
+    <rect x="104" y="937" width="164" height="38" rx="6" fill="var(--accent-brand)"/>
+    <text x="186" y="962" class="mono" font-size="14" font-weight="800" fill="var(--ink-on-dark)" text-anchor="middle" letter-spacing="1">STRATEGIC SHIFT</text>
+    <text x="288" y="964" font-size="22" font-weight="700" fill="var(--ink-on-dark)">破局公式：以 <tspan fill="var(--accent-brand)" font-weight="900">70% 垂类专业内容</tspan> 铸造信任金身，撬动 30% 泛时尚人群的高溢价自来水传播</text>
+  </g>
+
+  <!-- Global Skyline Footer -->
+  <g id="skyline-footer">
+    <text x="80" y="1034" font-size="14" font-weight="500" fill="var(--ink-muted)">Source: 小红书品牌搜索词云与竞品心智象限对标分析 (2025 Q1–Q4)</text>
+    <text x="1840" y="1036" class="display" font-size="20" font-weight="900" fill="var(--ink-primary)" text-anchor="end">P.02</text>
+  </g>
+  <!-- Left 1/3 Dark Hero Anchor Card (x=80, y=196, w=540, h=696) -->
+  <g id="left-hero-anchor" transform="translate(80, 196)">
+    <rect x="0" y="0" width="540" height="696" rx="16" fill="var(--surface-dark)"/>
+    <rect x="0" y="0" width="540" height="10" rx="4" fill="var(--accent-brand)"/>
+
+    <text x="40" y="62" class="mono" font-size="15" font-weight="800" fill="var(--accent-brand)" letter-spacing="1.5">BRAND CORE ARCHETYPE</text>
+    <text x="40" y="114" font-size="34" font-weight="900" fill="var(--ink-on-dark)">百年匠心 × 科技美学</text>
+    <text x="40" y="156" font-size="19" font-weight="500" fill="var(--ink-on-dark-muted)">1906 年创立，手握跑鞋/足球/训练三大专业资产库</text>
+
+    <line x1="40" y1="192" x2="500" y2="192" stroke="#2B2E36" stroke-width="1.5"/>
+
+    <!-- Big KPI Callout 1 -->
+    <text x="40" y="246" class="mono" font-size="14" font-weight="700" fill="var(--ink-on-dark-muted)">自然搜索「专业度」正面心智占比</text>
+    <text x="40" y="318" class="display" font-size="64" font-weight="900" fill="var(--ink-on-dark)">86.4<tspan font-size="28" fill="var(--accent-brand)">%</tspan></text>
+    <text x="270" y="308" font-size="17" font-weight="600" fill="var(--ink-on-dark-muted)">稳居垂类第一梯队</text>
+
+    <!-- Big KPI Callout 2 -->
+    <text x="40" y="392" class="mono" font-size="14" font-weight="700" fill="var(--ink-on-dark-muted)">泛穿搭 / OOTD 关联词渗透率</text>
+    <text x="40" y="464" class="display" font-size="64" font-weight="900" fill="var(--accent-brand)">11.2<tspan font-size="28" fill="var(--ink-on-dark)">%</tspan></text>
+    <text x="270" y="454" font-size="17" font-weight="600" fill="var(--ink-on-dark-muted)">仅为同级标杆品牌的 1/4</text>
+
+    <!-- Bottom Embedded Verdict Box inside Dark Card -->
+    <rect x="32" y="520" width="476" height="140" rx="12" fill="var(--surface-dark-elevated)"/>
+    <rect x="32" y="520" width="6" height="140" rx="3" fill="var(--accent-brand)"/>
+    <text x="56" y="562" font-size="20" font-weight="800" fill="var(--ink-on-dark)">核心症结：有口碑、缺社交货币</text>
+    <text x="56" y="598" font-size="17" font-weight="400" fill="var(--ink-on-dark-muted)">硬核跑者高度认可中底科技，但大众消费者</text>
+    <text x="56" y="628" font-size="17" font-weight="400" fill="var(--ink-on-dark-muted)">在搜「通勤百搭跑鞋」时缺乏直观的视觉锚点。</text>
+  </g>
+
+  <!-- Right 2/3 Three Horizontal Left-Bar Strip Rows (x=656, w=1184) -->
+  <!-- Row 1: Hero Red Left Bar -->
+  <g id="right-row-1" transform="translate(656, 196)">
+    <rect x="0" y="0" width="1184" height="214" rx="14" fill="var(--surface-card)"/>
+    <rect x="0" y="0" width="10" height="214" rx="5" fill="var(--accent-brand)"/>
+    <text x="1140" y="165" class="display" font-size="110" font-weight="900" fill="var(--ink-watermark)" text-anchor="end">01</text>
+
+    <rect x="40" y="30" width="148" height="32" rx="6" fill="var(--surface-accent-tint)"/>
+    <text x="114" y="51" class="mono" font-size="14" font-weight="800" fill="var(--accent-brand)" text-anchor="middle">PRIORITY #1 · 破局</text>
+    <text x="40" y="106" font-size="28" font-weight="900" fill="var(--ink-primary)">视觉降维：把「实验室参数」翻译成「一眼高级的型格」</text>
+    <text x="40" y="148" font-size="19" font-weight="500" fill="var(--ink-secondary)">摒弃传统棚拍白底鞋图，建立高反差街拍、复古运动档案与银色金属质感三大视觉母体，</text>
+    <text x="40" y="180" font-size="19" font-weight="500" fill="var(--ink-secondary)">让每双尖货自带 <tspan fill="var(--accent-brand)" font-weight="700">#CleanFit、#复古跑鞋穿搭</tspan> 的天然高点击封面基因。</text>
+  </g>
+
+  <!-- Row 2: Secondary Charcoal Left Bar -->
+  <g id="right-row-2" transform="translate(656, 437)">
+    <rect x="0" y="0" width="1184" height="214" rx="14" fill="var(--surface-card)"/>
+    <rect x="0" y="0" width="10" height="214" rx="5" fill="var(--surface-dark)"/>
+    <text x="1140" y="165" class="display" font-size="110" font-weight="900" fill="var(--ink-watermark)" text-anchor="end">02</text>
+
+    <rect x="40" y="30" width="148" height="32" rx="6" fill="var(--surface-muted)"/>
+    <text x="114" y="51" class="mono" font-size="14" font-weight="800" fill="var(--ink-primary)" text-anchor="middle">PILLAR #2 · 卡位</text>
+    <text x="40" y="106" font-size="28" font-weight="900" fill="var(--ink-primary)">搜索截流：重构「选鞋标尺」内容，承接泛人群决策长尾词</text>
+    <text x="40" y="148" font-size="19" font-weight="500" fill="var(--ink-secondary)">针对「足弓支撑怎么选」「通勤日行两万步神鞋」等高转化痛点词，铺设横评矩阵与尺码攻略，</text>
+    <text x="40" y="180" font-size="19" font-weight="500" fill="var(--ink-secondary)">把品牌的专业护城河转化为大众消费者下单前的「唯一定心丸」。</text>
+  </g>
+
+  <!-- Row 3: Secondary Charcoal Left Bar -->
+  <g id="right-row-3" transform="translate(656, 678)">
+    <rect x="0" y="0" width="1184" height="214" rx="14" fill="var(--surface-card)"/>
+    <rect x="0" y="0" width="10" height="214" rx="5" fill="var(--surface-dark)"/>
+    <text x="1140" y="165" class="display" font-size="110" font-weight="900" fill="var(--ink-watermark)" text-anchor="end">03</text>
+
+    <rect x="40" y="30" width="148" height="32" rx="6" fill="var(--surface-muted)"/>
+    <text x="114" y="51" class="mono" font-size="14" font-weight="800" fill="var(--ink-primary)" text-anchor="middle">PILLAR #3 · 沉淀</text>
+    <text x="40" y="106" font-size="28" font-weight="900" fill="var(--ink-primary)">阵地共振：官号人设栏目化，联动达人 KFS 放大爆文长尾</text>
+    <text x="40" y="148" font-size="19" font-weight="500" fill="var(--ink-secondary)">改变官号「单向发海报」旧习，用六大固定栏目承接达人共创素材，实现「达人种草引爆话题 —</text>
+    <text x="40" y="180" font-size="19" font-weight="500" fill="var(--ink-secondary)">官号专业背书沉淀 — 评论区组件直跳转化」的完整商业闭环。</text>
+  </g>
+</svg>
