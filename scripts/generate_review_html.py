@@ -18,7 +18,7 @@ from pathlib import Path
 
 from project_state import (PNG, REVIEW, SVG, approvals, content, images, local, read,
                            review_snapshot, sha, versions, write)
-from review_surface import DRAFT_REL, write_surface
+from review_surface import DRAFT_REL, resolve_module, write_surface
 
 SNAPSHOT_REL = f'{REVIEW}/snapshot.json'
 VERSIONS_REL = f'{REVIEW}/versions'
@@ -175,7 +175,8 @@ def generate(root, template_path=None):
     template = tpl_file.read_text(encoding='utf-8')
     # DSH 设计令牌随页面一起发：审阅页在不透明源 iframe 里，宿主的变量继承不进来、
     # 外链样式表也会被信任围栏打回 403，所以这张表必须是**内联的**。
-    tokens = (Path(__file__).resolve().parents[1]/'assets/review/dsh-tokens.css').read_text(encoding='utf-8')
+    # 表只有一份，在公共接缝那儿（planners-review-core）—— 本 Skill 不再存副本。
+    tokens = (resolve_module('planners-review-core')/'assets'/'dsh-tokens.css').read_text(encoding='utf-8')
     html = template.replace('__DSH_TOKENS__', tokens)
     html = html.replace('__DATA__', json.dumps(data, ensure_ascii=False).replace('<', '\\u003c'))
     (root/'02_visual_review.html').write_text(html, encoding='utf-8')

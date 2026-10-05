@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-05 — 令牌表移到公共接缝（本 Skill 不再存副本）
+
+要给更多审阅面铺同一套观感，那张表就不能再放在本 Skill 里。已移到 **`planners-review-core/assets/dsh-tokens.css`**
+（接缝本来就在发 `review-bridge.js` 这类"所有审阅页共用"的页面侧资产），并加了
+`scripts/inline_review_tokens.py`（把表内联进页面，写盘前验括号配对与表是否真在里面）。
+
+`generate_review_html.py` 改成按名字解析接缝再取表；本 Skill 下的 `assets/review/dsh-tokens.css`
+与 `scripts/vendor_dsh_tokens.py` 已删除。**一处定义**：改表只改接缝那一份，三个审阅面在生成时各自内联。
+
 ## 2026-10-05 — 令牌来源纠错：改钉"你装的那一版"，并把两个静默失效堵上
 
 作者问了句要害的话："你调用的这个 UI 组件是最新的吗。" **不是。** 记录如下。

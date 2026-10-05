@@ -53,13 +53,13 @@
 ## 审阅页的观感：用 DSH 的令牌（vendor 一份副本，别手改）
 
 页面的颜色、字、圆角、阴影、滚动条、控件密度都走 DSH 的设计令牌，表在
-`assets/review/dsh-tokens.css`。它是**副本**（审阅页在不透明 iframe 里继承不到宿主的变量，
+公共接缝 `planners-review-core/assets/dsh-tokens.css`。它是**副本**（审阅页在不透明 iframe 里继承不到宿主的变量，
 外链样式表也会被 403 打回，所以令牌只能随页面一起内联发出去）。
 
 **更新方式只有一条**：
 
 ```bash
-python3 scripts/vendor_dsh_tokens.py        # 从 npm 包 + 本机发行版重抄
+python3 <planners-review-core>/scripts/vendor_dsh_tokens.py   # 重抄（表只有那一份）
 ```
 
 它会打印并写进文件头：三个源文件的 sha256、补丁 token 条数。**手改那份 CSS 会漂移，而两边都不会报错** —— 所以别手改。缺 npm 包或缺发行版时脚本直接报错退出，不会写出半份。
