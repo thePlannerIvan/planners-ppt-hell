@@ -378,5 +378,50 @@ class ReviewBrowserTests(unittest.TestCase):
             for item in hosts: review_host.stop_host(item)
             fixture.tearDown()
 
+    def test_typing_feedback_does_not_rebuild_the_rail(self):
+        """写反馈打字时，左边的缩略图不该被销毁重建（2026-10-05 真人反馈）。
+
+        `#feedback` 的 oninput → `autoState()` 原本调 `drawRail()`：**每敲一个字**，整条轨道
+        连同每一张缩略图的重新取回都重来一遍（插件模式下是每页一次桥往返 + 一个新 blob）。
+        人在左边看到的就是缩略图一直在动。
+
+        判据要能证伪：先给每个缩略图打上 `data-probe` 标记，再敲一个字 ——
+        标记还在＝没重建（新行为）；标记全没了＝被重建了（旧行为）。
+        同时确认状态确实更新了（活动页变成 `revise`），别把"什么都不做"当成修好。
+        """
+        fixture = fixtures.V5Tests(); fixture.setUp(); root = fixture.root.resolve()
+        hosts = []
+        try:
+            fixture.payload()
+            state = review_host.start_host(root / review_surface.SURFACE_REL); hosts.append(state)
+            from playwright.sync_api import sync_playwright
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page(viewport={'width': 1440, 'height': 900})
+                page.goto(state['url'])
+                page.wait_for_function("document.querySelector('#bridgeState').textContent.includes('已连接')")
+                page.wait_for_function("() => document.querySelectorAll('#rail img').length > 0")
+                marked = page.evaluate("""() => {
+                  const imgs = [...document.querySelectorAll('#rail img')];
+                  imgs.forEach((el, i) => { el.dataset.probe = String(i) });
+                  const box = document.querySelector('#feedback');
+                  box.value = '写一句意见';
+                  box.dispatchEvent(new Event('input', { bubbles: true }));
+                  return {
+                    marked: imgs.length,
+                    survived: document.querySelectorAll('#rail img[data-probe]').length,
+                    active: document.querySelector('#rail button.active').className,
+                    total: document.querySelectorAll('#rail button').length,
+                  };
+                }""")
+                self.assertGreater(marked['marked'], 0, '轨道里得先有缩略图，否则这条断言什么也没证')
+                self.assertEqual(marked['total'], marked['marked'], '缩略图数量应与页数一致')
+                self.assertEqual(marked['survived'], marked['marked'],
+                                 '打字只该改状态，不该销毁重建缩略图（重建会让整条轨道一直在动）')
+                self.assertIn('revise', marked['active'], '状态仍要更新：活动页应变成 revise')
+        finally:
+            for item in hosts: review_host.stop_host(item)
+            fixture.tearDown()
+
 if __name__ == '__main__':
     unittest.main()

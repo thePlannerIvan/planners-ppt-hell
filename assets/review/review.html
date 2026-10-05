@@ -35,6 +35,8 @@ header small{color:#8fa6ae;font-size:12px}
 .rail img{width:100%;display:block;border-radius:3px;border:1px solid #e5eaed;aspect-ratio:16/9;object-fit:contain;background:white}
 .rail .active{border-color:#1b4e60;box-shadow:0 2px 6px rgba(17,43,53,.12)}
 .rail-meta{display:flex;align-items:center;justify-content:space-between;margin-top:5px;font-size:12px;font-weight:600;color:#2c4049}
+.rail-tag{color:#cb741d}
+.rail-tag:empty{display:none}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#929ca0;margin-right:6px}
 .approved .dot{background:#138357}
 .revise .dot{background:#cb741d}
@@ -277,7 +279,7 @@ function status(){
 function autoState(){
   const p=page(),s=state[p.key];
   s.decision=changed(p)?'revise':initial[p.key].decision;
-  drawRail();status();
+  updateRail();status();
 }
 $('#project').textContent=(data.project||'项目')+' · 整套审阅';
 
@@ -294,12 +296,19 @@ function setMode(mode){
   $('#stageModeHint').textContent='单击元素可改字、拖动位置或按 Delete 删除';
 }
 
+function railClass(i,p){
+  const s=state[p.key];
+  return s.decision+(i===index?' active':'')+(updatedPages.has(p.key)?' updated':'');
+}
+function railTagText(s){
+  return (s.annotations.length?s.annotations.length+'框 ':'')+(s.svg_edits.length?s.svg_edits.length+'改':'');
+}
+/* 整条轨道建一次。只在换页 / 换新快照（`render()`）时用。 */
 function drawRail(){
   const rail=$('#rail');rail.replaceChildren();
   data.pages.forEach((p,i)=>{
-    const s=state[p.key];
     const b=document.createElement('button');
-    b.className=s.decision+(i===index?' active':'')+(updatedPages.has(p.key)?' updated':'');
+    b.className=railClass(i,p);
     b.dataset.key=p.key;
     b.title=updatedPages.has(p.key)?'画面已更新，待复核':'';
     const img=document.createElement('img');img.alt='第 '+(i+1)+' 页';
@@ -309,15 +318,29 @@ function drawRail(){
     const t=document.createElement('span');const d=document.createElement('span');d.className='dot';
     t.append(d,document.createTextNode(String(i+1)));
     meta.append(t);
-    if(s.annotations.length||s.svg_edits.length){
-      const tag=document.createElement('small');
-      tag.style.color='#cb741d';
-      tag.textContent=(s.annotations.length?s.annotations.length+'框 ':'')+(s.svg_edits.length?s.svg_edits.length+'改':'');
-      meta.append(tag);
-    }
+    // 标签常驻（空的时候用 `:empty` 收起来），这样状态变化能原地改，不必重建。
+    const tag=document.createElement('small');tag.className='rail-tag';tag.textContent=railTagText(state[p.key]);
+    meta.append(tag);
     b.append(meta);
     b.onclick=()=>{index=i;render()};
     rail.append(b);
+  });
+}
+/* 只改状态，不重建。
+ *
+ * 原来每个状态变化都走 `drawRail()`，而写意见时**每敲一个字**都会走到这里
+ * （`#feedback` 的 oninput → autoState → drawRail）：于是 28 页的整套缩略图被反复销毁重建，
+ * 每重建一次还要**重新取 28 张图**（每次都是新的 `<img>` 与新的 blob）。人在左边看到的
+ * 就是缩略图一直在动，正在写的意见也被打断。滚动位置、图片、按钮结构都不该因为一个决定变了
+ * 而重来 —— 变的只是那个圆点和那个「N框 N改」标签。
+ */
+function updateRail(){
+  data.pages.forEach((p,i)=>{
+    const b=$('#rail button[data-key="'+p.key+'"]');if(!b)return;
+    b.className=railClass(i,p);
+    b.title=updatedPages.has(p.key)?'画面已更新，待复核':'';
+    const tag=b.querySelector('.rail-tag');
+    if(tag)tag.textContent=railTagText(state[p.key]);
   });
 }
 
@@ -607,7 +630,7 @@ $('#inlineTextInput').oninput=e=>{
   applyTextToDom(el,rec.text,rec.lines);
   pruneNoopEditRecord(selectedReviewId);
   updateToolbarSelection();
-  drawRail();status();
+  updateRail();status();
 };
 
 function stepFontSize(delta){
@@ -621,7 +644,7 @@ function stepFontSize(delta){
   applyFontSizeToDom(el,nextFs);
   pruneNoopEditRecord(selectedReviewId);
   updateToolbarSelection();
-  drawRail();status();
+  updateRail();status();
 }
 
 function deleteSelectedSvgElement(){
@@ -633,7 +656,7 @@ function deleteSelectedSvgElement(){
   applyDeleteToDom(el,true);
   selectedReviewId=null;
   updateToolbarSelection();
-  drawRail();status();
+  updateRail();status();
   note('已删除（可点「撤销」恢复）','ok');
 }
 
@@ -642,7 +665,7 @@ function undoLastSvgEdit(){
   if(!s.edit_history||!s.edit_history.length)return;
   s.svg_edits=s.edit_history.pop();
   mountInlineSvg(p);
-  drawRail();status();
+  updateRail();status();
 }
 function resetPageSvgEdits(){
   const p=page(),s=state[p.key];
@@ -650,7 +673,7 @@ function resetPageSvgEdits(){
   pushHistorySnapshot();
   s.svg_edits=[];
   mountInlineSvg(p);
-  drawRail();status();
+  updateRail();status();
 }
 
 function commentOnSelected(){
@@ -937,7 +960,7 @@ async function upload(file,key,isNew){
     state[targetKey].decision='revise';
     note('图片已上传（版本 '+(sha?sha.slice(0,12):'未给 hash')+'）；提交后更新页面','ok');
     if(page().key===targetKey)drawAssets();
-    drawRail();status();
+    updateRail();status();
   }catch(error){
     note('上传失败：'+error.message+(/asset-upload/.test(error.message)?'（这个宿主没有声明上传能力）':''),'error');
   }finally{uploads--}
@@ -1081,7 +1104,7 @@ async function decideCurrent(value){
   const p=page(),s=state[p.key];
   if(value==='approved'&&changed(p)){note('本页还有意见、框选或图片改动：清空（图片点「重置修改」）后才能通过','error');return}
   if(value==='revise'&&!changed(p)){note('先写一句要改什么，或框选一处问题，再点「本页要求修改」','error');return}
-  s.decision=value;drawRail();status();
+  s.decision=value;updateRail();status();
   const gist=(s.feedback.trim()||((s.annotations[0]||{}).text||'').trim()).slice(0,40);
   const wake=value==='approved'
     ?{unit:p.key,text:p.key+' 已通过。'}
@@ -1197,7 +1220,7 @@ $('#preview').onpointerup=()=>{
     if(dragState.moved){
       pruneNoopEditRecord(selectedReviewId);
       updateToolbarSelection();
-      drawRail();status();
+      updateRail();status();
     }
     dragState=null;
   }
