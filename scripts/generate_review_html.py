@@ -173,7 +173,11 @@ def generate(root, template_path=None):
     if not tpl_file.is_file():
         tpl_file = Path(__file__).resolve().parent / 'review.html'
     template = tpl_file.read_text(encoding='utf-8')
-    html = template.replace('__DATA__', json.dumps(data, ensure_ascii=False).replace('<', '\\u003c'))
+    # DSH 设计令牌随页面一起发：审阅页在不透明源 iframe 里，宿主的变量继承不进来、
+    # 外链样式表也会被信任围栏打回 403，所以这张表必须是**内联的**。
+    tokens = (Path(__file__).resolve().parents[1]/'assets/review/dsh-tokens.css').read_text(encoding='utf-8')
+    html = template.replace('__DSH_TOKENS__', tokens)
+    html = html.replace('__DATA__', json.dumps(data, ensure_ascii=False).replace('<', '\\u003c'))
     (root/'02_visual_review.html').write_text(html, encoding='utf-8')
     snap['html_sha256'] = sha(root/'02_visual_review.html')
     write(root/REVIEW/'snapshot.json', snap)

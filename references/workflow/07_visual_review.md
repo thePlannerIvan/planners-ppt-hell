@@ -50,6 +50,37 @@
 
 用户实际提交反馈后继续。读取所有反馈（`feedback.json` 已被 `consume` 规范化：决定、`items`、每页盖上的版本与 PNG hash）；修改回到统一创作阶段。修改后的页面重新检查和审阅；未变化页面可保留其版本一致的批准。禁止模型调用反馈接口代替用户批准生产项目。
 
+## 审阅页的观感：用 DSH 的令牌（vendor 一份副本，别手改）
+
+页面的颜色、字、圆角、阴影、滚动条、控件密度都走 DSH 的设计令牌，表在
+`assets/review/dsh-tokens.css`。它是**副本**（审阅页在不透明 iframe 里继承不到宿主的变量，
+外链样式表也会被 403 打回，所以令牌只能随页面一起内联发出去）。
+
+**更新方式只有一条**：
+
+```bash
+python3 scripts/vendor_dsh_tokens.py        # 从 npm 包 + 本机发行版重抄
+```
+
+它会打印并写进文件头：三个源文件的 sha256、补丁 token 条数。**手改那份 CSS 会漂移，而两边都不会报错** —— 所以别手改。缺 npm 包或缺发行版时脚本直接报错退出，不会写出半份。
+
+两个来源的分工：npm 公开包 `@deepseek-ai/dsh-client-ui-theme`（BSD-3-Clause）给颜色两层、
+滚动条、明暗整套；`--dsw-radius-*`、`--dsw-elevation-*`、`--dsw-font-*` 字阶、以及
+`bg-document-preview`／`bg-document-selection` 两个 alias 在更上游（deepsuite），npm 包没带，
+由脚本从**本机已装的发行版**里抽出来补上。
+
+**页面里写规则时的三条**：
+
+1. **颜色/字/圆角/阴影一律用 token**，不写字面值（写死一个 hex，明暗就废了一半）。
+2. **字用组合式 token**：`font: var(--dsw-font-xs-strong-13)`，别自己拼 `font-size` + `font-weight` —— 他们的 UI 粗体是 **500**，行高是**固定档位**，自己拼就会回到"看着像但不是"。
+3. **内容是内容，UI 是 UI**：缩略图卡、被审的那张幻灯片本体**不套** UI token（那是作者的画面，不是我们的界面）。
+
+**明暗**：`body[data-ds-dark-theme]` 那一整套已在表里。页面在 iframe 里读不到宿主的偏好，所以跟随系统（`prefers-color-scheme`）——就是 DSH "system" 那一档；宿主将来若自己把这个属性打进来，页面的那句不会覆盖它。
+
+**层次怎么读**：`bg-base` 画布 → `bg-module-platform` 侧栏凹面 → `bg-document-preview` 被审的纸 → `bg-layer-1` 浮层；分隔一律用 `border-l1/l2` 细线，不要用灰块。
+
+**控件密度**：他们的控件是**固定高 + 只给水平内边距**（按钮 28、紧凑按钮/指标 24），不是垂直内边距堆出来的 —— 加新控件时按这个来。
+
 ## 作者直接在页面上改的那一笔，是**定版**，不是建议
 
 作者可以在审阅页上直接改字、拖动位置、删元素（`svg_edits`）。这一笔在 `consume` 时被**确定性写回 `_internal/02_svg_source/<page_key>.svg`** —— 写进去就是那一页的定版，**不经过你**。

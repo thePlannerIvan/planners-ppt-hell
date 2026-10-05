@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-05 — 审阅页 UI 换成 DSH 的设计令牌（只动这一个面）
+
+起因：作者提过"审阅页 UI 能不能换成和 DSH 应用一样"。评估后按最小范围做：**只改 ppt-hell 的审阅页**，布局与交互一行不动。
+
+**他们的 UI 定义在哪**：`github.com` 在本机被 DNS 挡了，所以改从 **npm 公开包** `@deepseek-ai/dsh-client-ui-theme@0.0.1-rc.1`（BSD-3-Clause）取 —— `design-platform.css` 就是设计系统本体：**349 个 `--dsw-*`**，两层结构（146 static 调色板 → 154 alias 语义），引用自洽（0 缺件），**明暗各一套**（`body[data-ds-dark-theme]` 覆写 73 个 static + 77 个 alias）。组件包（`dsh-client-ui-*`）是 React + 依赖宿主运行时，**在不透明 iframe 里用不了**，所以只换 token 层。
+
+- **vendor**：`assets/review/dsh-tokens.css`（逐字节照抄三份表 + BSD-3 全文声明），由 `scripts/vendor_dsh_tokens.py` 生成 —— **不手改**，DSH 改版就跑这个脚本重抄，凭证（三个源文件 sha256 + 补丁条数）写进文件头。
+- **npm 包里没有的那几组**（`--dsw-radius-*`、`--dsw-elevation-*`、`--dsw-font-*` 字阶、`bg-document-preview`、`bg-document-selection`）在更上游的 deepsuite 主题里；脚本从**本机发行版**里抽出来补上，一个都没猜。
+- **页面规则**：95 条规则逐条对过去，**硬编码颜色从 59 个降到 0**；几何（栅格/尺寸/间距/flex）未动。
+- **字层对齐**（作者反馈"字体字号对不上"后补的）：他们的 UI 粗体是 **500 不是 600/700**；行高是固定档位（11/14、12/18、13/20、14/22、16/24）；字阶只有 11/12/13/14/16/20/24。全部换用 `font: var(--dsw-font-*)` 组合式 token，页面里**不再有裸 `font-size`/`font-weight`**。
+- **精致化细节**：`-webkit-font-smoothing:antialiased` + `-moz-osx-font-smoothing:grayscale`、`::selection` 用他们的选中色 token、过渡用 `--ds-transition-duration*`/`--ds-ease-in-out`、内边距回到 4/8/12 节奏。
+- **控件密度**：他们 129 个含 `radius-sm/md` 的组件块里 **28px 出现 26 次**（主档），且是"固定高 + 只给水平内边距"；我们原来是垂直内边距堆出的 32px。改成 **按钮 28 / 紧凑按钮 24 / 指标 24 / 输入框 28**。**这是本次唯一动到"尺寸"的地方**（缩略图卡、栅格、间距未动）。
+- **顺手修掉一个真 BUG**：我们原来写的 `.rail,.panel{scrollbar-width:thin}` 会让 Chromium/Safari **丢弃该元素上所有 `::-webkit-scrollbar*` 规则**（他们 `scrollbar.css` 的 README 专门讲了这条）—— 也就是把他们那张主题滚动条表整条打断。已删掉。
+- **回归**：浏览器套件 8 例 + 默认套件 207 例全过（余 1 例是 `soffice` 环境缺失，与本改动无关）。另在真实浏览器里核对计算样式（见下），并量了控件实测高度。
+
+**没做的事**：只改了 ppt-hell 这一个审阅页。另外四个审阅面（video-craft 920 行 CSS、editor 147、video-idea-system 119、planning-before-create 20）**未动** —— 要不要铺开另说。
+
 ## 2026-10-05 — 草稿自动落盘：「提交」不再是让改动不丢的前提
 
 起因：作者问「我的意见、框选、直改应该自动落盘在文件里，为什么还需要提交？我点重新加载的时候就应该全部自动落盘了」。

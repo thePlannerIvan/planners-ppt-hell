@@ -6,6 +6,25 @@
 
 ---
 
+## 2026-10-05 · 审阅页 UI 采用 DSH 的设计令牌（vendor 一份副本 + 一道更新闸门）
+
+**起因**：作者希望审阅页的观感和 DSH 应用一致。评估后按最小范围：**只改 ppt-hell 的审阅页**。
+
+**硬约束（决定了"换"只能换一半）**：审阅页在 `sandbox="allow-scripts"` 的**不透明源 iframe** 里 —— 宿主的 CSS 变量继承不进来，外链样式表会被信任围栏打回 403，他们的 React 组件包（依赖宿主运行时）也搬不进来。**所以只能把 token 表带进页面，构件只能照着仿。**
+
+| 动了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| `assets/review/dsh-tokens.css`：vendor `@deepseek-ai/dsh-client-ui-theme@0.0.1-rc.1` 的 base/design-platform/scrollbar 三份表 + 补丁块 + BSD-3 全文 | 令牌只能随页面发；两处副本必须有一道闸门，不能手改 | `assets/review/dsh-tokens.css`（新）、`assets/review/dsh-tokens.LICENSE.txt`（新） | — |
+| `scripts/vendor_dsh_tokens.py`：从 npm 包（或 `--from` 的离线目录）+ 本机发行版重新 vendor，把三个源文件的 sha256 与补丁条数写进文件头 | "更新方式只有一条命令"，凭证可核对 | `scripts/vendor_dsh_tokens.py`（新） | 手工维护那份 CSS 的可能 |
+| `generate_review_html.py` 在 `<style>` 顶部注入 `__DSH_TOKENS__` | 令牌表必须**内联**（外链在 iframe 里 403） | `scripts/generate_review_html.py`、`assets/review/review.html` | — |
+| 页面 95 条规则改用 `--dsw-*` 语义 token（颜色 59 → **0** 硬编码）；字层改用 `font: var(--dsw-font-*)`；控件收到他们的 28px 档 | 见 CHANGELOG 的逐项对照（字重 500、固定行高、antialiased、选中色、过渡曲线、4/8 节奏） | `assets/review/review.html` | `.rail,.panel{scrollbar-width:thin}`（它会让他们整张 `::-webkit-scrollbar*` 表失效） |
+
+**边界**：只换了 token 层（颜色/字/圆角/浮起/滚动条/密度）。**构件形态是仿的**，不是引他们的组件 —— 他们改版时这层要重看。另外四个审阅面未动。页面里凡"内容"（缩略图卡、幻灯片本体）不套 UI token。
+
+**怎么升级**：DSH 改版 → `python3 scripts/vendor_dsh_tokens.py` → 重出审阅页 → 看一眼明暗两档。脚本在缺 npm 包或缺发行版时**直接报错退出，不写半份文件**。
+
+---
+
 ## 2026-10-05 · 草稿自动落盘：把「我改了东西」和「告诉模型可以动手」拆开
 
 **起因**：作者问「我的意见、框选、直改应该自动落盘，为什么还需要提交？点重新加载时就应该全部自动落盘」。
