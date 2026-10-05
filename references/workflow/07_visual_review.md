@@ -64,10 +64,13 @@ python3 scripts/vendor_dsh_tokens.py        # 从 npm 包 + 本机发行版重�
 
 它会打印并写进文件头：三个源文件的 sha256、补丁 token 条数。**手改那份 CSS 会漂移，而两边都不会报错** —— 所以别手改。缺 npm 包或缺发行版时脚本直接报错退出，不会写出半份。
 
-两个来源的分工：npm 公开包 `@deepseek-ai/dsh-client-ui-theme`（BSD-3-Clause）给颜色两层、
-滚动条、明暗整套；`--dsw-radius-*`、`--dsw-elevation-*`、`--dsw-font-*` 字阶、以及
-`bg-document-preview`／`bg-document-selection` 两个 alias 在更上游（deepsuite），npm 包没带，
-由脚本从**本机已装的发行版**里抽出来补上。
+**只认一个来源：本机已装的发行版。** 脚本读 `Info.plist` 的版本，再从 `app.asar` 里的
+`lib/welcome/welcome.css` 抽表（那是整个发行版里唯一带这份表的文件），另补它没有的
+`--dsw-radius-*`、运动变量、字体栈底座。
+
+**别用 `npm view <包> version` 取版本** —— 它跟 `latest` 标签，而 `dsh-client-ui-theme` 的
+`latest` 卡在最老那一版（`0.0.1-rc.1`，8-10）；照它抄会得到比运行版本老七周的副本，
+而且**不会报错**。这个坑已经踩过一次，见 maintenance-history。
 
 **页面里写规则时的三条**：
 
