@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+
+  <!-- Header -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">30 / 33 · CADENCE SEQUENCE</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">PLAYLIST LEDGER</text>
+
+  <!-- Left Tracklist Rows (x=100..1050) -->
+  <g transform="translate(100, 180)">
+    <!-- Row 1 -->
+    <line x1="0" y1="0" x2="950" y2="0" stroke="#CBD5E1" stroke-width="1.5"/>
+    <text x="10" y="45" font-family='monospace' font-size="18" font-weight="800" fill="#111111">01. INITIAL COGNITIVE HARVEST</text>
+    <text x="800" y="45" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">04:15</text>
+    <circle cx="910" cy="40" r="14" fill="#111111"/>
+    <path d="M 906 35 L 916 40 L 906 45 Z" fill="#E2F827"/>
+
+    <!-- Row 2 -->
+    <line x1="0" y1="85" x2="950" y2="85" stroke="#CBD5E1" stroke-width="1.5"/>
+    <text x="10" y="130" font-family='monospace' font-size="18" font-weight="800" fill="#111111">02. METHODOLOGICAL REDUCTION &amp; FORM</text>
+    <text x="800" y="130" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">09:30</text>
+    <circle cx="910" cy="125" r="14" fill="#111111"/>
+    <path d="M 906 120 L 916 125 L 906 130 Z" fill="#E2F827"/>
+
+    <!-- Row 3 -->
+    <line x1="0" y1="170" x2="950" y2="170" stroke="#CBD5E1" stroke-width="1.5"/>
+    <text x="10" y="215" font-family='monospace' font-size="18" font-weight="800" fill="#111111">03. WIREFRAME TOPOLOGY RIGIDITY</text>
+    <text x="800" y="215" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">16:45</text>
+    <circle cx="910" cy="210" r="14" fill="#111111"/>
+    <path d="M 906 205 L 916 210 L 906 215 Z" fill="#E2F827"/>
+
+    <!-- Row 4 -->
+    <line x1="0" y1="255" x2="950" y2="255" stroke="#CBD5E1" stroke-width="1.5"/>
+    <text x="10" y="300" font-family='monospace' font-size="18" font-weight="800" fill="#111111">04. BRUTALIST DISPLAY ARTICULATION</text>
+    <text x="800" y="300" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">25:00</text>
+    <circle cx="910" cy="295" r="14" fill="#111111"/>
+    <path d="M 906 290 L 916 295 L 906 300 Z" fill="#E2F827"/>
+
+    <!-- Row 5 (Active Highlight Row) -->
+    <line x1="0" y1="340" x2="950" y2="340" stroke="#CBD5E1" stroke-width="1.5"/>
+    <rect x="0" y="342" width="950" height="80" fill="#111111"/>
+    <text x="20" y="390" font-family='monospace' font-size="18" font-weight="900" fill="#E2F827">● 05. PRODUCTION HANDSHAKE &amp; DISPATCH</text>
+    <text x="800" y="390" font-family='monospace' font-size="16" font-weight="700" fill="#E2F827">38:20</text>
+    <circle cx="910" cy="382" r="14" fill="#E2F827"/>
+    <path d="M 906 377 L 916 382 L 906 387 Z" fill="#111111"/>
+    <line x1="0" y1="425" x2="950" y2="425" stroke="#CBD5E1" stroke-width="1.5"/>
+  </g>
+
+  <!-- Right Hero Headline (x=1150..1820) -->
+  <g transform="translate(1150, 240)">
+    <text x="0" y="70" font-family='system-ui, -apple-system, sans-serif' font-size="76" font-weight="900" fill="#111111" letter-spacing="-3">EXECUTION</text>
+    <text x="0" y="165" font-family='system-ui, -apple-system, sans-serif' font-size="76" font-weight="900" fill="#111111" letter-spacing="-3">PLAYLIST</text>
+
+    <text x="0" y="260" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#374151">如同精密编排的声音曲目，</text>
+    <text x="0" y="298" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#374151">一套顶级提案应具备起承转合的节奏律动。</text>
+    <text x="0" y="336" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#374151">每一屏都在推进认知，决不在中途产生杂音。</text>
+
+    <!-- Capsule Tag -->
+    <g transform="translate(0, 420)">
+      <rect width="280" height="42" rx="21" fill="#111111"/>
+      <text x="140" y="27" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827" text-anchor="middle">5 TRACKS // CONTINUOUS</text>
+    </g>
+  </g>
+
+  <!-- Bottom Divider Line -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Footer -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280">EDITORIAL TRACKLIST // LINEAR CADENCE</text>
+    <text x="1720" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER SYSTEM</text>
+  </g>
+</svg>

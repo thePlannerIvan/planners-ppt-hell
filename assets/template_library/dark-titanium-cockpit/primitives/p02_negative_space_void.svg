@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+
+  <!-- Top 42% Pure Void (Only subtle header) -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">02 / 13 · STRATEGIC PREMISE</text>
+  <g transform="translate(1720, 58)">
+    <rect width="100" height="34" rx="17" fill="none" stroke="#111111" stroke-width="1.5"/>
+    <text x="50" y="23" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111" text-anchor="middle">INDEX</text>
+  </g>
+
+  <!-- Central Horizontal Dividing Razor Line -->
+  <line x1="100" y1="560" x2="1820" y2="560" stroke="#111111" stroke-width="1.5"/>
+
+  <!-- Bottom Left: Massive Typographic Assertions -->
+  <g transform="translate(100, 620)">
+    <text x="0" y="60" font-family='system-ui, -apple-system, sans-serif' font-size="44" font-weight="900" fill="#111111" letter-spacing="-1">01. 真实的原声不是问卷，而是认知冲动</text>
+    <text x="0" y="140" font-family='system-ui, -apple-system, sans-serif' font-size="44" font-weight="900" fill="#111111" letter-spacing="-1">02. 真正的专业不是加字，而是删繁就简</text>
+    <text x="0" y="220" font-family='system-ui, -apple-system, sans-serif' font-size="44" font-weight="900" fill="#111111" letter-spacing="-1">03. 核心认知的穿透力在最初 3 秒决定</text>
+  </g>
+
+  <!-- Bottom Right: Pill Badge and Explanatory Note -->
+  <g transform="translate(1380, 640)">
+    <rect x="0" y="0" width="220" height="38" rx="19" fill="#111111"/>
+    <text x="110" y="25" font-family='monospace' font-size="18" font-weight="800" fill="#E2F827" text-anchor="middle">● RADICAL RESTRAINT</text>
+
+    <text x="0" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="600" fill="#111111">去除一切多余的灰色圆角卡片，</text>
+    <text x="0" y="125" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="600" fill="#111111">让决策者在绝对留白中直视核心事实。</text>
+    <text x="0" y="170" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#6B7280">不靠填满求安全感，依靠尺度建立权威。</text>
+  </g>
+</svg>

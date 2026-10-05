@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+
+  <!-- Header -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">33 / 33 · CAPABILITY AUDIT</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">METRIC GAUGES</text>
+
+  <!-- Left Precision Gauges (x=100..1050) -->
+  <g transform="translate(100, 180)">
+    <text x="0" y="30" font-family='monospace' font-size="18" font-weight="900" fill="#111111">// TECHNICAL SKILLS &amp; CAPABILITY MATURITY</text>
+
+    <!-- Gauge 1: 94% -->
+    <g transform="translate(0, 80)">
+      <text x="0" y="20" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="800" fill="#111111">Typographic Hierarchy &amp; Scale Contrast</text>
+      <text x="920" y="20" font-family='monospace' font-size="20" font-weight="900" fill="#111111" text-anchor="end">94%</text>
+      <rect x="0" y="35" width="920" height="24" fill="#CBD5E1"/>
+      <rect x="0" y="35" width="864" height="24" fill="#111111"/>
+    </g>
+
+    <!-- Gauge 2: 88% -->
+    <g transform="translate(0, 180)">
+      <text x="0" y="20" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="800" fill="#111111">Negative Space Void Discipline (50-70% Void)</text>
+      <text x="920" y="20" font-family='monospace' font-size="20" font-weight="900" fill="#111111" text-anchor="end">88%</text>
+      <rect x="0" y="35" width="920" height="24" fill="#CBD5E1"/>
+      <rect x="0" y="35" width="809" height="24" fill="#111111"/>
+    </g>
+
+    <!-- Gauge 3: 96% -->
+    <g transform="translate(0, 280)">
+      <text x="0" y="20" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="800" fill="#111111">Swiss Grid Modularity &amp; Architectural Alignment</text>
+      <text x="920" y="20" font-family='monospace' font-size="20" font-weight="900" fill="#111111" text-anchor="end">96%</text>
+      <rect x="0" y="35" width="920" height="24" fill="#CBD5E1"/>
+      <rect x="0" y="35" width="883" height="24" fill="#111111"/>
+    </g>
+
+    <!-- Gauge 4: 99% (Highlighted in Lime) -->
+    <g transform="translate(0, 380)">
+      <text x="0" y="20" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="900" fill="#111111">● Elimination of Decorative Bento Card Clutter</text>
+      <text x="920" y="20" font-family='monospace' font-size="20" font-weight="900" fill="#111111" text-anchor="end">99%</text>
+      <rect x="0" y="35" width="920" height="24" fill="#CBD5E1"/>
+      <rect x="0" y="35" width="910" height="24" fill="#E2F827" stroke="#111111" stroke-width="1.5"/>
+    </g>
+  </g>
+
+  <!-- Right Hero Stat Stage (x=1150..1820) -->
+  <g transform="translate(1150, 200)">
+    <text x="0" y="100" font-family='system-ui, -apple-system, sans-serif' font-size="110" font-weight="900" fill="#111111" letter-spacing="-4">+82%</text>
+    <text x="0" y="150" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#111111">COGNITIVE COMPRESSION RATIO</text>
+
+    <text x="0" y="230" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="500" fill="#374151">实测对比传统 40 页卡片拼贴 PPT，</text>
+    <text x="0" y="265" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="500" fill="#374151">采用瑞士极客驾驶舱排版系统的提案，</text>
+    <text x="0" y="300" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="500" fill="#374151">能使董事会高管的决策理解速度提升 82%。</text>
+
+    <!-- Capsule Tag -->
+    <g transform="translate(0, 400)">
+      <rect width="280" height="42" rx="21" fill="#111111"/>
+      <text x="140" y="27" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827" text-anchor="middle">EMPIRICAL BENCHMARK</text>
+    </g>
+  </g>
+
+  <!-- Bottom Divider Line -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Footer -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280">PRECISION GAUGES // EMPIRICAL PERFORMANCE</text>
+    <text x="1720" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER SYSTEM</text>
+  </g>
+</svg>

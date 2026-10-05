@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#0C0D11"/>
+
+  <!-- Header -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#9CA3AF" letter-spacing="2">26 / 33 · HARDWARE CALIBRATION</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827" text-anchor="end">CHAMFERED SPEC</text>
+
+  <!-- Slide Title -->
+  <g transform="translate(100, 160)">
+    <text x="0" y="44" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#FFFFFF" letter-spacing="-1">THREE RIGOROUS DOMAINS</text>
+    <text x="0" y="86" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#9CA3AF">Precision beveled enclosures for mission-critical architectural specs.</text>
+  </g>
+
+  <!-- 3 Chamfered Cards (x=100, 680, 1260; w=560, h=520) -->
+
+  <!-- Card 1 -->
+  <g transform="translate(100, 300)">
+    <polygon points="0,30 30,0 560,0 560,490 530,520 0,520" fill="#14161F" stroke="#282C3D" stroke-width="1.5"/>
+    <g transform="translate(45, 45)">
+      <text x="0" y="30" font-family='monospace' font-size="18" font-weight="800" fill="#E2F827">[ SPEC A // INGESTION ]</text>
+      <text x="0" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="32" font-weight="900" fill="#FFFFFF">资料原声无损解析</text>
+      <text x="0" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#9CA3AF">支持多源文档与事实核查，</text>
+      <text x="0" y="160" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#9CA3AF">构建高信度项目证据链条。</text>
+
+      <line x1="0" y1="210" x2="470" y2="210" stroke="#222533" stroke-width="1"/>
+      <text x="0" y="250" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">INDEX TRACE: P_SRC_01</text>
+      <text x="0" y="280" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">STATUS: AUDITED (PASS)</text>
+
+      <!-- Arrow icon -->
+      <g transform="translate(420, 20)">
+        <circle cx="16" cy="16" r="18" fill="none" stroke="#6B7280" stroke-width="1.5"/>
+        <path d="M 10 22 L 22 10 M 13 10 L 22 10 L 22 19" stroke="#6B7280" stroke-width="1.5" fill="none"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Card 2 -->
+  <g transform="translate(680, 300)">
+    <polygon points="0,30 30,0 560,0 560,490 530,520 0,520" fill="#14161F" stroke="#282C3D" stroke-width="1.5"/>
+    <g transform="translate(45, 45)">
+      <text x="0" y="30" font-family='monospace' font-size="18" font-weight="800" fill="#E2F827">[ SPEC B // GEOMETRY ]</text>
+      <text x="0" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="32" font-weight="900" fill="#FFFFFF">瑞士排印数学约束</text>
+      <text x="0" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#9CA3AF">严格遵循黄金比例与天际线，</text>
+      <text x="0" y="160" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#9CA3AF">杜绝任意性装饰与字号漂移。</text>
+
+      <line x1="0" y1="210" x2="470" y2="210" stroke="#222533" stroke-width="1"/>
+      <text x="0" y="250" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">INDEX TRACE: P_GEO_02</text>
+      <text x="0" y="280" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">STATUS: VERIFIED (PASS)</text>
+
+      <!-- Arrow icon -->
+      <g transform="translate(420, 20)">
+        <circle cx="16" cy="16" r="18" fill="none" stroke="#6B7280" stroke-width="1.5"/>
+        <path d="M 10 22 L 22 10 M 13 10 L 22 10 L 22 19" stroke="#6B7280" stroke-width="1.5" fill="none"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Card 3 (Highlighted in Electric Lime) -->
+  <g transform="translate(1260, 300)">
+    <polygon points="0,30 30,0 560,0 560,490 530,520 0,520" fill="#14161F" stroke="#E2F827" stroke-width="2"/>
+    <g transform="translate(45, 45)">
+      <text x="0" y="30" font-family='monospace' font-size="18" font-weight="900" fill="#E2F827">● [ SPEC C // CONVERSION ]</text>
+      <text x="0" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="32" font-weight="900" fill="#FFFFFF">原生 PPTX 高保真导出</text>
+      <text x="0" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">矢量元素 1:1 精确映射，</text>
+      <text x="0" y="160" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">文本与几何图形完全可二次编辑。</text>
+
+      <line x1="0" y1="210" x2="470" y2="210" stroke="#222533" stroke-width="1"/>
+      <text x="0" y="250" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">INDEX TRACE: P_PPTX_03</text>
+      <text x="0" y="280" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">STATUS: COMMITTED (ZERO DEFECT)</text>
+
+      <!-- Arrow icon -->
+      <g transform="translate(420, 20)">
+        <circle cx="16" cy="16" r="18" fill="#E2F827"/>
+        <path d="M 10 22 L 22 10 M 13 10 L 22 10 L 22 19" stroke="#111111" stroke-width="2" fill="none"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Bottom Divider Line -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#22252E" stroke-width="1.5"/>
+
+  <!-- Footer -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280">CHAMFERED CORNER GEOMETRY // INDUSTRIAL PRECISION</text>
+    <text x="1720" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#FFFFFF" text-anchor="end">THE PLANNER SYSTEM</text>
+  </g>
+</svg>

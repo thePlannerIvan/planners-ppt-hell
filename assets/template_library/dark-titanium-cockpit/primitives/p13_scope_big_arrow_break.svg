@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <!-- Puncture Canvas: Solid Electric Lime/Yellow -->
+  <rect width="1920" height="1080" fill="#E2F827"/>
+
+  <!-- Top Monumental Header -->
+  <g transform="translate(100, 140)">
+    <text x="0" y="0" font-family='system-ui, -apple-system, sans-serif' font-size="76" font-weight="900" fill="#111111" letter-spacing="-2">2.SCOPE OF WORK</text>
+    <text x="0" y="42" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="700" fill="#333333">执行矩阵与权责边界 // 严格界定四大交付模块，杜绝范围蔓延</text>
+  </g>
+
+  <!-- 4 Solid Black Rounded Cards (y=220, height=440) -->
+  <!-- Card 1 -->
+  <g transform="translate(100, 220)">
+    <rect width="400" height="440" rx="20" fill="#111111"/>
+    <g transform="translate(36, 45)">
+      <text x="0" y="40" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#E2F827">2.1</text>
+      <text x="0" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#FFFFFF">认知断层扫描</text>
+      <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">对全网公开原声与行业数据</text>
+      <text x="0" y="175" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">展开深度穿透，定位真偏见</text>
+      <text x="0" y="205" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">与伪需求的结构性断层。</text>
+      <line x1="0" y1="240" x2="320" y2="240" stroke="#333333" stroke-width="1"/>
+      <text x="0" y="280" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827">DELIVERABLE:</text>
+      <text x="0" y="310" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#FFFFFF">认知诊断审计白皮书</text>
+    </g>
+  </g>
+
+  <!-- Card 2 -->
+  <g transform="translate(540, 220)">
+    <rect width="400" height="440" rx="20" fill="#111111"/>
+    <g transform="translate(36, 45)">
+      <text x="0" y="40" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#E2F827">2.2</text>
+      <text x="0" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#FFFFFF">叙事重构与主张</text>
+      <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">建立单点极致的战略表达，</text>
+      <text x="0" y="175" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">以反常识洞察重构品牌</text>
+      <text x="0" y="205" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">第一性产品与心智价值。</text>
+      <line x1="0" y1="240" x2="320" y2="240" stroke="#333333" stroke-width="1"/>
+      <text x="0" y="280" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827">DELIVERABLE:</text>
+      <text x="0" y="310" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#FFFFFF">核心主张与表达契约</text>
+    </g>
+  </g>
+
+  <!-- Card 3 -->
+  <g transform="translate(980, 220)">
+    <rect width="400" height="440" rx="20" fill="#111111"/>
+    <g transform="translate(36, 45)">
+      <text x="0" y="40" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#E2F827">2.3</text>
+      <text x="0" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#FFFFFF">视觉符码与物料</text>
+      <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">将策略翻译为高辨识度符码，</text>
+      <text x="0" y="175" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">覆盖发布会、主图及终端</text>
+      <text x="0" y="205" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">陈列阵列，杜绝视觉散焦。</text>
+      <line x1="0" y1="240" x2="320" y2="240" stroke="#333333" stroke-width="1"/>
+      <text x="0" y="280" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827">DELIVERABLE:</text>
+      <text x="0" y="310" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#FFFFFF">瑞士先锋视觉规范包</text>
+    </g>
+  </g>
+
+  <!-- Card 4 -->
+  <g transform="translate(1420, 220)">
+    <rect width="400" height="440" rx="20" fill="#111111"/>
+    <g transform="translate(36, 45)">
+      <text x="0" y="40" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#E2F827">2.4</text>
+      <text x="0" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#FFFFFF">战役闭环与监控</text>
+      <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">设定心智渗透与转化指标，</text>
+      <text x="0" y="175" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">按双周推进复盘与战术纠偏，</text>
+      <text x="0" y="205" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">确保商业结果真实兑现。</text>
+      <line x1="0" y1="240" x2="320" y2="240" stroke="#333333" stroke-width="1"/>
+      <text x="0" y="280" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827">DELIVERABLE:</text>
+      <text x="0" y="310" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#FFFFFF">双周执行跟踪看板</text>
+    </g>
+  </g>
+
+  <!-- Giant Directional Arrow Spanning across the Bottom -->
+  <g transform="translate(100, 780)">
+    <line x1="0" y1="50" x2="1540" y2="50" stroke="#111111" stroke-width="44"/>
+    <polygon points="1500,-10 1720,50 1500,110" fill="#111111"/>
+
+    <text x="0" y="140" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="900" fill="#111111">PROJECT CADENCE // 严格按阶段推进，每一节点均设决策签字门禁</text>
+    <text x="0" y="175" font-family='monospace' font-size="18" font-weight="700" fill="#333333">PAGE 13 · NEO-BRUTALIST WORKFLOW ENGINE</text>
+
+    <!-- Monogram Circle Mark at right -->
+    <g transform="translate(1660, 130)">
+      <circle cx="20" cy="20" r="24" fill="none" stroke="#111111" stroke-width="2.5"/>
+      <path d="M 12 30 L 12 18 A 8 8 0 0 1 28 18 L 28 30" fill="none" stroke="#111111" stroke-width="2.5"/>
+    </g>
+  </g>
+</svg>

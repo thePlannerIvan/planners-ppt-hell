@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+
+  <!-- Top Header Metadata -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">03 / 13 · SYSTEM TAXONOMY</text>
+  <text x="1820" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="600" fill="#6B7280" text-anchor="end">SWISS ASYMMETRIC GRID</text>
+
+  <!-- Left 45%: Delicate Empty Architectural Grid -->
+  <g stroke="#D1D5DB" stroke-width="1.5">
+    <line x1="100" y1="140" x2="980" y2="140"/>
+    <line x1="100" y1="380" x2="980" y2="380"/>
+    <line x1="100" y1="620" x2="980" y2="620"/>
+    <line x1="100" y1="860" x2="980" y2="860"/>
+    <line x1="100" y1="140" x2="100" y2="860"/>
+    <line x1="540" y1="140" x2="540" y2="460"/>
+    <line x1="540" y1="530" x2="540" y2="860"/>
+    <line x1="980" y1="140" x2="980" y2="860"/>
+  </g>
+
+  <!-- Subtle Micro-Annotation in the Left Grid Void -->
+  <text x="540" y="500" font-family='monospace' font-size="18" font-weight="700" fill="#9CA3AF" text-anchor="middle" letter-spacing="2">+ THE VOID IS NOT EMPTY // IT IS STRUCTURE +</text>
+
+  <!-- Vertical Electric Lime Pillar (x=1040, runs through the canvas) -->
+  <rect x="1040" y="120" width="18" height="840" fill="#E2F827"/>
+
+  <!-- Right Section: Clean Typographic Taxonomy -->
+  <g transform="translate(1120, 160)">
+    <text x="0" y="30" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#111111" letter-spacing="-1">CATALOG // 战略演进纲领</text>
+
+    <!-- 6 Clean Rows -->
+    <g transform="translate(0, 100)">
+      <g transform="translate(0, 0)">
+        <text x="0" y="35" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#111111">01 · 认知断层诊断</text>
+        <text x="360" y="35" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#6B7280">真实原声穿透 · 锁定三大自嗨偏见</text>
+      </g>
+      <g transform="translate(0, 80)">
+        <text x="0" y="35" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#111111">02 · 战略叙事重构</text>
+        <text x="360" y="35" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#6B7280">将工业感偏见重构为极客科技纯粹性</text>
+      </g>
+      <g transform="translate(0, 160)">
+        <text x="0" y="35" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#111111">03 · 心智资产立碑</text>
+        <text x="360" y="35" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#6B7280">打造不可替代的视觉符码与品类记忆</text>
+      </g>
+      <g transform="translate(0, 240)">
+        <text x="0" y="35" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#111111">04 · 跨周期交付矩阵</text>
+        <text x="360" y="35" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#6B7280">从发布会原爆点到终端阵列分阶段渗透</text>
+      </g>
+      <g transform="translate(0, 320)">
+        <text x="0" y="35" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#111111">05 · 事实审计闭环</text>
+        <text x="360" y="35" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#6B7280">逐页数字回查机制，杜绝推演漂移</text>
+      </g>
+      <g transform="translate(0, 400)">
+        <text x="0" y="35" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#111111">06 · 决策共识确认</text>
+        <text x="360" y="35" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#6B7280">高层战略对齐，签字锁定执行边界</text>
+      </g>
+    </g>
+  </g>
+</svg>

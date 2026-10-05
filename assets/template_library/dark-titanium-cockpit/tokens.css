@@ -1,0 +1,70 @@
+:root {
+  /* ==========================================================================
+     CANVAS DUAL-MODE FOUNDATION (70% - 80% Negative Space / Void)
+     ========================================================================== */
+  --bg-obsidian-dark: #0C0D11;        /* Primary Dark Stage */
+  --bg-obsidian-elevated: #141720;    /* Dark Micro-surface / Pill container */
+  --bg-obsidian-card: #181B24;        /* Solid Dark Card on Black */
+  
+  --bg-titanium-light: #ECEEF2;       /* Primary Light Stage (High Readability) */
+  --bg-titanium-white: #FFFFFF;       /* Crisp White Grid Cells */
+  --bg-titanium-grid: #E2E4E8;        /* Sub-surface Grid Plate */
+
+  --bg-puncture-lime: #E2F827;        /* Signature Puncture Canvas / Full-bleed Break */
+
+  /* ==========================================================================
+     TYPOGRAPHIC INK TOKENS (Strict >= 18px Readability Floor)
+     ========================================================================== */
+  --ink-on-dark-primary: #FFFFFF;     /* Pure White 900-weight Display */
+  --ink-on-dark-secondary: #8E92A4;   /* Titanium Silver-Grey for subheadings */
+  --ink-on-dark-muted: #6B7280;       /* Medium Cool Grey for micro-metadata */
+  --ink-on-dark-hairline: #1F222B;    /* Ghost numbers (140-320px) */
+
+  --ink-on-light-primary: #111111;    /* Deep Swiss Black */
+  --ink-on-light-secondary: #4B5563;  /* Slate Grey for supporting prose */
+  --ink-on-light-muted: #6B7280;      /* Micro-metadata and coordinates */
+
+  --ink-on-lime: #111111;             /* Jet Black on Electric Lime */
+
+  /* ==========================================================================
+     SIGNATURE VOLTAGE ACCENT (Single Brand Anchor)
+     ========================================================================== */
+  --accent-electric-lime: #E2F827;    /* Electric Lime / Acid Yellow */
+  --accent-lime-tint: rgba(226, 248, 39, 0.12); /* Soft Atmospheric Aura Blur */
+
+  /* ==========================================================================
+     HAIRLINE & ARCHITECTURAL GRID DIVIDERS
+     ========================================================================== */
+  --border-hairline-dark: #252733;    /* 1.5px Razor divider on obsidian */
+  --border-hairline-dark-subtle: #1C1F28;
+  --border-hairline-light: #D1D5DB;   /* 1.5px Razor grid on titanium */
+  --border-hairline-black: #111111;   /* 1.5px High-contrast razor on light */
+
+  /* ==========================================================================
+     FONT STACKS & SCALE TIERS (1920x1080 Native)
+     ========================================================================== */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, Monaco, monospace;
+
+  /* Scale Ladder */
+  --size-display-colossal: 145px;      /* Master cover titles (DEEP COGNITION) */
+  --size-display-poster: 110px;        /* Poster manifesto (NO MORE BORING) */
+  --size-display-break: 132px;         /* Interrupted hero (FOR BRANDS MISSION) */
+  --size-number-slender: 320px;        /* Ghost background numbers */
+  --size-number-kpi: 130px;            /* Hero financial metrics (85.6M) */
+  --size-headline-section: 72px - 76px;/* Section headers (SCOPE OF WORK / AGENDA) */
+  --size-headline-lead: 44px - 52px;   /* Major assertions / Step titles */
+  --size-subtitle: 28px - 32px;        /* Paragraph lead-ins / Manifesto lines */
+  --size-body-large: 24px - 26px;      /* Key takeaways */
+  --size-body-regular: 20px;           /* Primary reading copy */
+  --size-annotation-floor: 18px;       /* Absolute minimum for any label/tag/source */
+
+  /* ==========================================================================
+     GEOMETRIC SPACING & MARGINS
+     ========================================================================== */
+  --margin-safe-x: 100px;              /* Left & Right canvas margins */
+  --margin-safe-top: 80px;             /* Skyline header baseline */
+  --margin-safe-bottom: 960px;         /* Footer / coordinates baseline */
+  --hairline-width: 1.5px;
+  --corner-pill-radius: 17px - 55px;   /* Pure geometric pills, zero boxy bento */
+}

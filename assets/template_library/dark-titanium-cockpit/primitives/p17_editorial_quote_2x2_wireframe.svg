@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+
+  <!-- Header -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">17 / 33 · CLARITY LAW</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">MODULAR MATRIX</text>
+
+  <!-- Left Quote Stage (x=100..750) -->
+  <g transform="translate(100, 240)">
+    <text x="0" y="60" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#111111" letter-spacing="-1">“Readable content</text>
+    <text x="0" y="125" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#111111" letter-spacing="-1">always wins.”</text>
+
+    <text x="0" y="220" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#374151">Generous margins, high contrast, and clear typography</text>
+    <text x="0" y="258" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#374151">make even complex ideas accessible to any audience.</text>
+    <text x="0" y="296" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#374151">Strip away the ornament to reveal the structural truth.</text>
+
+    <!-- Mono Stamp -->
+    <g transform="translate(0, 380)">
+      <rect width="260" height="42" rx="21" fill="#111111"/>
+      <text x="130" y="27" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827" text-anchor="middle">TYPOGRAPHY FIRST</text>
+    </g>
+  </g>
+
+  <!-- Right 2x2 Modular Wireframe Matrix (x=840..1820) -->
+  <g transform="translate(840, 180)">
+    <!-- Cell 01 -->
+    <g transform="translate(0, 0)">
+      <rect width="460" height="260" fill="#E2E5EC" stroke="#CBD5E1" stroke-width="1.5"/>
+      <text x="30" y="50" font-family='monospace' font-size="16" font-weight="800" fill="#6B7280">VIEWPORT 01</text>
+      <text x="30" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="800" fill="#111111">认知重力基准</text>
+      <text x="30" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#4B5563">以首屏核心命题锁定全场注意力</text>
+    </g>
+
+    <!-- Cell 02 -->
+    <g transform="translate(500, 0)">
+      <rect width="460" height="260" fill="#E2E5EC" stroke="#CBD5E1" stroke-width="1.5"/>
+      <text x="30" y="50" font-family='monospace' font-size="16" font-weight="800" fill="#6B7280">VIEWPORT 02</text>
+      <text x="30" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="800" fill="#111111">范式对比矩阵</text>
+      <text x="30" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#4B5563">传统繁冗与极客效率的非对称对撞</text>
+    </g>
+
+    <!-- Cell 03 -->
+    <g transform="translate(0, 300)">
+      <rect width="460" height="260" fill="#E2E5EC" stroke="#CBD5E1" stroke-width="1.5"/>
+      <text x="30" y="50" font-family='monospace' font-size="16" font-weight="800" fill="#6B7280">VIEWPORT 03</text>
+      <text x="30" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="800" fill="#111111">硬核机制流水线</text>
+      <text x="30" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#4B5563">三阶逻辑齿轮咬合与端到端闭环</text>
+    </g>
+
+    <!-- Cell 04 (Highlighted with black border and lime accent) -->
+    <g transform="translate(500, 300)">
+      <rect width="460" height="260" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>
+      <text x="30" y="50" font-family='monospace' font-size="16" font-weight="800" fill="#111111">● VIEWPORT 04 // DECISION</text>
+      <text x="30" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111">商业结果终局兑现</text>
+      <text x="30" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="600" fill="#111111">穿透证据链并支持董事会裁决</text>
+      <circle cx="410" cy="210" r="16" fill="#111111"/>
+      <path d="M 405 210 L 415 210 M 411 205 L 416 210 L 411 215" stroke="#E2F827" stroke-width="2" fill="none"/>
+    </g>
+  </g>
+
+  <!-- Bottom Line -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Footer -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280">SWISS PROPORTION // 2X2 WIREFRAME TOPOLOGY</text>
+    <text x="1720" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER SYSTEM</text>
+  </g>
+</svg>

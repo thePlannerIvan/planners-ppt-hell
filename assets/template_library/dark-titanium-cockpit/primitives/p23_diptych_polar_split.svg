@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <!-- Left Half: Dark Obsidian -->
+  <rect x="0" y="0" width="960" height="1080" fill="#0C0D11"/>
+  <!-- Right Half: Light Titanium -->
+  <rect x="960" y="0" width="960" height="1080" fill="#ECEEF2"/>
+
+  <!-- Center Vertical Dividing Razor Line -->
+  <line x1="960" y1="0" x2="960" y2="1080" stroke="#374151" stroke-width="1.5"/>
+
+  <!-- Left Dark Side Content -->
+  <g transform="translate(100, 80)">
+    <text x="0" y="0" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#9CA3AF" letter-spacing="2">23A / 33 · THE OLD PARADIGM</text>
+
+    <g transform="translate(0, 160)">
+      <text x="0" y="60" font-family='system-ui, -apple-system, sans-serif' font-size="64" font-weight="900" fill="#FFFFFF" letter-spacing="-2">LEGACY</text>
+      <text x="0" y="135" font-family='system-ui, -apple-system, sans-serif' font-size="64" font-weight="900" fill="#EF4444" letter-spacing="-2">NOISE</text>
+
+      <text x="0" y="230" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#9CA3AF">01. 堆砌十几个灰底小圆角卡片</text>
+      <text x="0" y="275" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#9CA3AF">02. 缺乏主次次序，满屏都是文字</text>
+      <text x="0" y="320" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#9CA3AF">03. 观众无法在 3 秒内识别决策结论</text>
+
+      <g transform="translate(0, 400)">
+        <rect width="200" height="40" rx="20" fill="#1F2937"/>
+        <text x="100" y="26" font-family='monospace' font-size="16" font-weight="800" fill="#EF4444" text-anchor="middle">● DEPRECATED</text>
+      </g>
+    </g>
+
+    <!-- Left Footer -->
+    <text x="0" y="860" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280">LEFT AXIS: 0.00° // OBSIDIAN VOID</text>
+  </g>
+
+  <!-- Right Light Side Content -->
+  <g transform="translate(1060, 80)">
+    <text x="0" y="0" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">23B / 33 · COCKPIT STANDARD</text>
+
+    <g transform="translate(0, 160)">
+      <text x="0" y="60" font-family='system-ui, -apple-system, sans-serif' font-size="64" font-weight="900" fill="#111111" letter-spacing="-2">COCKPIT</text>
+      <text x="0" y="135" font-family='system-ui, -apple-system, sans-serif' font-size="64" font-weight="900" fill="#111111" letter-spacing="-2">CLARITY</text>
+
+      <text x="0" y="230" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="700" fill="#111111">01. 50%~70% 极度留白赋予呼吸感</text>
+      <text x="0" y="275" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="700" fill="#111111">02. 120px+ 巨字宣告如穿甲弹直击心智</text>
+      <text x="0" y="320" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="700" fill="#111111">03. 瑞士网格系统重构专业秩序感</text>
+
+      <g transform="translate(0, 400)">
+        <rect width="220" height="40" rx="20" fill="#111111"/>
+        <text x="110" y="26" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827" text-anchor="middle">● ADOPTED CORE</text>
+      </g>
+    </g>
+
+    <!-- Right Footer -->
+    <text x="760" y="860" font-family='monospace' font-size="18" font-weight="800" fill="#111111" text-anchor="end">RIGHT AXIS: 180.00° // TITANIUM</text>
+  </g>
+</svg>

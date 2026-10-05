@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+
+  <!-- Top Metadata -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">12 / 13 · STRATEGIC COCKPIT MATRIX</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">GWTB ARCHITECTURE</text>
+
+  <!-- Top 4 Floating GWTB Pillars (No Heavy Background Boxes) -->
+  <g transform="translate(100, 160)">
+    <!-- G: Goal -->
+    <g transform="translate(0, 0)">
+      <circle cx="10" cy="15" r="7" fill="#10B981"/>
+      <text x="28" y="21" font-family='monospace' font-size="18" font-weight="800" fill="#111111">GOAL // 破局目标</text>
+      <text x="0" y="65" font-family='system-ui, -apple-system, sans-serif' font-size="26" font-weight="900" fill="#111111">重塑即溶咖啡高端心智</text>
+      <text x="0" y="105" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#4B5563">打破“工业香精”刻板偏见，</text>
+      <text x="0" y="132" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#4B5563">建立精品冷萃第一认知。</text>
+    </g>
+
+    <!-- W: Way -->
+    <g transform="translate(440, 0)">
+      <circle cx="10" cy="15" r="7" fill="#E2F827" stroke="#111111" stroke-width="1.5"/>
+      <text x="28" y="21" font-family='monospace' font-size="18" font-weight="800" fill="#111111">WAY // 战略路径</text>
+      <text x="0" y="65" font-family='system-ui, -apple-system, sans-serif' font-size="26" font-weight="900" fill="#111111">超频冷萃与小罐符码</text>
+      <text x="0" y="105" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#4B5563">以反常识极客科技包装产品，</text>
+      <text x="0" y="132" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#4B5563">小罐符码形成社群自传播。</text>
+    </g>
+
+    <!-- T: Target -->
+    <g transform="translate(880, 0)">
+      <circle cx="10" cy="15" r="7" fill="#06B6D4"/>
+      <text x="28" y="21" font-family='monospace' font-size="18" font-weight="800" fill="#111111">TARGET // 核心客群</text>
+      <text x="0" y="65" font-family='system-ui, -apple-system, sans-serif' font-size="26" font-weight="900" fill="#111111">精致白领与品质挑剔客</text>
+      <text x="0" y="105" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#4B5563">对风味口感有挑剔要求，</text>
+      <text x="0" y="132" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#4B5563">愿为仪式感支付品牌溢价。</text>
+    </g>
+
+    <!-- B: Baseline -->
+    <g transform="translate(1320, 0)">
+      <circle cx="10" cy="15" r="7" fill="#F59E0B"/>
+      <text x="28" y="21" font-family='monospace' font-size="18" font-weight="800" fill="#111111">BASELINE // 事实底座</text>
+      <text x="0" y="65" font-family='system-ui, -apple-system, sans-serif' font-size="26" font-weight="900" fill="#111111">全链条原声证据闭环</text>
+      <text x="0" y="105" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#4B5563">1,820 份真实社媒原声反查，</text>
+      <text x="0" y="132" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#4B5563">杜绝一切自嗨主观推导。</text>
+    </g>
+  </g>
+
+  <!-- Divider Line -->
+  <line x1="100" y1="440" x2="1820" y2="440" stroke="#D1D5DB" stroke-width="1.5"/>
+
+  <!-- Floating Evidence Drawer below (Airy dual column) -->
+  <g transform="translate(100, 500)">
+    <!-- Left Column: Statistics -->
+    <g transform="translate(0, 0)">
+      <text x="0" y="30" font-family='monospace' font-size="18" font-weight="800" fill="#111111">EVIDENCE // 统计事实强锚定</text>
+      <text x="0" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111">速溶 (842次) · 香精添加 (390次) · 工业感 (280次) · 结块 (210次)</text>
+      <text x="0" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#4B5563">数据事实：超过 68% 的非客群在初次提及速溶时直接联想工业添加剂与低端劣质。</text>
+    </g>
+
+    <!-- Right Column: Quote -->
+    <g transform="translate(880, 0)">
+      <text x="0" y="30" font-family='monospace' font-size="18" font-weight="800" fill="#111111">VERBATIM // 真实原声逐字反查 (篇目 #042)</text>
+      <text x="0" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="500" fill="#111111">“以前加班喝雀巢红杯只觉得死甜齁嗓子，完全是工业香精水，一直对即溶有偏见。”</text>
+      <text x="0" y="115" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="700" fill="#111111">“直到同事塞给我一颗三顿半，倒进冰燕麦奶居然喝出坚果香，彻底颠覆了偏见！”</text>
+      <text x="0" y="160" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#6B7280">原始来源：小红书笔记 ID: 64b82a... · 分类：风味翻案代表贴 · 审计通过</text>
+    </g>
+  </g>
+</svg>

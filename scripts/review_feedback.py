@@ -10,6 +10,7 @@ import hashlib
 import json
 import math
 import re
+import shutil
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -21,6 +22,8 @@ from project_state import (PNG, REVIEW, SVG, VALIDATION, content, digest, event,
 
 HISTORY = 'history'
 APPLIED_EDITS_FILE = 'applied_svg_edits.json'
+# 人改完那几版 SVG 的快照目录（PNG 的 versions/ 在同一个父目录下）。
+VERSIONS = f'{REVIEW}/versions'
 TREE_PATH_RE = re.compile(r'^0(?:\.\d+)*$')
 SVG_NS = 'http://www.w3.org/2000/svg'
 ET.register_namespace('', SVG_NS)
@@ -388,11 +391,21 @@ def apply_pending_svg_edits(root, data):
         entry['version'] = new_ver
         entry['png_sha256'] = new_png_sha
         entry['svg_edits_applied'] = edits_hash
+        # 人改完那一版 SVG 单独留档。模型后来整份重写这一页时，这是唯一的还原底本 ——
+        # PNG 早就有 versions/ 待遇，SVG（真正的源文件）反而没有，所以人被改掉的东西找不回来。
+        svg_snapshot = root/REVIEW/VERSIONS/f'{key}-{new_ver[:12]}.svg'
+        svg_snapshot.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(svg_path, svg_snapshot)
         ledger[ledger_key] = {
             'page': key,
             'edits_hash': edits_hash,
+            # 逐笔内容，不只是哈希。账本原来只存 digest，连「人到底改了什么」都查不回来，
+            # 模型想「以人为基版」也无从下手；一笔最多几条，存全文不值几个字节。
+            'edits': edits,
             'old_version': old_ver,
             'new_version': new_ver,
+            'svg_sha256': sha(svg_path),
+            'svg_snapshot': str(svg_snapshot.relative_to(root)).replace('\\', '/'),
             'new_png_sha256': new_png_sha,
             'applied_at': datetime.now(timezone.utc).isoformat(),
         }
@@ -602,3 +615,79 @@ def consume(root):
         'svg_edits_applied': applied_svg_pages,
         'archived': str(archived.relative_to(root)) if archived else '',
     }
+
+
+def _human_edit_index(root):
+    """账本里「每一页最近一次人工改动」，返回 `(整本账, {页: (账目键, 记录)})`。
+
+    同一页可以被改很多次，每次一条；取 `applied_at` 最新的那条当这一页的当前状态。
+    """
+    ledger = read(Path(root)/REVIEW/APPLIED_EDITS_FILE, {})
+    latest = {}
+    for key, record in (ledger.items() if isinstance(ledger, dict) else []):
+        if not isinstance(record, dict):
+            continue
+        page = str(record.get('page') or '')
+        if not page:
+            continue
+        previous = latest.get(page)
+        if previous is None or str(record.get('applied_at') or '') > str(previous[1].get('applied_at') or ''):
+            latest[page] = (key, record)
+    return ledger, latest
+
+
+def human_edits(root):
+    """每一页最近一次「人手动改过」的记录。没人改过的页不在里面。"""
+    latest = _human_edit_index(root)[1]
+    return {page: record for page, (_key, record) in latest.items()}
+
+
+def human_edit_state(root, page, version):
+    """人改的那一笔现在还算不算数。没人改过的页返回 `None`。
+
+    · `carried` —— 当前这一版**就是**人改完那一版，人的改动还在；
+    · `acknowledged` —— 不是那一版了，但模型已经就当前这一版交代过怎么处理的；
+    · 两个都假 —— 人改过这一页，后来它被整份重写了，而没人交代过。**这就是「白改了」。**
+    """
+    record = human_edits(root).get(page)
+    if not record:
+        return None
+    ack = record.get('ack') if isinstance(record.get('ack'), dict) else {}
+    return {
+        'applied_at': record.get('applied_at'),
+        'version': record.get('new_version'),
+        'edits': record.get('edits') or [],
+        'svg_snapshot': record.get('svg_snapshot') or '',
+        'carried': str(record.get('new_version') or '') == str(version or ''),
+        'acknowledged': str(ack.get('version') or '') == str(version or ''),
+        'ack': ack,
+    }
+
+
+def ack_human_edit(root, page, note):
+    """就当前这一版记下「人那一笔怎么处理的」，闸门随之放行。
+
+    和 `resolve` 同一条规矩：要写清实际做法（带进新版／被新版替掉／恢复），空话不算 ——
+    这条闸门存在的唯一意义就是**不许人的改动被静默丢掉**，一句"已处理"糊过去等于没修。
+    """
+    root = Path(root)
+    text = str(note or '').strip()
+    if not text:
+        raise ValueError('写下你实际怎么处理人那一笔的（带进新版／被新版替掉／恢复），空话不算')
+    pages = {p['page_key']: p for p in content(root)['pages']}
+    if page not in pages:
+        raise ValueError(f'项目里没有这一页：{page}')
+    ledger, latest = _human_edit_index(root)
+    if page not in latest:
+        raise ValueError(f'{page} 没有人工改动记录，无需确认')
+    key, record = latest[page]
+    record = dict(record)
+    record['ack'] = {
+        'version': page_version(root, pages[page]),
+        'note': text,
+        'at': datetime.now(timezone.utc).isoformat(),
+    }
+    ledger[key] = record
+    write(root/REVIEW/APPLIED_EDITS_FILE, ledger)
+    return {'page': page, 'version': record['ack']['version'], 'note': text,
+            'svg_snapshot': record.get('svg_snapshot') or '', 'edits': record.get('edits') or []}

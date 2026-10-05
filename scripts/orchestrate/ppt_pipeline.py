@@ -22,7 +22,8 @@ import urllib.request
 import xml.etree.ElementTree as ET
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 import review_surface
-from review_feedback import consume, content_key
+from review_feedback import (APPLIED_EDITS_FILE, ack_human_edit, consume, content_key,
+                             human_edit_state, human_edits)
 import template_feedback
 from project_state import (DIRECTION, POSITION_HELP, PROJECT, PNG, REVIEW, SVG, VALIDATION, approved,
                            content, contract_binding, design_observations_deck, digest, event,
@@ -105,6 +106,56 @@ def layout_check(root, keys):
         if summary.get('errors'):
             issues=[i for r in data.get('reports',[]) for i in r.get('issues',[]) if i.get('severity')=='error']
             problems.append({'page':k,'errors':summary['errors'],'issues':issues})
+    problems.extend(human_edit_problems(root,keys))
+    return problems
+
+def human_edit_problems(root, keys):
+    """人手动改过、后来又被整份重写、而没有人交代过的页。**这是「白改了」的那条路。**
+
+    审阅页上的轻量直改（改字、移位、删除）会确定性写回 `.svg`，并记进
+    `_internal/05_review/applied_svg_edits.json`。问题是同一页还有第二个写手：模型自己的
+    生成脚本 —— 脚本一跑就是整份 SVG 重写，人那一笔不在脚本里，于是静默消失。
+
+    所以这里不问「画面的风格对不对」，只问一件事实：**人改完那一版，还是现在这一版吗？**
+    不是、而且没人交代过，就报出来。人在这一页上的决定只能由人撤，不能由重画顺手抹掉。
+
+    交代走 `ack-human-edit`（要写清实际怎么处理的）。误报的代价是模型多写一句话；
+    漏报的代价是人白改一场 —— 所以宁可报。
+    """
+    pages={p['page_key']:p for p in content(root)['pages']}
+    human=human_edits(root)
+    problems=[]
+    for k in keys:
+        page=pages.get(k)
+        # 只看账本里真有人改过的页。这不只是省事：`page_version` 要读 SVG，
+        # 而 CREATE 阶段页面还没写出来 —— 对全量页面无脑算版本会把 `next` 打成 errno
+        # （video 路线实测：`next` 报 FileNotFoundError 而不是给出下一步动作）。
+        if page is None or k not in human: continue
+        if not (root/SVG/(k+'.svg')).is_file(): continue
+        try:
+            version=page_version(root,page)
+        except OSError:
+            continue
+        state=human_edit_state(root,k,version)
+        if not state or state['carried'] or state['acknowledged']: continue
+        edits=state['edits']
+        if edits:
+            tags='、'.join(sorted({str(e.get('tag') or '元素') for e in edits}))
+            what=f'{len(edits)} 笔：{tags}'
+            where=(f'先看改了什么：账本 `{REVIEW}/{APPLIED_EDITS_FILE}` 里的 edits，'
+                   f'人改完那版 SVG 快照在 {state["svg_snapshot"] or "未留档"}')
+        else:
+            # 扩容之前记的账只有哈希，没有逐笔内容 —— 别把「0 笔」说成"什么都没改"。
+            what='内容未记账（这条记录写在账本扩容之前，只有哈希）'
+            where=(f'逐笔内容要回 `{REVIEW}/history/round-NN.json` 查（那一轮的 `svg_edits` 就在里面）')
+        problems.append({
+            'page':k,
+            'human_edit':state,
+            'error':(f'{k} 在 {state["applied_at"]} 被人手动改过（{what}），'
+                     f'但现在这一版已经不是人改完那一版了 —— 人那一笔很可能被整份重写覆盖掉。'
+                     f'{where}，把它带进新版或恢复，'
+                     f'再交代：ppt_pipeline.py <project> ack-human-edit --page {k} --note "..."'),
+        })
     return problems
 
 def check(root, keys):
@@ -148,6 +199,13 @@ def check(root, keys):
     from render_svg_png import make_contact_sheet
     files=[root/PNG/(p['page_key']+'.png') for p in pages if (root/PNG/(p['page_key']+'.png')).exists()]
     if files: make_contact_sheet(files,root/'_internal/03_png_preview/full_deck_contact_sheet.png')
+    # 人那一笔还在不在 —— 独立于画面检查的另一条事实，所以单独标上去而不是混进 validator 的 issues。
+    for problem in human_edit_problems(root,[r['page'] for r in results if r.get('page')]):
+        hit=next((r for r in results if r.get('page')==problem['page']),None)
+        if hit is None: continue
+        hit['status']='fix'
+        hit['human_edit']=problem['human_edit']
+        hit['human_edit_error']=problem['error']
     event(root,'check',pages=selected)
     return {'route':route(root),'contract':contract,'pages':results}
 
@@ -364,7 +422,26 @@ def next_action(root):
         result['contract']=contract_result(root)
     _attach_intake(result,intake)
     _attach_template_intake(result,template_intake)
+    _attach_human_edits(result,root)
     return result
+
+def _attach_human_edits(result,root):
+    """人手动改过的页被整页重写、又没人交代过 —— 在**入口**就说出来。
+
+    这件事不能等模型自己去翻账本才发现：人白改一场，就是这么发生的（2026-10-05）。
+    人改的东西不归模型顺手抹掉；要覆盖可以，但必须先说清怎么处理的。
+    """
+    if not isinstance(result,dict): return
+    lost=human_edit_problems(root,[p['page_key'] for p in content(root)['pages']])
+    if not lost: return
+    result['human_edits_lost']=[{'page':x['page'],'applied_at':x['human_edit']['applied_at'],
+                                 'edits':x['human_edit']['edits'],
+                                 'svg_snapshot':x['human_edit']['svg_snapshot'],
+                                 'message':x['error']} for x in lost]
+    result['human_edits_lost_zh']=('有人手动改过的页被整页重写了，还没人交代过怎么处理（'
+        +'、'.join(x['page'] for x in lost)+'）。人在页面上的决定只能由人撤 —— '
+        '先看账本里的 edits 和人改完那版 SVG 快照，把它带进新版或恢复，'
+        '再跑 ack-human-edit 说明你实际怎么处理的。')
 
 def _attach_template_intake(result,intake):
     """把模板审阅的收件结果报出来（键与页面那条**不同名**：两个主体，两份事实）。
@@ -486,6 +563,9 @@ def main():
     verdict.add_argument('--clean',action='store_true',help='看过了，没有缺陷')
     verdict.add_argument('--must-fix',action='store_true',help='看过了，有缺陷且已记录（页面会被推回 CREATE）')
     c=sub.add_parser('resolve');c.add_argument('--feedback-id',required=True);c.add_argument('--note',required=True)
+    c=sub.add_parser('ack-human-edit');c.add_argument('--page',required=True)
+    c.add_argument('--note',required=True,
+                   help='你实际怎么处理人那一笔的：带进新版 / 被新版替掉 / 已恢复。空话不算')
     c=sub.add_parser('review')
     c.add_argument('--surface-only','--no-host',dest='surface_only',action='store_true',
                    help='只生成页面、写 surface、校验 surface 并报出它的绝对路径；不起宿主、不开浏览器'
@@ -497,10 +577,12 @@ def main():
     c=sub.add_parser('template');c.add_argument('--mode',choices=['autonomous','reference','fidelity'],required=True);c.add_argument('--template-id');c.add_argument('--reference')
     a=p.parse_args();root=Path(a.project_dir).expanduser().resolve()
     try:
-        if a.command=='next':result=next_action(root)
+        if a.command=='next':
+            result=next_action(root)
         elif a.command=='check':result=check(root,a.pages)
         elif a.command=='inspect':result=inspect(root,a.page,a.render_token,a.note,a.first_glance,a.design_check,a.position,'must_fix' if a.must_fix else 'clean')
         elif a.command=='resolve':result=resolve(root,a.feedback_id,a.note)
+        elif a.command=='ack-human-edit':result=ack_human_edit(root,a.page,a.note)
         elif a.command=='review':result=review_open(root,surface_only=a.surface_only)
         elif a.command=='export':result=export(root)
         elif a.command=='export-inspect':result=export_inspect(root,a.note,a.previews)

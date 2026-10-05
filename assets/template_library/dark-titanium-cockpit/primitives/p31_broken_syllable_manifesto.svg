@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+
+  <!-- Header -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">31 / 33 · BROKEN SYLLABLE MANIFESTO</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">RADICAL POSTER</text>
+
+  <!-- Left Stage: Monumental Broken Syllables (x=100..900) -->
+  <g transform="translate(100, 200)">
+    <text x="0" y="140" font-family='system-ui, -apple-system, sans-serif' font-size="140" font-weight="900" fill="#111111" letter-spacing="-6">RE-</text>
+    <text x="0" y="330" font-family='system-ui, -apple-system, sans-serif' font-size="140" font-weight="900" fill="#111111" letter-spacing="-6">THINK</text>
+
+    <text x="0" y="500" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="800" fill="#111111">BREAKING CONVENTIONS OF SLIDE FILLING</text>
+    <text x="0" y="540" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#4B5563">以极端断裂与字重对比，强迫观众重构思考惯性。</text>
+  </g>
+
+  <!-- Right Stage: Obsidian Block with Core Creed (x=980, y=180, w=840, h=660) -->
+  <g transform="translate(980, 180)">
+    <rect width="840" height="660" fill="#0C0D11"/>
+    <g transform="translate(60, 60)">
+      <text x="0" y="30" font-family='monospace' font-size="18" font-weight="900" fill="#E2F827">// THE COCKPIT PHILOSOPHY</text>
+      <text x="0" y="95" font-family='system-ui, -apple-system, sans-serif' font-size="36" font-weight="900" fill="#FFFFFF">拒绝为了填满而填满</text>
+
+      <text x="0" y="170" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#D1D5DB">幻灯片是最高决策层的时间交换契约，</text>
+      <text x="0" y="208" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#D1D5DB">不是展示排版努力的素材收纳盒。</text>
+      <text x="0" y="246" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#D1D5DB">越是重要的议题，越需要巨大的留白来承载思维重力。</text>
+      <text x="0" y="284" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#D1D5DB">大字是意志的穿透弹，空地是决策的呼吸区。</text>
+
+      <line x1="0" y1="360" x2="720" y2="360" stroke="#222533" stroke-width="1.5"/>
+
+      <g transform="translate(0, 420)">
+        <text x="0" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#9CA3AF">STATUS: ARCHITECTURAL LAW</text>
+        <text x="0" y="55" font-family='monospace' font-size="18" font-weight="900" fill="#E2F827">VERIFIED BY THE PLANNER</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Bottom Divider Line -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Footer -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280">BROKEN SYLLABLE MONUMENT // ZERO COMPROMISE</text>
+    <text x="1720" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER SYSTEM</text>
+  </g>
+</svg>

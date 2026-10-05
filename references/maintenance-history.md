@@ -6,6 +6,28 @@
 
 ---
 
+## 2026-10-05 · 作者在审阅页上直接改的那一笔，不许被整页重写静默覆盖
+
+**起因**：作者在审阅页上直接改字、拖位置、删元素（`svg_edits`）。这一步本身是对的 —— `consume` 会确定性写回 `_internal/02_svg_source/<page_key>.svg`，写进去就是那一页的定版。问题是同一页有**两个写手**：作者的直改，和模型的生成脚本。脚本一跑就是**整份 SVG 重写**（`generate_all_*.py` 结尾是无条件的 `for key in pages: 写文件`，连"只写某一页"的参数都没有），作者那一笔不在脚本里，于是静默消失。作者的原话是「我白改了」「按理来说我直接改了源文件，那都应该以我为主的」。
+
+**根因不是"检查太少"，是生成的作用域没有规则**：模型被要求改 A 页时跑了整批脚本，把 B、C 页一起重写；而被点名的 A 页也是整份重写。所以修法分两半：**规则**（一次只写被点名的页）＋ **一条闸门**（人改完那版还是不是现在这版）。
+
+| 动了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| **生成作用域写进 `04_svg_stage.md`**：脚本必须能被点名、**不点名就一个字节都不写**（不是写全部）、没点名的页不许动、作者改过的页以作者那版为基版 | 这是根因本身。默认全写这个默认值就是错的；只要它还在，任何一次"只改一页"都会顺手覆盖别的页 | `references/workflow/04_svg_stage.md` | — |
+| **账本扩容**：`applied_svg_edits.json` 每条新增 `edits`（逐笔内容，不只是 digest）、`svg_sha256`、`svg_snapshot`；写回时把人改完那版 SVG 快照到 `_internal/05_review/versions/<page_key>-<version>.svg` | 原来只存 `edits_hash`，连"人到底改了什么"都查不回来，模型想"以人为基版"也无从下手；PNG 早有 `versions/` 待遇，**源文件反而没有** | `scripts/review_feedback.py`（`apply_pending_svg_edits`） | — |
+| **一条闸门**：`human_edits()`／`human_edit_state()`／`ack_human_edit()`；`next` 报 `human_edits_lost`、`check` 把那页标 `fix`、导出时的检查画面直接拦下 | 不问画面风格，只问一件事实：**人改完那一版，还是现在这一版吗？** 人在页面上的决定只能由人撤，不能由重画顺手抹掉 | `scripts/review_feedback.py`、`scripts/orchestrate/ppt_pipeline.py`（`human_edit_problems`、`_attach_human_edits`、`ack-human-edit` 子命令） | — |
+| **`ack-human-edit --page X --note '...'`**：交代按**版本**记账，再画一次闸门重新立起来 | 覆盖可以，但必须先说清怎么处理的（带进新版／被新版替掉／恢复）。和 `resolve` 同一条规矩：空话不算 | `scripts/orchestrate/ppt_pipeline.py`、`references/workflow/07_visual_review.md` | — |
+| **回归 `test/test_human_edit_guard.py`（5 例）** | 关键断言要能证伪：直改落 SVG 且内容入账、重画被抓、空 note 不放行、交代只对当前版本有效、没被改过的页永不误报 | `scripts/test/test_human_edit_guard.py`（新） | — |
+
+**刻意没做的一件事**：**自动回放**人那一笔。`svg_edits` 按**元素树路径**（`0.5.4.0`）定位，页面重画后同一路径指向另一个元素，自动套回去会改坏别的东西。所以这条路只能"停下来 + 重新落一遍"，快照是给人看的还原底本，不是自动补丁。
+
+**踩到并修掉的坑**：闸门最初对**全量页面**无脑算 `page_version`，而 `page_version` 要读 SVG —— CREATE 阶段页面还没写出来，于是 `next` 在 video 路线上从"给出下一步动作"退化成 `FileNotFoundError`（`test_video_route_pipeline` 当场变红）。现在只对**账本里真有人改过、且 SVG 已存在**的页去看。
+
+**边界**：闸门只对**账本里有记录**的页生效；从没被人改过的页永不误报（有回归钉着）。误报的代价是模型多写一句交代，漏报的代价是人白改一场 —— 所以宁可报。
+
+---
+
 ## 2026-09-30 · 幻灯片（PPT）全链路升级（v6.0）：多模态四件套模板包、SVG→PPTX 转换器与校验器协同、极简 PPT 式审阅工作台
 
 **起因**：视频路线（`route == "video"`）稳定后，幻灯片（PPT）路线（`route == "slides"`）暴露出四大瓶颈：① 原模板提取只机械抠取 XML 边缘装饰，产出空壳 `<g data-template-content-layer="replace"></g>`，完全丢失内部版式骨架与比例；② 领域规则偏抽象哲学，换模型或长链路下极易退化为千篇一律的「三等分描边卡片 + 边框套边框」；③ `native_svg_to_ppt.py` 不支持 `<style>`/`:root` `var(--...)`、`<tspan dy>` 多行段落、叶子节点 `transform`、`1px` 细分割线、文字/分组 `opacity` 与 `<linearGradient>`，反向倒逼模型写冗长死板的内联 SVG；④ 审阅页交互弱（框选后画布无常驻标记、模型不知道框中了哪个 SVG 节点、改一个错字或删一个色块也得唤醒模型重画整页）。
