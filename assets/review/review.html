@@ -325,6 +325,7 @@ function status(){
   const s=state[page().key];
   const suffix=(s.svg_edits&&s.svg_edits.length)?' · 已微调 '+s.svg_edits.length+' 处':'';
   $('#pageStatus').textContent=labels[s.decision]+suffix;
+  scheduleDraft();   // 状态变了就排一次草稿（打字、框选、直改、拖动、上传、决定都会走到这里）
 }
 function autoState(){
   const p=page(),s=state[p.key];
@@ -1141,6 +1142,7 @@ async function push(wake){
   const document=collect();
   try{
     await review.write(document);
+    await clearDraft();   // 提交过的不再是"没提交的"，刷新不该把它们当草稿恢复回来
     let verified=null, duplicate=false, notice='';
     if(wake){
       const result=await review.wake(wake);
@@ -1173,6 +1175,94 @@ async function decideCurrent(value){
   note('已写入 '+p.key+' 的决定，并已通知模型'+(value==='approved'?'「已通过」':'「只重出这一页」')
     +'（'+wakeNote(sent.verified)+'）',sent.verified?'ok':'warn');
 }
+/* ---- 草稿：自动落盘，刷新自动读回 ----
+ *
+ * **「我改了东西」和「告诉模型可以动手」是两件事。** 以前只有后者（提交 = 写 feedback.json
+ * + 唤醒），所以没提交的意见/框选/直改/图只活在内存里，刷新即丢 —— 人点一下「重新加载」，
+ * 改的那句就没了（真人反馈 2026-10-05）。
+ *
+ * 现在：任何状态变化都排一次草稿（停手 0.8 秒才写，打字过程中不必每一击都发请求），写进
+ * surface 声明的 `draft` 文件。它**不唤醒模型、也不进模型那一侧的轮次** —— 模型只认
+ * `feedback.json`（决定）。刷新时读回来，页面就是刷新前的样子。
+ *
+ * 恢复只按一条硬规矩：**直改要按页版本判定**。模型已经重出过的那一页，旧直改套不上新画面
+ * （`review_id` 是元素树路径，重画以后同一个路径指向别的元素），所以丢掉；意见、框选、图这些
+ * 是"人写的字"，照常恢复。
+ */
+const DRAFT_REL=data.draft||'';
+const DRAFT_DEBOUNCE_MS=800;
+let canDraft=false,draftTimer=null,draftBusy=false,draftQueued=false,lastDraftSaved='';
+
+function draftPayload(pages){
+  const out={};
+  data.pages.forEach(p=>{
+    const s=state[p.key];
+    out[p.key]={decision:s.decision,feedback:s.feedback,annotations:s.annotations,
+      assets:s.assets.map(a=>({...a})),svg_edits:s.svg_edits,version:p.version};
+  });
+  return {review_id:data.review_id,at:new Date().toISOString(),pages:pages||out};
+}
+/* 状态变了就排一次。`status()` 是所有变更路径的汇合点：打字、框选、直改、拖动、上传、决定。 */
+function scheduleDraft(){
+  if(!DRAFT_REL||!review||!canDraft)return;
+  clearTimeout(draftTimer);
+  draftTimer=setTimeout(saveDraft,DRAFT_DEBOUNCE_MS);
+}
+async function saveDraft(){
+  if(!DRAFT_REL||!review||!canDraft)return false;
+  if(draftBusy){draftQueued=true;return false}
+  let body;
+  try{body=JSON.stringify(draftPayload())}catch(error){return false}
+  if(body===lastDraftSaved)return true;
+  draftBusy=true;
+  try{
+    await review.draft(JSON.parse(body));
+    lastDraftSaved=body;
+    return true;
+  }catch(error){
+    // 存不进就**关掉这条路并说出来** —— 静默失败会让人以为刷新是安全的。
+    canDraft=false;
+    note('草稿存不进（'+error.message+'）：没提交的改动只在这台机器的内存里，刷新会丢。','warn');
+    return false;
+  }finally{
+    draftBusy=false;
+    if(draftQueued){draftQueued=false;scheduleDraft()}
+  }
+}
+/* 提交成功之后把草稿清空：那些东西已经不是"没提交的"了，刷新不该把它们又当成草稿恢复回来
+ * （已提交的那一轮由页面自己的「上一轮你说的」那块只读地显示）。 */
+async function clearDraft(){
+  if(!DRAFT_REL||!review||!canDraft)return;
+  try{
+    await review.draft({review_id:data.review_id,at:new Date().toISOString(),pages:{}});
+    lastDraftSaved='';
+  }catch(error){/* 清不掉不影响正确性：下次任何改动都会覆盖它 */}
+}
+async function restoreDraft(){
+  if(!DRAFT_REL||!review||!canDraft)return;
+  let draft=null;
+  try{draft=JSON.parse(await review.readText(DRAFT_REL))}catch(error){return}   // 还没存过 → 正常
+  if(!draft||typeof draft!=='object'||!draft.pages)return;
+  let restored=0;const droppedEdits=[];
+  data.pages.forEach(p=>{
+    const saved=draft.pages[p.key];
+    if(!saved||typeof saved!=='object')return;
+    const s=state[p.key];
+    if(typeof saved.feedback==='string'&&saved.feedback.trim()){s.feedback=saved.feedback;restored++}
+    if(Array.isArray(saved.annotations)&&saved.annotations.length)s.annotations=saved.annotations;
+    if(Array.isArray(saved.assets)&&saved.assets.length)s.assets=saved.assets;
+    if(saved.decision&&saved.decision!==s.decision)s.decision=saved.decision;
+    if(Array.isArray(saved.svg_edits)&&saved.svg_edits.length){
+      if(saved.version===p.version)s.svg_edits=saved.svg_edits;   // 画面没变 → 旧直改照样成立
+      else droppedEdits.push(p.key);                             // 模型重出过 → 路径已指到别处，丢掉
+    }
+  });
+  if(restored){
+    note('已读回你没提交的草稿（'+restored+' 页有意见）'
+      +(droppedEdits.length?('；'+droppedEdits.join('、')+' 的画面已被模型重出，那几页的直改没有恢复'):''),'ok');
+  }
+}
+
 /* ---- 「重新加载」不能把人还没提交的东西悄悄丢掉 ----
  *
  * 页面上的意见、框选、直改、图都只活在内存里（`state`），**只有「提交」那一刻才落盘**。
@@ -1196,7 +1286,14 @@ function pendingWork(){
   });
   return out;
 }
-function askReload(){
+async function askReload(){
+  // 草稿这条路通了，刷新就是安全的：先把最后一笔刷出去（防抖窗口里可能还没写），再刷新。
+  if(DRAFT_REL&&review&&canDraft){
+    clearTimeout(draftTimer);
+    const saved=await saveDraft();
+    if(saved){location.reload();return}
+    // 存不进 → 掉到下面的弹窗，由人决定
+  }
   const work=pendingWork();
   if(!work.length){location.reload();return}
   $('#reloadWhat').textContent='还没提交的有 —— '+work.join('；');
@@ -1381,6 +1478,10 @@ function sayReadOnly(why){
   // 轨道是在**握手之前**建的（`render()` 排在前面），那时 `assetFor` 只能给降级地址；
   // 插件模式下那个地址 404，缩略图就整场是破的 —— 桥接上以后必须重建一次，让图真正取到。
   drawRail();
+  // 草稿：能力是「宿主支持 ∩ surface 声明」。读回没提交的东西，然后重画一次让它们显出来
+  // （直改要靠 `mountInlineSvg()` 里的 `replaySvgEditsOnDom()` 重放）。
+  canDraft=DRAFT_REL!==''&&Array.isArray(review.capabilities)&&review.capabilities.indexOf('draft')>=0;
+  if(canDraft){await restoreDraft();render()}
   review.on('changed',()=>onHostChanged());
   refreshStale();
 })();

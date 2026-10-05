@@ -49,12 +49,17 @@ VISUAL = {
     'entry': '02_visual_review.html',
     # `feedback` / `watch` 相对 **surface 文件**（R2 的第二个基准）：同在 `_internal/05_review/`。
     'feedback_rel': 'feedback.json',
+    # 草稿：和 `feedback` 分开的两个文件、两件事。`feedback` 是**决定**（人点了提交，
+    # 模型按轮次收件）；`draft` 是**还没提交的草稿**（页面拿它做「刷新不丢」，模型不当它是收件）。
+    # 曾经只有 feedback：于是「我改了东西」和「告诉模型可以动手」被绑成一个动作 ——
+    # 不提交就只活在内存里，刷新即丢（真人反馈 2026-10-05）。
+    'draft_rel': 'draft.json',
     'watch': ['snapshot.json'],
     'id': 'planners-ppt-hell/visual',
     'title': '整套页面审阅',
     'description': '逐页看实际渲染图，框选或写意见；每页可单独提交，模型只重出提交的那一页。',
     # 逐页审阅要人补图（换一张渲染图、贴一张截图）→ 声明上传能力。
-    'capabilities': ['asset-upload'],
+    'capabilities': ['asset-upload', 'draft'],
     # 逐页：单位是 page_key，所以唤醒语带 `{unit}`；页面会用整句覆盖（自带决定）。
     'wake_text': '{unit} 已定；只重出这一页，其余页不要动。',
 }
@@ -92,6 +97,7 @@ SURFACE_REL = VISUAL['surface_rel']
 HOST_STATE_REL = f"{REVIEW}/{review_host.HOST_STATE_NAME}"
 PAGE_REL = VISUAL['entry']
 FEEDBACK_REL = f"{REVIEW}/{VISUAL['feedback_rel']}"
+DRAFT_REL = f"{REVIEW}/{VISUAL['draft_rel']}"
 WAKE_LOG_REL = f"{REVIEW}/{review_host.WAKE_LOG_NAME}"
 ID = VISUAL['id']
 WAKE_TEXT = VISUAL['wake_text']
@@ -132,6 +138,8 @@ def surface_document(root, name='visual'):
         'dir': up,
         'entry': face['entry'],
         'feedback': face['feedback_rel'],
+        # 省略 = 这个面不做草稿（模板审阅面就没有）。宿主按声明决定收不收 `draft` 调用。
+        **({'draft': face['draft_rel']} if face.get('draft_rel') else {}),
         'wake': {'mode': 'queue', 'text': face['wake_text']},
         'capabilities': list(face['capabilities']),
         'watch': list(face['watch']),

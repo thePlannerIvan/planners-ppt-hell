@@ -18,7 +18,7 @@ from urllib.parse import unquote, urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import test_v5 as fixtures  # noqa: E402
-from project_state import PNG, REVIEW, SVG, approved, read  # noqa: E402
+from project_state import PNG, REVIEW, SVG, approved, read, write  # noqa: E402
 from ppt_pipeline import check, export, make_review, next_action, resolve  # noqa: E402
 from review_feedback import consume  # noqa: E402
 from ppt_pipeline import unresolved  # noqa: E402
@@ -475,15 +475,14 @@ class ReviewBrowserTests(unittest.TestCase):
             for item in hosts: review_host.stop_host(item)
             fixture.tearDown()
 
-    def test_reload_does_not_silently_discard_unsubmitted_work(self):
-        """有没提交的东西时，点「重新加载」必须先停下来问（2026-10-05 真人反馈）。
+    def test_reload_keeps_unsubmitted_work(self):
+        """点「重新加载」不该丢东西：草稿自动落盘，刷新后读回来（2026-10-05 真人反馈）。
 
-        作者在画布上改完一句、点「重新加载」，那句就没了 —— 页面上的意见、框选、直改、图
-        只活在内存里，`location.reload()` 会把它们全部抹掉。
+        以前「提交」是唯一的落盘路径，所以没提交的意见/框选/直改只活在内存里，刷新即丢。
+        现在任何状态变化都排一次草稿（停手 0.8 秒写进 surface 声明的 draft 文件），
+        「重新加载」先把最后一笔刷出去再刷新。
 
-        判据：点之前先立一个「页面没被换掉」的标记（`window.__survived`）。
-        刷新了 → 标记消失（旧行为，红）；没刷新且弹出选择框 → 标记还在（新行为）。
-        同时验反面对照：**没有**未提交内容时不该有摩擦，直接刷新。
+        判据分两层：**磁盘上真有那份草稿**（不是只在内存里），以及**刷新之后那句话还在**。
         """
         fixture = fixtures.V5Tests(); fixture.setUp(); root = fixture.root.resolve()
         hosts = []
@@ -497,7 +496,95 @@ class ReviewBrowserTests(unittest.TestCase):
                 page.goto(state['url'])
                 page.wait_for_function("document.querySelector('#bridgeState').textContent.includes('已连接')")
 
-                # 造一笔没提交的意见，然后点「重新加载」
+                page.evaluate("""() => {
+                  const box = document.querySelector('#feedback');
+                  box.value = '这句还没提交';
+                  box.dispatchEvent(new Event('input', { bubbles: true }));
+                }""")
+                # 停手 0.8 秒后才会写；等一下再看磁盘
+                page.wait_for_timeout(1400)
+                draft = read(root / '_internal/05_review' / 'draft.json')
+                self.assertEqual(draft['pages']['alpha']['feedback'], '这句还没提交',
+                                 '没提交的意见必须自动落到 draft 文件里')
+
+                # 点「重新加载」：这次应当真的刷新（草稿已经安全），而东西不该丢
+                page.evaluate("() => { window.__beforeReload = true }")
+                page.get_by_text('重新加载', exact=True).click()
+                page.wait_for_function("() => window.__beforeReload === undefined", timeout=10000)
+                page.wait_for_function("document.querySelector('#feedback').value.length > 0", timeout=10000)
+                self.assertEqual(page.input_value('#feedback'), '这句还没提交',
+                                 '刷新之后草稿要读回来，页面就是刷新前的样子')
+        finally:
+            for item in hosts: review_host.stop_host(item)
+            fixture.tearDown()
+
+    def test_draft_direct_edits_follow_the_page_version(self):
+        """草稿里的直改按**页版本**恢复：画面没变就恢复，模型重出过就丢掉。
+
+        `svg_edits` 的定位是元素树路径（`0.1` 这种）。页面一旦重画，同一个路径指向的就是
+        另一个元素 —— 自动套回去会改坏别的东西。所以只认版本对得上的那些。
+        """
+        fixture = fixtures.V5Tests(); fixture.setUp(); root = fixture.root.resolve()
+        hosts = []
+        try:
+            fixture.payload()
+            surface_path = root / review_surface.SURFACE_REL
+            state = review_host.start_host(surface_path); hosts.append(state)
+            draft_path = root / '_internal/05_review' / 'draft.json'
+            snapshot = read(root / '_internal/05_review' / 'snapshot.json')
+
+            def draft_for(version):
+                return {'review_id': snapshot['review_id'], 'at': '2026-10-05T00:00:00Z',
+                        'pages': {'alpha': {'decision': 'pending', 'feedback': '', 'annotations': [],
+                                            'assets': [], 'version': version,
+                                            'svg_edits': [{'review_id': '0.1', 'tag': 'text',
+                                                           'text': '草稿里的直改'}]}}}
+
+            from playwright.sync_api import sync_playwright
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page(viewport={'width': 1440, 'height': 900})
+
+                # ① 版本对得上 → 恢复
+                write(draft_path, draft_for(snapshot['versions']['alpha']))
+                page.goto(state['url'])
+                page.wait_for_function("document.querySelector('#bridgeState').textContent.includes('已连接')")
+                page.wait_for_timeout(500)
+                self.assertEqual(page.evaluate("() => state.alpha.svg_edits.length"), 1,
+                                 '画面没变，草稿里的直改该恢复')
+
+                # ② 版本对不上（模型重出过这一页）→ 丢掉
+                write(draft_path, draft_for('一个已经不存在的版本'))
+                page.reload()
+                page.wait_for_function("document.querySelector('#bridgeState').textContent.includes('已连接')")
+                page.wait_for_timeout(500)
+                self.assertEqual(page.evaluate("() => state.alpha.svg_edits.length"), 0,
+                                 '画面已经被模型重出过，旧直改必须丢掉（元素树路径已经指到别处）')
+        finally:
+            for item in hosts: review_host.stop_host(item)
+            fixture.tearDown()
+
+    def test_reload_guard_still_catches_surfaces_without_drafts(self):
+        """面**没有**声明 draft 时（比如模板审阅面），弹窗那条兜底必须还在。
+
+        草稿是"刷新不丢"的正路；这条路不通时，页面不能又变回静默丢弃 —— 它得先问人。
+        """
+        fixture = fixtures.V5Tests(); fixture.setUp(); root = fixture.root.resolve()
+        hosts = []
+        try:
+            fixture.payload()
+            surface_path = root / review_surface.SURFACE_REL
+            doc = read(surface_path)
+            doc.pop('draft', None)
+            doc['capabilities'] = [c for c in doc.get('capabilities', []) if c != 'draft']
+            write(surface_path, doc)
+            state = review_host.start_host(surface_path); hosts.append(state)
+            from playwright.sync_api import sync_playwright
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page(viewport={'width': 1440, 'height': 900})
+                page.goto(state['url'])
+                page.wait_for_function("document.querySelector('#bridgeState').textContent.includes('已连接')")
                 page.evaluate("""() => {
                   window.__survived = true;
                   const box = document.querySelector('#feedback');
@@ -507,23 +594,14 @@ class ReviewBrowserTests(unittest.TestCase):
                 page.get_by_text('重新加载', exact=True).click()
                 page.wait_for_timeout(600)
                 self.assertTrue(page.evaluate("() => window.__survived === true"),
-                                '有未提交内容时点「重新加载」不该直接把页面刷新掉')
+                                '没有草稿可存时，点「重新加载」不该直接把页面刷新掉')
                 self.assertTrue(page.evaluate("() => document.querySelector('#reloadDialog').open"),
                                 '该先弹出「会丢掉什么」的选择框')
                 what = page.locator('#reloadWhat').inner_text()
                 self.assertIn('alpha', what, '要说清是哪一页')
                 self.assertIn('意见', what, '要说清丢的是什么')
-
-                # 选「返回」：什么都不动，页面还在，那笔意见还在
                 page.locator('#reloadDialog').get_by_text('返回', exact=True).click()
                 self.assertEqual(page.input_value('#feedback'), '这句还没提交', '返回之后不该动任何东西')
-
-                # 反面对照：没有未提交内容时不该有摩擦
-                page.evaluate("() => { const b=document.querySelector('#feedback'); b.value=''; b.dispatchEvent(new Event('input',{bubbles:true})) }")
-                page.get_by_text('重新加载', exact=True).click()
-                page.wait_for_timeout(600)
-                self.assertNotEqual(page.evaluate("() => window.__survived"), True,
-                                    '没有未提交内容时应当直接刷新（没有摩擦）')
         finally:
             for item in hosts: review_host.stop_host(item)
             fixture.tearDown()

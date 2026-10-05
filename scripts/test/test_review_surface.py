@@ -125,7 +125,12 @@ class ReviewSurfaceTests(unittest.TestCase):
         self.assertEqual(doc['feedback'], 'feedback.json')
         self.assertEqual(doc['wake']['mode'], 'queue')
         self.assertIn('{unit}', doc['wake']['text'])
-        self.assertEqual(doc['capabilities'], ['asset-upload'])
+        # `draft` 与 `asset-upload` 并列：前者是「未提交的草稿」这条路，后者是上传。
+        # 两个都是**承诺**（宿主支持 ∩ surface 声明），页面靠它决定要不要摆那个控件/走那条路。
+        self.assertEqual(doc['capabilities'], ['asset-upload', 'draft'])
+        self.assertEqual(doc['draft'], 'draft.json',
+                         '草稿文件必须和 feedback 分开：一个是决定，一个是没提交的草稿')
+        self.assertNotEqual(doc['draft'], doc['feedback'])
         # 宿主只 stat 它；页面收到戳之后自己去读、自己 diff（相对 surface 文件）
         self.assertEqual(doc['watch'], ['snapshot.json'])
         # dir 只能取项目根：页面在根上，渲染图/上传件/素材分别在 _internal 的几处（见 review_surface 的 docstring）

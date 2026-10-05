@@ -18,7 +18,7 @@ from pathlib import Path
 
 from project_state import (PNG, REVIEW, SVG, approvals, content, images, local, read,
                            review_snapshot, sha, versions, write)
-from review_surface import write_surface
+from review_surface import DRAFT_REL, write_surface
 
 SNAPSHOT_REL = f'{REVIEW}/snapshot.json'
 VERSIONS_REL = f'{REVIEW}/versions'
@@ -147,6 +147,10 @@ def generate(root, template_path=None):
         'project': c.get('project', ''),
         'review_id': snap['review_id'],
         'snapshot': SNAPSHOT_REL,
+        # 草稿文件的**相对 dir 路径**（页面用它读回未提交的草稿）。与 surface 里那个
+        # `draft` 同一个来源（`review_surface.VISUAL['draft_rel']`），只是基准不同：
+        # surface 里相对它自己，页面里相对 dir。
+        'draft': DRAFT_REL,
         'pages': [],
     }
     for p in c['pages']:

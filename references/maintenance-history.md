@@ -6,6 +6,27 @@
 
 ---
 
+## 2026-10-05 · 草稿自动落盘：把「我改了东西」和「告诉模型可以动手」拆开
+
+**起因**：作者问「我的意见、框选、直改应该自动落盘，为什么还需要提交？点重新加载时就应该全部自动落盘」。
+
+**根**：`feedback.json` 是唯一的落盘路径，而「提交」＝写它＋唤醒模型。所以没提交的东西只活在页面内存里 —— 刷新即丢。**这是把两件事绑成了一个动作**，不是保存按钮的缺失。
+
+**为什么不直接把打字过程写进 `feedback.json`**：模型那一侧按轮次收件（读成一个 round、生成待办、同页同话永久关闭）。边打字边写，模型会在半句话上动手，轮次也会碎成"每敲一个字一轮"。所以拆开、不是合并。
+
+| 动了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| 公共契约加可选字段 `draft`；桥加 `review.draft(payload)`；两种宿主各加一条路由；校验器加「draft 在 project_root 内」「draft ≠ feedback」 | 草稿需要一个**和决定分开**的落点，而落点属于"宿主把字节搬到哪"，不属于业务 | `planners-review-core`：`contracts/review-surface.schema.json`、`assets/review-bridge.js`、`scripts/serve-review.mjs`、`scripts/lib/review_host.py`、`scripts/validate-surface.mjs`、`evals/run.mjs`；`dsh-review-dock`：`lib/index.js`（`/api/review.draft` + 能力）、`lib/client.js`（中继） | 无 |
+| surface 声明 `draft: 'draft.json'` ＋ 能力 `draft`；页面自动存（`status()` 是所有变更路径的汇合点，停手 0.8 秒写）与读回 | 「改了」自动存、「定了」才提交 | `scripts/review_surface.py`、`scripts/generate_review_html.py`（把路径注进页面 `data`）、`assets/review/review.html` | 无 |
+| 「重新加载」先刷草稿再刷新（`askReload` 走 `saveDraft()`）；弹窗只在草稿存不进时兜底 | 刷新不再需要人做决定；而没有草稿能力的面不能又变回静默丢弃 | `assets/review/review.html` | — |
+| 提交成功后清空草稿 | 已提交的东西不该在刷新后被当成"没提交的"恢复回来（那由「上一轮你说的」只读显示） | `assets/review/review.html`（`push()`） | — |
+
+**边界**：恢复的硬规矩是**直改按页版本判定** —— 模型重出过的那一页，旧直改丢掉（`review_id` 是元素树路径，重画后同一路径指向别的元素）；意见/框选/图照常恢复。草稿**永远不唤醒模型、也永远不进 `feedback.json`**，模型只认决定。
+
+**踩到的**：`evals/run.mjs` 里那句"宿主断言总数"是手写的（"宿主 29 条"），加两条断言就过期了 —— 已改成数出来的。手写的计数会让人以为自己看到的是全部。
+
+---
+
 ## 2026-10-05 · 「重新加载」静默丢掉未提交的东西；缩略图整场是破的（同一个根：启动顺序）
 
 **起因**：作者在画布上改完一句、点「重新加载」，那句就没了。截图同时暴露左侧 11–16 页缩略图全是破图 —— 他大概正是为了这个才点重新加载。
