@@ -19,8 +19,13 @@
 | `drawRail()` 只负责整条建（换页 / 换新快照）；新增 `updateRail()` 原地改圆点与 `N框 N改` 标签，9 处状态变化路径改走它 | 一个决定变了只需改那一个按钮，不需要重建 28 个按钮、重取 28 张图 | `assets/review/review.html` | 状态变化路径上对 `drawRail()` 的 9 次调用 |
 | 缩略图标签改为常驻 + `.rail-tag:empty{display:none}` | 常驻才能原地更新；`drawRail()` 里"有内容才创建"的写法只适合重建 | `assets/review/review.html` | — |
 | 回归 `test_review_browser.test_typing_feedback_does_not_rebuild_the_rail` | 给每个缩略图打标记再敲一个字：标记还在＝没重建。对照组（还原 9 处）实测红 `0 != 2`；同时断言活动页确实变 `revise` | `scripts/test/test_review_browser.py`（新用例） | — |
+| **随后收紧**：`updateRail(keys)` 支持只更新点名的页，两条**逐字符**路径（本页意见框、画布「改字」输入框）改传 `[当前页]` | 原来一个字符要写 N 个按钮的类名；打字只会改变当前页的状态 | `assets/review/review.html` | 逐字符路径上的整条更新 |
+| **随后收紧**：`drawRail()` 建 `page_key → {按钮, 标签, 序号}` 登记表，`updateRail()` 查表；表空时先整条建 | 去掉每页一次 `querySelector`；也堵住"首屏 `render()` 之前调 `updateRail()` 会静默什么都不做"这个自己新开的口子 | `assets/review/review.html` | `updateRail()` 里逐页的 DOM 查询 |
+| **随后收紧**：资源 URL 按「路径 + 版本」记住（`assetUrls`） | 每次重建轨道都重取整套缩略图（插件模式：每页一次桥往返 + 一个新 blob）。键带版本 → 模型重出这一页仍取到新图；取失败不缓存 | `assets/review/review.html` | — |
+| **一处事实一个来源**：宿主推「画面已更新」时手写的类名规则删掉，改走 `updateRail()` | 那段和 `railClass()` 是同一套规则的两份写法，改一处漏一处 | `assets/review/review.html` | 重复的类名/标题赋值 |
+| 加断言「一个字符只写 1 个按钮的类名」；新增 `test_switching_pages_does_not_refetch_every_thumbnail` | 两条都验过对照组：还原成整条更新 → 红 `2 != 1`；去掉缓存 → 红 `3 != 0` | `scripts/test/test_review_browser.py` | — |
 
-**边界**：`drawRail()` 仍保留给 `render()`（换页、换新快照）—— 那时结构真的变了。若某天 `data.pages` 的页数会就地变化，必须在变更处显式调 `drawRail()`。
+**边界**：`drawRail()` 仍保留给 `render()`（换页、换新快照）—— 那时结构真的变了。若某天 `data.pages` 的页数会就地变化，必须在变更处显式调 `drawRail()`。`assetUrls` 以「路径 + 版本」为键，所以**只要版本如实反映内容**它就不会给出旧图 —— 若有任何绕过版本号原地覆盖同一路径的写法，这里会拿到旧 URL。
 
 ---
 

@@ -404,21 +404,73 @@ class ReviewBrowserTests(unittest.TestCase):
                 marked = page.evaluate("""() => {
                   const imgs = [...document.querySelectorAll('#rail img')];
                   imgs.forEach((el, i) => { el.dataset.probe = String(i) });
+                  // 顺便数一数这次输入到底写了几个轨道按钮的 className：只该有当前页那一个。
+                  let writes = 0;
+                  const desc = Object.getOwnPropertyDescriptor(Element.prototype, 'className');
+                  Object.defineProperty(Element.prototype, 'className', {
+                    configurable: true,
+                    get() { return desc.get.call(this) },
+                    set(v) { if (this.parentElement && this.parentElement.id === 'rail') writes += 1; desc.set.call(this, v) },
+                  });
                   const box = document.querySelector('#feedback');
                   box.value = '写一句意见';
                   box.dispatchEvent(new Event('input', { bubbles: true }));
-                  return {
+                  const out = {
                     marked: imgs.length,
                     survived: document.querySelectorAll('#rail img[data-probe]').length,
+                    writes: writes,
                     active: document.querySelector('#rail button.active').className,
                     total: document.querySelectorAll('#rail button').length,
                   };
+                  Object.defineProperty(Element.prototype, 'className', desc);
+                  return out;
                 }""")
                 self.assertGreater(marked['marked'], 0, '轨道里得先有缩略图，否则这条断言什么也没证')
                 self.assertEqual(marked['total'], marked['marked'], '缩略图数量应与页数一致')
                 self.assertEqual(marked['survived'], marked['marked'],
                                  '打字只该改状态，不该销毁重建缩略图（重建会让整条轨道一直在动）')
+                self.assertEqual(marked['writes'], 1,
+                                 '一个字符只该写「当前这一页」那一个按钮的类名，不该把整条轨道写一遍')
                 self.assertIn('revise', marked['active'], '状态仍要更新：活动页应变成 revise')
+        finally:
+            for item in hosts: review_host.stop_host(item)
+            fixture.tearDown()
+
+    def test_switching_pages_does_not_refetch_every_thumbnail(self):
+        """翻页不该把整套缩略图重新向宿主取一遍（同一条浪费，只是触发频率低些）。
+
+        `render()` 每次都整条重建轨道，而重建就要给每个缩略图取一次 URL（插件模式下是每页
+        一次桥往返 + 一个新 blob）。资源按「路径 + 版本」记住之后，第二遍应该一次都不问宿主；
+        版本变了（模型重出这一页）自然还是会去取 —— 键里带版本，所以不会拿到旧图。
+        """
+        fixture = fixtures.V5Tests(); fixture.setUp(); root = fixture.root.resolve()
+        hosts = []
+        try:
+            fixture.payload()
+            state = review_host.start_host(root / review_surface.SURFACE_REL); hosts.append(state)
+            from playwright.sync_api import sync_playwright
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page(viewport={'width': 1440, 'height': 900})
+                page.goto(state['url'])
+                page.wait_for_function("document.querySelector('#bridgeState').textContent.includes('已连接')")
+                page.wait_for_function("() => [...document.querySelectorAll('#rail img')].every(i => i.src)")
+                page.wait_for_timeout(300)          # 首屏该取的都取完了
+                counts = page.evaluate("""async () => {
+                  let n = 0;
+                  const original = review.asset.bind(review);
+                  review.asset = (...a) => { n += 1; return original(...a) };
+                  const buttons = [...document.querySelectorAll('#rail button')];
+                  buttons[1].click();               // 翻到第 2 页 → render → drawRail
+                  await new Promise(r => setTimeout(r, 500));
+                  const away = n; n = 0;
+                  buttons[0].click();               // 翻回第 1 页
+                  await new Promise(r => setTimeout(r, 500));
+                  return { away: away, back: n, pages: buttons.length };
+                }""")
+                self.assertGreaterEqual(counts['pages'], 2, '这条断言要至少两页才有意义')
+                self.assertEqual(counts['away'], 0, '翻过去时缩略图与舞台图都该用记住的 URL，不再问宿主')
+                self.assertEqual(counts['back'], 0, '翻回来时同样不该重新取')
         finally:
             for item in hosts: review_host.stop_host(item)
             fixture.tearDown()

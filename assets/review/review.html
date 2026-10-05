@@ -262,10 +262,25 @@ const uid=()=>((window.crypto&&crypto.randomUUID)?crypto.randomUUID():'f'+Math.r
 function note(text,kind){const el=$('#message');el.textContent=text||'';el.className=kind||''}
 
 const assetVersion=a=>String((a&&(a.version||a.sha256))||'').slice(0,12);
+/* 资源 URL 按「路径 + 版本」记住：同一版内容只向宿主取一次。
+ *
+ * 以前每次重建缩略图轨道都把 N 张图重新取一遍（插件模式下是 N 次桥往返 + N 个新 blob），
+ * 翻一页就重来一次。键里带版本号，所以模型重出这一页（版本变）取到的一定是新图；
+ * 版本没变就是同一份字节，重复取没有意义。取失败不缓存，下次还会再试。
+ */
+const assetUrls=new Map();
 async function assetFor(rel,v){
-  if(!review)return '/'+rel+(v?'?v='+encodeURIComponent(String(v)):'');
-  try{return await review.asset(rel,v?{v:String(v)}:undefined)}
-  catch(error){note('取不到资源：'+error.message,'error');return ''}
+  const cacheKey=rel+'\u0000'+(v==null?'':String(v));
+  if(assetUrls.has(cacheKey))return assetUrls.get(cacheKey);
+  let url='';
+  if(!review){
+    url='/'+rel+(v?'?v='+encodeURIComponent(String(v)):'');
+  }else{
+    try{url=await review.asset(rel,v?{v:String(v)}:undefined)}
+    catch(error){note('取不到资源：'+error.message,'error');return ''}
+  }
+  if(url)assetUrls.set(cacheKey,url);
+  return url;
 }
 
 // 注意：`changed(p)` 判定的是「是否需要大模型重画」（feedback / annotations / assets）。
@@ -279,7 +294,7 @@ function status(){
 function autoState(){
   const p=page(),s=state[p.key];
   s.decision=changed(p)?'revise':initial[p.key].decision;
-  updateRail();status();
+  updateRail([p.key]);status();   // 逐字符路径：只碰当前页
 }
 $('#project').textContent=(data.project||'项目')+' · 整套审阅';
 
@@ -303,9 +318,12 @@ function railClass(i,p){
 function railTagText(s){
   return (s.annotations.length?s.annotations.length+'框 ':'')+(s.svg_edits.length?s.svg_edits.length+'改':'');
 }
+/* 按钮登记表：`page_key → {b, tag, i}`。有它才不用每次靠 `querySelector` 去找按钮。 */
+let railButtons=new Map();
 /* 整条轨道建一次。只在换页 / 换新快照（`render()`）时用。 */
 function drawRail(){
   const rail=$('#rail');rail.replaceChildren();
+  railButtons=new Map();
   data.pages.forEach((p,i)=>{
     const b=document.createElement('button');
     b.className=railClass(i,p);
@@ -324,24 +342,28 @@ function drawRail(){
     b.append(meta);
     b.onclick=()=>{index=i;render()};
     rail.append(b);
+    railButtons.set(p.key,{b:b,tag:tag,i:i});
   });
 }
-/* 只改状态，不重建。
+/* 只改状态：不重建 DOM、不重取图、不动滚动位置。
  *
  * 原来每个状态变化都走 `drawRail()`，而写意见时**每敲一个字**都会走到这里
- * （`#feedback` 的 oninput → autoState → drawRail）：于是 28 页的整套缩略图被反复销毁重建，
- * 每重建一次还要**重新取 28 张图**（每次都是新的 `<img>` 与新的 blob）。人在左边看到的
- * 就是缩略图一直在动，正在写的意见也被打断。滚动位置、图片、按钮结构都不该因为一个决定变了
- * 而重来 —— 变的只是那个圆点和那个「N框 N改」标签。
+ * （`#feedback` 的 oninput → autoState → drawRail）：28 个按钮连同 28 张缩略图被反复销毁重建、
+ * 重新取回。人在左边看到的就是缩略图一直在动，正在写的意见也被打断。变的其实只是
+ * 那一个圆点和那个「N框 N改」标签 —— 其余按钮连碰都不该碰。
+ *
+ * `keys` 给了就只更新这几页（打字只影响当前页）；不给就全部更新一遍（单击、拖拽这类一次性动作）。
  */
-function updateRail(){
-  data.pages.forEach((p,i)=>{
-    const b=$('#rail button[data-key="'+p.key+'"]');if(!b)return;
-    b.className=railClass(i,p);
-    b.title=updatedPages.has(p.key)?'画面已更新，待复核':'';
-    const tag=b.querySelector('.rail-tag');
-    if(tag)tag.textContent=railTagText(state[p.key]);
-  });
+function updateRail(keys){
+  if(!railButtons.size){drawRail();return}
+  const targets=(keys&&keys.length)?keys:railButtons.keys();
+  for(const key of targets){
+    const at=railButtons.get(key);if(!at)continue;
+    const p=data.pages[at.i],s=state[key];
+    at.b.className=railClass(at.i,p);
+    at.b.title=updatedPages.has(p.key)?'画面已更新，待复核':'';
+    at.tag.textContent=railTagText(s);
+  }
 }
 
 /* ---- 内联 SVG 舞台与轻量微调（改字 / 改字号 / 拖拽移位） ---- */
@@ -630,7 +652,7 @@ $('#inlineTextInput').oninput=e=>{
   applyTextToDom(el,rec.text,rec.lines);
   pruneNoopEditRecord(selectedReviewId);
   updateToolbarSelection();
-  updateRail();status();
+  updateRail([page().key]);status();   // 逐字符路径：只碰当前页
 };
 
 function stepFontSize(delta){
@@ -1018,10 +1040,7 @@ async function onHostChanged(){
   }
   stale=false;staleKeys=[];drawStale();
   await swapImages(changedPages);
-  for(const p of changedPages){
-    const button=document.querySelector('#rail button[data-key="'+p.key+'"]');
-    if(button){button.className=state[p.key].decision+(p.key===page().key?' active':'')+' updated';button.title='画面已更新，待复核'}
-  }
+  updateRail(changedPages.map(p=>p.key));
   status();
   if(updatedPages.has(page().key))render();
 }
