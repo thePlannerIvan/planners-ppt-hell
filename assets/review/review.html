@@ -255,6 +255,28 @@ function drawPulse(){
 const $=s=>document.querySelector(s);
 const data=__DATA__;
 const page=()=>data.pages[index];
+/* 当前页记在地址的 hash 上（`#page_14`）。
+ *
+ * **不能用 localStorage／sessionStorage**：插件的不透明 iframe 里读它会直接抛，而且那个源
+ * 每次加载都是新的，存了也读不回来。hash 随刷新一起保留 —— 所以「重新加载」之后人还停在
+ * 原来那一页，而不是每次都被弹回第 1 页（真人反馈 2026-10-05）。
+ *
+ * hash 是当前页的**唯一来源**：切页时写它；`hashchange`（浏览器前进/后退、手改地址）读它。
+ */
+function pageKeyFromHash(){
+  try{return decodeURIComponent(String(location.hash||'').replace(/^#/,''))}
+  catch(error){return ''}
+}
+function syncHash(){
+  const p=data.pages[index];if(!p)return;
+  if(pageKeyFromHash()!==p.key){
+    try{location.hash=p.key}catch(error){/* 不让写就算了：不记位置也能用，不该因此中断 */}
+  }
+}
+addEventListener('hashchange',()=>{
+  const at=data.pages.findIndex(p=>p.key===pageKeyFromHash());
+  if(at>=0&&at!==index){index=at;render()}
+});
 const labels={pending:'未处理',approved:'人工批准',revise:'要求修改'};
 const CIRCLED=['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
 const numBadge=i=>CIRCLED[i]||String(i+1);
@@ -762,6 +784,7 @@ async function render(){
   $('#modeSelect').classList.add('active');
   $('#mark').classList.remove('active');
   const p=page(),s=state[p.key];
+  syncHash();   // 切页/换页都记下位置，重新加载后还停在这一页
   $('#title').textContent=(index+1)+' / '+data.pages.length+' · '+p.title;
   $('#feedback').value=s.feedback;
   const updated=updatedPages.has(p.key);
@@ -1340,6 +1363,8 @@ function sayReadOnly(why){
   $('#addDrop').hidden=true;
 }
 (async function boot(){
+  const fromHash=data.pages.findIndex(p=>p.key===pageKeyFromHash());
+  if(fromHash>=0)index=fromHash;      // 重新加载回到原来那一页（hash 是唯一来源）
   render();sizePreview();drawPulse();
   try{
     if(window.ReviewBridge)review=await connectWithTimeout(BRIDGE_TIMEOUT_MS);

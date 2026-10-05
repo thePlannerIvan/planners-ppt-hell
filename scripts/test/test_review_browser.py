@@ -572,5 +572,46 @@ class ReviewBrowserTests(unittest.TestCase):
             for item in hosts: review_host.stop_host(item)
             fixture.tearDown()
 
+    def test_reload_keeps_you_on_the_same_page(self):
+        """点「重新加载」之后要停在原来那一页，不是被弹回第 1 页（2026-10-05 真人反馈）。
+
+        当前页存在**地址的 hash** 上（`#<page_key>`），不用 `localStorage` —— 插件的不透明
+        iframe 里读存储会直接抛，而且那个源每次加载都是新的，存了也读不回来。hash 随刷新一起保留。
+
+        顺带把 hash 的**双向性**钉住：切页会写 hash，改 hash 也会切页 —— 它是"当前是哪一页"的
+        唯一来源，不是一份悄悄同步的副本。
+        """
+        fixture = fixtures.V5Tests(); fixture.setUp(); root = fixture.root.resolve()
+        hosts = []
+        try:
+            fixture.payload()
+            state = review_host.start_host(root / review_surface.SURFACE_REL); hosts.append(state)
+            from playwright.sync_api import sync_playwright
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page(viewport={'width': 1440, 'height': 900})
+                page.goto(state['url'])
+                page.wait_for_function("document.querySelector('#bridgeState').textContent.includes('已连接')")
+                self.assertIn('1 / 2', page.locator('#title').inner_text(), '打开时应在第 1 页')
+
+                # 切到第 2 页：hash 要跟着变
+                page.get_by_text('下一页', exact=True).click()
+                page.wait_for_function("document.querySelector('#title').textContent.startsWith('2 /')")
+                self.assertEqual(page.evaluate("() => decodeURIComponent(location.hash)"), '#omega',
+                                 '切页要把当前页写进 hash')
+
+                # 重新加载：还该停在原来那一页
+                page.reload()
+                page.wait_for_function("document.querySelector('#title').textContent.includes('/')")
+                self.assertIn('2 / 2', page.locator('#title').inner_text(),
+                              '重新加载之后应停在原来那一页，而不是弹回第 1 页')
+
+                # 反向：改 hash 也要切页（它是唯一来源，不是副本）
+                page.evaluate("() => { location.hash = 'alpha' }")
+                page.wait_for_function("document.querySelector('#title').textContent.startsWith('1 /')")
+        finally:
+            for item in hosts: review_host.stop_host(item)
+            fixture.tearDown()
+
 if __name__ == '__main__':
     unittest.main()

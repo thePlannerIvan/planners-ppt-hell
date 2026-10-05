@@ -22,6 +22,8 @@
 | 「重新加载」→ `askReload()` + `#reloadDialog`：先说清丢什么，由人选「先提交再重新加载／丢弃并重新加载／返回」；没有未提交内容时直接刷新 | 人写的东西不能被静默丢掉；而"保存了就该看得见"在直改这条路上不成立，所以要在弹窗里讲明白 | `assets/review/review.html` | 那一句裸 `location.reload()` |
 | 用页面自己的 `<dialog>`，不用 `window.confirm` | 插件的不透明 iframe 没开 `allow-modals`，原生弹窗被 sandbox 静默拦掉 —— 那等于又变回静默丢弃 | `assets/review/review.html` | — |
 | 回归两条，都验过对照组 | `test_reload_does_not_silently_discard_unsubmitted_work`（改回裸 reload → 红 `False is not true`）；`test_thumbnails_are_fetched_again_once_the_bridge_is_up`（去掉重建 → 红 `2 != 0`） | `scripts/test/test_review_browser.py`（两条新用例） | — |
+| 当前页记在**地址 hash** 上（`#<page_key>`）：`render()` 写它、`hashchange` 读它、`boot()` 按它定位 | 刷新后不该弹回第 1 页（作者反馈）。**不能用 `localStorage`**：插件的不透明 iframe 里读它会直接抛，而且那个源每次加载都是新的 —— hash 是唯一能跨刷新带走的东西。让 hash 当「当前是哪一页」的唯一来源（写+读双向），而不是再加一份跟着同步的副本 | `assets/review/review.html` | 无（`index` 仍是内存里的当前位置，hash 是它的持久面） |
+| 回归 `test_reload_keeps_you_on_the_same_page` | 切到第 2 页（验 hash=`#omega`）→ `reload()` → 必须仍在 `2 / 2`；再改 hash 反向验切页。对照组（去掉按 hash 定位）实测红 `'2 / 2' not found in '1 / 2 · alpha'` | `scripts/test/test_review_browser.py`（新用例） | — |
 
 **边界**：`askReload()` 的「先提交再重新加载」只落盘、**不唤醒** —— 要不要叫模型由人自己决定。而且**直改的那几处即使提交了也不会立刻回到页面上**（页面里的画面是生成时烘进去的），要等模型重出这一页；弹窗里写明了这一点，免得人以为又丢了。
 
