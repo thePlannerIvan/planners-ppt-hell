@@ -6,6 +6,27 @@
 
 ---
 
+## 2026-10-05 · 「重新加载」静默丢掉未提交的东西；缩略图整场是破的（同一个根：启动顺序）
+
+**起因**：作者在画布上改完一句、点「重新加载」，那句就没了。截图同时暴露左侧 11–16 页缩略图全是破图 —— 他大概正是为了这个才点重新加载。
+
+**根**：`boot()` 里 `render()` 排在 `connectWithTimeout()` **前面**。
+
+- **破图**：建轨道时 `review === null`，`assetFor()` 只能给同源降级地址。无插件宿主下它是对的；**插件模式下页面在 `/api/review.page?…` 上，它必然 404**，且之后再没人重取（`onHostChanged` 只换版本变过的页）→ 缩略图整场是破的。
+- **丢东西**：「重新加载」是裸 `location.reload()`。意见/框选/直改/图**只活在内存里**，只有「提交」才落盘 → 重读磁盘＝全丢。
+
+| 动了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| 桥接上之后重建一次轨道（`drawRail()`） | 轨道本来就跑在握手之前；插件模式里那批图的地址是错的，不重取就永远是破的 | `assets/review/review.html`（`boot()`） | — |
+| `assetFor()` 的降级分支不写缓存 | 缓存会把 404 的地址钉死一整场，桥接上以后也换不回来 | `assets/review/review.html` | — |
+| 「重新加载」→ `askReload()` + `#reloadDialog`：先说清丢什么，由人选「先提交再重新加载／丢弃并重新加载／返回」；没有未提交内容时直接刷新 | 人写的东西不能被静默丢掉；而"保存了就该看得见"在直改这条路上不成立，所以要在弹窗里讲明白 | `assets/review/review.html` | 那一句裸 `location.reload()` |
+| 用页面自己的 `<dialog>`，不用 `window.confirm` | 插件的不透明 iframe 没开 `allow-modals`，原生弹窗被 sandbox 静默拦掉 —— 那等于又变回静默丢弃 | `assets/review/review.html` | — |
+| 回归两条，都验过对照组 | `test_reload_does_not_silently_discard_unsubmitted_work`（改回裸 reload → 红 `False is not true`）；`test_thumbnails_are_fetched_again_once_the_bridge_is_up`（去掉重建 → 红 `2 != 0`） | `scripts/test/test_review_browser.py`（两条新用例） | — |
+
+**边界**：`askReload()` 的「先提交再重新加载」只落盘、**不唤醒** —— 要不要叫模型由人自己决定。而且**直改的那几处即使提交了也不会立刻回到页面上**（页面里的画面是生成时烘进去的），要等模型重出这一页；弹窗里写明了这一点，免得人以为又丢了。
+
+---
+
 ## 2026-10-05 · 打字时左侧缩略图一直在动：状态变化不该重建整条轨道
 
 **起因**：作者反馈「在右边写反馈打字的时候，左边的缩略图会自动往上移」。

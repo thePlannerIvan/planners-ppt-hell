@@ -198,11 +198,24 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
     <button onclick="go(1)">下一页</button>
     <button onclick="decideCurrent('revise')">本页要求修改</button>
     <button class="good" onclick="decideCurrent('approved')">本页通过</button>
-    <button onclick="location.reload()">重新加载</button>
+    <button onclick="askReload()">重新加载</button>
   </div>
   <span id="message"></span>
   <button class="primary" onclick="showSubmit()">整套提交</button>
 </footer>
+
+<dialog id="reloadDialog">
+  <h2>重新加载会丢掉还没提交的东西</h2>
+  <p id="reloadWhat"></p>
+  <p class="muted">页面上的意见、框选、直改、图只活在内存里，<b>只有提交那一刻才落盘</b>。重新加载＝从磁盘重读这一版页面。</p>
+  <p class="muted">注意：<b>直接改的那几处，即使先提交也不会立刻回来</b> —— 它们已经写进内存里的画面，要等模型按意见重出这一页，才会重新出现在页面上。</p>
+  <div class="tools">
+    <button class="primary" onclick="saveAndReload()">先提交再重新加载</button>
+    <button onclick="discardAndReload()">丢弃并重新加载</button>
+    <button onclick="document.querySelector('#reloadDialog').close()">返回</button>
+  </div>
+  <p id="reloadMessage"></p>
+</dialog>
 
 <dialog id="submitDialog">
   <h2>整套提交</h2>
@@ -272,13 +285,13 @@ const assetUrls=new Map();
 async function assetFor(rel,v){
   const cacheKey=rel+'\u0000'+(v==null?'':String(v));
   if(assetUrls.has(cacheKey))return assetUrls.get(cacheKey);
+  // 桥还没接上：给一个同源降级地址（无插件宿主下它就是对的）。**不缓存它** ——
+  // 插件模式里页面在 `/api/review.page?…` 上，这个地址必然 404；缓存了就会把破图钉死一整场，
+  // 而且桥接上以后再也换不回来（轨道本来就跑在握手之前）。
+  if(!review)return '/'+rel+(v?'?v='+encodeURIComponent(String(v)):'');
   let url='';
-  if(!review){
-    url='/'+rel+(v?'?v='+encodeURIComponent(String(v)):'');
-  }else{
-    try{url=await review.asset(rel,v?{v:String(v)}:undefined)}
-    catch(error){note('取不到资源：'+error.message,'error');return ''}
-  }
+  try{url=await review.asset(rel,v?{v:String(v)}:undefined)}
+  catch(error){note('取不到资源：'+error.message,'error');return ''}
   if(url)assetUrls.set(cacheKey,url);
   return url;
 }
@@ -1137,6 +1150,48 @@ async function decideCurrent(value){
   note('已写入 '+p.key+' 的决定，并已通知模型'+(value==='approved'?'「已通过」':'「只重出这一页」')
     +'（'+wakeNote(sent.verified)+'）',sent.verified?'ok':'warn');
 }
+/* ---- 「重新加载」不能把人还没提交的东西悄悄丢掉 ----
+ *
+ * 页面上的意见、框选、直改、图都只活在内存里（`state`），**只有「提交」那一刻才落盘**。
+ * `location.reload()` 会从磁盘重读这一版页面 —— 没提交的因此全部消失。实测（2026-10-05）：
+ * 作者在画布上改完一句、点「重新加载」，那句就没了。
+ *
+ * 这里不替人做决定：有未提交内容就先把后果摊开说清，由人选「先提交」还是「丢弃」。
+ * 用页面自己的 dialog 而不是 `window.confirm`：插件的不透明 iframe 没开 `allow-modals`，
+ * 原生弹窗会被 sandbox 静默拦掉 —— 那等于又变回静默丢弃。
+ */
+function pendingWork(){
+  const out=[];
+  data.pages.forEach(p=>{
+    const s=state[p.key],bits=[];
+    if(s.feedback.trim())bits.push('意见');
+    if(s.annotations.length)bits.push(s.annotations.length+' 处框选');
+    if(s.svg_edits.length)bits.push(s.svg_edits.length+' 处直改');
+    if(s.assets.length)bits.push(s.assets.length+' 张图');
+    if(s.decision!==initial[p.key].decision)bits.push('「'+labels[s.decision]+'」的决定');
+    if(bits.length)out.push(p.key+'：'+bits.join('、'));
+  });
+  return out;
+}
+function askReload(){
+  const work=pendingWork();
+  if(!work.length){location.reload();return}
+  $('#reloadWhat').textContent='还没提交的有 —— '+work.join('；');
+  $('#reloadMessage').textContent='';
+  $('#reloadDialog').showModal();
+}
+async function saveAndReload(){
+  const sent=await push(null);            // 只落盘，不唤醒：要不要叫模型由人自己决定
+  if(!sent.ok){
+    $('#reloadMessage').textContent='没能保存（上面那句提示说了原因）。要放弃这些改动，就选「丢弃并重新加载」。';
+    return;
+  }
+  location.reload();
+}
+function discardAndReload(){
+  $('#reloadDialog').close();
+  location.reload();
+}
 function showSubmit(){
   const values=Object.values(state);
   $('#stats').textContent=['approved','revise','pending'].map(s=>labels[s]+' '+values.filter(x=>x.decision===s).length+' 页').join(' / ');
@@ -1298,6 +1353,9 @@ function sayReadOnly(why){
   const can=applyUploadCapability();
   $('#bridgeState').textContent='已连接审阅宿主（'+review.transport+'）· 逐页提交会写反馈并通知模型'
     +(can?' · 可上传图片':' · 这个宿主不支持上传');
+  // 轨道是在**握手之前**建的（`render()` 排在前面），那时 `assetFor` 只能给降级地址；
+  // 插件模式下那个地址 404，缩略图就整场是破的 —— 桥接上以后必须重建一次，让图真正取到。
+  drawRail();
   review.on('changed',()=>onHostChanged());
   refreshStale();
 })();

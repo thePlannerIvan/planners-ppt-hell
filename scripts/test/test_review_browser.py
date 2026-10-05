@@ -475,5 +475,102 @@ class ReviewBrowserTests(unittest.TestCase):
             for item in hosts: review_host.stop_host(item)
             fixture.tearDown()
 
+    def test_reload_does_not_silently_discard_unsubmitted_work(self):
+        """有没提交的东西时，点「重新加载」必须先停下来问（2026-10-05 真人反馈）。
+
+        作者在画布上改完一句、点「重新加载」，那句就没了 —— 页面上的意见、框选、直改、图
+        只活在内存里，`location.reload()` 会把它们全部抹掉。
+
+        判据：点之前先立一个「页面没被换掉」的标记（`window.__survived`）。
+        刷新了 → 标记消失（旧行为，红）；没刷新且弹出选择框 → 标记还在（新行为）。
+        同时验反面对照：**没有**未提交内容时不该有摩擦，直接刷新。
+        """
+        fixture = fixtures.V5Tests(); fixture.setUp(); root = fixture.root.resolve()
+        hosts = []
+        try:
+            fixture.payload()
+            state = review_host.start_host(root / review_surface.SURFACE_REL); hosts.append(state)
+            from playwright.sync_api import sync_playwright
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page(viewport={'width': 1440, 'height': 900})
+                page.goto(state['url'])
+                page.wait_for_function("document.querySelector('#bridgeState').textContent.includes('已连接')")
+
+                # 造一笔没提交的意见，然后点「重新加载」
+                page.evaluate("""() => {
+                  window.__survived = true;
+                  const box = document.querySelector('#feedback');
+                  box.value = '这句还没提交';
+                  box.dispatchEvent(new Event('input', { bubbles: true }));
+                }""")
+                page.get_by_text('重新加载', exact=True).click()
+                page.wait_for_timeout(600)
+                self.assertTrue(page.evaluate("() => window.__survived === true"),
+                                '有未提交内容时点「重新加载」不该直接把页面刷新掉')
+                self.assertTrue(page.evaluate("() => document.querySelector('#reloadDialog').open"),
+                                '该先弹出「会丢掉什么」的选择框')
+                what = page.locator('#reloadWhat').inner_text()
+                self.assertIn('alpha', what, '要说清是哪一页')
+                self.assertIn('意见', what, '要说清丢的是什么')
+
+                # 选「返回」：什么都不动，页面还在，那笔意见还在
+                page.locator('#reloadDialog').get_by_text('返回', exact=True).click()
+                self.assertEqual(page.input_value('#feedback'), '这句还没提交', '返回之后不该动任何东西')
+
+                # 反面对照：没有未提交内容时不该有摩擦
+                page.evaluate("() => { const b=document.querySelector('#feedback'); b.value=''; b.dispatchEvent(new Event('input',{bubbles:true})) }")
+                page.get_by_text('重新加载', exact=True).click()
+                page.wait_for_timeout(600)
+                self.assertNotEqual(page.evaluate("() => window.__survived"), True,
+                                    '没有未提交内容时应当直接刷新（没有摩擦）')
+        finally:
+            for item in hosts: review_host.stop_host(item)
+            fixture.tearDown()
+
+    def test_thumbnails_are_fetched_again_once_the_bridge_is_up(self):
+        """轨道建在握手之前，那时根本取不到图 —— 桥接上以后必须重建一次。
+
+        `boot()` 是 `render()` 在前、`connectWithTimeout()` 在后：轨道第一批缩略图是在
+        `review === null` 时建的，`assetFor` 只能给一个同源降级地址。无插件宿主下那个地址是对的，
+        **插件模式下页面在 `/api/review.page?…` 上，它必然 404** —— 而且之后再没人重取，
+        缩略图就整场是破的（2026-10-05 截图：左侧 11–16 页全是破图）。
+
+        判据：用 `add_init_script` 在页面脚本之前埋一个钩子，在 `DOMContentLoaded` 时给
+        **握手前那一批**缩略图打标记。桥接上以后这批标记必须已经不存在（重建过了）；
+        没有修复时它们会原样留着 —— 那正是破图那一批。
+        """
+        fixture = fixtures.V5Tests(); fixture.setUp(); root = fixture.root.resolve()
+        hosts = []
+        try:
+            fixture.payload()
+            state = review_host.start_host(root / review_surface.SURFACE_REL); hosts.append(state)
+            from playwright.sync_api import sync_playwright
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page(viewport={'width': 1440, 'height': 900})
+                page.add_init_script("""
+                  addEventListener('DOMContentLoaded', () => {
+                    document.querySelectorAll('#rail img').forEach((el, i) => { el.dataset.preBridge = String(i) });
+                    window.__preBridgeCount = document.querySelectorAll('#rail img[data-pre-bridge]').length;
+                  });
+                """)
+                page.goto(state['url'])
+                page.wait_for_function("document.querySelector('#bridgeState').textContent.includes('已连接')")
+                page.wait_for_function("() => [...document.querySelectorAll('#rail img')].every(i => i.src)")
+                page.wait_for_function("() => [...document.querySelectorAll('#rail img')].every(i => i.complete && i.naturalWidth > 0)")
+                probe = page.evaluate("""() => ({
+                  pre: window.__preBridgeCount || 0,
+                  stale: document.querySelectorAll('#rail img[data-pre-bridge]').length,
+                  now: document.querySelectorAll('#rail img').length,
+                })""")
+                self.assertGreater(probe['pre'], 0, '握手前确实先建过一次轨道，否则这条断言没意义')
+                self.assertEqual(probe['stale'], 0,
+                                 '桥接上以后缩略图必须重新取一次，不能留着握手前那批取不到的')
+                self.assertEqual(probe['now'], probe['pre'], '页数没变，缩略图数量也不该变')
+        finally:
+            for item in hosts: review_host.stop_host(item)
+            fixture.tearDown()
+
 if __name__ == '__main__':
     unittest.main()
