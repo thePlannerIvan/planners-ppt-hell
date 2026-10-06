@@ -1,0 +1,216 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#0C0D11"/>
+
+  <!-- Header -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#9CA3AF" letter-spacing="2">36 / 45 · AUDIENCE PENETRATION</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827" text-anchor="end">ISOTYPE METRIC MATRIX</text>
+
+  <!-- Left Editorial Column (x=100..720) -->
+  <g transform="translate(100, 180)">
+    <text x="0" y="25" font-family='monospace' font-size="18" font-weight="900" fill="#E2F827">// EPIDEMIOLOGICAL METRIC</text>
+    <text x="0" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#FFFFFF">ONE OUT OF FOUR</text>
+    <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#FFFFFF">STRATEGISTS ADAPT</text>
+
+    <text x="0" y="225" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="500" fill="#9CA3AF">在第一波极客驾驶舱范式迁移中，</text>
+    <text x="0" y="260" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="500" fill="#9CA3AF">已有 25.0% 的先锋策划团队完全废弃了</text>
+    <text x="0" y="295" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="500" fill="#9CA3AF">传统花哨卡片拼贴，改用可验证单屏交付体系。</text>
+
+    <!-- Two Metric Counters -->
+    <g transform="translate(0, 380)">
+      <line x1="0" y1="0" x2="620" y2="0" stroke="#282C3D" stroke-width="1.5"/>
+      <g transform="translate(0, 40)">
+        <text x="0" y="55" font-family='monospace' font-size="64" font-weight="900" fill="#FFFFFF">78.1k</text>
+        <text x="0" y="95" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#9CA3AF">ACTIVE WORKSPACES</text>
+      </g>
+      <g transform="translate(320, 40)">
+        <text x="0" y="55" font-family='monospace' font-size="64" font-weight="900" fill="#E2F827">95.3%</text>
+        <text x="0" y="95" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#9CA3AF">VERIFICATION RATE</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Right Human Pictogram Grid Stage (x=880..1820, borderless floating matrix) -->
+  <g transform="translate(880, 200)">
+    <!-- Glyphs Container directly floating in void -->
+    <g transform="translate(10, 20)">
+      <g transform="translate(0, 0)">
+          <circle cx="20" cy="12" r="10" fill="#E2F827"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#E2F827"/>
+        </g>
+        <g transform="translate(92, 0)">
+          <circle cx="20" cy="12" r="10" fill="#E2F827"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#E2F827"/>
+        </g>
+        <g transform="translate(184, 0)">
+          <circle cx="20" cy="12" r="10" fill="#E2F827"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#E2F827"/>
+        </g>
+        <g transform="translate(276, 0)">
+          <circle cx="20" cy="12" r="10" fill="#E2F827"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#E2F827"/>
+        </g>
+        <g transform="translate(368, 0)">
+          <circle cx="20" cy="12" r="10" fill="#E2F827"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#E2F827"/>
+        </g>
+        <g transform="translate(460, 0)">
+          <circle cx="20" cy="12" r="10" fill="#E2F827"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#E2F827"/>
+        </g>
+        <g transform="translate(552, 0)">
+          <circle cx="20" cy="12" r="10" fill="#E2F827"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#E2F827"/>
+        </g>
+        <g transform="translate(644, 0)">
+          <circle cx="20" cy="12" r="10" fill="#E2F827"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#E2F827"/>
+        </g>
+        <g transform="translate(736, 0)">
+          <circle cx="20" cy="12" r="10" fill="#E2F827"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#E2F827"/>
+        </g>
+        <g transform="translate(828, 0)">
+          <circle cx="20" cy="12" r="10" fill="#E2F827"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#E2F827"/>
+        </g>
+        <g transform="translate(0, 110)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(92, 110)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(184, 110)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(276, 110)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(368, 110)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(460, 110)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(552, 110)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(644, 110)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(736, 110)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(828, 110)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(0, 220)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(92, 220)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(184, 220)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(276, 220)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(368, 220)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(460, 220)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(552, 220)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(644, 220)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(736, 220)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(828, 220)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(0, 330)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(92, 330)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(184, 330)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(276, 330)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(368, 330)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(460, 330)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(552, 330)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(644, 330)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(736, 330)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+        <g transform="translate(828, 330)">
+          <circle cx="20" cy="12" r="10" fill="#242938"/>
+          <path d="M7 32 C7 25 13 24 20 24 C27 24 33 25 33 32 L33 60 C33 63 30 66 27 66 L25 66 L25 90 C25 93 22 95 19 95 C16 95 13 93 13 90 L13 66 L11 66 C8 66 5 63 5 60 Z" fill="#242938"/>
+        </g>
+    </g>
+
+    <!-- Legend Notation at bottom of void stage -->
+    <g transform="translate(10, 500)">
+      <rect x="0" y="-14" width="16" height="16" rx="3" fill="#E2F827"/>
+      <text x="26" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#FFFFFF">25.0% EARLY COGNITIVE ADOPTERS</text>
+
+      <rect x="440" y="-14" width="16" height="16" rx="3" fill="#242938"/>
+      <text x="466" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#9CA3AF">75.0% CONVENTIONAL RESIDUAL</text>
+    </g>
+  </g>
+
+  <!-- Bottom Divider Line -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#282C3D" stroke-width="1.5"/>
+
+  <!-- Footer -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="700" fill="#9CA3AF">ISOTYPE PROPORTION // COGNITIVE REVOLUTION MATRIX</text>
+    <text x="1720" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#FFFFFF" text-anchor="end">THE PLANNER SYSTEM</text>
+  </g>
+</svg>

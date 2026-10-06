@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+
+  <!-- Header -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">38 / 45 · DUAL COCKPIT ARCHITECTURE</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">BIPOLAR CHASSIS</text>
+
+  <!-- Left Light Container (x=100, y=140, w=740, h=700, BORDERLESS WHITE CARD) -->
+  <g transform="translate(100, 140)">
+    <rect width="740" height="700" rx="16" fill="#FFFFFF"/>
+    <g transform="translate(60, 60)">
+      <text x="0" y="30" font-family='monospace' font-size="18" font-weight="900" fill="#6B7280">// EXECUTIVE THESIS</text>
+      <text x="0" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="44" font-weight="900" fill="#111111">SCALING ENTERPRISE</text>
+      <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="44" font-weight="900" fill="#111111">AGENT DECISIONING</text>
+
+      <text x="0" y="230" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="500" fill="#374151">将零散的多工具调用整合成高内聚微内核，</text>
+      <text x="0" y="265" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="500" fill="#374151">在保证确定性执行的同时实现敏捷扩展。</text>
+      <text x="0" y="300" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="500" fill="#374151">左舱承载战略定性主张，右舱锁定定量证据，</text>
+      <text x="0" y="335" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="500" fill="#374151">形成不容置疑的架构压迫感。</text>
+
+      <line x1="0" y1="420" x2="620" y2="420" stroke="#CBD5E1" stroke-width="1.5"/>
+
+      <!-- Meta Pill -->
+      <g transform="translate(0, 480)">
+        <rect width="280" height="42" rx="21" fill="#111111"/>
+        <text x="140" y="27" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827" text-anchor="middle">STATUS: DEPLOYED ACTIVE</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Right Dark Metric Cockpit Container (x=880, y=140, w=940, h=700, BORDERLESS OBSIDIAN CARD) -->
+  <g transform="translate(880, 140)">
+    <rect width="940" height="700" rx="16" fill="#0C0D11"/>
+
+    <!-- 2x2 Metric Quad Array (Borderless Floating Tiles) -->
+    <g transform="translate(50, 50)">
+      <!-- Card 01: ARR -->
+      <g transform="translate(0, 0)">
+        <rect width="400" height="270" rx="12" fill="#161922"/>
+        <text x="35" y="50" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">01 // REVENUE RUN-RATE</text>
+        <text x="35" y="125" font-family='monospace' font-size="54" font-weight="900" fill="#FFFFFF">$2.4M</text>
+        <text x="35" y="165" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#D1D5DB">+180% Annual Growth Rate</text>
+        <text x="35" y="200" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#9CA3AF">Audited recurring software revenue</text>
+      </g>
+
+      <!-- Card 02: Users -->
+      <g transform="translate(440, 0)">
+        <rect width="400" height="270" rx="12" fill="#161922"/>
+        <text x="35" y="50" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">02 // ENTERPRISE BASE</text>
+        <text x="35" y="125" font-family='monospace' font-size="54" font-weight="900" fill="#FFFFFF">32.5k</text>
+        <text x="35" y="165" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#D1D5DB">Active Professional Planners</text>
+        <text x="35" y="200" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#9CA3AF">Across 42 Tier-1 agencies</text>
+      </g>
+
+      <!-- Card 03: Global Markets -->
+      <g transform="translate(0, 310)">
+        <rect width="400" height="270" rx="12" fill="#161922"/>
+        <text x="35" y="50" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">03 // EDGE FOOTPRINT</text>
+        <text x="35" y="125" font-family='monospace' font-size="54" font-weight="900" fill="#FFFFFF">14</text>
+        <text x="35" y="165" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#D1D5DB">Global Regional Datacenters</text>
+        <text x="35" y="200" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#9CA3AF">Sub-50ms synthesis latency</text>
+      </g>
+
+      <!-- Card 04: Retention -->
+      <g transform="translate(440, 310)">
+        <rect width="400" height="270" rx="12" fill="#161922"/>
+        <text x="35" y="50" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">04 // USER STICKINESS</text>
+        <text x="35" y="125" font-family='monospace' font-size="54" font-weight="900" fill="#FFFFFF">99.4%</text>
+        <text x="35" y="165" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#D1D5DB">Net Logo Retention Rate</text>
+        <text x="35" y="200" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#9CA3AF">Zero attrition in core accounts</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Bottom Divider Line -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Footer -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280">ASYMMETRIC BIPOLAR CHASSIS // SPLIT COGNITIVE COCKPIT</text>
+    <text x="1720" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER SYSTEM</text>
+  </g>
+</svg>

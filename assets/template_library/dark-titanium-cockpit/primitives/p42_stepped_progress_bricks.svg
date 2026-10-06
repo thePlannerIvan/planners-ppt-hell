@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+
+  <!-- Header -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">42 / 45 · STEPPED PROGRESS BRICKS</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">FINANCIAL MILESTONES</text>
+
+  <!-- Top Hero Header Stage -->
+  <g transform="translate(100, 140)">
+    <text x="0" y="25" font-family='monospace' font-size="18" font-weight="900" fill="#111111">// LINEAR GROWTH CADENCE</text>
+    <text x="0" y="75" font-family='system-ui, -apple-system, sans-serif' font-size="40" font-weight="900" fill="#111111">FOUR STAGES OF CAPITAL MATURITY</text>
+    <text x="0" y="115" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="500" fill="#4B5563">用纯色块阶梯式递进强化融资与规模化里程碑的心理达成感。</text>
+  </g>
+
+  <!-- 4 Borderless Stepped Columns (x=100, 538, 976, 1414; w=406 each, h=550) -->
+  <!-- Col 1: Obsidian Dark #111111 (White text) -->
+  <g transform="translate(100, 290)">
+    <rect width="406" height="550" rx="16" fill="#111111"/>
+    <g transform="translate(40, 50)">
+      <text x="0" y="20" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">STAGE 01 // SEED</text>
+      <text x="0" y="95" font-family='monospace' font-size="76" font-weight="900" fill="#FFFFFF">25%</text>
+      <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#FFFFFF">INTAKE &amp; ENGINE</text>
+
+      <line x1="0" y1="185" x2="326" y2="185" stroke="#333333" stroke-width="1.5"/>
+
+      <text x="0" y="235" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#D1D5DB">搭建核心事实核查基座，</text>
+      <text x="0" y="265" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#D1D5DB">确立单屏高密度的排版规范，</text>
+      <text x="0" y="295" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#D1D5DB">完成首期自动化测试闭环。</text>
+
+      <g transform="translate(0, 390)">
+        <rect width="200" height="34" rx="17" fill="#222222"/>
+        <text x="100" y="22" font-family='monospace' font-size="14" font-weight="800" fill="#FFFFFF" text-anchor="middle">VERIFIED ARR: $600k</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Col 2: Slate Titanium #283042 (White text) -->
+  <g transform="translate(538, 290)">
+    <rect width="406" height="550" rx="16" fill="#283042"/>
+    <g transform="translate(40, 50)">
+      <text x="0" y="20" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">STAGE 02 // EXPANSION</text>
+      <text x="0" y="95" font-family='monospace' font-size="76" font-weight="900" fill="#FFFFFF">50%</text>
+      <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#FFFFFF">ALPHA ADOPTION</text>
+
+      <line x1="0" y1="185" x2="326" y2="185" stroke="#3D475E" stroke-width="1.5"/>
+
+      <text x="0" y="235" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#D1D5DB">接入 15 家先锋代理商，</text>
+      <text x="0" y="265" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#D1D5DB">完成 50 场实战提案验证，</text>
+      <text x="0" y="295" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#D1D5DB">胜标率提升 42%。</text>
+
+      <g transform="translate(0, 390)">
+        <rect width="200" height="34" rx="17" fill="#3D475E"/>
+        <text x="100" y="22" font-family='monospace' font-size="14" font-weight="800" fill="#FFFFFF" text-anchor="middle">VERIFIED ARR: $1.4M</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Col 3: Steel Titanium #4D5B75 (White text) -->
+  <g transform="translate(976, 290)">
+    <rect width="406" height="550" rx="16" fill="#4D5B75"/>
+    <g transform="translate(40, 50)">
+      <text x="0" y="20" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">STAGE 03 // SCALE</text>
+      <text x="0" y="95" font-family='monospace' font-size="76" font-weight="900" fill="#FFFFFF">75%</text>
+      <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#FFFFFF">ENTERPRISE ROLLOUT</text>
+
+      <line x1="0" y1="185" x2="326" y2="185" stroke="#687896" stroke-width="1.5"/>
+
+      <text x="0" y="235" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#FFFFFF">部署跨团队知识微内核，</text>
+      <text x="0" y="265" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#FFFFFF">实现提案资产全局复用，</text>
+      <text x="0" y="295" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#FFFFFF">边际交付成本逼近于零。</text>
+
+      <g transform="translate(0, 390)">
+        <rect width="200" height="34" rx="17" fill="#687896"/>
+        <text x="100" y="22" font-family='monospace' font-size="14" font-weight="800" fill="#FFFFFF" text-anchor="middle">VERIFIED ARR: $3.2M</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Col 4: Hero Fluorescent Lime #E2F827 (Black text!) -->
+  <g transform="translate(1414, 290)">
+    <rect width="406" height="550" rx="16" fill="#E2F827"/>
+    <g transform="translate(40, 50)">
+      <text x="0" y="20" font-family='monospace' font-size="16" font-weight="900" fill="#111111">STAGE 04 // MATURE</text>
+      <text x="0" y="95" font-family='monospace' font-size="76" font-weight="900" fill="#111111">100%</text>
+      <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111">FULL FLYWHEEL</text>
+
+      <line x1="0" y1="185" x2="326" y2="185" stroke="#111111" stroke-opacity="0.3" stroke-width="1.5"/>
+
+      <text x="0" y="235" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="600" fill="#111111">全面建立自主生态护城河，</text>
+      <text x="0" y="265" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="600" fill="#111111">成为行业事实上的商业报告标准，</text>
+      <text x="0" y="295" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="600" fill="#111111">净现金流持续健康自持。</text>
+
+      <g transform="translate(0, 390)">
+        <rect width="200" height="34" rx="17" fill="#111111"/>
+        <text x="100" y="22" font-family='monospace' font-size="14" font-weight="800" fill="#E2F827" text-anchor="middle">PROJECTED: $5.0M+</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Bottom Divider Line -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Footer -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280">STEPPED PROGRESS BRICKS // PROGRESSION PSYCHOLOGY</text>
+    <text x="1720" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER SYSTEM</text>
+  </g>
+</svg>

@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="waveGradLime41" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E2F827" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#E2F827" stop-opacity="0.0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+
+  <!-- Header -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">41 / 45 · CONTINUOUS SPLINE DYNAMICS</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">ORGANIC OSCILLATION</text>
+
+  <!-- Left Hero KPI Block (x=100..640, BORDERLESS WHITE CARD) -->
+  <g transform="translate(100, 140)">
+    <rect width="540" height="700" rx="16" fill="#FFFFFF"/>
+    <g transform="translate(50, 50)">
+      <text x="0" y="20" font-family='monospace' font-size="18" font-weight="900" fill="#111111">// OSCILLATING DYNAMICS</text>
+      <text x="0" y="135" font-family='monospace' font-size="110" font-weight="900" fill="#111111" letter-spacing="-4">74</text>
+      <text x="0" y="185" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111">PEAK STABILITY SCORE</text>
+
+      <!-- Well done pill -->
+      <g transform="translate(0, 225)">
+        <rect width="240" height="38" rx="19" fill="#111111"/>
+        <text x="120" y="24" font-family='monospace' font-size="15" font-weight="800" fill="#E2F827" text-anchor="middle">● WELL DONE · IN SPEC</text>
+      </g>
+
+      <line x1="0" y1="295" x2="440" y2="295" stroke="#CBD5E1" stroke-width="1.5"/>
+
+      <text x="0" y="345" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#111111">连续光滑周期性阻尼</text>
+      <text x="0" y="380" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#4B5563">系统在经历三轮认知压力测试后，</text>
+      <text x="0" y="410" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#4B5563">误差振幅迅速收敛于黄金控制带以内，</text>
+      <text x="0" y="440" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#4B5563">维持绝对输出确定性。</text>
+
+      <g transform="translate(0, 510)">
+        <text x="0" y="20" font-family='monospace' font-size="15" font-weight="700" fill="#6B7280">STD DEV: +/- 1.4%</text>
+        <text x="0" y="45" font-family='monospace' font-size="15" font-weight="700" fill="#6B7280">CONFIDENCE: 99.8%</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Right Spline Wave Stage (x=680..1820, BORDERLESS WHITE CARD) -->
+  <g transform="translate(680, 140)">
+    <rect width="1140" height="700" rx="16" fill="#FFFFFF"/>
+
+    <!-- Coordinate Box & Gridlines -->
+    <g transform="translate(50, 45)">
+      <text x="0" y="25" font-family='monospace' font-size="18" font-weight="900" fill="#111111">// SPLINE CURVE TELEMETRY [TIME DOMAIN T_01 .. T_06]</text>
+
+      <!-- Horizontal gridlines -->
+      <line x1="0" y1="130" x2="1020" y2="130" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4,4"/>
+      <text x="1030" y="135" font-family='monospace' font-size="14" font-weight="700" fill="#9CA3AF">100</text>
+
+      <!-- Target Baseline Threshold Line -->
+      <line x1="0" y1="250" x2="1020" y2="250" stroke="#111111" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <text x="1030" y="255" font-family='monospace' font-size="14" font-weight="800" fill="#111111">70 BASELINE</text>
+
+      <line x1="0" y1="370" x2="1020" y2="370" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4,4"/>
+      <text x="1030" y="375" font-family='monospace' font-size="14" font-weight="700" fill="#9CA3AF">40</text>
+
+      <line x1="0" y1="490" x2="1020" y2="490" stroke="#111111" stroke-width="2"/>
+      <text x="1030" y="495" font-family='monospace' font-size="14" font-weight="700" fill="#9CA3AF">00</text>
+
+      <!-- Spline Gradient Area Fill -->
+      <path d="M 0 390 C 140 390, 200 190, 320 190 C 440 190, 500 330, 620 330 C 740 330, 800 85, 920 85 C 980 85, 1000 230, 1020 230 L 1020 490 L 0 490 Z" fill="url(#waveGradLime41)"/>
+
+      <!-- Spline Stroke Path -->
+      <path d="M 0 390 C 140 390, 200 190, 320 190 C 440 190, 500 330, 620 330 C 740 330, 800 85, 920 85 C 980 85, 1000 230, 1020 230" fill="none" stroke="#111111" stroke-width="4"/>
+
+      <!-- Node Markers -->
+      <!-- Node 1: T_01 (y=390, val=38) -->
+      <g transform="translate(100, 360)">
+        <circle cx="0" cy="0" r="7" fill="#111111"/>
+        <text x="0" y="-15" font-family='monospace' font-size="16" font-weight="800" fill="#111111" text-anchor="middle">38</text>
+      </g>
+
+      <!-- Node 2: T_02 Peak (y=190, val=72) -->
+      <g transform="translate(320, 190)">
+        <circle cx="0" cy="0" r="7" fill="#111111"/>
+        <text x="0" y="-15" font-family='monospace' font-size="16" font-weight="800" fill="#111111" text-anchor="middle">72</text>
+      </g>
+
+      <!-- Node 3: T_03 Valley (y=330, val=48) -->
+      <g transform="translate(620, 330)">
+        <circle cx="0" cy="0" r="7" fill="#111111"/>
+        <text x="0" y="-15" font-family='monospace' font-size="16" font-weight="800" fill="#111111" text-anchor="middle">48</text>
+      </g>
+
+      <!-- Node 4: T_04 Top Peak (y=85, val=89) -->
+      <g transform="translate(920, 85)">
+        <circle cx="0" cy="0" r="9" fill="#E2F827" stroke="#111111" stroke-width="2.5"/>
+        <text x="0" y="-18" font-family='monospace' font-size="18" font-weight="900" fill="#111111" text-anchor="middle">89 (MAX)</text>
+      </g>
+
+      <!-- X-Axis Labels -->
+      <g transform="translate(0, 530)" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">
+        <text x="100" y="0" text-anchor="middle">EPOCH 01</text>
+        <text x="320" y="0" text-anchor="middle">EPOCH 02</text>
+        <text x="620" y="0" text-anchor="middle">EPOCH 03</text>
+        <text x="920" y="0" text-anchor="middle">EPOCH 04</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Bottom Divider Line -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Footer -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280">ORGANIC SPLINE WAVE // DETERMINISTIC CONTROL BOUNDS</text>
+    <text x="1720" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER SYSTEM</text>
+  </g>
+</svg>

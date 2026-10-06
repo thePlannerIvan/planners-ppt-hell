@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+
+  <!-- Header -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">35 / 45 · DISCRETE PULSE GAUGES</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">BARCODE METRIC ARRAY</text>
+
+  <!-- Top Hero Header Stage -->
+  <g transform="translate(100, 140)">
+    <text x="0" y="25" font-family='monospace' font-size="18" font-weight="900" fill="#111111">// COGNITIVE IMPACT ASSESSMENT</text>
+    <text x="0" y="75" font-family='system-ui, -apple-system, sans-serif' font-size="40" font-weight="900" fill="#111111">THREE-DIMENSIONAL SYSTEM EFFICIENCY</text>
+    <g transform="translate(1420, 30)">
+      <rect width="300" height="42" rx="21" fill="#111111"/>
+      <text x="150" y="27" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827" text-anchor="middle">OPTIMAL ZONE [0.82 RATIO]</text>
+    </g>
+  </g>
+
+  <!-- 3 Comparative Columns (x=100, 695, 1290; w=530 each, h=580, BORDERLESS WHITE CARDS) -->
+  <!-- Col 1: 78% (16 of 20 filled) -->
+  <g transform="translate(100, 260)">
+    <rect width="530" height="580" rx="16" fill="#FFFFFF"/>
+    <g transform="translate(45, 50)">
+      <text x="0" y="70" font-family='monospace' font-size="76" font-weight="900" fill="#111111">78%</text>
+      <text x="0" y="115" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111">INFORMATION DENSITY</text>
+      <text x="0" y="145" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">// INDEX SCORE: 15.6 / 20.0</text>
+
+      <!-- 20-segment barcode pill array (horizontal 20 pills, w=17, gap=5) -->
+      <g transform="translate(0, 185)">
+        <!-- 15 solid black pills + 1 peak lime pill = 16 active -->
+        <rect x="0" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="22" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="44" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="66" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="88" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="110" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="132" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="154" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="176" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="198" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="220" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="242" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="264" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="286" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="308" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="330" y="0" width="17" height="36" rx="4" fill="#E2F827" stroke="#111111" stroke-width="1.5"/>
+        <!-- 4 inactive pills -->
+        <rect x="352" y="0" width="17" height="36" rx="4" fill="#E2E8F0"/>
+        <rect x="374" y="0" width="17" height="36" rx="4" fill="#E2E8F0"/>
+        <rect x="396" y="0" width="17" height="36" rx="4" fill="#E2E8F0"/>
+        <rect x="418" y="0" width="17" height="36" rx="4" fill="#E2E8F0"/>
+      </g>
+
+      <line x1="0" y1="265" x2="440" y2="265" stroke="#E2E8F0" stroke-width="1.5"/>
+
+      <text x="0" y="315" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="700" fill="#111111">高阶结构化提炼</text>
+      <text x="0" y="350" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#4B5563">消除大段叙事废话，将长篇论证</text>
+      <text x="0" y="380" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#4B5563">压缩为三组不可争辩的硬核数字事实。</text>
+    </g>
+  </g>
+
+  <!-- Col 2: 64% (13 of 20 filled) -->
+  <g transform="translate(695, 260)">
+    <rect width="530" height="580" rx="16" fill="#FFFFFF"/>
+    <g transform="translate(45, 50)">
+      <text x="0" y="70" font-family='monospace' font-size="76" font-weight="900" fill="#111111">64%</text>
+      <text x="0" y="115" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111">DECISION VELOCITY</text>
+      <text x="0" y="145" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">// INDEX SCORE: 12.8 / 20.0</text>
+
+      <!-- 20-segment barcode pill array -->
+      <g transform="translate(0, 185)">
+        <!-- 12 solid black pills + 1 peak lime pill = 13 active -->
+        <rect x="0" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="22" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="44" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="66" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="88" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="110" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="132" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="154" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="176" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="198" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="220" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="242" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="264" y="0" width="17" height="36" rx="4" fill="#E2F827" stroke="#111111" stroke-width="1.5"/>
+        <!-- 7 inactive pills -->
+        <rect x="286" y="0" width="17" height="36" rx="4" fill="#E2E8F0"/>
+        <rect x="308" y="0" width="17" height="36" rx="4" fill="#E2E8F0"/>
+        <rect x="330" y="0" width="17" height="36" rx="4" fill="#E2E8F0"/>
+        <rect x="352" y="0" width="17" height="36" rx="4" fill="#E2E8F0"/>
+        <rect x="374" y="0" width="17" height="36" rx="4" fill="#E2E8F0"/>
+        <rect x="396" y="0" width="17" height="36" rx="4" fill="#E2E8F0"/>
+        <rect x="418" y="0" width="17" height="36" rx="4" fill="#E2E8F0"/>
+      </g>
+
+      <line x1="0" y1="265" x2="440" y2="265" stroke="#E2E8F0" stroke-width="1.5"/>
+
+      <text x="0" y="315" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="700" fill="#111111">决策共识快速达成</text>
+      <text x="0" y="350" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#4B5563">管理层无需在汇报中费力搜寻结论，</text>
+      <text x="0" y="380" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#4B5563">首屏 3 秒内完成关键商业判断对齐。</text>
+    </g>
+  </g>
+
+  <!-- Col 3: 92% (18 of 20 filled) -->
+  <g transform="translate(1290, 260)">
+    <rect width="530" height="580" rx="16" fill="#FFFFFF"/>
+    <g transform="translate(45, 50)">
+      <text x="0" y="70" font-family='monospace' font-size="76" font-weight="900" fill="#111111">92%</text>
+      <text x="0" y="115" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111">TRACEABILITY INDEX</text>
+      <text x="0" y="145" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">// INDEX SCORE: 18.4 / 20.0</text>
+
+      <!-- 20-segment barcode pill array -->
+      <g transform="translate(0, 185)">
+        <!-- 17 solid black pills + 1 peak lime pill = 18 active -->
+        <rect x="0" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="22" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="44" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="66" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="88" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="110" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="132" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="154" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="176" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="198" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="220" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="242" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="264" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="286" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="308" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="330" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="352" y="0" width="17" height="36" rx="4" fill="#111111"/>
+        <rect x="374" y="0" width="17" height="36" rx="4" fill="#E2F827" stroke="#111111" stroke-width="1.5"/>
+        <!-- 2 inactive pills -->
+        <rect x="396" y="0" width="17" height="36" rx="4" fill="#E2E8F0"/>
+        <rect x="418" y="0" width="17" height="36" rx="4" fill="#E2E8F0"/>
+      </g>
+
+      <line x1="0" y1="265" x2="440" y2="265" stroke="#E2E8F0" stroke-width="1.5"/>
+
+      <text x="0" y="315" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="700" fill="#111111">原始事实链条闭环</text>
+      <text x="0" y="350" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#4B5563">所有指标均通过独立事实核查子代理，</text>
+      <text x="0" y="380" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#4B5563">确保分母明确、来源可溯、绝无漂移。</text>
+    </g>
+  </g>
+
+  <!-- Bottom Divider Line -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Footer -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280">DISCRETE PULSE GAUGES // EMPIRICAL BENCHMARKS</text>
+    <text x="1720" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER SYSTEM</text>
+  </g>
+</svg>
