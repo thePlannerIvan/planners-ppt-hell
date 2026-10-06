@@ -1,6 +1,6 @@
 ---
 name: planners-ppt-hell
-description: 把材料或上游交来的画面契约做成有证据、可读的画面。两个出口：可编辑 PPT（从**逐页内容稿**出发 —— 通常由 `planners-bypage` 产出；没有上游内容稿时提供**轻量切片降级**。主 Agent 自主设计 SVG、看图修订、可选整套人工审阅，导出质量由转换器保证），以及视频静态画面（从 video-idea-system 交来的 visual-plan.json + assets 出发，挑一个视觉风格、逐屏出可被动画指名的 SVG，录制前交付）。也用于指定品牌模板复用、按需提取模板与已有项目返修。
+description: 把材料或上游交来的画面契约做成有证据、可读的画面。两个出口：可编辑 PPT（优先从**逐页内容稿**出发 —— 通常由 `planners-bypage` 产出；收到非 PPT 资料包或需要完整内容理解时，先调用 `planners-bypage`；仅在简单单源材料且不需要内容展开时提供**轻量切片降级**。主 Agent 自主设计 SVG、看图修订、可选整套人工审阅，导出质量由转换器保证），以及视频静态画面（从 video-idea-system 交来的 visual-plan.json + assets 出发，挑一个视觉风格、逐屏出可被动画指名的 SVG，录制前交付）。也用于指定品牌模板复用、按需提取模板与已有项目返修。
 ---
 
 # Planner's PPT Hell
@@ -15,7 +15,7 @@ description: 把材料或上游交来的画面契约做成有证据、可读的�
 |---|---|---|
 | 什么时候走 | 要做一份可编辑 PPT | 上游 `video-idea-system` 交了画面契约，要做**录制前**的静态画面 |
 | 入口 | `init_svg_project.py --source <doc>` | `init_svg_project.py --assets <包>/assets --plan <visual-plan.json>` |
-| 内容从哪来 | 上游的逐页内容稿（`planners-bypage`）／本路线的**轻量切片降级** | 上游契约适配而来；**本路线不做内容判断** |
+| 内容从哪来 | 上游的逐页内容稿（`planners-bypage`）／非 PPT 资料先交给 `planners-bypage`／本路线的**轻量切片降级** | 上游契约适配而来；**本路线不做内容判断** |
 | 视觉身份 | 模板库／视觉参考／自主设计 | **风格库**（`video-craft/visual/themes/`，旗舰四域风格见 `references/domain/video_style_editorial_archive.md`；从参考画板提炼新视频风格见 `references/workflow/08_video_style_extraction_sop.md`）或自主设计 |
 | 出口 | `final_deck.pptx` | 全部 `_internal/02_svg_source/<page_key>.svg`，**且可能被强调的元素都带稳定 `id` 与预埋 `data-step` / `data-anim` 子元素钩子**（不导出 PPT） |
 | 完成 | 导出并复核过 PPTX | 画面全部做完，**且作者看过**——这条路上审阅是门，不是可选项 |
@@ -55,7 +55,7 @@ description: 把材料或上游交来的画面契约做成有证据、可读的�
 | # | 这一步做什么 | 主要产物 | 做完的标志 | 完整任务 |
 |---|---|---|---|---|
 | 1 | **确认视觉来源**：自主设计／模板库／视觉参考／新建品牌模板，四选一 | 选定来源；用模板时项目内的 fidelity 包；参考路线渲染出的参考页 | 视觉身份已确认；要真实复用品牌资产时是**复用**而不是近似重画 | `01_template_intake.md` |
-| 2 | **内容底稿**：直接沿用已批准逐页稿；多源材料或含待核数字时**调 `$planners-bypage`**；无上游内容稿时走轻量切片降级（三条判据见文档） | `_internal/01_content/page_content.json`（含每页 `mode`） | 底稿覆盖论证与资产、每页读法已声明，`next` 进 CREATE | `02_content_stage.md` |
+| 2 | **内容底稿**：直接沿用已批准逐页稿；收到非 PPT 资料包、多源材料或含待核数字时**调 `$planners-bypage`**；仅在简单单源材料且不需要完整内容展开时走轻量切片降级 | `_internal/01_content/page_content.json`（含每页 `mode`） | 底稿覆盖论证与资产、每页读法已声明，`next` 进 CREATE | `02_content_stage.md` |
 | 3 | **整套审阅**（可选步骤） | `02_visual_review.html`、`_internal/05_review/review-surface.json`（宿主契约）、`_internal/05_review/feedback.json` | 作者在真实页面上提交过整套决定，或明确表示当前这版不用审（导出会提醒一次） | `07_visual_review.md` |
 | 4 | **导出与复核** | `final_deck.pptx`、`_internal/00_project/export.json`、PPTX 渲染出来的逐页复核图 | 页数与页面版本对得上，且**导出的 PPTX 逐页看过**（`export-inspect` 之后才到 COMPLETE） | `07_visual_review.md` |
 

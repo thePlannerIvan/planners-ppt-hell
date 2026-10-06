@@ -26,6 +26,20 @@
       ]
     },
     {
+      "id": "bypage_material_intake",
+      "prompt": "把这批不是 PPT 的研究资料做成可编辑 PPT，先完成内容理解和完整逐页稿，再进入视觉制作。",
+      "must_do": [
+        "调用 planners-bypage 处理非 PPT 资料",
+        "接收 by-page.md 与 assets 后再开始画面制作",
+        "保留来源、数字限定条件和图片语义作用"
+      ],
+      "must_not_do": [
+        "要求 Proposal 交接文件作为前置条件",
+        "用轻量切片替代完整内容展开",
+        "在没有完整内容稿时直接开始 Layout"
+      ]
+    },
+    {
       "id": "brand",
       "prompt": "按这个品牌模板制作，标志和背景要直接复用。",
       "must_do": [

@@ -34,6 +34,32 @@ def png_bytes(width=40, height=20):
 
 
 class SourceAssetTests(unittest.TestCase):
+    def test_bypage_handoff_keeps_content_and_assets_without_proposal(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw) / 'slides'
+            root.mkdir()
+            package = Path(raw) / 'deliverable'
+            assets = package / 'assets' / 'original'
+            assets.mkdir(parents=True)
+            image = png_bytes()
+            (assets / 'evidence.png').write_bytes(image)
+            source = package / 'by-page.md'
+            source.write_text(
+                '---\npage_number: 1\npage_title: "Evidence"\n---\n\n'
+                '## Page Content\n\nObserved result: 42% in the pilot sample.\n\n'
+                '![Evidence](assets/original/evidence.png)\n\n'
+                '## Speaker Notes\n\nThe pilot does not establish causality.\n\n'
+                '## Production Notes\n\nUse the original evidence image.\n\n'
+                '## Sources\n\n- study.md, Results\n', encoding='utf-8')
+            manifest = prepare_source_material(root, source)
+            normalized = (root / manifest['normalized_source']).read_text(encoding='utf-8')
+            self.assertIn('42% in the pilot sample', normalized)
+            self.assertIn('The pilot does not establish causality', normalized)
+            self.assertIn('study.md, Results', normalized)
+            self.assertIn('![Evidence](assets/asset_001.png)', normalized)
+            self.assertEqual((root / manifest['assets'][0]['normalized_path']).read_bytes(), image)
+            self.assertFalse((Path(raw) / '.proposal-work').exists())
+
     def test_markdown_images_are_copied_and_rewritten(self):
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw) / "project"

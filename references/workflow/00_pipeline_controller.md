@@ -6,6 +6,8 @@
 
 ## 两条路线各一条命令
 
+幻灯片路线先按 `02_content_stage.md` 判断内容入口。原始资料尚需理解、组织或展开时，先调用 `planners-bypage`，接收 `deliverable/by-page.md` 与资产后再初始化；不要把 PDF、表格或资料目录直接传给只接受 Markdown/Word 的 `--source`。已有制作项目则恢复原项目，不重新初始化。
+
 ```bash
 # 幻灯片：有源文档
 python scripts/init_svg_project.py <project> --source <source.md|source.doc|source.docx>

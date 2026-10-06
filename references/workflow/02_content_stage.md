@@ -7,12 +7,12 @@
 | 通道 | 什么时候走 | 内容从哪来 |
 |---|---|---|
 | **已批准逐页稿** | 上游已经产出并批准了逐页内容稿（`source.md` 就是 `by-page.md`，或项目里已有 `page_content.json`） | 直接沿用。本阶段只按登记后的 `source_assets.json` 核对图片用途与取舍 |
-| **交给 `planners-bypage`** | 材料是多源的（Word/PDF/Excel/PPT/图片混在一起），或正文含需要回源核对的数字与引用，或需要图片状态与终审绑定 | **调用 `$planners-bypage`** 做完整逐页内容稿，再回到本路线做画面 |
+| **交给 `planners-bypage`** | 原始资料尚需理解、组织或内容展开，或需要回源核查与图片终审绑定 | **调用 `$planners-bypage`**，交入原始资料、用途、受众和已有用户确认；不要求 Proposal 文件。接收 `deliverable/by-page.md` 与 `deliverable/assets/` 后继续本路线 |
 | **视频画面路线** | 初始化用的是 `--assets` + `--plan`（见 `00_pipeline_controller.md`） | 上游契约适配而来：初始化已把画面契约适配成 `page_content.json`（上屏内容进 `content`，理由与来源进 `notes`）。**本阶段不重推、不改判任何页级内容** |
 
 ### 轻量切片是**降级通道**，不是并行实现
 
-没有 bypage 可用时，本阶段可以自己读 `_internal/00_project/source/source.md`、同目录的 `source_assets.json` 并实际查看图片，按受众需要判断每页证明什么、哪些数字与条件不能遗漏、图片承担什么证据作用，然后把长文按论证切分（避免每段机械变成一页）。
+材料确实是简单单源、内容已经完整且只需切页时，本阶段可以自己读 `_internal/00_project/source/source.md`、同目录的 `source_assets.json` 并实际查看图片，把长文按论证切分（避免每段机械变成一页）。需要 Bypage 的内容工作但当前无法调用时，应说明缺口，不能把完整内容展开静默降级成切片。
 
 但它**只做「能落地的页面切分」**：不做来源索引、不做事实核查、不保证可追溯。
 

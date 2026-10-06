@@ -9,7 +9,7 @@
 
 ```text
 材料 ──┐
-       ├─ 边界（init_svg_project）→ 内容底稿 → 做画面 ↔ 渲染看图修订 → 整套审阅 → 出口
+       ├─ 边界（init_svg_project）→ 内容底稿（必要时调用 planners-bypage）→ 做画面 ↔ 渲染看图修订 → 整套审阅 → 出口
 契约 ──┘                                    ↑
                                     画幅／判断框架／技术规则
 ```
@@ -54,7 +54,7 @@
 | `scripts/prepare_source_material.py` | 素材登记 | 源文与图片的登记、命名键去重、`source_assets.json` 的形状 | 被 `init_svg_project` 调用（`prepare_source_material`／`register_image_folder`） | 不判断图片内容；不裁剪、不改图 |
 | `references/workflow/00_pipeline_controller.md` | Stage·开局与恢复 | 立项目／恢复项目的命令序列、**开局一次性确认**（视觉来源、画幅、图片）、CONTENT 状态的入口判据 | 被 `SKILL.md`「开始」与 `next` 的 CONTENT 指向；命令在 `init_svg_project.py` 与 `ppt_pipeline.py` | 不写各路线内部怎么做（那是 01／03／04）；除导入异常、源资料缺失、影响结论的歧义外不再追问 |
 | `references/workflow/01_template_intake.md` | Stage·幻灯片的视觉来源与模板 | 四条来源路线（自主／模板库／视觉参考／建严格模板）的**判据、命令序列、产物清单**，以及「用」与「建」的分界 | `template_library.py list／apply`、`prepare_visual_references.py`、八步提取各脚本 | 不服务视频路线（那条走风格库）；做画面不经过提取 |
-| `references/workflow/02_content_stage.md` | Stage·内容底稿 | `page_content.json` 的写法、**每页读法 `mode` 的语义**、图片取舍与 `unused_assets` 的原因、**三条通道的判据**（已批准逐页稿 / 交给 bypage / 视频契约）与轻量切片降级的边界 | 读 `source/source.md`＋`source_assets.json`；多源或含待核数字时调 `$planners-bypage`；视频路线读适配后的底稿（不重推、不改判） | 不提前冻结坐标与版式；源事实、数字与限定条件不因版面不足被删除；**降级通道不冒充正路** |
+| `references/workflow/02_content_stage.md` | Stage·内容底稿 | `page_content.json` 的写法、**每页读法 `mode` 的语义**、图片取舍与 `unused_assets` 的原因、**三条通道的判据**（已批准逐页稿 / 交给 bypage / 视频契约）与轻量切片降级的边界 | 原始资料需要内容展开时先调 `$planners-bypage`，接收逐页稿与资产；视频路线读适配后的底稿（不重推、不改判） | 不提前冻结坐标与版式；源事实、数字与限定条件不因版面不足被删除；**降级通道不冒充正路** |
 | `references/workflow/03_video_route.md` | Stage·视频画面路线（接手 → 逐屏 → 整套） | 这条路线自己的 V1／V2／V3 与完成标准、**四条视频约束**（字幕安全区／人物位置／不透明与透明／强调动画余量）、交给动画层的接口 | 读适配后的底稿与风格库（`theme_tokens.py`）；出口物被 `video-craft` 消费 | 不做内容判断、不重新编号、不套模板库、不给页面加动画 |
 | `references/workflow/04_svg_stage.md` | Stage·制作与逐页自检（两条路线共用） | 逐页制作顺序、**看图是必填动作**的判据（含 `inspect` 的字段）、`design_direction.md` 里该写的秩序 | `ppt_pipeline check`／`inspect`；被 03 引用（视频路线的额外三条） | 不评价设计（判断框架在 `references/domain/`）；自检不代替人审 |
 | `references/workflow/07_visual_review.md` | Stage·整套审阅与交付 | 审阅的跑法与否决语义、**交付与复核**：幻灯片路线的导出复核与证据强度措辞，视频路线的「审阅是门」 | `ppt_pipeline review`／`export`／`export-inspect`；被 `next` 的 VISUAL_REVIEW／EXPORT／EXPORT_VERIFY 指向 | 不代替作者批准；不把机器绿灯当成内容正确 |
@@ -102,7 +102,7 @@
 |---|---|---|---|
 | `video-idea-system`（上游） | `visual-plan.json` 5.0（逐屏声明）＋ `<包>/assets/`；上游**已经过**念稿审阅——那不是包里的文件，记录在上游自己的 `_idea/reviews/script/` | 交接后的技术确认（能不能落地、缺什么字段） | 不判断内容对不对、不改写上屏文字、不重新编号 |
 | `video-craft`（下游） | —（它是最终成片的消费者） | 全部页面 SVG（带唯一 id）＋ 三个合成事实的来源（`design_direction.md`） | 不做动画、不做剪辑、不管音频与时间轴 |
-| `planners-bypage`（上游，幻灯片路线） | 逐页内容稿 ＋ 图片资产 | 技术确认 | 不做叙事与事实审计 |
+| `planners-bypage`（内容前置，幻灯片路线） | 原始资料需展开时，先交资料、目标与已有确认；接回逐页内容稿 ＋ 图片资产 | 内容适配与技术确认后继续制作 | 不代替 By-page 做叙事展开与事实审计 |
 | 模板提取（本 Skill 内的重组件） | — | 可复用的严格模板包 | 不由做画面这一步触发（做画面永不经过模板提取） |
 
 ## 同一件事的两个真相源

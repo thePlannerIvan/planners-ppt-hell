@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-10-06 · 幻灯片路线补上非 PPT 资料的 Bypage 适配入口
+
+**边界变化**：幻灯片路线收到非 PPT 资料包，或材料需要完整内容理解时，先调用 `planners-bypage`；Bypage 独立完成资料理解、结构形成和完整逐页内容，再把 `deliverable/by-page.md` 与 `deliverable/assets/`交回本路线。轻量切片只保留为简单单源材料的降级通道。
+
+| 动了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| `SKILL.md`、`references/workflow/00_pipeline_controller.md`、`02_content_stage.md`、`references/architecture.md` | 初始化前先判断内容入口，避免 PDF、表格或资料目录卡在导入器；已有目标和确认随资料交接 | 内容底稿、架构与路线入口 | 用轻量切片替代尚未完成的内容展开 |
+
+---
+
 ## 2026-10-05 · 令牌副本"钉版本"纠错：从 npm 的 latest 改成你装的那一版
 
 **触发**：作者问"你调用的 UI 组件是这个时间段以后的最新版吗"。
