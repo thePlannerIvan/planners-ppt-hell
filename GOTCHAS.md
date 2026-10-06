@@ -214,6 +214,33 @@
 - **行为修正**：① 闸门认两个写者（新页面 `template_review_page`；`review_server` 继续认，因为老项目里那份批准是人真的给过的）；② **摘要由 Skill 的收件层盖章**（`html_sha256`／`png_sha256`／`template_package_sha256`），陈旧的那一份**不盖章**（不留看起来算数的证据）。这与页面审阅"收件时由 Skill 盖版本与 PNG hash"是同一条规则。
 - **状态**：已升级（v5.5 补丁，同上）
 
+### G-23 右栏的定高子项被图片压扁（flex 子项默认会缩，而且不报错）
+
+- **module**：`assets/review/review.html`（`.panel` 的几何）
+- **现象**：真人截图（2026-10-06）：一页有图、窗口又不够高时，**右栏上面那个 78px 的「本页反馈」框被图片挤成一条 18px**，同时整栏出现滚动条。浏览器把"内容超高"处理成"每个 flex 子项各让一点"，而不是"整栏滚"——**不报错、不告警，看起来只是"这个页面不好看"**。
+- **原因**：`.panel` 是 `display:flex;flex-direction:column;overflow:auto`，而 flex 子项默认 `flex-shrink:1`。凡是往这一栏加**定高**的东西（`height:78px` 的 textarea、132px 的取景框），多到溢出时先被压的就是它们；`overflow:auto` 要等子项缩到 min-content 之后才轮到滚动。
+- **行为修正**：`.panel>*{flex:0 0 auto}`（整栏滚，谁也不许缩）＋ textarea 补 `min-height`。判据进浏览器冒烟：把窗口压到 560px 高、右栏必须真的溢出（**先断言溢出发生了，否则下面那条是空转**），此时 `#feedback` 高度必须 ≥78px。红对照实测：拆掉这两条，同一个位置量到 **18px**。
+- **证据**：`test_review_browser.py`（①b；红对照 18px 实测）。
+- **状态**：已升级（v5.5 补丁）
+
+### G-24 模板换了，项目里的审阅页永远不重出（"最新"只比页面自己）
+
+- **module**：`scripts/orchestrate/ppt_pipeline.py`（`make_review`）＋ `scripts/project_state.py`（`review_current`）
+- **现象**：改完审阅页模板，跑 `review` 再打开项目，**看到的还是旧页面**：人的右栏问题照旧存在，而命令一路绿灯。`make_review` 的短路条件是 `review_current`，它比的是"磁盘上 `02_visual_review.html` 的 sha == 快照里记的 sha" —— 而页面与快照是**一起写下的**，模板升级后两者照样互相印证，两个都是旧的。
+- **原因**：快照只记**产物**的 sha，不记**输入**（模板 ＋ 内联的令牌表）。"这一版是最新的"因此只能表达"没人手改过这个文件"，表达不了"这一版是按当前模板生成的"。
+- **行为修正**：`generate_review_html.template_fingerprint()`（模板 sha ＋ 令牌表 sha）写进快照的 `template_sha256`；`make_review` 短路时**两个条件都要成立**。**不动** `review_current`／`approvals` 的语义——审阅页换皮不该让已有的 31 页批准作废（那是页面的观感，不是被审的画面）。
+- **证据**：`test_review_page_is_regenerated_when_the_review_template_changes`（幂等那条是正向对照，抹掉指纹那条是红对照）。
+- **状态**：已升级（v5.5 补丁）
+
+### G-25 作者写的 `display` 会盖掉 `hidden` 属性（"藏起来的东西"照旧显示）
+
+- **module**：`assets/review/review.html`（凡是靠 `element.hidden = true` 藏东西的地方）
+- **现象**：选中「原始」比例时，下面**还挂着**自定义比例的输入框和一行红字提示（页面看不出哪里错了，像是"这个控件没做完"）。同一段代码里 `customRow.hidden=true` **确实执行了**。
+- **原因**：`hidden` 属性靠 UA 样式表的 `[hidden]{display:none}` 生效，而**任何作者写的 `display` 都盖得过它**。给这一行加的 `.field{display:flex}` 就把它顶掉了。JS 那边全是绿的，只有截图能看出来。
+- **行为修正**：表头加 `[hidden]{display:none!important}`（这类"作者规则盖掉 UA 规则"的坑只有一条出路：自己写死）。同一处的第二个毛病一并修：空输入框不算错误（`ratioBad` 只对"非空且不合法"报红），不合规的输入在失焦时退回上一个成立的值，不把人写的东西留在红框里。
+- **证据**：浏览器冒烟断言「选了预设比例时 `.ratio-custom` 必须不可见」；2026-10-06 项目页截图（page_07）。
+- **状态**：已升级（v5.5 补丁）
+
 ---
 
 ## 五、与相邻 Skill 协作

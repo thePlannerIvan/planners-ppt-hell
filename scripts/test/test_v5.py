@@ -13,7 +13,8 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'orchestrate'))
 from canvas_frame import FRAME_H_INT, FRAME_VIEWBOX, FRAME_W_INT
 from project_state import (CONTENT, PNG, PROJECT, REVIEW, SVG, TEMPLATE_REVIEW_SNAPSHOT,
                            VALIDATION, approvals, approved, content, digest, images,
-                           manifest, read, sha, sync, template_version, versions, write)
+                           manifest, read, review_snapshot, sha, sync, template_version,
+                           versions, write)
 from ppt_pipeline import next_action, make_review, resolve, export, unresolved
 from review_feedback import archive_consumed, consume
 from validate_svg_layout import validate_file
@@ -140,6 +141,48 @@ class V5Tests(unittest.TestCase):
     def test_source_assets_must_be_accounted_for(self):
         write(self.root/PROJECT/'source/source_assets.json',{'assets':[{'asset_id':'asset_001'}]})
         with self.assertRaisesRegex(ValueError,'not accounted'):content(self.root)
+    def test_image_alignment_covers_the_whole_nine_grid(self):
+        """对齐的九个格子都要能提交。
+
+        控件是九宫格（CSS `object-position` 本来就是二维的），旧判据只收五个（正上下左右＋居中）：
+        四个角在页面上点得到、提交却被退。这一条把"控件上的格子"和"服务端收的值"钉在一起。
+        """
+        assets=[]
+        for anchor in ['center','top','bottom','left','right',
+                       'top-left','top-right','bottom-left','bottom-right']:
+            path=self.root/REVIEW/f'uploads/alpha/{anchor}.png'
+            path.parent.mkdir(parents=True,exist_ok=True)
+            Image.new('RGB',(20,20),'blue').save(path)
+            assets.append({'asset_key':anchor,'operation':'add','path':path.relative_to(self.root).as_posix(),
+                           'fit':'cover','ratio':'1:1','anchor':anchor})
+        p=self.payload();p['pages']['alpha']['assets']=assets
+        self.submit(p)
+        saved=read(self.root/REVIEW/'feedback.json')['pages']['alpha']['assets']
+        self.assertEqual(sorted(a['anchor'] for a in saved),
+                         ['bottom','bottom-left','bottom-right','center','left','right','top','top-left','top-right'])
+    def test_unknown_image_alignment_is_rejected(self):
+        """九宫格之外的值仍然要挡住（保住上一条的边界）。"""
+        path=self.root/REVIEW/'uploads/alpha/one.png';path.parent.mkdir(parents=True,exist_ok=True)
+        Image.new('RGB',(20,20),'blue').save(path)
+        p=self.payload()
+        p['pages']['alpha']['assets']=[{'asset_key':'new','operation':'add','path':path.relative_to(self.root).as_posix(),
+                                        'fit':'cover','ratio':'1:1','anchor':'middle'}]
+        with self.assertRaisesRegex(ValueError,'Invalid anchor'):self.submit(p)
+    def test_review_page_is_regenerated_when_the_review_template_changes(self):
+        """审阅页模板升级之后，已经生成过的页面要重出。
+
+        `review_current` 只比"磁盘上的页面 vs 快照"，而这两样是一起写下的 —— 模板换了以后照样
+        互相印证，只看它就会把一版按旧模板生成的页面当成最新的（2026-10-06 真人报的右栏问题就是
+        这样卡住的：模板改了，项目里的页面还是旧的）。所以快照里记模板与令牌表的指纹。
+        """
+        from generate_review_html import template_fingerprint
+        first=make_review(self.root)
+        self.assertEqual(review_snapshot(self.root)['template_sha256'],template_fingerprint())
+        self.assertEqual(make_review(self.root)['review_id'],first['review_id'],'模板没变就不重出（幂等）')
+        snapshot=read(self.root/REVIEW/'snapshot.json');snapshot.pop('template_sha256')
+        write(self.root/REVIEW/'snapshot.json',snapshot)         # ＝"这份页面不是按当前模板生成的"
+        self.assertNotEqual(make_review(self.root)['review_id'],first['review_id'],'模板换了就必须重出')
+        self.assertEqual(review_snapshot(self.root)['template_sha256'],template_fingerprint())
     def test_missing_image_and_stretch_rejected(self):
         svg=self.root/SVG/'alpha.svg';svg.write_text('<svg xmlns="http://www.w3.org/2000/svg"><image href="missing.png"/></svg>')
         with self.assertRaisesRegex(ValueError,'Missing image'):images(self.root,svg)

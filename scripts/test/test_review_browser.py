@@ -111,6 +111,26 @@ class ReviewBrowserTests(unittest.TestCase):
                 self.assertTrue(self.posts('/__review/upload'), '上传必须走桥的 upload')
                 self.assertIn('_internal/05_review/uploads/alpha/', unquote(self.posts('/__review/upload')[0][2]))
 
+                # ①b 右栏版面：**有图 + 窗口不高时，上面的反馈框不许被挤扁**（2026-10-06 真人截图）。
+                # 先把窗口压矮，让右栏真的溢出 —— 没溢出就无所谓压不压，这一条会先替下面那条兜底。
+                page.set_viewport_size({'width': 1440, 'height': 560})
+                overflowing = page.evaluate(
+                    "() => { const p = document.querySelector('.panel'); return p.scrollHeight > p.clientHeight; }")
+                self.assertTrue(overflowing, '窗口压矮 + 有图，右栏必须真的溢出，否则下面那条断言是空转的')
+                self.assertGreaterEqual(page.locator('#feedback').bounding_box()['height'], 78,
+                                        '右栏溢出时要整栏滚动，反馈框保住自己的高度（flex 子项不许被压缩）')
+                page.set_viewport_size({'width': 1440, 'height': 900})
+
+                # ①c 图片的三个设定：显示方式 / 裁剪比例 / 对齐 —— 点得到的控件，不是一排下拉框
+                self.assertTrue(page.locator('#assets .ratio-custom').is_hidden(),
+                                '选了预设比例时不许还挂着自定义输入框（`hidden` 会被 .field 的 display 盖掉）')
+                page.locator('#assets .seg button[data-value=cover]').click()
+                page.locator('#assets .grid9 button[data-value="bottom-right"]').click()
+                self.assertIn('on', page.locator('#assets .seg button[data-value=cover]').get_attribute('class') or '',
+                              '选中的显示方式要留在控件上')
+                self.assertIn('on', page.locator('#assets .grid9 button[data-value="bottom-right"]').get_attribute('class') or '',
+                              '选中的对齐格子要留在控件上')
+
                 # ② 框选一处 + 「本页要求修改」= 写整份状态 + wake(unit=page_key)
                 page.get_by_text('框选问题', exact=True).click()
                 box = page.locator('#preview').bounding_box()
@@ -136,6 +156,9 @@ class ReviewBrowserTests(unittest.TestCase):
                 self.assertTrue(uploaded[0]['path'].startswith('_internal/05_review/uploads/alpha/'))
                 self.assertTrue((root / uploaded[0]['path']).is_file(), '上传件真的落在项目里了')
                 self.assertEqual(uploaded[0]['sha256'], hashlib.sha256((root / uploaded[0]['path']).read_bytes()).hexdigest())
+                # ①c 在页面上点的那两下要原样进反馈：图片的显示方式与对齐
+                self.assertEqual(uploaded[0]['fit'], 'cover', '页面上选的「填满裁剪」要进反馈')
+                self.assertEqual(uploaded[0]['anchor'], 'bottom-right', '九宫格里点的右下角要进反馈')
                 self.assertTrue(self.posts('/__review/write'), '提交必须真的写了一次')
                 wakes = self.posts('/__review/wake')
                 self.assertTrue(wakes, '逐页提交必须唤醒模型')

@@ -78,6 +78,22 @@ python3 <planners-review-core>/scripts/vendor_dsh_tokens.py   # 重抄（表只�
 2. **字用组合式 token**：`font: var(--dsw-font-xs-strong-13)`，别自己拼 `font-size` + `font-weight` —— 他们的 UI 粗体是 **500**，行高是**固定档位**，自己拼就会回到"看着像但不是"。
 3. **内容是内容，UI 是 UI**：缩略图卡、被审的那张幻灯片本体**不套** UI token（那是作者的画面，不是我们的界面）。
 
+### 右栏的图片卡：三个设定对应三个字段
+
+人改一张图的用法，改的只有三件事，页面上也只有三个控件（都点了立刻生效，预览框当场按新值成形）：
+
+| 控件 | 字段 | 取值 | 读法 |
+|---|---|---|---|
+| **显示方式** | `fit` | `contain` 完整显示 / `cover` 填满裁剪 | 整张放进来（框里可能留白），还是铺满框、裁掉多出来的 |
+| **裁剪比例** | `ratio` | `original` 或 `宽:高`（如 `3:2`） | 把画面归进几比几的框；`original` 保持原比例 |
+| **位置**（九宫格） | `anchor` | `center`／`top`／`bottom`／`left`／`right`／`top-left`／`top-right`／`bottom-left`／`bottom-right` | 框里有富余或有裁切时，画面往哪边靠。就是 CSS `object-position` 的九个位置 |
+
+**九宫格不是装饰**：`fit` 与 `ratio` 各自都会在框里留下富余或裁切，往哪边靠是第三件独立的事。旧的五值判据（正上下左右＋居中）配九宫格控件会让四个角**点得到、提交却被退**，所以 `review_feedback.consume` 收九个值；`anchor` 与 CSS 的写法一一对应，模型照着改 `<image>` 的 `preserveAspectRatio` 与裁切框即可。
+
+**右栏的几何是"整栏滚动，谁也不许缩"**（`.panel>*{flex:0 0 auto}`）。这一栏是 flex 列 + `overflow:auto`，而 flex 子项默认 `flex-shrink:1` —— 一页有图、窗口又不够高时，**上面的反馈框会被图片压成一条**，而且不报错（2026-10-06 真人截图）。凡是往这一栏加定高的东西，都要记着这条。
+
+**模板换了，已生成的项目页面要重出**：`make_review` 除了比"页面 sha 是否还等于快照里的"，还比**模板与令牌表的指纹**（快照的 `template_sha256`）。只看前者分不出来——页面与快照是一起写下的，模板升级后两者照样互相印证。
+
 **明暗**：`body[data-ds-dark-theme]` 那一整套已在表里。页面在 iframe 里读不到宿主的偏好，所以跟随系统（`prefers-color-scheme`）——就是 DSH "system" 那一档；宿主将来若自己把这个属性打进来，页面的那句不会覆盖它。
 
 **层次怎么读**：`bg-base` 画布 → `bg-module-platform` 侧栏凹面 → `bg-document-preview` 被审的纸 → `bg-layer-1` 浮层；分隔一律用 `border-l1/l2` 细线，不要用灰块。

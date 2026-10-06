@@ -12,6 +12,10 @@ __DSH_TOKENS__
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 body{margin:0;height:100vh;overflow:hidden;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font:var(--dsw-font-xs-13);display:flex;flex-direction:column}
 ::selection{background:var(--dsw-alias-bg-document-selection)}
+/* `hidden` 属性靠 UA 的 `display:none` 生效，**任何作者写的 display 都会盖掉它** ——
+   `.field{display:flex}` 就让"藏起来的那一行"照旧显示（2026-10-06 截图里：选了「原始」，
+   下面还挂着自定义比例的输入框和一行红字）。要藏就用这条，别赌 UA 规则赢。 */
+[hidden]{display:none!important}
 
 header{height:48px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);padding:0 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--dsw-alias-border-l2)}
 header .brand-left{display:flex;align-items:center;gap:14px}
@@ -87,7 +91,11 @@ header small{color:var(--dsw-alias-label-tertiary);font:var(--dsw-font-xxs-12)}
 
 /* Right Panel */
 .panel{background:var(--dsw-alias-bg-layer-2);border-radius:var(--dsw-radius-md);padding:14px;border:1px solid var(--dsw-alias-border-l1);display:flex;flex-direction:column;gap:8px}
-.panel textarea{width:100%;height:78px;resize:vertical;font:inherit;padding:8px;border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-sm);background:var(--dsw-specific-input-major);color:var(--dsw-alias-label-primary)}
+/* 这一栏是 flex 列 + `overflow:auto`，而 flex 子项默认 `flex-shrink:1` —— 内容一超高，
+   **定高的子项会被压扁**（不是滚动）。实测（2026-10-06 真人截图）：一页有图时，上面那个
+   78px 的反馈框被图片挤成一条。要滚动就整栏滚，谁也不许缩。 */
+.panel>*{flex:0 0 auto}
+.panel textarea{width:100%;height:78px;min-height:78px;resize:vertical;font:inherit;padding:8px;border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-sm);background:var(--dsw-specific-input-major);color:var(--dsw-alias-label-primary)}
 .panel h3{margin:6px 0 2px;font:var(--dsw-font-xs-strong-13);color:var(--dsw-alias-label-primary);display:flex;align-items:center;justify-content:space-between}
 button,input,select{font:inherit}
 button{cursor:pointer;border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-sm);height:28px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary)}
@@ -100,11 +108,42 @@ button.good:hover:not(:disabled){background:var(--dsw-alias-state-success-second
 button:disabled{opacity:.45;cursor:default}
 .tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .muted{color:var(--dsw-alias-label-tertiary);font:var(--dsw-font-xxs-12);margin:2px 0}
-.asset{border:1px solid var(--dsw-alias-border-l1);padding:10px;margin:6px 0;border-radius:var(--dsw-radius-sm)}
-.asset img{display:block;width:100%;height:100%;object-fit:contain}
-.crop{height:110px;background:var(--dsw-alias-bg-skeleton);margin:6px 0}
-.asset select,.asset input[type=text]{width:100%;margin:3px 0;padding:5px}
-.asset input[type=file]{width:100%;font:var(--dsw-font-xxs-12)}
+/* ---- 页内图片：一张图 = 一张卡，三个设定各用各的控件 ----
+ *
+ * 这三个设定管的是三件不同的事，所以控件也长得不一样 —— 两个下拉 + 一个自由文本输入
+ * 排成一列（旧版）读起来像一张没做完的表单：`original` 是什么意思、"靠上"和"填满"有什么
+ * 关系，全靠猜。现在：显示方式是二选一的分段控件，比例是一排预设，对齐是九宫格（CSS 的
+ * `object-position` 本来就是二维的）。预览框按这三个值实时成形，看到的就是提交后模型要裁
+ * 出来的样子。
+ */
+.asset{border:1px solid var(--dsw-alias-border-l1);border-radius:var(--dsw-radius-sm);padding:10px;margin:6px 0;display:flex;flex-direction:column;gap:8px}
+.asset>*{flex:0 0 auto}
+.asset-head{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.asset-head b{font:var(--dsw-font-xs-strong-13);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.asset-head .tools{gap:2px;flex-wrap:nowrap}
+.mini{height:22px;padding:0 7px;font:var(--dsw-font-xxxs-strong-11);color:var(--dsw-alias-label-secondary);background:transparent;border-color:transparent}
+.mini:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}
+/* 预览：外面是"取景框之外"的凹面，里面那个框按住选定的比例成形，所以留白与裁切都看得见。 */
+.shot{height:132px;display:flex;align-items:center;justify-content:center;background:var(--dsw-alias-bg-skeleton);border-radius:var(--dsw-radius-xs);overflow:hidden}
+.shot .frame{position:relative;overflow:hidden;background:var(--dsw-alias-bg-layer-1);box-shadow:0 0 0 1px var(--dsw-alias-border-l2)}
+.shot img{display:block;width:100%;height:100%}
+.field{display:flex;align-items:center;gap:8px;min-height:24px}
+.field>span{flex:0 0 auto;width:26px;font:var(--dsw-font-xxxs-11);color:var(--dsw-alias-label-tertiary)}
+.seg{display:flex;flex:1;min-width:0;border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-sm);overflow:hidden}
+.seg button{flex:1;min-width:0;height:24px;padding:0 4px;border:0;border-radius:0;background:transparent;color:var(--dsw-alias-label-secondary);font:var(--dsw-font-xxxs-strong-11);white-space:nowrap}
+.seg button+button{border-left:1px solid var(--dsw-alias-border-l2)}
+.seg button:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}
+.seg button.on{background:var(--dsw-alias-button-ghost-active-fill);color:var(--dsw-alias-label-primary)}
+.grid9{display:grid;grid-template-columns:repeat(3,18px);grid-auto-rows:18px;gap:2px;padding:2px;border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-sm)}
+.grid9 button{display:grid;place-items:center;width:18px;height:18px;padding:0;border:0;border-radius:2px;background:transparent}
+.grid9 button:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}
+.grid9 button i{display:block;width:4px;height:4px;border-radius:50%;background:var(--dsw-alias-label-tertiary)}
+.grid9 button.on{background:var(--dsw-alias-button-ghost-active-fill)}
+.grid9 button.on i{width:7px;height:7px;background:var(--dsw-alias-state-business-primary)}
+.ratio-custom{flex:1;min-width:0;height:24px;padding:0 6px;border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-xs);background:var(--dsw-specific-input-major);font:var(--dsw-font-xxs-12);color:var(--dsw-alias-label-primary)}
+.ratio-custom[aria-invalid=true]{border-color:var(--dsw-alias-state-error-primary)}
+.hint{font:var(--dsw-font-xxxs-11);color:var(--dsw-alias-state-error-primary);margin:0}
+.hint:empty{display:none}
 .drop{border:2px dashed var(--dsw-alias-border-l3);padding:12px;text-align:center;margin:4px 0;border-radius:var(--dsw-radius-sm);cursor:pointer}
 .annotation{border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-static-neutral-bluish-50);border-radius:var(--dsw-radius-sm);padding:8px;margin-bottom:6px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;transition:border-color var(--ds-transition-duration-fast) var(--ds-ease-in-out),background var(--ds-transition-duration-fast) var(--ds-ease-in-out)}
 .annotation:hover,.annotation.active-region{border-color:var(--dsw-alias-state-warn-primary);background:var(--dsw-alias-state-warn-tertiary)}
@@ -210,6 +249,7 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
 
     <h3>本页图片</h3>
     <p class="muted">支持替换、拖入或粘贴图片</p>
+    <p class="muted">改完点「本页要求修改」提交：模型按这三项重出这一页。预览框里就是提交后的结果</p>
     <div id="assets"></div>
     <div class="drop" id="addDrop" tabindex="0">新增图片：点击、拖入或粘贴<input id="newFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></div>
   </aside>
@@ -982,7 +1022,68 @@ function drawRegions(){
   });
 }
 
-/* ---- 页内图片 ---- */
+/* ---- 页内图片 ----
+ *
+ * 三个设定管三件不同的事，控件也各不相同：
+ *   显示方式 `fit`    —— 整张放进来（`contain`，框里可能留白）还是铺满框（`cover`，裁掉多出来的）
+ *   裁剪比例 `ratio`  —— 把画面归成几比几的框；`original` 保持原比例
+ *   对齐     `anchor` —— 框里有富余或有裁切时画面往哪边靠（就是 CSS `object-position` 的九个位置）
+ *
+ * 预览里那块凹面是"取景框之外"，中间那个框按选定的比例成形 —— 留白与裁掉的部分都看得见。
+ */
+const FIT_OPTIONS=[['contain','完整显示'],['cover','填满裁剪']];
+const RATIO_OPTIONS=[['original','原始'],['1:1','1:1'],['4:3','4:3'],['16:9','16:9']];
+/* 服务端只收这九个。`center`/`top`/`bottom`/`left`/`right` 是旧版就在的五个，正好也是格子名，
+   所以老反馈不需要迁移。 */
+const ANCHORS=[['top-left','左上'],['top','上'],['top-right','右上'],
+               ['left','左'],['center','居中'],['right','右'],
+               ['bottom-left','左下'],['bottom','下'],['bottom-right','右下']];
+function anchorToPosition(value){
+  if(value==='top')return '50% 0%';
+  if(value==='bottom')return '50% 100%';
+  if(value==='left')return '0% 50%';
+  if(value==='right')return '100% 50%';
+  if(!value||value==='center')return '50% 50%';
+  const [row,col]=String(value).split('-');
+  return (row==='top'?'0%':'100%')+' '+(col==='left'?'0%':'100%');
+}
+function ratioOK(text){const t=String(text||'').trim();return t==='original'||/^[1-9]\d*:[1-9]\d*$/.test(t)}
+/* 空框不算错：它是"还没填"，不是"填错了" —— 一打开自定义比例就报红是在骂人。 */
+function ratioBad(text){const t=String(text||'').trim();return t!==''&&!ratioOK(t)}
+function ratioNumber(text,fallback){
+  const t=String(text||'').trim();
+  if(!t||t==='original')return fallback;
+  const match=t.match(/^([1-9]\d*):([1-9]\d*)$/);
+  return match?Number(match[1])/Number(match[2]):fallback;
+}
+/* 预览框几何：先按高度上限定高、按比例算宽；太宽就改用宽度上限反算高度。
+   两条路都让框保持选定比例，所以"16:9 裁出来是什么样"能一眼看出来。 */
+function sizeFrame(frame,shot,ratio,natural){
+  const maxH=shot.clientHeight||132,maxW=shot.clientWidth||250;
+  const r=ratioNumber(ratio,natural)||16/9;
+  let h=maxH,w=h*r;
+  if(w>maxW){w=maxW;h=w/r}
+  frame.style.width=Math.max(20,Math.round(w))+'px';
+  frame.style.height=Math.max(20,Math.round(h))+'px';
+}
+function field(label,control){
+  const row=document.createElement('div');row.className='field';
+  const span=document.createElement('span');span.textContent=label;row.append(span);
+  if(control)row.append(control);
+  return row;
+}
+function seg(options,value,onPick){
+  const wrap=document.createElement('div');wrap.className='seg';
+  for(const [v,text] of options){
+    const button=document.createElement('button');button.type='button';button.textContent=text;button.dataset.value=v;
+    if(v===value)button.classList.add('on');
+    button.onclick=()=>onPick(v);
+    wrap.append(button);
+  }
+  return wrap;
+}
+/* 「自定义比例」只在打开时出现；正在敲的字存在这里，重画一次不会把它抹掉。 */
+const customRatio={};
 function assetState(a){return state[page().key].assets.find(x=>x.asset_key===a.asset_key)||{...a,operation:'crop',ratio:'original',anchor:'center'}}
 function setAsset(a,item){const s=state[page().key];s.assets=s.assets.filter(x=>x.asset_key!==a.asset_key);const unchanged=item.operation==='crop'&&item.path===a.path&&item.fit===a.fit&&item.ratio==='original'&&item.anchor==='center';if(!unchanged)s.assets.push(item);autoState()}
 function drawAssets(){
@@ -990,39 +1091,92 @@ function drawAssets(){
   const added=state[p.key].assets.filter(a=>a.operation==='add');
   [...p.assets,...added].forEach(a=>{
     let item=assetState(a);
+    const ck=p.key+'|'+a.asset_key;
     const box=document.createElement('div');box.className='asset';
-    const name=document.createElement('b');name.textContent=a.asset_key;box.append(name);
-    const crop=document.createElement('div');crop.className='crop';
-    const img=document.createElement('img');
-    assetFor(item.path,assetVersion(item)).then(url=>{if(url)img.src=url});
-    crop.append(img);box.append(crop);
-    const fit=document.createElement('select');
-    for(const [v,t] of [['contain','完整显示'],['cover','填满并裁剪']])fit.add(new Option(t,v));
-    fit.value=item.fit;
-    const ratio=document.createElement('input');ratio.type='text';ratio.value=item.ratio||'original';ratio.placeholder='original 或 16:9';
-    const anchor=document.createElement('select');
-    for(const [v,t] of [['center','居中'],['top','靠上'],['bottom','靠下'],['left','靠左'],['right','靠右']])anchor.add(new Option(t,v));
-    anchor.value=item.anchor||'center';
-    function preview(){img.style.objectFit=fit.value;img.style.objectPosition=anchor.value;
-      const parts=ratio.value.split(':').map(Number);
-      crop.style.aspectRatio=parts.length===2&&parts.every(n=>n>0)?parts.join('/'):(a.width&&a.height?a.width+'/'+a.height:'16/9');
-      crop.style.height='auto'}
-    function change(){item={...item,fit:fit.value,ratio:ratio.value,anchor:anchor.value};setAsset(a,item);preview()}
-    fit.onchange=change;ratio.onchange=change;anchor.onchange=change;
-    box.append(fit,ratio,anchor);preview();
+
+    const head=document.createElement('div');head.className='asset-head';
+    const name=document.createElement('b');name.textContent=a.asset_key;head.append(name);
+    const headTools=document.createElement('div');headTools.className='tools';
+    const reset=document.createElement('button');reset.className='mini';
+    reset.textContent=a.operation==='add'?'移除':'重置';
+    reset.title=a.operation==='add'?'移除这张新增的图片':'恢复成现在的画面';
+    reset.onclick=()=>{state[p.key].assets=state[p.key].assets.filter(x=>x.asset_key!==a.asset_key);drawAssets();autoState()};
+    headTools.append(reset);head.append(headTools);box.append(head);
+
+    const shot=document.createElement('div');shot.className='shot';
+    const frame=document.createElement('div');frame.className='frame';
+    const img=document.createElement('img');img.alt=a.asset_key;
+    frame.append(img);shot.append(frame);box.append(shot);
+
+    const preset=RATIO_OPTIONS.some(([v])=>v===item.ratio)?item.ratio:'';
+    const custom=customRatio[ck]||(customRatio[ck]={open:!preset,text:preset?'':String(item.ratio||'')});
+
+    function naturalRatio(){return img.naturalWidth&&img.naturalHeight?img.naturalWidth/img.naturalHeight:(a.width&&a.height?a.width/a.height:16/9)}
+    function shownRatio(){return custom.open&&ratioOK(custom.text)?custom.text.trim():item.ratio}
+    function preview(){
+      img.style.objectFit=item.fit==='cover'?'cover':'contain';
+      img.style.objectPosition=anchorToPosition(item.anchor);
+      sizeFrame(frame,shot,shownRatio(),naturalRatio());
+    }
+    function change(patch){item={...item,...patch};setAsset(a,item);drawAssets()}
+
+    box.append(field('显示',seg(FIT_OPTIONS,item.fit==='cover'?'cover':'contain',value=>change({fit:value}))));
+    box.append(field('比例',seg([...RATIO_OPTIONS,['custom','自定义']],custom.open?'custom':preset,value=>{
+      if(value==='custom'){custom.open=true;custom.text=item.ratio==='original'?'':String(item.ratio||'');drawAssets();return}
+      custom.open=false;change({ratio:value});
+    })));
+
+    const customInput=document.createElement('input');
+    customInput.className='ratio-custom';customInput.type='text';customInput.value=custom.text;
+    customInput.placeholder='宽:高，如 3:2';
+    customInput.setAttribute('aria-invalid',ratioBad(custom.text)?'true':'false');
+    const customHint=document.createElement('p');customHint.className='hint';
+    customHint.textContent='要写 original 或 宽:高（都用正整数），例如 3:2';
+    customHint.hidden=!ratioBad(custom.text);        // 空框不是错误，别一打开就报红
+    const customRow=field('',customInput);customRow.hidden=!custom.open;
+    box.append(customRow,customHint);
+    customInput.oninput=()=>{                        // 敲的时候先看效果，不合规就不落状态
+      custom.text=customInput.value;
+      const bad=ratioBad(custom.text);
+      customInput.setAttribute('aria-invalid',bad?'true':'false');
+      customHint.hidden=!bad;
+      preview();
+    };
+    customInput.onchange=()=>{
+      const text=custom.text.trim();
+      if(ratioOK(text)){custom.open=true;custom.text=text;change({ratio:text});return}
+      custom.text=String(item.ratio||'');           // 不合规就退回上一个成立的值，不把人写的东西留在红框里
+      drawAssets();
+    };
+
+    const grid=document.createElement('div');grid.className='grid9';
+    for(const [value,label] of ANCHORS){
+      const button=document.createElement('button');button.type='button';
+      button.dataset.value=value;button.title=label+'对齐';button.setAttribute('aria-label',label+'对齐');
+      button.append(document.createElement('i'));
+      if(value===(item.anchor||'center'))button.classList.add('on');
+      button.onclick=()=>change({anchor:value});
+      grid.append(button);
+    }
+    box.append(field('位置',grid));
+
     if(canUpload){
-      const input=document.createElement('input');input.type='file';input.accept='image/png,image/jpeg,image/webp,image/gif';
+      const input=document.createElement('input');input.type='file';input.hidden=true;input.className='assetFile';
+      input.accept='image/png,image/jpeg,image/webp,image/gif';
       input.onchange=()=>input.files[0]&&upload(input.files[0],a.asset_key,false);
-      box.append(input);
+      const pick=document.createElement('button');pick.className='mini';pick.textContent='替换图片';
+      pick.onclick=()=>input.click();
+      headTools.prepend(pick);head.append(input);
       box.ondragover=e=>e.preventDefault();
       box.ondrop=e=>{e.preventDefault();if(e.dataTransfer.files[0])upload(e.dataTransfer.files[0],a.asset_key,false)};
       box.tabIndex=0;
       box.onpaste=e=>{const file=[...e.clipboardData.items].find(x=>x.kind==='file')?.getAsFile();if(file){e.preventDefault();upload(file,a.asset_key,false)}};
     }
-    const reset=document.createElement('button');
-    reset.textContent=a.operation==='add'?'移除新增图片':'重置修改';
-    reset.onclick=()=>{state[p.key].assets=state[p.key].assets.filter(x=>x.asset_key!==a.asset_key);drawAssets();autoState()};
-    box.append(reset);wrap.append(box);
+
+    wrap.append(box);                                // 先入 DOM，预览框才量得到自己的宽度
+    preview();
+    img.onload=preview;
+    assetFor(item.path,assetVersion(item)).then(url=>{if(url)img.src=url});
   });
 }
 function applyUploadCapability(){

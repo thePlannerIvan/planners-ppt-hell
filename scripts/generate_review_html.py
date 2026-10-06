@@ -110,6 +110,25 @@ def prepare_inline_svg(root, key):
     return ET.tostring(svg_root, encoding='unicode')
 
 
+def review_template_path():
+    """审阅页模板（本 Skill 持有的那一份）。"""
+    return Path(__file__).resolve().parents[1]/'assets/review/review.html'
+
+
+def template_fingerprint():
+    """「这个页面是拿哪一版模板生成的」。
+
+    页面 = 模板 + 内联的令牌表，两样任一变了，磁盘上那份页面就不再是"用当前模板生成的"。
+    快照里记下它，`make_review` 才能分辨"这一版页面还是最新的"和"模板升级了、页面该重出"
+    ——单看页面自己的 sha 是分辨不出来的（那时页面与快照互相印证，两个都是旧的）。
+    """
+    path = review_template_path()
+    if not path.is_file():
+        return ''
+    tokens = resolve_module('planners-review-core')/'assets'/'dsh-tokens.css'
+    return sha(path) + ':' + (sha(tokens) if tokens.is_file() else '')
+
+
 def previous_page_feedback(root, current):
     """旧一轮反馈里「这一页已经按意见改过、待人复核」的那些条目。"""
     old = read(root/REVIEW/'feedback.json', {}).get('pages', {})
@@ -142,6 +161,7 @@ def generate(root, template_path=None):
         'order': list(v),
         'png_hashes': {k: sha(root/PNG/(k+'.png')) for k in v},
         'assets': {k: asset_records(root, k) for k in v},
+        'template_sha256': template_fingerprint(),
     }
     data = {
         'project': c.get('project', ''),

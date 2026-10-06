@@ -257,12 +257,19 @@ def unresolved(root):
     return [i for i in f.get('items',[]) if i['id'] not in resolutions]
 
 def make_review(root):
+    """出审阅页。**页面模板升级也算"这一版页面该重出"** —— 理由见 `template_fingerprint`。
+
+    `review_current` 只比"磁盘上的页面 vs 快照"，而页面与快照是一起写下的：模板换了以后
+    两者照样互相印证，只看它就会把一版旧页面当成最新的（2026-10-06 真人报的右栏问题就是这样
+    卡住的：模板改了，项目里的页面还是旧的）。所以再审模板与令牌表的指纹。
+    """
     sync(root); v=versions(root)
     bad=[k for k,x in v.items() if not inspected(root,k,x)]
     if bad: raise ValueError('View and inspect current PNGs after check: '+', '.join(bad))
     if unresolved(root): raise ValueError('Resolve every submitted feedback item: '+json.dumps(unresolved(root),ensure_ascii=False))
-    if review_current(root): return review_snapshot(root)
-    from generate_review_html import generate
+    from generate_review_html import generate, template_fingerprint
+    if review_current(root) and review_snapshot(root).get('template_sha256')==template_fingerprint():
+        return review_snapshot(root)
     return generate(root)
 
 def template_review(root, port=0, surface_only=False):

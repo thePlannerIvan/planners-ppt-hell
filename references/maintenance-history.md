@@ -6,6 +6,27 @@
 
 ---
 
+## 2026-10-06 · 审阅页右栏：图片卡重做 + 两处"不报错的坏"
+
+**触发**：作者在真实项目上截图指出两件事——「图片会把上面的文字反馈框挤掉」「图片下面那几个反馈显得没什么意义，改的应该是裁剪比例、显示方式、对齐方式」。
+
+**第一个是真缺陷，不是观感**：右栏是 flex 列 + `overflow:auto`，子项默认 `flex-shrink:1`，所以内容一超高，**78px 的反馈框被压成 18px**（实测），整栏还给出一条滚动条。第二个是控件没做完：两个下拉 + 一个自由文本（`original 或 16:9`）排成一列，`original` 是什么意思、`靠上` 和 `填满` 什么关系都得猜。
+
+**顺带挖出第二处**：改完模板跑 `review`，项目里的页面**没有重出**（`make_review` 的"已是最新"只比页面自己的 sha，而页面与快照是一起写的）。等于"Skill 升级了，用户看到的还是旧页面"，而且命令一路绿灯。
+
+| 动了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| `assets/review/review.html` 右栏：`.panel>*{flex:0 0 auto}` ＋ textarea `min-height`；图片卡改成 预览（按比例成形的取景框）＋ 显示方式（分段控件）＋ 裁剪比例（预设 + 自定义）＋ 位置（九宫格）；原生 `Choose File` 换成"替换图片" | 整栏滚而不是把定高子项压扁；三个设定各用与它形状相称的控件，预览当场显示"提交后会裁成什么样" | `assets/review/review.html`（CSS ＋ `drawAssets`） | `.crop` 样式与自由文本比例输入、`asset select` 那几条"表单式"规则 |
+| `review_feedback.consume` 的 `anchor` 判据由五个值扩到九个 (`*-left`/`*-right` 四角) | 控件是九宫格，只收五个值会让四个角**点得到、提交却被退** | `scripts/review_feedback.py`（一处校验） | 旧五值集合（`center`/`top`/`bottom`/`left`/`right` 仍是其中五个，老反馈不必迁移） |
+| `generate_review_html.template_fingerprint()`（模板 sha ＋ 令牌表 sha）写进快照 `template_sha256`；`make_review` 短路时两个条件都要成立 | "这一版是最新的"必须同时表达"没人手改过"**和**"是按当前模板生成的" | `generate_review_html.py`、`orchestrate/ppt_pipeline.py` | 只看 `review_current` 的短路条件 |
+| 新增三条回归（`test_v5`：九宫格九值可提交／九宫格外仍被挡／模板换了就重出）＋ 浏览器冒烟两条（右栏真溢出时反馈框 ≥78px、点出来的显示方式与对齐要进反馈） | 这三处都是"静默坏"，没有断言就会第二次坏掉 | `scripts/test/test_v5.py`、`scripts/test/test_review_browser.py` | —— |
+
+**没动的**：`review_current`／`approvals` 的语义。审阅页换皮不该让已有的 31 页批准作废——那是页面的观感，不是被审的画面。
+
+**自己看图又看出第三个**（`GOTCHAS` G-25）：`hidden` 属性被 `.field{display:flex}` 盖掉，于是"选了原始比例"时下面还挂着自定义输入框和一行红字——JS 里 `hidden=true` 明明执行了。修法：表头 `[hidden]{display:none!important}`；顺带把"空框不算错误、不合规的输入失焦时退回上一个成立的值"补上，并加进浏览器冒烟。**这三条（G-23／G-24／G-25）有同一个形状：不报错、只有看一眼页面才发现** —— 所以每条都配了一条会红对照的断言，而不是只写在文档里。
+
+---
+
 ## 2026-10-06 · 幻灯片路线补上非 PPT 资料的 Bypage 适配入口
 
 **边界变化**：幻灯片路线收到非 PPT 资料包，或材料需要完整内容理解时，先调用 `planners-bypage`；Bypage 独立完成资料理解、结构形成和完整逐页内容，再把 `deliverable/by-page.md` 与 `deliverable/assets/`交回本路线。轻量切片只保留为简单单源材料的降级通道。

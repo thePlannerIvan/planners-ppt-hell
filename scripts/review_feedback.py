@@ -513,7 +513,11 @@ def validate_document(root, data, strict=True, suppressed=None):
                 raise ValueError('Invalid image bytes: '+str(path))
             if not re.fullmatch(r'(original|[1-9]\d*:[1-9]\d*)', str(asset.get('ratio', ''))):
                 raise ValueError('Use original or W:H ratio')
-            if asset.get('anchor') not in {'center', 'top', 'bottom', 'left', 'right'}:
+            # 对齐就是 CSS `object-position` 的位置：五个旧值（`center`/`top`/`bottom`/`left`/`right`，
+            # 页面九宫格里的正上下左右与正中）加四个角。九宫格控件上的每一格都必须是这里收的值，
+            # 否则人在页面上点得到、提交却被退（2026-10-06 起）。
+            if asset.get('anchor') not in {'center', 'top', 'bottom', 'left', 'right',
+                                           'top-left', 'top-right', 'bottom-left', 'bottom-right'}:
                 raise ValueError('Invalid anchor')
             asset['sha256'] = sha(path)
         # Note: svg_edits alone do NOT force decision='revise' — if user only made direct SVG tweaks,
