@@ -4,7 +4,34 @@
 
 看每一条时问三件事：**边界怎么变了**、**哪些 module 被牵动**、**删掉了什么**。
 
+## 2026-10-07（二）· 页面审阅交互：页序可操作，文字在画布原地编辑
+
+**触发**：真实审阅时，缩略图只能按生成顺序阅读，改页序要离开审阅面；文字元素虽然能改，但输入框在顶部工具栏，视线和编辑目标分离。
+
+| 动了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| `review.html` 增加缩略图拖拽排序、落点提示、键盘 `Alt+↑/↓`，并把页序作为 `page_order` 纳入草稿、提交、刷新恢复 | 页序是审阅工作台的导航状态，不能只改 DOM；写入两条落盘路径后刷新与模型收件才一致 | `assets/review/review.html`、`scripts/review_feedback.py`、浏览器／收件测试 | 不能持久化的临时排序 |
+| `review.html` 将文字编辑改为画布内 textarea：双击进入，默认全选，回车完成、Esc 取消；顶部栏保留字号、删除、批注等辅助操作 | 编辑框贴近目标，减少在画布与工具栏之间来回确认；取消操作不污染编辑历史 | `assets/review/review.html`、`scripts/test/test_review_browser.py` | 顶部栏作为主文字编辑入口的地位 |
+| 收件层校验 `page_order` 必须覆盖完整页集合 | 防止页面只提交部分页或伪造不存在的页序，保持审阅语义与内容页集合绑定 | `scripts/review_feedback.py`、`scripts/test/test_v5.py` | 无效页序的静默接受 |
+
+**回归**：223 条（含浏览器宿主链路）；新增页序往返、非法页序、缩略图拖拽与画布原地改字断言。
+
 ---
+
+## 2026-10-07（二）· 反馈不再只活在对话里；「整套已定」有了机器可读的一格
+
+**触发**：同一轮复盘里的两条——① 作者三次逐页提交只以唤醒到达，`feedback.json` 没写（文字只活在对话里，其中一句还被截断在半句）；② 作者点了整套提交，导出仍报"这套页面还没有走过整套人工审阅"。
+
+| 动了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| 宿主的 `wake-log.jsonl` 升级成**接入日志**：`/write` 时**先追加一行**（`kind=='write'`＋整份 `pages`＋`submitted_at`），再写 `feedback.json`；`/wake` 记 `kind=='wake'`＋`unit` | 唤醒与落文件不是一次事务：状态写失败时，人的字就只剩对话里那一份。先落日志让"最坏情况"也留得住 | `planners-review-core/scripts/serve-review.mjs`、`01-projects/dsh-review-dock/lib/index.js`（此前完全不写日志） | 无插件宿主那行只记截断唤醒语的旧写法（改成两种行都记） |
+| `review_feedback`：新增 `read_intake()`／`unrecorded_writes()`／`deck_settled()`；`consume` 返回 `unrecorded`；`next` 在 `review_intake` 里报出来 | 日志是 append-only 的事实源：把"日志里有、文件里没有"的提交接回来，模型不会因为文件里没有就当成没提过 | `scripts/review_feedback.py`、`scripts/orchestrate/ppt_pipeline.py` | —（新增读端） |
+| `consume` 把「`revise` 且内容身份已在 `closed` 里」的页归一成 `pending` | 那是**历史**，不是本轮待办；留着 `revise` 会让整套审阅永远批不通过（作者刚点完整套提交也照样报"还没审"） | `scripts/review_feedback.py` | 把历史当成本轮决定的那份状态 |
+| `approved()` 认「整套已定」：`deck_approved`（来自接入日志的 `unit=='整套'`）＋ 每页绑当前版本 ＋ 没有一页 `revise` | 单页状态表达不了 deck 级决定；审阅文档本来就写着"整套提交含批准未处理页" | `scripts/project_state.py` | 旧的"必须每一页 decision==approved"（在整套已定这条路下） |
+
+**回归**：223 条（`PPT_BROWSER_TESTS=1` 时 224）。新增 5 条行为断言；三处"盲取唤醒日志最后一行"的用例改成**先按 `kind` 选行**——日志现在装两种行，那是这次契约变化必须跟上的地方。
+
+**没做**：页面那一侧的"写失败要自己说"（作者正在改 `assets/review/review.html`，不碰）；`test_review_browser.py::test_reorder_thumbnails_and_edit_text_in_place` 目前在真项目上红，是页面原地改字编辑器的问题（同属作者在改的那一块）。
 
 ## 2026-10-07 · 版本只属于这一页：单页改动不再牵连整套的重看与交代
 

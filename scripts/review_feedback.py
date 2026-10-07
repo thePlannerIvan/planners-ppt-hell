@@ -24,6 +24,9 @@ HISTORY = 'history'
 APPLIED_EDITS_FILE = 'applied_svg_edits.json'
 # 人改完那几版 SVG 的快照目录（PNG 的 versions/ 在同一个父目录下）。
 VERSIONS = f'{REVIEW}/versions'
+# 宿主的**接入日志**（append-only）：每次提交一行，先落它、再写 feedback.json、最后唤醒。
+# 整份状态丢失时，人的字还在这里（G-32）。
+INTAKE_LOG = 'wake-log.jsonl'
 TREE_PATH_RE = re.compile(r'^0(?:\.\d+)*$')
 SVG_NS = 'http://www.w3.org/2000/svg'
 ET.register_namespace('', SVG_NS)
@@ -440,6 +443,63 @@ def apply_pending_svg_edits(root, data):
     return applied_keys
 
 
+def read_intake(root):
+    """读宿主的接入日志（append-only）。
+
+    行形状（新宿主）：`{at, kind, review_id, submitted_at, unit, overall_feedback, pages}`
+    —— `kind=='write'` 是整份状态、`kind=='wake'` 是一次唤醒。
+    老宿主只写 `{at, unit, text}`（唤醒语，截断过的）：读得懂，当唤醒行处理。
+    """
+    path = Path(root)/REVIEW/INTAKE_LOG
+    rows = []
+    if not path.is_file(): return rows
+    for line in path.read_text(encoding='utf-8').splitlines():
+        line = line.strip()
+        if not line: continue
+        try: row = json.loads(line)
+        except ValueError: continue
+        if isinstance(row, dict): rows.append(row)
+    return rows
+
+def unrecorded_writes(root, rows=None):
+    """宿主写下过、却**没有落进 feedback.json** 的提交。
+
+    判据：同一轮（`review_id` 与快照一致）、`kind=='write'`、且行上的 `submitted_at`
+    比现在这份状态的 `submitted_at` 更新。这就是「唤醒到了、文件没写」那一类丢失 ——
+    2026-10-07 实测出现过三次，文字只活在对话里。
+    """
+    rows = read_intake(root) if rows is None else rows
+    state = read(Path(root)/REVIEW/'feedback.json', {})
+    rid = str(review_snapshot(root).get('review_id') or '')
+    current = str((state.get('provenance') or {}).get('submitted_at') or '')
+    lost = []
+    for row in rows:
+        if row.get('kind') != 'write': continue
+        if rid and str(row.get('review_id') or '') != rid: continue
+        stamp = str(row.get('submitted_at') or '')
+        if stamp and stamp > current: lost.append(row)
+    return lost
+
+def deck_settled(root, data=None):
+    """作者有没有提交过「整套已定」。
+
+    单页状态表达不了"整套"这个决定（旧话带回来时更是如此，G-33）。宿主的接入日志里
+    `unit=='整套'` 是它的机器可读形态；只认**属于当前这份状态**的那条 ——
+    写盘在唤醒之前，所以当前状态的 `submitted_at` 就是那条唤醒的时间下界，
+    上一轮的「整套已定」不会替这一轮作证。
+    """
+    state = data if isinstance(data, dict) else read(Path(root)/REVIEW/'feedback.json', {})
+    current = str((state.get('provenance') or {}).get('submitted_at') or '')
+    rid = str(review_snapshot(root).get('review_id') or '')
+    for row in read_intake(root):
+        if str(row.get('unit') or '') != '整套': continue
+        if rid and row.get('review_id') and str(row.get('review_id')) != rid: continue
+        at = str(row.get('at') or row.get('submitted_at') or '')
+        if current and at and at < current: continue
+        if str(row.get('overall_feedback') or '').strip(): continue
+        return True
+    return bool(isinstance(state, dict) and state.get('deck_approved'))
+
 def validate_document(root, data, strict=True, suppressed=None):
     """校验一份反馈，返回规范化后的文档（不改盘）。"""
     root = Path(root)
@@ -564,6 +624,10 @@ def validate_document(root, data, strict=True, suppressed=None):
                 if suppressed is not None:
                     suppressed.append({'page': key, 'content_key': fingerprint, 'reason': 'already_resolved'})
                 result[key]['already_resolved'] = True
+                # 归一成 pending：这句话是**历史**，不是本轮的待办。留着 revise 会让
+                # 「整套审阅是否通过」永远为假（作者刚点完整套提交也照样报"还没审"）——
+                # 页面照样把它显示在「上一轮你说的」那块（`previous_page_feedback()` 另算）。
+                result[key]['decision'] = 'pending'
             else:
                 item_obj = {
                     'id': given.get(str(key)) or _item_id(key, submitted_at),
@@ -578,6 +642,8 @@ def validate_document(root, data, strict=True, suppressed=None):
     if overall and ('overall', content_key('overall', overall)) not in closed:
         items.append({'id': given_overall or _item_id('overall', submitted_at), 'pages': list(result), 'feedback': overall})
     normalized = {**data, 'page_order': page_order, 'pages': result, 'overall_feedback': overall, 'items': items}
+    # 作者提交过「整套已定」时，把这件事记成机器可读的一格（单页状态表达不了它，G-33）。
+    if deck_settled(root, data): normalized['deck_approved'] = True
     return normalized
 
 
@@ -626,6 +692,8 @@ def consume(root):
         'suppressed': suppressed,
         'svg_edits_applied': applied_svg_pages,
         'archived': str(archived.relative_to(root)) if archived else '',
+        # 宿主写过、却没落进 feedback.json 的提交：接回来，别让它只活在对话里（G-32）。
+        'unrecorded': unrecorded_writes(root),
     }
 
 

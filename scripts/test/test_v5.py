@@ -1,7 +1,7 @@
 """v5 behavioral regressions. Synthetic approvals are isolated test fixtures only."""
 import json
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import re
 import subprocess
 import sys
@@ -16,7 +16,7 @@ from project_state import (CONTENT, PNG, PROJECT, REVIEW, SVG, TEMPLATE_REVIEW_S
                            images, inspected, manifest, read, review_current, review_snapshot,
                            sha, sync, template_version, versions, write)
 from ppt_pipeline import next_action, make_review, resolve, export, unresolved
-from review_feedback import archive_consumed, consume
+from review_feedback import archive_consumed, consume, read_intake, unrecorded_writes
 from validate_svg_layout import validate_file
 S=Path(__file__).resolve().parents[1]
 
@@ -154,6 +154,75 @@ class V5Tests(unittest.TestCase):
         ins=read(self.root/VALIDATION/'inspections.json')['alpha']
         self.assertEqual(ins['carried_from'],rec_old['png_sha256'])
         self.assertIn('carried_at',ins)
+    def test_previous_round_revise_is_normalised_to_pending(self):
+        """上一轮那句「要求修改」随新版本带回来时，就只是历史，不该把整套审阅永久卡死。
+
+        页面照样把它显示在「上一轮你说的」那块（`previous_page_feedback()` 另算）；
+        但存下来的 `decision` 必须归成 `pending` —— 否则作者点完整套提交，导出还是报
+        "这套页面还没有走过整套人工审阅"（G-33）。
+        """
+        p=self.payload();p['pages']['alpha']['feedback']='把标题下移，别压到图'
+        self.submit(p)
+        fid=read(self.root/REVIEW/'feedback.json')['items'][0]['id']
+        self.svg('alpha','Reworked');self.seal()
+        resolve(self.root,fid,'标题下移 40px')
+        make_review(self.root)
+        again=self.payload()
+        again['pages']['alpha']={'decision':'revise','feedback':'把标题下移，别压到图','annotations':[],'assets':[]}
+        self.submit(again)
+        f=read(self.root/REVIEW/'feedback.json')
+        self.assertEqual(f['pages']['alpha']['decision'],'pending')
+        self.assertTrue(f['pages']['alpha'].get('already_resolved'))
+        self.assertEqual(f['items'],[],'同一句话不该再长出一条待办')
+    def test_whole_deck_submit_settles_the_review(self):
+        """作者点「整套提交」= 对整套的决定，未处理的页也算批准（审阅文档原话）。
+
+        单页状态里那些页是 `pending`，只看逐页状态会把刚做完的整套审阅判成"还没审"。
+        """
+        make_review(self.root)
+        stamp=datetime.now(timezone.utc).isoformat()
+        # 页面顺序：先写状态、再唤醒。接入日志里那条 `unit=='整套'` 就是整套已定的机器可读形态。
+        (self.root/REVIEW/'wake-log.jsonl').write_text(
+            json.dumps({'at':stamp,'kind':'wake','unit':'整套','text':'整套已定，可以进入下一步。'},ensure_ascii=False)+'\n',
+            encoding='utf-8')
+        p=self.payload()
+        p['pages']['alpha']={'decision':'pending','feedback':'','annotations':[],'assets':[]}
+        self.submit(p,stamp=stamp)
+        self.assertEqual(read(self.root/REVIEW/'feedback.json')['pages']['alpha']['decision'],'pending')
+        self.assertTrue(approved(self.root),'整套已定之后，未处理页不该把通过挡住')
+    def test_a_later_page_revise_blocks_approval_again(self):
+        """整套已定之后又提了一条修改：那一页仍然是 revise，就还不能算通过。"""
+        make_review(self.root)
+        stamp=datetime.now(timezone.utc).isoformat()
+        (self.root/REVIEW/'wake-log.jsonl').write_text(
+            json.dumps({'at':stamp,'kind':'wake','unit':'整套'},ensure_ascii=False)+'\n',encoding='utf-8')
+        p=self.payload();p['pages']['alpha']={'decision':'pending','feedback':'','annotations':[],'assets':[]}
+        self.submit(p,stamp=stamp)
+        self.assertTrue(approved(self.root))
+        q=self.payload();q['pages']['alpha']['feedback']='这一页标题要重写'
+        self.submit(q)
+        self.assertFalse(approved(self.root))
+    def test_unrecorded_write_is_recovered_from_the_intake_log(self):
+        """唤醒到了、文件没写的提交：接入日志里还留着全文，收件时必须接回来（G-32）。"""
+        self.submit(self.payload())
+        rid=read(self.root/REVIEW/'feedback.json')['review_id']
+        later=(datetime.now(timezone.utc)+timedelta(seconds=5)).isoformat()
+        row={'at':later,'kind':'write','review_id':rid,'submitted_at':later,
+             'unit':'p03','pages':{'alpha':{'decision':'revise','feedback':'这一页的标题要重写'}}}
+        with open(self.root/REVIEW/'wake-log.jsonl','a',encoding='utf-8') as handle:
+            handle.write(json.dumps(row,ensure_ascii=False)+'\n')
+        result=consume(self.root)
+        self.assertEqual([r['submitted_at'] for r in result['unrecorded']],[later])
+        self.assertEqual(result['unrecorded'][0]['pages']['alpha']['feedback'],'这一页的标题要重写')
+    def test_intake_reader_tolerates_the_old_line_shape(self):
+        """老宿主只写 `{at, unit, text}`（截断过的唤醒语）：读得懂，当唤醒行处理。"""
+        make_review(self.root)
+        (self.root/REVIEW/'wake-log.jsonl').write_text(
+            json.dumps({'at':'2026-10-07T00:00:00Z','unit':'p03','text':'p03 要求修改：…'},ensure_ascii=False)+'\n',
+            encoding='utf-8')
+        rows=read_intake(self.root)
+        self.assertEqual(rows[0]['unit'],'p03')
+        self.assertEqual(unrecorded_writes(self.root),[])
     def test_carry_requires_the_same_rendered_bytes(self):
         rec_old=read(self.root/VALIDATION/'alpha.json')
         rec_new={'version':'v2','errors':0,'png_sha256':'0'*64,'validator':{}}

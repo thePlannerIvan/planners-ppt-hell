@@ -567,9 +567,25 @@ def approvals(root):
     return result
 
 def approved(root):
+    """整套算不算通过。
+
+    两条等价的路：**逐页全部 approved**，或作者提交过**整套已定**（`deck_approved`）。
+    后者是必须的：整套提交对"未处理的页"也是批准（审阅文档原话），而那些页在单页状态里
+    是 `pending`——只看逐页状态会把作者刚做完的整套审阅判成"还没审"（G-33）。
+    两条路共用的底线：每一页都绑在当前版本上，且**没有一页**还挂着「要求修改」。
+    """
     if not review_current(root): return False
     s=review_snapshot(root); f=read(root/REVIEW/'feedback.json',{})
-    return f.get('review_id')==s.get('review_id') and not f.get('overall_feedback','').strip() and all(x.get('decision')=='approved' for x in approvals(root).values()) and len(approvals(root))==len(s['versions'])
+    if f.get('review_id')!=s.get('review_id'): return False
+    if f.get('overall_feedback','').strip(): return False
+    pages=f.get('pages') or {}; versions=s.get('versions') or {}
+    if set(pages)!=set(versions): return False
+    for k,v in versions.items():
+        item=pages.get(k) or {}
+        if item.get('version')!=v: return False
+        if item.get('decision')=='revise': return False
+    if f.get('deck_approved'): return True
+    return bool(approvals(root)) and len(approvals(root))==len(versions)
 
 
 def template_version(root):

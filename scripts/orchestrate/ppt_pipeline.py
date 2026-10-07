@@ -511,6 +511,15 @@ def _attach_intake(result,intake):
         result['review_intake']['suppressed']=intake['suppressed']
         result['review_intake']['suppressed_zh']=('有一页的这条意见与已经落实并关闭过的那条一模一样：'
             '按规则它不再成为待办（原件在 history/round-NN.json 里可回查）。人若确实还想改，换一种说法再提。')
+    if intake.get('unrecorded'):
+        # 宿主写过、却没落进 feedback.json 的提交：接回来，别让人的字只活在对话里（G-32）。
+        result['review_intake']['unrecorded']=[{
+            'at':row.get('at'),'submitted_at':row.get('submitted_at'),'unit':row.get('unit'),
+            'pages':{k:{'decision':(v or {}).get('decision'),'feedback':(v or {}).get('feedback')}
+                     for k,v in (row.get('pages') or {}).items()
+                     if (v or {}).get('decision') not in (None,'pending')}} for row in intake['unrecorded']]
+        result['review_intake']['unrecorded_zh']=('有提交只到了唤醒、没写进 feedback.json（宿主接入日志里还留着全文）。'
+            '上面 unrecorded 就是它们——按它继续改，不要因为文件里没有就当成没提过。')
     if intake['stale']:
         result['review_intake']['message']=('这份反馈绑的是上一版审阅页（review_id 对不上）：它不算批准。'
             '页面上已提示「这一页已更新，先复核」——等作者复核后再提交，或直接按 items 继续改。')

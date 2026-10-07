@@ -317,18 +317,36 @@
 - **module**：审阅缝（宿主 → `feedback.json`）＋ `scripts/review_feedback.py`
 - **现象**：作者三次逐页提交（p02／p03／p06b）只以唤醒到达；文件里没有它们，`submitted_at` 停在上一轮。文字只活在对话里，下个会话看不见。
 - **原因**：唤醒与落文件不是一次事务；且唤醒正文按长度截断，中文句子被切在半句（「…这和前面 —— 只重出这一页…」），留下的还不是全文。
-- **行为修正**：**待定**（与作者讨论中）——方向是「先落文件再唤醒」＋唤醒带全文＋写失败要在页面上说出来。
-- **证据**：2026-10-07 实测；整项目与 `~/.dsh` 全搜无那三段文字。
-- **状态**：已复现（未升级）
+- **行为修正**：宿主把 `wake-log.jsonl` 升级成**接入日志**——每次提交**先追加一行**（`kind=='write'`，带整份 `pages` 与 `submitted_at`），**再写 `feedback.json`**，最后唤醒；唤醒也记一行（`kind=='wake'`，带 `unit`）。Skill 侧 `review_feedback.unrecorded_writes()` 把"日志里有、文件里没有"的提交接回来，`next` 在 `review_intake.unrecorded` 里报出来（含逐页原文）。两个宿主都改了：dock 插件（此前**完全不写日志**）与无插件宿主。
+- **证据**：2026-10-07 实测；整项目与 `~/.dsh` 全搜无那三段文字。回归：`test_v5.py::test_unrecorded_write_is_recovered_from_the_intake_log`、`test_intake_reader_tolerates_the_old_line_shape`、`test_review_browser.py`（断言提交先在日志里留一行、且带上人的全文）。
+- **状态**：已升级（页面那一侧的"写失败要自己说"仍待作者改完 `review.html`）
 
 ### G-33 上一轮的「要求修改」随新版本带回来，`reviewed` 就再也翻不过来
 
 - **module**：`scripts/review_feedback.py`（`consume` 的页决策归一）＋ `scripts/project_state.py`（`approved` / `approvals`）＋ 审阅页的带回逻辑
 - **现象**：作者点了整套提交，导出仍报「这套页面还没有走过整套人工审阅」，并让模型去问作者要不要审——他刚审过。
 - **原因**：8 页的 `decision` 仍是上一轮的 `revise`（内容身份已在 `closed` 里、`items` 已被正确抑制），而 `approved()` 要求**每一页**都是 `approved`。旧话在条目层抑制了，在页决策层留着。
-- **行为修正**：**待定**（与作者讨论中）——方向是 consume 时把「decision=revise 且内容身份已关闭」的页归一成 `pending`，`approved()` 只数绑定当前版本的批准，整套提交写 deck 级标记供 `reviewed` 读。
-- **证据**：2026-10-07 实测：`feedback.json` 里 8 页 `revise`＋`already_resolved=True`、`items=0`，`project_state.py:531-534` 的全票要求；导出返回的 `review_remark` 连续多轮出现。
-- **状态**：已复现（未升级）
+- **行为修正**：两件一起做。①`consume` 把「`decision=revise` 且内容身份已在 `closed` 里」的页**归一成 `pending`**（历史仍由 `previous_page_feedback()` 显示，不丢）；②宿主的接入日志里 `unit=='整套'` 是"整套已定"的机器可读形态，`consume` 记成 `deck_approved`，`approved()` 认这条路——两条等价的通过路径（逐页全 approved ／ 作者整套已定）共用一个底线：每页都绑在当前版本，且**没有一页**还挂着「要求修改」。
+- **证据**：2026-10-07 实测：`feedback.json` 里 8 页 `revise`＋`already_resolved=True`、`items=0`，`project_state.approved()` 的全票要求；导出返回的 `review_remark` 连续多轮出现。回归：`test_previous_round_revise_is_normalised_to_pending`、`test_whole_deck_submit_settles_the_review`、`test_a_later_page_revise_blocks_approval_again`。
+- **状态**：已升级
+
+### G-34 页序只改了缩略图 DOM，刷新和收件层就会回到另一套顺序
+
+- **module**：`assets/review/review.html`（页面状态／草稿／提交）＋ `scripts/review_feedback.py`（收件校验）
+- **现象**：拖动缩略图后当前页面看起来已经换序，但刷新回到原顺序，或 `feedback.json` 没有顺序信息；模型侧无法知道作者审阅时采用的页序。
+- **原因**：页序不是单页决定，不能塞进某一页的 `decision`；只移动 DOM 也不会进入宿主的草稿／反馈文件。
+- **行为修正**：以 `page_order` 作为完整页 key 的排列，页面导航、草稿恢复与整套提交都使用同一份状态；收件层要求它覆盖完整页集合。缩略图拖拽同时提供 `Alt+↑/↓` 键盘入口。
+- **证据**：`test_v5.py::test_page_order_round_trips_through_feedback`、`test_v5.py::test_page_order_must_cover_exact_page_set`、`test_review_browser.py::test_reorder_thumbnails_and_edit_text_in_place`。
+- **状态**：已升级
+
+### G-35 原地文字编辑不能只把输入框搬到画布上，还要处理提交、取消与焦点
+
+- **module**：`assets/review/review.html`（inline editor）
+- **现象**：编辑框已经贴在文字旁，但回车、失焦、Esc 的语义不清，输入可能被追加到原文，或取消后残留一笔不可见的 edit history。
+- **原因**：SVG 文字节点不是可编辑 HTML 控件；编辑态、SVG 预览态、`svg_edits` 历史是三份不同状态，焦点切换还会触发 blur。
+- **行为修正**：双击进入时默认全选；输入只在编辑态内持有，回车／失焦提交、Esc 用会话前快照恢复；无实际变化时回收历史快照。顶部输入框降为隐藏兼容节点，不再承担主路径。
+- **证据**：`test_review_browser.py::test_reorder_thumbnails_and_edit_text_in_place`。
+- **状态**：已升级
 
 ---
 
