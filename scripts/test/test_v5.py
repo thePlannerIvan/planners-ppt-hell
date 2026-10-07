@@ -12,9 +12,9 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'orchestrate'))
 from canvas_frame import FRAME_H_INT, FRAME_VIEWBOX, FRAME_W_INT
 from project_state import (CONTENT, PNG, PROJECT, REVIEW, SVG, TEMPLATE_REVIEW_SNAPSHOT,
-                           VALIDATION, approvals, approved, content, digest, images,
-                           manifest, read, review_snapshot, sha, sync, template_version,
-                           versions, write)
+                           VALIDATION, approvals, approved, carry_inspection, content, digest,
+                           images, inspected, manifest, read, review_current, review_snapshot,
+                           sha, sync, template_version, versions, write)
 from ppt_pipeline import next_action, make_review, resolve, export, unresolved
 from review_feedback import archive_consumed, consume
 from validate_svg_layout import validate_file
@@ -117,10 +117,63 @@ class V5Tests(unittest.TestCase):
         self.submit(self.payload());Image.new('RGB',(192,108),'red').save(self.root/PNG/'alpha.png');self.assertFalse(approved(self.root))
     def test_source_change_invalidates_review(self):
         self.submit(self.payload());(self.root/PROJECT/'source/source.md').write_text('New facts');self.assertFalse(approved(self.root))
+    def test_source_rewrite_alone_does_not_move_page_versions(self):
+        """材料副本整份重写：单页版本不动（因此看图记录与直改交代不作废），但整套审阅失效。
+
+        材料级绑定归 `review_current`；单页版本只吃这一页自己的东西。2026-10-07 实测的
+        代价是：整份 `source.md` 的哈希曾经算进 `page_version`，于是改一页标题就让 17 页
+        全部重渲重看，并让 `ack-human-edit` 的交代反复失效。
+        """
+        self.submit(self.payload())
+        self.assertTrue(review_current(self.root))
+        before=versions(self.root)
+        (self.root/PROJECT/'source/source.md').write_text('材料副本被整份重写')
+        self.assertEqual(before,versions(self.root),'单页版本不该被材料副本牵连')
+        self.assertFalse(review_current(self.root),'整套审阅仍应因材料变化失效')
+    def test_one_page_edit_moves_only_that_page_version(self):
+        before=versions(self.root)
+        c=content(self.root);c['pages'][0]['notes']='只改这一页的讲述'
+        write(self.root/CONTENT,c)
+        after=versions(self.root)
+        self.assertNotEqual(before['alpha'],after['alpha'])
+        self.assertEqual(before['omega'],after['omega'])
+    def test_identical_render_carries_the_eye_record_forward(self):
+        """换了版本但渲染字节相同（例如只改 notes）：上一条看图记录承接，不必重看。"""
+        rec_old=read(self.root/VALIDATION/'alpha.json')
+        v1=versions(self.root)['alpha']
+        self.assertTrue(inspected(self.root,'alpha',v1))
+        c=content(self.root);c['pages'][0]['notes']='只改讲述层，画面不动'
+        write(self.root/CONTENT,c)
+        v2=versions(self.root)['alpha']
+        self.assertNotEqual(v1,v2)
+        self.assertFalse(inspected(self.root,'alpha',v2),'新版本还没被看过')
+        rec_new={'version':v2,'errors':0,'png_sha256':sha(self.root/PNG/'alpha.png'),'validator':{}}
+        write(self.root/VALIDATION/'alpha.json',rec_new)
+        self.assertTrue(carry_inspection(self.root,'alpha',rec_old['png_sha256'],rec_new))
+        self.assertTrue(inspected(self.root,'alpha',v2),'承接之后这一页仍然算看过')
+        ins=read(self.root/VALIDATION/'inspections.json')['alpha']
+        self.assertEqual(ins['carried_from'],rec_old['png_sha256'])
+        self.assertIn('carried_at',ins)
+    def test_carry_requires_the_same_rendered_bytes(self):
+        rec_old=read(self.root/VALIDATION/'alpha.json')
+        rec_new={'version':'v2','errors':0,'png_sha256':'0'*64,'validator':{}}
+        self.assertFalse(carry_inspection(self.root,'alpha',rec_old['png_sha256'],rec_new),
+                         '图真的换了就必须重看')
     def test_html_change_invalidates_approval(self):
         self.submit(self.payload());p=self.root/'02_visual_review.html';p.write_text(p.read_text()+'<!-- changed -->');self.assertFalse(approved(self.root))
     def test_feedback_overrides_approved(self):
         p=self.payload();p['pages']['alpha']['feedback']='Rearrange the whole page';self.submit(p);f=read(self.root/REVIEW/'feedback.json');self.assertEqual(f['pages']['alpha']['decision'],'revise');self.assertEqual(next_action(self.root)['state'],'CREATE')
+
+    def test_page_order_round_trips_through_feedback(self):
+        p=self.payload();p['page_order']=['omega','alpha']
+        result=self.submit(p)
+        self.assertEqual(result['document']['page_order'],['omega','alpha'])
+        self.assertEqual(read(self.root/REVIEW/'feedback.json')['page_order'],['omega','alpha'])
+
+    def test_page_order_must_cover_exact_page_set(self):
+        p=self.payload();p['page_order']=['omega','missing']
+        with self.assertRaisesRegex(ValueError,'page_order must contain the exact page set'):
+            self.submit(p)
     def test_feedback_needs_actual_change_to_resolve(self):
         p=self.payload();p['pages']['alpha']['feedback']='Change';self.submit(p);fid=read(self.root/REVIEW/'feedback.json')['items'][0]['id']
         with self.assertRaisesRegex(ValueError,'changed artifact'):resolve(self.root,fid,'Done')

@@ -15,7 +15,9 @@ import sys
 # 这条测试以前写 `from scripts.prepare_source_material import ...`，隐含要求 CWD = Skill 根。
 # 现在自己把 Skill 根放进 sys.path，从任何目录跑都成立。
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib'))
 
+from office import soffice_argv  # noqa: E402
 from scripts.prepare_source_material import prepare_source_material  # noqa: E402
 
 
@@ -118,7 +120,7 @@ class SourceAssetTests(unittest.TestCase):
             docx = temp / "brief.docx"
             subprocess.run([shutil.which("pandoc"), str(markdown), "-o", str(docx)], check=True, cwd=temp)
             subprocess.run(
-                [shutil.which("soffice"), "--headless", "--convert-to", "doc", "--outdir", str(temp), str(docx)],
+                soffice_argv(["--headless", "--convert-to", "doc", "--outdir", str(temp), str(docx)]),
                 check=True,
                 capture_output=True,
             )

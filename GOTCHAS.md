@@ -241,6 +241,26 @@
 - **证据**：浏览器冒烟断言「选了预设比例时 `.ratio-custom` 必须不可见」；2026-10-06 项目页截图（page_07）。
 - **状态**：已升级（v5.5 补丁）
 
+### G-26 唤醒走持久队列：一句话同时出现在「已送达」和「排队中」
+
+- **module**：`scripts/review_surface.py`（`wake.mode` 的声明）＋ `assets/review/review.html`（`wakeNote` 的措辞）
+- **现象**：人点「本页要求修改」，**模型收到了**，可 DSH 界面的「N 条排队消息」里**还挂着同一句**。人的结论是"有两个通道、模型会重复干活"（真人 2026-10-06 再次提出）。
+- **原因**：两层，都不是"两条消息"：
+  ① surface 声明 `wake.mode: 'queue'` → DSH 走 `agent.followup` → 消息进 `inbox` 的 **`next-turn`（持久队列）**，当前回合结束后才被当成新回合取走。同一个 `requestId` 在日志里走的是 `agent/inbox/spliced(target=next-turn)` →（回合开始时）`agent/inbox/spliced(target=next-step)` → `user/message`，**两段式交接同一条消息**；三个会话 95 次提交实测，每次提交只有一条 `user/message`（零重复投递）。
+  ② 页面只说了一句笼统的「宿主已在会话日志里核对进入队列」——把"排进队列"说得像"已经送达"，于是人看到它在队里时无法判断到底送到没有。
+- **行为修正**：① `wake.mode` 改 **`steer`**（`agent.steer` → `next-step`）：当前回合走到**下一个步骤边界**就取走，会话空闲时也会立刻起一个回合取走；提交不再进持久队列。② 页面按 `verified.state` 分档说话：`in-turn`／`queued`／只报"有证据"（"核对送达"）。
+- **证据**：DSH 侧源码 `@deepseek-ai/dsh-api-session-controller`（`mode==='steer' ? agent.steer : agent.followup`）＋ `dsh-agent-loop`（`followup`→`next-turn`、`steer`→`next-step`，`claim()` 每个步骤先排空 `next-step`）；**DSH 的「N 条排队消息」只读 `inbox["next-turn"]`**（`dsh-client-ui-conversation`：`queue: inbox.getSnapshot()["next-turn"]`，`steerQueue()` 同源）—— 所以走 `next-step` 的提交**根本不会出现在队列面板里**；会话日志实测 3 个会话共 95 次提交、0 次双投递；`test_review_surface.py`（mode==steer）与浏览器冒烟（三档措辞各一条断言）。
+- **状态**：已升级（v5.5 补丁）
+
+### G-27 surface 声明是**生成时烤进项目**的：改了 Skill，已有项目一动不动
+
+- **module**：`scripts/review_surface.py`（`write_surface`）＋ 每个项目里的 `_internal/05_review/review-surface.json`
+- **现象**：把 `wake.mode` 从 `queue` 改成 `steer`、跑通测试、把新页面挂给人 —— 人再点一次，**消息还是进了队列**。以为改错了，其实改对了：他正在审的项目（页 key `p01…`）的 surface 是**改动之前生成的**，`mode: queue` 白纸黑字写在那个文件里，宿主只读文件、不读 Skill。
+- **原因**：`wake` / `watch` / `capabilities` 这些声明是 `generate()` 时**写进项目**的产物，不是每次从 Skill 现算的。所以"改了 Skill"对存量项目**零效果**，除非重出那份页面。顺带一个更隐蔽的：**看 unit 就知道是不是同一个项目** —— 唤醒语里的 `p02` 与本项目的 `page_02` 不是一回事，我第一反应是"写盘坏了"，实际是**审的根本是另一个项目**。
+- **行为修正**：① 改 surface 声明时，把**存量**当交付的一部分：本次把工作区里 17 份真实项目的 `review-surface.json` 一起改成 `steer`（scratch/归档/旧格式不动，改前逐份备份到 `/tmp/surface-backup`）；② 在审的项目**不要为此重出页面**（那会换 `review_id`、让人白刷新一次）——宿主每次都重读 surface 文件（`loadSurface` 无缓存），改那一行就生效；③ **判断"我改的是不是人在看的那个"用 unit 核**（`p02` vs `page_02`），别用"我刚才不是重出过页面吗"；④ **队列面板里的条目要先看 seq 与时间再下结论**：DSH 每个回合只从 `next-turn` 取**一条**，历史积压会一直挂在面板上 —— 它是"还没轮到"，不是"新提交又排队了"。本次实测：面板上 8 条全是两小时前的旧通知（其中 5 条的页 key 早被删掉），而当天点的那两条其实**都已经 delivered**。
+- **证据**：会话日志里那条提交的 `agent/inbox/spliced target='next-turn'`（surface 仍是 queue）；同项目 `feedback.json` 里 p01–p08 的决定**已经落盘**（写盘没坏）；`index.js` 的 `loadSurface()` 每次 `readFile`，无缓存；`agent/inbox/spliced` 与 `user/message` 按 `rpcId` 配对，配不上的 8 条即积压。
+- **状态**：已升级（v5.5 补丁）
+
 ---
 
 ## 五、与相邻 Skill 协作
@@ -253,6 +273,62 @@
 - **行为修正**：`SKILL.md` 的两条路线对照表 + 「模板库≠风格库」写清分工；`ppt_pipeline` 只在 `route=='slides'` 时才挂 `--fidelity-template`；视频路线的视觉身份只从风格库（或自主设计，在 `design_direction.md` 里说明）来。**做画面永不经过模板提取。**
 - **证据**：报告 P-01（含锁层里那两个矩形的实测 XML）。
 - **状态**：已升级（v5.5）
+
+---
+
+### G-28 整份 `source.md` 的哈希进了**单页**版本：改一页的字，全部页一起失效
+
+- **module**：`scripts/project_state.py`（`page_version` / `review_current`）＋ `scripts/generate_review_html.py`（快照）
+- **现象**：改一页的正文或讲述，**17 页全部**的版本一起变，于是每一页的批准、看图记录（`inspected`）与人工直改的交代（`ack_human_edit` 按版本记账）同时作废；一次改动要重渲重看整套。
+- **原因**：`page_version` 的 digest 里算了 `'source': sha(source.md)`，而 `source.md` 是**所有页 content+notes 的拼接**——单页的输入被绑在了整份文档上。
+- **行为修正**：`page_version` 只吃这一页自己的东西（页记录／SVG／引用图／方向／模板）；材料级绑定搬到 `source_digest()`，由 `review_current()` 判——材料变了整套审阅失效（原意保留），单页版本与它的记录不动。
+- **证据**：2026-10-07 真项目实测——改五页标题（`apply_author_titles.py` 重写 `source.md`），17 页全部要重渲重看、直改闸门重立；整场会话 71 次看图里大部分是这次牵连的重看。回归：`test_v5.py::test_source_rewrite_alone_does_not_move_page_versions`、`test_one_page_edit_moves_only_that_page_version`。
+- **状态**：已升级
+
+### G-29 版本换了但**图没换**时，也要求重看
+
+- **module**：`scripts/project_state.py`（`inspected` / `carry_inspection`）＋ `scripts/orchestrate/ppt_pipeline.py`（`check`）
+- **现象**：只改一页的 `notes`（讲述层，不上屏）也会让版本变，于是这一页被要求重新"看图自检"——而 PNG 一个字节都没变。
+- **原因**：`inspected()` 只认 `render_token`（版本绑定），没有"图是否真的换了"这一维。
+- **行为修正**：`check` 渲染后比较新旧 `png_sha256`；相同则由 `carry_inspection()` 把上一条记录承接过来（记 `carried_from` / `carried_at`，让"没被重新看过"仍然可查），不同则照旧要求重看。
+- **证据**：`test_v5.py::test_identical_render_carries_the_eye_record_forward`（承接后成立）、`test_carry_requires_the_same_rendered_bytes`（图换了不承接）。
+- **状态**：已升级
+
+### G-30 写盘与记账用**同一个错路径**：两边一起错，断言照样通过
+
+- **module**：`scripts/review_feedback.py`（人改底本的还原快照）
+- **现象**：`applied_svg_edits.json` 里 `svg_snapshot` 记成 `_internal/05_review/_internal/05_review/versions/<page>-<ver>.svg`（前缀多一层），文件也真的落在那个嵌套目录里——账本唯一的"人改完那一版"按它自己记的路径取不到。
+- **原因**：`VERSIONS = f'{REVIEW}/versions'` 已经含了 `REVIEW`，取值时又写了一遍 `root/REVIEW/VERSIONS/…`。
+- **行为修正**：改成 `root/VERSIONS/…`；用例从「记录的路径能打开」升级为「快照必须与 PNG 快照同住 `_internal/05_review/versions/`」——只断言前者时，两边一起错是不会被抓到的。
+- **证据**：2026-10-07 真项目两次复现（p01/p02 一次、p09/p10/p11/p13/p14 一次，手工搬回 7 份）；`test_human_edit_guard.py` 的强化断言。
+- **状态**：已升级
+
+### G-31 沙箱里 `soffice` 启动即抛 `DeploymentException`：三个调用点只有一个给了临时 profile
+
+- **module**：`scripts/lib/office.py`（新，唯一入口）＋ `scripts/prepare_source_material.py`、`scripts/template/extract_template_pack.py`、`scripts/test/test_source_assets.py`；同族缺陷也在 `04-office-docs/{docx,pptx,xlsx}/scripts/office/soffice.py`
+- **现象**：`soffice --headless --convert-to pdf` 在**启动阶段**就 `libc++abi: terminating due to uncaught exception of type com::sun::star::deployment::DeploymentException`，与要转的文件无关；技能自带的包装器（自述"auto-configured for sandboxed environments"）同样失败。
+- **原因**：默认用户 profile 在受限 HOME 下锁住或不可写；三个调用点里只有 `extract_template_pack.py` 显式给了 `-env:UserInstallation`。
+- **行为修正**：新增 `scripts/lib/office.py` 的 `soffice_argv()` / `run_soffice()`（每次运行一个临时 profile），三处共用；`04-office-docs` 三个包装器同样补上。
+- **证据**：2026-10-07 实测——直接调用失败两次，加 `-env:UserInstallation=file:///tmp/…` 当场通过；本 Skill 自己的 `.doc` 转换用例在改动前是红的，改动后 215 条全绿。
+- **状态**：已升级
+
+### G-32 逐页提交只把唤醒送到了模型，`feedback.json` 没有落盘
+
+- **module**：审阅缝（宿主 → `feedback.json`）＋ `scripts/review_feedback.py`
+- **现象**：作者三次逐页提交（p02／p03／p06b）只以唤醒到达；文件里没有它们，`submitted_at` 停在上一轮。文字只活在对话里，下个会话看不见。
+- **原因**：唤醒与落文件不是一次事务；且唤醒正文按长度截断，中文句子被切在半句（「…这和前面 —— 只重出这一页…」），留下的还不是全文。
+- **行为修正**：**待定**（与作者讨论中）——方向是「先落文件再唤醒」＋唤醒带全文＋写失败要在页面上说出来。
+- **证据**：2026-10-07 实测；整项目与 `~/.dsh` 全搜无那三段文字。
+- **状态**：已复现（未升级）
+
+### G-33 上一轮的「要求修改」随新版本带回来，`reviewed` 就再也翻不过来
+
+- **module**：`scripts/review_feedback.py`（`consume` 的页决策归一）＋ `scripts/project_state.py`（`approved` / `approvals`）＋ 审阅页的带回逻辑
+- **现象**：作者点了整套提交，导出仍报「这套页面还没有走过整套人工审阅」，并让模型去问作者要不要审——他刚审过。
+- **原因**：8 页的 `decision` 仍是上一轮的 `revise`（内容身份已在 `closed` 里、`items` 已被正确抑制），而 `approved()` 要求**每一页**都是 `approved`。旧话在条目层抑制了，在页决策层留着。
+- **行为修正**：**待定**（与作者讨论中）——方向是 consume 时把「decision=revise 且内容身份已关闭」的页归一成 `pending`，`approved()` 只数绑定当前版本的批准，整套提交写 deck 级标记供 `reviewed` 读。
+- **证据**：2026-10-07 实测：`feedback.json` 里 8 页 `revise`＋`already_resolved=True`、`items=0`，`project_state.py:531-534` 的全票要求；导出返回的 `review_remark` 连续多轮出现。
+- **状态**：已复现（未升级）
 
 ---
 

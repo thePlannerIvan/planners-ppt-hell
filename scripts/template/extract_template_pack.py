@@ -203,21 +203,19 @@ def render_pptx_to_pngs(pptx_path, prs, out_dir, dpi=144, max_pages=0):
             wrapper_pages = wrapper_pages[:max_pages]
         return wrapper_pages, "direct_full_slide_bitmap"
 
-    soffice = shutil.which("soffice") or shutil.which("libreoffice")
-    if not soffice:
+    from office import soffice_argv
+    if not soffice_argv():
         return [], "unavailable_no_soffice"
 
     with tempfile.TemporaryDirectory(prefix="ppt_hell_soffice_") as tmp_dir:
         tmp_path = Path(tmp_dir)
-        user_profile = (tmp_path / "lo_profile").as_uri()
-        cmd = [
-            soffice,
-            f"-env:UserInstallation={user_profile}",
+        # 临时 profile 由 office.soffice_argv 统一给（沙箱里默认 profile 会让 soffice 启动即抛）。
+        cmd = soffice_argv([
             "--headless",
             "--convert-to", "pdf",
             "--outdir", str(tmp_path),
             str(pptx_path),
-        ]
+        ])
         res = subprocess.run(cmd, capture_output=True, text=True, timeout=120, check=False)
         pdf_candidates = list(tmp_path.glob("*.pdf"))
         if res.returncode != 0 or not pdf_candidates:

@@ -112,6 +112,12 @@ class HumanEditGuardTests(unittest.TestCase):
         snapshot = self.root / record['svg_snapshot']
         self.assertTrue(snapshot.is_file(), '人改完那版 SVG 应有快照')
         self.assertIn('人改过的字', snapshot.read_text(encoding='utf-8'))
+        # 快照必须和 PNG 快照住在同一个 versions/ 下。
+        # 只断言「记录的路径能打开」是不够的：写盘与记账用同一个错路径时，两边一起错，
+        # 断言照样通过 —— 双层前缀（`_internal/05_review/_internal/05_review/versions/`）
+        # 就是这样躲过上一版测试、并在真项目里复现两次的。
+        self.assertEqual(Path(record['svg_snapshot']).parent, Path(REVIEW) / 'versions',
+                         '人改底本的快照要落在 _internal/05_review/versions/')
 
         state = human_edit_state(self.root, PAGE, self.page_version())
         self.assertTrue(state['carried'])

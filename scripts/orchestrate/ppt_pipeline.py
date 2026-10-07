@@ -26,8 +26,8 @@ from review_feedback import (APPLIED_EDITS_FILE, ack_human_edit, consume, conten
                              human_edit_state, human_edits)
 import template_feedback
 from project_state import (DIRECTION, POSITION_HELP, PROJECT, PNG, REVIEW, SVG, VALIDATION, approved,
-                           content, contract_binding, design_observations_deck, digest, event,
-                           inspected, local, manifest, page_version, parse_position, read, rendered,
+                           carry_inspection, content, contract_binding, design_observations_deck, digest,
+                           event, inspected, local, manifest, page_version, parse_position, read, rendered,
                            review_current, review_recorded, review_snapshot, route, sha, sync,
                            versions, write)
 SCRIPTS=Path(__file__).resolve().parents[1]
@@ -190,7 +190,9 @@ def check(root, keys):
             rec={'version':v,'errors':data.get('summary',{}).get('errors',1) if not val.returncode else max(1,data.get('summary',{}).get('errors',1)),
                 'png_sha256':sha(png),'validator':data}
             write(root/VALIDATION/(k+'.json'),rec)
-            results.append({'page':k,'status':'pass' if rec['errors']==0 else 'fix','render_token':digest(rec),'png':str(png),'issues':data})
+            # 版本换了但图没换（例如只改了 notes）：把上一条看图记录承接过来，不要求重看。
+            carried=carry_inspection(root,k,old.get('png_sha256'),rec)
+            results.append({'page':k,'status':'pass' if rec['errors']==0 else 'fix','render_token':digest(rec),'png':str(png),'issues':data,**({'inspection_carried':True} if carried else {})})
         except (ValueError,OSError,ET.ParseError) as e: results.append({'page':k,'status':'blocked','error':str(e)})
     # Read-only measurements for the model's own design self-check. Facts, never pass/fail.
     obs=design_observations_deck(root,[r['page'] for r in results if r.get('page')])

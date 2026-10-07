@@ -293,12 +293,12 @@ def prepare_source_material(project_root, source, output_root=None):
         normalized = normalize_docx(source, writer)
         source_type = "docx"
     elif suffix == ".doc":
-        soffice = shutil.which("soffice")
-        if not soffice:
+        from office import soffice_argv
+        if not soffice_argv():
             raise ValueError("Legacy .doc requires LibreOffice/soffice for loss-minimized conversion to DOCX.")
         with tempfile.TemporaryDirectory(prefix="ppt-hell-doc-") as temp:
             completed = subprocess.run(
-                [soffice, "--headless", "--convert-to", "docx", "--outdir", temp, str(source)],
+                soffice_argv(["--headless", "--convert-to", "docx", "--outdir", temp, str(source)]),
                 capture_output=True,
                 text=True,
             )

@@ -17,7 +17,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from project_state import (PNG, REVIEW, SVG, approvals, content, images, local, read,
-                           review_snapshot, sha, versions, write)
+                           review_snapshot, sha, source_digest, versions, write)
 from review_surface import DRAFT_REL, resolve_module, write_surface
 
 SNAPSHOT_REL = f'{REVIEW}/snapshot.json'
@@ -162,6 +162,7 @@ def generate(root, template_path=None):
         'png_hashes': {k: sha(root/PNG/(k+'.png')) for k in v},
         'assets': {k: asset_records(root, k) for k in v},
         'template_sha256': template_fingerprint(),
+        'source_sha256': source_digest(root),
     }
     data = {
         'project': c.get('project', ''),

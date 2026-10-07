@@ -393,7 +393,7 @@ def apply_pending_svg_edits(root, data):
         entry['svg_edits_applied'] = edits_hash
         # 人改完那一版 SVG 单独留档。模型后来整份重写这一页时，这是唯一的还原底本 ——
         # PNG 早就有 versions/ 待遇，SVG（真正的源文件）反而没有，所以人被改掉的东西找不回来。
-        svg_snapshot = root/REVIEW/VERSIONS/f'{key}-{new_ver[:12]}.svg'
+        svg_snapshot = root/VERSIONS/f'{key}-{new_ver[:12]}.svg'
         svg_snapshot.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(svg_path, svg_snapshot)
         ledger[ledger_key] = {
@@ -449,6 +449,14 @@ def validate_document(root, data, strict=True, suppressed=None):
     supplied = data.get('pages')
     if not isinstance(supplied, dict) or not supplied:
         raise ValueError('反馈里没有 pages')
+    page_order = data.get('page_order')
+    if page_order is None:
+        page_order = list(supplied)
+    if (not isinstance(page_order, list) or len(page_order) != len(supplied)
+            or len(set(str(key) for key in page_order)) != len(supplied)
+            or set(str(key) for key in page_order) != set(str(key) for key in supplied)):
+        raise ValueError('page_order must contain the exact page set')
+    page_order = [str(key) for key in page_order]
     if strict:
         expected = snapshot.get('versions') or {}
         if str(data.get('review_id') or '') != str(snapshot.get('review_id') or ''):
@@ -569,7 +577,7 @@ def validate_document(root, data, strict=True, suppressed=None):
                 items.append(item_obj)
     if overall and ('overall', content_key('overall', overall)) not in closed:
         items.append({'id': given_overall or _item_id('overall', submitted_at), 'pages': list(result), 'feedback': overall})
-    normalized = {**data, 'pages': result, 'overall_feedback': overall, 'items': items}
+    normalized = {**data, 'page_order': page_order, 'pages': result, 'overall_feedback': overall, 'items': items}
     return normalized
 
 

@@ -20,8 +20,8 @@ __all__ = [
     'DIRECTION', 'ROUTES',
     'read', 'write', 'digest', 'sha', 'local', 'event',
     'manifest', 'content', 'sync', 'images', 'page_version', 'versions',
-    'rendered', 'inspected', 'parse_position', 'POSITION_HELP',
-    'route', 'project_root_of', 'contract_binding', 'review_recorded',
+    'rendered', 'inspected', 'parse_position', 'POSITION_HELP', 'carry_inspection',
+    'route', 'project_root_of', 'contract_binding', 'review_recorded', 'source_digest',
     'design_observations', 'design_observations_deck',
     'review_snapshot', 'review_current', 'approvals', 'approved',
     'template_version', 'template_review_snapshot',
@@ -274,20 +274,32 @@ def images(root, svg):
     return result
 
 def page_version(root, p):
+    """这一页的版本：只吃**这一页自己的**东西。
+
+    `page` 记录里已经含它的 title／content／notes／mode／source_assets，加上它的 SVG、
+    它引用的图、方向文件、模板与画幅——这一页变了，版本才变。
+
+    整份 `source.md` 的哈希曾经也算在这里。代价是**改一页的字，全部页的版本一起变**：
+    每一页的批准、看图记录（`inspected`）与人工直改的交代（`ack_human_edit` 按版本记账）
+    会同时作废，一次改动要重渲重看整套页面（2026-10-07 实测：改五页标题，17 页全部重看）。
+    材料级的变化由 `source_digest()` 在 `review_current()` 里单独判——那是整套审阅的事，
+    不是单页版本的事。
+    """
     svg = root / SVG / (p['page_key']+'.svg')
     m = manifest(root)
     source = read(root / PROJECT / 'source/source_assets.json', {})
     assets = {a['asset_id']:a for a in source.get('assets',[])}
     dependencies = {aid:sha(local(root,assets[aid]['normalized_path'])) for aid in p.get('source_assets',[])}
     direction = root / DIRECTION
-    # 没有源文档的路线（init 的 `--assets`）不写 source.md：底稿本身就是材料，它的内容已在
-    # 'page' 里，实际用到的图在 'source_assets' 里。缺源文时给固定空值；有源文时仍是同一个
-    # hash，所以既有页面的 digest 不变。
-    document = root / PROJECT / 'source/source.md'
     template = root / PROJECT / 'fidelity_template'
     return digest({'page':p,'svg':sha(svg),'images':images(root,svg),'source_assets':dependencies,
-        'source':sha(document) if document.exists() else '','direction':sha(direction) if direction.exists() else '',
+        'direction':sha(direction) if direction.exists() else '',
         'mode':m.get('template_intake'), 'template':{str(f.relative_to(template)):sha(f) for f in sorted(template.rglob('*')) if f.is_file()} if m.get('template_intake',{}).get('mode')=='fidelity' else {}})
+
+def source_digest(root):
+    """材料副本 `source/source.md` 的哈希。视频画面路线没有这份文件，给空串。"""
+    document = root / PROJECT / 'source/source.md'
+    return sha(document) if document.exists() else ''
 
 def versions(root):
     return {p['page_key']:page_version(root,p) for p in content(root)['pages']}
@@ -303,6 +315,9 @@ def inspected(root,k,version):
     成立要同时满足：渲染是最新的；`note`／`first-glance`／`design-check` 都写了；
     **指出了当前 PNG 上的一处位置且落在画布内**；**明确选了「看过无缺陷」或「看过有缺陷」**。
     自由文本填满不算数——那是这条闸门以前被跳过的方式。
+
+    渲染字节与上一条记录相同时，`carry_inspection()` 会把记录承接过来，所以这里照样成立：
+    同一张图不必重看。
     """
     rec=read(root / VALIDATION / (k+'.json'),{})
     ins=read(root / VALIDATION / 'inspections.json',{}).get(k,{})
@@ -317,6 +332,28 @@ def inspected(root,k,version):
     except ValueError:
         return False
     return ins.get('verdict')=='clean'
+
+def carry_inspection(root,k,old_png_sha256,rec):
+    """换了版本但**没换图**：把已有的看图记录按新记录承接过来，不要求重看。
+
+    判据是渲染字节相同（`old_png_sha256 == rec['png_sha256']`）。这条闸门问的是
+    「有没有人看过当前这一版的图」——字节一样时，上一次看的就是这一版。
+    承接会在记录里留下 `carried_from`／`carried_at`，「这一页没被重新看过」因此仍然可查。
+    """
+    if not old_png_sha256 or old_png_sha256 != rec.get('png_sha256'):
+        return False
+    path = root / VALIDATION / 'inspections.json'
+    records = read(path,{})
+    ins = records.get(k)
+    if not isinstance(ins,dict) or ins.get('verdict') not in ('clean','must_fix'):
+        return False
+    item = dict(ins)
+    item['render_token'] = digest(rec)
+    item['carried_from'] = old_png_sha256
+    item['carried_at'] = datetime.now(timezone.utc).isoformat()
+    records[k] = item
+    write(path,records)
+    return True
 
 
 def design_observations(root, page_key):
@@ -509,6 +546,7 @@ def review_current(root):
         return bool(snap and snap.get('versions')==v and snap.get('order')==list(v) and
             all(inspected(root,k,x) for k,x in v.items()) and
             snap.get('png_hashes')=={k:sha(root/PNG/(k+'.png')) for k in v} and
+            snap.get('source_sha256','')==source_digest(root) and
             snap.get('html_sha256')==sha(root/'02_visual_review.html'))
     except (OSError,ValueError,ET.ParseError): return False
 
