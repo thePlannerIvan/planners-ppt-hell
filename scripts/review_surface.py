@@ -140,7 +140,11 @@ def surface_document(root, name='visual'):
         'feedback': face['feedback_rel'],
         # 省略 = 这个面不做草稿（模板审阅面就没有）。宿主按声明决定收不收 `draft` 调用。
         **({'draft': face['draft_rel']} if face.get('draft_rel') else {}),
-        'wake': {'mode': 'queue', 'text': face['wake_text']},
+        # 唤醒一律**插话**（`steer` → `next-step`），不进持久队列。
+        # 声明 `queue` 会让提交排到当前回合之后（DSH 的 `agent.followup` → `next-turn`）：
+        # 模型正忙时它就躺在队列里等，界面上同时出现「已送达」和「排队中」两份。
+        # 人点「本页要求修改」的语义是"现在就按这个改"，所以走步骤边界。
+        'wake': {'mode': 'steer', 'text': face['wake_text']},
         'capabilities': list(face['capabilities']),
         'watch': list(face['watch']),
     }

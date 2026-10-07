@@ -70,6 +70,43 @@
 
 ---
 
+## 2026-10-07 · 版本只属于这一页：单页改动不再牵连整套的重看与交代
+
+**触发**：一次真项目改稿（先挪页、再把后半段六页压成四页、最后写回作者在审阅页上手改的五处标题）之后复盘：整场会话 **71 次看图**里大部分不是审稿，而是**被迫重看没变过的图**；`ack-human-edit` 被反复重跑 9 次。
+
+**先查事实，再改**。三处根因都拿到了可复现的证据：
+
+| 动了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| `project_state.page_version`：digest 里去掉 `'source': sha(source.md)` | `source.md` 是**全部页 content+notes 的拼接**，把它算进单页版本等于把每一页绑在整份文档上——改一页的字，全部页的批准／看图记录／直改交代一起作废 | `scripts/project_state.py`、`scripts/generate_review_html.py`（快照新增 `source_sha256`）、`scripts/test/test_v5.py` | 单页版本对整份材料的绑定（材料级绑定改由 `review_current` 承担，原意保留） |
+| 新增 `project_state.source_digest()` ＋ `review_current()` 里比 `source_sha256` | 材料副本变了，**整套审阅**该失效（这是原设计的意思）；但那不是单页版本的事 | `scripts/project_state.py`、`scripts/generate_review_html.py` | —（把一件事挪到它该在的层） |
+| 新增 `project_state.carry_inspection()`，`check` 渲染后按新旧 `png_sha256` 决定承接 | 版本换了但**图一个字节没变**（例如只改 `notes`）时，要求重看是没有信息量的动作；字节相同即"上一次看的就是这一版" | `scripts/project_state.py`、`scripts/orchestrate/ppt_pipeline.py`、`scripts/test/test_v5.py` | 那句无条件的"重看" |
+| `review_feedback`：`root/REVIEW/VERSIONS/…` → `root/VERSIONS/…` | `VERSIONS` 已含 `REVIEW`，多拼一层使账本记的 `svg_snapshot` 指向一个不存在的路径（文件也真落在嵌套目录里） | `scripts/review_feedback.py`、`scripts/test/test_human_edit_guard.py`（断言升级为"与 PNG 快照同住 versions/"） | 双层前缀；以及那条**只断言"记录的路径能打开"**的弱断言 |
+| 新增 `scripts/lib/office.py`（`soffice_argv` / `run_soffice`），三处调用点共用 | 沙箱里默认用户 profile 会让 `soffice` **启动即抛** `DeploymentException`；三个调用点里只有一个显式给了临时 profile，本 Skill 自己的 `.doc` 转换用例因此长期红着 | `scripts/lib/office.py`（新）、`scripts/prepare_source_material.py`、`scripts/template/extract_template_pack.py`、`scripts/test/test_source_assets.py`；同族改动也在 `04-office-docs/{docx,pptx,xlsx}/scripts/office/soffice.py` | 三处各写一份的 soffice 调用（其中一处自拼 profile） |
+
+**回归**：`python -m unittest discover -s scripts/test` → 215 条全绿（改动前 1 条红，即 `.doc` 转换用例）。新增断言四条：材料重写不动单页版本、单页编辑只动这一页、同一张图承接看图记录、图换了不承接。
+
+**没做的事**（作者点过、留待讨论）：唤醒与落文件的事务化、`reviewed` 在"旧页决策随新版本带回"下的判定。两条都记在 `GOTCHAS.md`（G-32／G-33）。
+
+## 2026-10-06 · 唤醒从「排队」改成「插话」：一句话不再同时出现在两处
+
+**触发**：作者再提一次：「点本页需要修改，模型会收到一次消息，同时消息排队中还会有这个消息……如果直接传给模型的消息能够收到，就不要再有消息排队了。」
+
+**先查事实，再改**。会话日志（3 个会话、95 次提交）实测：**每次提交只有一条 `user/message`，零重复投递**。看到的是**同一条消息的两段式交接**——`agent/inbox/spliced(target=next-turn)` → `agent/inbox/spliced(target=next-step)` → `user/message`，同一个 `requestId`。所以"模型重复工作"这个担心不成立，但两个真问题成立：① `queue` 把提交压到当前回合结束之后（dock 实测队列里躺过 64 秒）；② 页面用一句笼统的"已通知模型/已进入队列"，让人没法判断到底送到没有。
+
+| 动了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| `review_surface.py` 的 `wake.mode`：`queue` → **`steer`** | `queue` = `agent.followup` → `next-turn`（持久队列，回合结束才取）；`steer` = `agent.steer` → `next-step`（下一个步骤边界就取）。"现在就按这个改"才是提交的语义 | `scripts/review_surface.py`、`scripts/test/test_review_surface.py` | `queue` 这个默认（它带来的等待与"两处显示"） |
+| `assets/review/review.html` 的 `wakeNote()` 按 `verified.state` 分三档 | 「排进待处理」与「已经进了当前回合」不是一回事，笼统说"已通知"是替宿主许诺 | `assets/review/review.html`、`test_review_browser.py`（三档各一条断言） | 那句把两档混在一起的「核对进入队列」 |
+| 契约与文档：`planners-review-core` 的 `wake.mode` 描述、`07_visual_review.md` 的唤醒一节 | mode 是 **surface 的声明**，要写清两种投递各是什么、审阅面为什么选 steer | `00-system/planners-review-core/contracts/review-surface.schema.json`、`references/workflow/07_visual_review.md` | —— |
+| 同一处声明的另外三个 Skill：`video-craft`（两个 helper）、`planners-bypage` | 一条规则一处生效不够——所有审阅面走同一个宿主，声明不一致就会"这里不排队、那里排队" | `video-craft/helpers/{review_surface,edl_review_surface}.py`、`video-craft/tests/test_visual_review_feedback.py`、`planners-bypage/scripts/review-surface.mjs` | 那三处的 `queue` |
+
+**没动的**：dock 侧（`dsh-review-dock`）一行没改 —— `mode` 本来就读 surface 声明；`verified.state` 也早就在返回里。
+
+**补一次"存量"（同日晚些时候，人第二次报"还是有排队消息"）**：`wake.mode` 是**生成时写进项目**的产物，所以改完 Skill 只对**新生成**的页面生效 —— 人正在审的那个项目（页 key `p01…`，不是我刚重出的那个）surface 里还写着 `queue`，点了照旧进队列。**这次的交付因此包含两件别的东西**：① 把工作区里 **17 份真实项目的 `review-surface.json`** 一起改成 `steer`（scratch/归档/旧格式不动，逐份备份到 `/tmp/surface-backup`）；② 记下"在审的项目不要为此重出页面"——宿主每次都重读 surface 文件（`loadSurface` 无缓存），改那一行就生效，而重出页面会换 `review_id`、让人白刷新一次。教训写进 `GOTCHAS` G-27：**判断"我改的是不是人在看的那个"，用唤醒语里的 unit 核（`p02` ≠ `page_02`）。**
+
+---
+
 ## 2026-10-06 · 审阅页右栏：图片卡重做 + 两处"不报错的坏"
 
 **触发**：作者在真实项目上截图指出两件事——「图片会把上面的文字反馈框挤掉」「图片下面那几个反馈显得没什么意义，改的应该是裁剪比例、显示方式、对齐方式」。

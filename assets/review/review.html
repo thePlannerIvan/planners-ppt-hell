@@ -40,6 +40,7 @@ header small{color:var(--dsw-alias-label-tertiary);font:var(--dsw-font-xxs-12)}
 .selected-badge{font:var(--dsw-font-xxs-strong-12);color:var(--dsw-alias-label-secondary);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:4px}
 #inlineTextInput{width:210px;min-width:130px;height:28px;padding:0 8px;border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-xs);background:var(--dsw-specific-input-major);font:inherit;color:var(--dsw-alias-label-primary)}
 #inlineTextInput:disabled{background:var(--dsw-alias-bg-skeleton);color:var(--dsw-alias-label-tertiary)}
+.edit-hint{font:var(--dsw-font-xxs-12);color:var(--dsw-alias-label-secondary);white-space:nowrap;padding:0 4px}
 .toolbar-metric{font:var(--dsw-font-xxs-12);font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-secondary);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-xs);height:24px;padding:0 8px;min-width:48px;display:inline-flex;align-items:center;justify-content:center}
 .compact-btn{height:24px;padding:0 8px;font:var(--dsw-font-xxs-strong-12);border-radius:var(--dsw-radius-xs);white-space:nowrap;flex-shrink:0}
 
@@ -49,6 +50,12 @@ header small{color:var(--dsw-alias-label-tertiary);font:var(--dsw-font-xxs-12)}
 .rail{background:var(--dsw-specific-sidebar-fill);border-radius:var(--dsw-radius-md);padding:8px}
 .rail button{display:block;width:100%;height:auto;padding:6px;border:2px solid transparent;border-radius:var(--dsw-radius-sm);background:var(--dsw-alias-bg-layer-1);margin-bottom:8px;text-align:left;transition:border-color var(--ds-transition-duration-fast) var(--ds-ease-in-out),transform var(--ds-transition-duration-fast) var(--ds-ease-in-out)}
 .rail button:hover{background:var(--dsw-specific-sidebar-nav-item-hover)}
+.rail button{cursor:grab;touch-action:none;position:relative}
+.rail button:active,.rail button.dragging{cursor:grabbing}
+.rail button.dragging{opacity:.42;transform:scale(.98)}
+.rail button.drop-before::before,.rail button.drop-after::after{content:'';position:absolute;left:4px;right:4px;height:2px;background:var(--dsw-static-blue-500);z-index:2}
+.rail button.drop-before::before{top:-3px}
+.rail button.drop-after::after{bottom:-3px}
 .rail img{width:100%;display:block;border-radius:var(--dsw-radius-xs);border:1px solid var(--dsw-alias-border-l1);aspect-ratio:16/9;object-fit:contain;background:var(--dsw-alias-bg-layer-1)}
 /* 选中：底色 + 左侧强调条（他们的侧栏就是这么标的；用 inset 阴影做强调条，不加元素、不动几何） */
 .rail .active{background:var(--dsw-specific-sidebar-nav-item-active);border-color:transparent;box-shadow:inset 3px 0 0 var(--dsw-specific-sidebar-nav-item-active-accent)}
@@ -69,6 +76,8 @@ header small{color:var(--dsw-alias-label-tertiary);font:var(--dsw-font-xxs-12)}
 .preview img#slide{width:100%;height:100%;object-fit:contain;background:var(--dsw-alias-bg-layer-1);user-select:none;display:block}
 .preview.marking{cursor:crosshair;touch-action:none}
 .preview.marking .svg-stage-wrap,.preview.marking .region-overlay{pointer-events:none}
+.inline-canvas-editor{position:absolute;z-index:12;display:block;resize:none;overflow:hidden;padding:3px 5px;border:2px solid var(--ds-static-blue-500,var(--dsw-static-blue-500));border-radius:3px;background:var(--dsw-specific-input-major);color:var(--dsw-alias-label-primary);box-shadow:var(--dsw-elevation-panel);line-height:1.12;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}
+.inline-canvas-editor:focus{outline:none}
 
 /* Live Inline SVG Overlay */
 .svg-stage-wrap{position:absolute;inset:0;width:100%;height:100%;z-index:2;overflow:hidden}
@@ -198,7 +207,8 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
 
   <div class="micro-edit-bar" id="microEditBar">
     <span id="selectedBadge" class="selected-badge">未选中</span>
-    <input id="inlineTextInput" type="text" placeholder="点击画布文字可直接修改…" disabled>
+    <span id="editHint" class="edit-hint">双击文字原地编辑</span>
+    <input id="inlineTextInput" type="text" hidden aria-hidden="true">
     <button id="fontDecBtn" class="compact-btn" onclick="stepFontSize(-2)" disabled title="字号 -2px">A-</button>
     <span id="fontSizeLabel" class="toolbar-metric">--px</span>
     <button id="fontIncBtn" class="compact-btn" onclick="stepFontSize(2)" disabled title="字号 +2px">A+</button>
@@ -226,6 +236,7 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
     <div class="preview" id="preview">
       <img id="slide" draggable="false" alt="当前幻灯片">
       <div id="svgStageWrap" class="svg-stage-wrap"></div>
+      <textarea id="inlineCanvasEditor" class="inline-canvas-editor" hidden spellcheck="false" aria-label="原地编辑文字"></textarea>
       <div id="elHighlightBox" class="el-highlight-box" hidden><span id="elHighlightTag" class="el-highlight-tag"></span></div>
       <div id="regionOverlay" class="region-overlay"></div>
       <div id="selection" class="box" hidden></div>
@@ -318,6 +329,7 @@ if(!document.body.hasAttribute('data-ds-dark-theme')&&window.matchMedia
 }
 let review=null,index=0,marking=false,start=null,rect=null,pendingTargets=[],pendingTargetSummary='',previous=false,uploads=0,stale=false,staleKeys=[],slideSeq=0,canUpload=false;
 let selectedReviewId=null,dragState=null,activeRegionIdx=-1;
+let railDragState=null,railSuppressClick=false,inlineEditorState=null;
 const updatedPages=new Set();
 let pulseCount=0,lastPulseAt=null;
 function drawPulse(){
@@ -325,7 +337,14 @@ function drawPulse(){
 }
 const $=s=>document.querySelector(s);
 const data=__DATA__;
-const page=()=>data.pages[index];
+let pageOrder=data.pages.map(p=>p.key);
+const initialPageOrder=[...pageOrder];
+const orderedPages=()=>pageOrder.map(key=>data.pages.find(p=>p.key===key)).filter(Boolean);
+const page=()=>orderedPages()[index]||data.pages[0];
+const validPageOrder=order=>Array.isArray(order)&&order.length===data.pages.length
+  &&new Set(order).size===data.pages.length
+  &&order.every(key=>data.pages.some(p=>p.key===key));
+const pageOrderChanged=()=>pageOrder.some((key,i)=>key!==initialPageOrder[i]);
 /* 当前页记在地址的 hash 上（`#page_14`）。
  *
  * **不能用 localStorage／sessionStorage**：插件的不透明 iframe 里读它会直接抛，而且那个源
@@ -339,13 +358,13 @@ function pageKeyFromHash(){
   catch(error){return ''}
 }
 function syncHash(){
-  const p=data.pages[index];if(!p)return;
+  const p=page();if(!p)return;
   if(pageKeyFromHash()!==p.key){
     try{location.hash=p.key}catch(error){/* 不让写就算了：不记位置也能用，不该因此中断 */}
   }
 }
 addEventListener('hashchange',()=>{
-  const at=data.pages.findIndex(p=>p.key===pageKeyFromHash());
+  const at=pageOrder.indexOf(pageKeyFromHash());
   if(at>=0&&at!==index){index=at;render()}
 });
 const labels={pending:'未处理',approved:'人工批准',revise:'要求修改'};
@@ -395,7 +414,8 @@ function changed(p){const s=state[p.key];return !!(s.feedback.trim()||s.annotati
 function status(){
   const s=state[page().key];
   const suffix=(s.svg_edits&&s.svg_edits.length)?' · 已微调 '+s.svg_edits.length+' 处':'';
-  $('#pageStatus').textContent=labels[s.decision]+suffix;
+  const orderSuffix=pageOrderChanged()?' · 已排序':'';
+  $('#pageStatus').textContent=labels[s.decision]+suffix+orderSuffix;
   scheduleDraft();   // 状态变了就排一次草稿（打字、框选、直改、拖动、上传、决定都会走到这里）
 }
 function autoState(){
@@ -425,17 +445,117 @@ function railClass(i,p){
 function railTagText(s){
   return (s.annotations.length?s.annotations.length+'框 ':'')+(s.svg_edits.length?s.svg_edits.length+'改':'');
 }
+function clearRailDropCue(){
+  document.querySelectorAll('#rail button.drop-before,#rail button.drop-after').forEach(el=>el.classList.remove('drop-before','drop-after'));
+}
+function railTargetAtPoint(clientY){
+  for(const button of document.querySelectorAll('#rail button[data-key]')){
+    const box=button.getBoundingClientRect();
+    if(clientY>=box.top&&clientY<=box.bottom){
+      return {button,before:clientY<box.top+box.height/2};
+    }
+  }
+  return null;
+}
+function reorderPages(sourceKey,targetKey,before){
+  if(!sourceKey||!targetKey||sourceKey===targetKey)return false;
+  const currentKey=page().key;
+  const from=pageOrder.indexOf(sourceKey);
+  let to=pageOrder.indexOf(targetKey);
+  if(from<0||to<0)return false;
+  pageOrder.splice(from,1);
+  if(from<to)to--;
+  if(!before)to++;
+  to=Math.max(0,Math.min(pageOrder.length,to));
+  pageOrder.splice(to,0,sourceKey);
+  index=Math.max(0,pageOrder.indexOf(currentKey));
+  drawRail();
+  status();
+  note('页面顺序已调整，提交整套审阅后生效','ok');
+  return true;
+}
+function handleRailPointerDown(e){
+  if(e.button!==0)return;
+  const button=e.target.closest&&e.target.closest('#rail button[data-key]');
+  if(!button)return;
+  railDragState={button,key:button.dataset.key,pointerId:e.pointerId,startY:e.clientY,moved:false,target:null};
+  try{button.setPointerCapture(e.pointerId)}catch(error){}
+}
+function handleRailPointerMove(e){
+  if(!railDragState||e.pointerId!==railDragState.pointerId)return;
+  const distance=Math.abs(e.clientY-railDragState.startY);
+  if(!railDragState.moved&&distance<5)return;
+  if(!railDragState.moved){
+    railDragState.moved=true;
+    railDragState.button.classList.add('dragging');
+  }
+  const target=railTargetAtPoint(e.clientY);
+  clearRailDropCue();
+  if(target&&target.button!==railDragState.button){
+    target.button.classList.add(target.before?'drop-before':'drop-after');
+    railDragState.target={key:target.button.dataset.key,before:target.before};
+  }else railDragState.target=null;
+}
+function handleRailPointerUp(e){
+  if(!railDragState||e.pointerId!==railDragState.pointerId)return;
+  const current=railDragState;
+  current.button.classList.remove('dragging');
+  clearRailDropCue();
+  railDragState=null;
+  if(!current.moved)return;
+  railSuppressClick=true;
+  setTimeout(()=>{railSuppressClick=false},0);
+  const target=current.target||railTargetAtPoint(e.clientY);
+  if(target){
+    const targetKey=target.key||target.button?.dataset.key;
+    if(targetKey)reorderPages(current.key,targetKey,target.before);
+  }
+}
+function handleRailNativeDragStart(e,button){
+  railDragState={button,key:button.dataset.key,pointerId:null,startY:0,moved:true,target:null,native:true};
+  button.classList.add('dragging');
+  if(e.dataTransfer){
+    e.dataTransfer.effectAllowed='move';
+    e.dataTransfer.setData('text/plain',button.dataset.key);
+  }
+}
+function handleRailNativeDragOver(e,button){
+  if(!railDragState||railDragState.key===button.dataset.key)return;
+  e.preventDefault();
+  clearRailDropCue();
+  const box=button.getBoundingClientRect();
+  const before=e.clientY<box.top+box.height/2;
+  button.classList.add(before?'drop-before':'drop-after');
+  railDragState.target={key:button.dataset.key,before};
+  if(e.dataTransfer)e.dataTransfer.dropEffect='move';
+}
+function handleRailNativeDrop(e,button){
+  if(!railDragState||railDragState.key===button.dataset.key)return;
+  e.preventDefault();
+  const current=railDragState;
+  const box=button.getBoundingClientRect();
+  const before=e.clientY<box.top+box.height/2;
+  railDragState=null;
+  button.classList.remove('drop-before','drop-after');
+  current.button.classList.remove('dragging');
+  clearRailDropCue();
+  railSuppressClick=true;
+  setTimeout(()=>{railSuppressClick=false},0);
+  reorderPages(current.key,button.dataset.key,before);
+}
 /* 按钮登记表：`page_key → {b, tag, i}`。有它才不用每次靠 `querySelector` 去找按钮。 */
 let railButtons=new Map();
 /* 整条轨道建一次。只在换页 / 换新快照（`render()`）时用。 */
 function drawRail(){
   const rail=$('#rail');rail.replaceChildren();
   railButtons=new Map();
-  data.pages.forEach((p,i)=>{
+  orderedPages().forEach((p,i)=>{
     const b=document.createElement('button');
     b.className=railClass(i,p);
     b.dataset.key=p.key;
-    b.title=updatedPages.has(p.key)?'画面已更新，待复核':'';
+    b.draggable=true;
+    b.title=updatedPages.has(p.key)?'画面已更新，待复核':'拖动调整页面顺序；Alt+↑/↓ 也可移动';
+    b.setAttribute('aria-label','第 '+(i+1)+' 页：'+p.title);
     const img=document.createElement('img');img.alt='第 '+(i+1)+' 页';
     assetFor(p.png,p.version).then(url=>{if(url)img.src=url});
     b.append(img);
@@ -447,11 +567,33 @@ function drawRail(){
     const tag=document.createElement('small');tag.className='rail-tag';tag.textContent=railTagText(state[p.key]);
     meta.append(tag);
     b.append(meta);
-    b.onclick=()=>{index=i;render()};
+    b.onclick=()=>{
+      if(railSuppressClick)return;
+      index=pageOrder.indexOf(p.key);render();
+    };
+    b.ondragstart=e=>handleRailNativeDragStart(e,b);
+    b.ondragover=e=>handleRailNativeDragOver(e,b);
+    b.ondrop=e=>handleRailNativeDrop(e,b);
+    b.ondragend=()=>{
+      if(railDragState&&railDragState.button===b)railDragState=null;
+      b.classList.remove('dragging');clearRailDropCue();
+    };
+    b.onkeydown=e=>{
+      if(!e.altKey||!['ArrowUp','ArrowDown'].includes(e.key))return;
+      e.preventDefault();
+      const from=pageOrder.indexOf(p.key),to=from+(e.key==='ArrowUp'?-1:1);
+      if(to<0||to>=pageOrder.length)return;
+      reorderPages(p.key,pageOrder[to],e.key==='ArrowUp');
+      document.querySelector('#rail button[data-key="'+p.key+'"]')?.focus();
+    };
     rail.append(b);
     railButtons.set(p.key,{b:b,tag:tag,i:i});
   });
 }
+$('#rail').onpointerdown=handleRailPointerDown;
+document.addEventListener('pointermove',handleRailPointerMove);
+document.addEventListener('pointerup',handleRailPointerUp);
+document.addEventListener('pointercancel',handleRailPointerUp);
 /* 只改状态：不重建 DOM、不重取图、不动滚动位置。
  *
  * 原来每个状态变化都走 `drawRail()`，而写意见时**每敲一个字**都会走到这里
@@ -468,7 +610,7 @@ function updateRail(keys){
     const at=railButtons.get(key);if(!at)continue;
     const p=data.pages[at.i],s=state[key];
     at.b.className=railClass(at.i,p);
-    at.b.title=updatedPages.has(p.key)?'画面已更新，待复核':'';
+    at.b.title=updatedPages.has(p.key)?'画面已更新，待复核':'拖动调整页面顺序；Alt+↑/↓ 也可移动';
     at.tag.textContent=railTagText(s);
   }
 }
@@ -658,6 +800,94 @@ function updateHighlightOverlay(){
   const tagName=el.tagName.toLowerCase();
   tagEl.textContent=tagLabel(tagName);
 }
+function positionInlineCanvasEditor(){
+  const session=inlineEditorState,editor=$('#inlineCanvasEditor'),el=session&&session.el;
+  if(!session||!el||editor.hidden)return;
+  const previewRect=$('#preview').getBoundingClientRect();
+  const elRect=el.getBoundingClientRect();
+  if(!previewRect.width||!elRect.width){editor.hidden=true;return}
+  const left=Math.max(0,elRect.left-previewRect.left-4);
+  const top=Math.max(0,elRect.top-previewRect.top-4);
+  const width=Math.min(previewRect.width-left,Math.max(84,elRect.width+12));
+  const height=Math.min(previewRect.height-top,Math.max(28,elRect.height+10));
+  const style=getComputedStyle(el);
+  Object.assign(editor.style,{left:left+'px',top:top+'px',width:width+'px',height:height+'px',
+    font:style.font,color:style.fill||style.color,textAlign:style.textAnchor==='middle'?'center':'left'});
+}
+function endInlineTextEdit(commit=true){
+  const session=inlineEditorState;
+  if(!session)return;
+  const editor=$('#inlineCanvasEditor');
+  const p=page(),s=state[p.key];
+  if(commit)commitInlineTextEditorValue();
+  if(!commit&&session.dirty){
+    s.svg_edits=session.historyBefore||[];
+    mountInlineSvg(p);
+  }else if(commit){
+    pruneNoopEditRecord(session.reviewId);
+    if(session.dirty&&JSON.stringify(s.svg_edits)===JSON.stringify(session.historyBefore))s.edit_history.pop();
+    updateToolbarSelection();
+  }
+  editor.hidden=true;
+  editor.value='';
+  editor.removeAttribute('data-review-id');
+  inlineEditorState=null;
+  if(commit){updateHighlightOverlay();drawSvgEditsPanel();updateToolbarSelection();}
+}
+function ensureInlineEditHistory(){
+  const session=inlineEditorState;
+  if(!session||session.dirty)return;
+  session.historyBefore=structuredClone(state[page().key].svg_edits);
+  pushHistorySnapshot();
+  session.dirty=true;
+}
+function commitInlineTextEditorValue(){
+  const session=inlineEditorState,editor=$('#inlineCanvasEditor');
+  if(!session||editor.hidden)return;
+  const el=session.el;
+  ensureInlineEditHistory();
+  const rec=getOrCreateEditRecord(el);
+  const tspans=[...el.querySelectorAll(':scope > tspan')];
+  const rawVal=editor.value;
+  if(tspans.length>1){
+    const lines=rawVal.split('\n');
+    rec.lines=lines;
+    rec.text=lines.join('\n');
+  }else{
+    rec.text=rawVal;
+    delete rec.lines;
+  }
+  applyTextToDom(el,rec.text,rec.lines);
+  pruneNoopEditRecord(session.reviewId);
+  updateToolbarSelection();
+  positionInlineCanvasEditor();
+  updateRail([page().key]);status();
+}
+function applyInlineTextEditorValue(){
+  ensureInlineEditHistory();
+}
+function startInlineTextEdit(el){
+  if(!el||el.tagName.toLowerCase()!=='text'||previous)return;
+  if(inlineEditorState&&inlineEditorState.el===el){$('#inlineCanvasEditor').focus();return}
+  endInlineTextEdit(true);
+  selectedReviewId=el.getAttribute('data-review-id');
+  const text=extractTextState(el);
+  const editor=$('#inlineCanvasEditor');
+  inlineEditorState={el,reviewId:selectedReviewId,dirty:false,historyBefore:null};
+  editor.value=text.text;
+  editor.hidden=false;
+  editor.setAttribute('data-review-id',selectedReviewId);
+  positionInlineCanvasEditor();
+  requestAnimationFrame(()=>{editor.focus();editor.select()});
+  updateToolbarSelection();
+  positionInlineCanvasEditor();
+}
+$('#inlineCanvasEditor').oninput=applyInlineTextEditorValue;
+$('#inlineCanvasEditor').onkeydown=e=>{
+  if(e.key==='Escape'){e.preventDefault();endInlineTextEdit(false);return}
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();endInlineTextEdit(true);e.target.blur()}
+};
+$('#inlineCanvasEditor').onblur=()=>endInlineTextEdit(true);
 
 function updateToolbarSelection(){
   const el=findSvgEl(selectedReviewId);
@@ -676,6 +906,7 @@ function updateToolbarSelection(){
     $('#deleteElBtn').disabled=true;
     $('#commentElBtn').disabled=true;
     $('#elHighlightBox').hidden=true;
+    $('#editHint').textContent='双击文字原地编辑';
     return;
   }
   const tag=el.tagName.toLowerCase();
@@ -696,6 +927,7 @@ function updateToolbarSelection(){
     $('#fontDecBtn').disabled=false;
     $('#fontIncBtn').disabled=false;
     $('#fontSizeLabel').textContent=fs+'px';
+    $('#editHint').textContent=inlineEditorState&&inlineEditorState.el===el?'回车完成 · Esc取消':'双击文字原地编辑';
   }else{
     $('#selectedBadge').textContent=`已选${tagLabel(tag)}`;
     $('#inlineTextInput').value='';
@@ -703,6 +935,7 @@ function updateToolbarSelection(){
     $('#fontDecBtn').disabled=true;
     $('#fontIncBtn').disabled=true;
     $('#fontSizeLabel').textContent='--px';
+    $('#editHint').textContent='选中文字后可双击原地编辑';
   }
   updateHighlightOverlay();
 }
@@ -849,6 +1082,7 @@ function pickSelectableSvgTarget(target){
 }
 
 async function render(){
+  endInlineTextEdit(true);
   const seq=++slideSeq;
   marking=false;previous=false;
   $('#preview').classList.remove('marking');
@@ -881,6 +1115,7 @@ async function render(){
 
 function go(d){index=Math.max(0,Math.min(data.pages.length-1,index+d));render()}
 function togglePrevious(){
+  endInlineTextEdit(true);
   previous=!previous;
   $('#compare').textContent=previous?'查看当前版本':'查看修改前';
   marking=false;$('#selection').hidden=true;
@@ -1287,7 +1522,7 @@ function cleanSvgEditsForExport(edits){
 }
 function collect(){
   const pages={};
-  data.pages.forEach(p=>{
+  orderedPages().forEach(p=>{
     const s=state[p.key];const feedback=s.feedback.trim();
     const has=!!(feedback||s.annotations.length||s.assets.length);
     const svgEdits=cleanSvgEditsForExport(s.svg_edits);
@@ -1310,14 +1545,19 @@ function collect(){
       return it;
     });
   if(overall)items.push({id:uid(),pages:Object.keys(pages),feedback:overall});
-  return {review_id:data.review_id,pages,overall_feedback:overall,items,
+  return {review_id:data.review_id,page_order:[...pageOrder],pages,overall_feedback:overall,items,
     provenance:{source:'review_page',transport:(review&&review.transport)||'',
       surface:'planners-ppt-hell/visual',submitted_at:new Date().toISOString()}};
 }
+/* 送达分三档说清楚，因为"通知到了"和"回合取了"是两件事：
+ *   in-turn  —— 已经变成本回合里的一条消息（模型马上就看到了）
+ *   queued   —— 进了待处理，等当前回合走到下一个步骤边界才取走
+ * 一句笼统的"已通知模型"会把第二档说成第一档 —— 人看到消息还排在队里，就会以为有两份、以为模型会重复干活。 */
 function wakeNote(verified){
-  return verified
-    ? '宿主已在会话日志里核对进入队列'
-    : '宿主未核对 —— 若模型迟迟没反应，请回对话说一声';
+  if(!verified) return '宿主未核对 —— 若模型迟迟没反应，请回对话说一声';
+  if(verified.state==='in-turn') return '宿主已核对：已经进了当前回合';
+  if(verified.state==='queued') return '宿主已核对：已排进待处理，等当前回合走到下一个步骤取走';
+  return '宿主已在会话日志里核对送达';
 }
 async function push(wake){
   if(!review){note('本页只读：没有连上审阅宿主，反馈存不进去（请让宿主打开这一页）','warn');return {ok:false}}
@@ -1385,7 +1625,7 @@ function draftPayload(pages){
     out[p.key]={decision:s.decision,feedback:s.feedback,annotations:s.annotations,
       assets:s.assets.map(a=>({...a})),svg_edits:s.svg_edits,version:p.version};
   });
-  return {review_id:data.review_id,at:new Date().toISOString(),pages:pages||out};
+  return {review_id:data.review_id,page_order:[...pageOrder],at:new Date().toISOString(),pages:pages||out};
 }
 /* 状态变了就排一次。`status()` 是所有变更路径的汇合点：打字、框选、直改、拖动、上传、决定。 */
 function scheduleDraft(){
@@ -1419,7 +1659,7 @@ async function saveDraft(){
 async function clearDraft(){
   if(!DRAFT_REL||!review||!canDraft)return;
   try{
-    await review.draft({review_id:data.review_id,at:new Date().toISOString(),pages:{}});
+    await review.draft({review_id:data.review_id,page_order:[...initialPageOrder],at:new Date().toISOString(),pages:{}});
     lastDraftSaved='';
   }catch(error){/* 清不掉不影响正确性：下次任何改动都会覆盖它 */}
 }
@@ -1429,6 +1669,12 @@ async function restoreDraft(){
   try{draft=JSON.parse(await review.readText(DRAFT_REL))}catch(error){return}   // 还没存过 → 正常
   if(!draft||typeof draft!=='object'||!draft.pages)return;
   let restored=0;const droppedEdits=[];
+  let orderRestored=false;
+  if(validPageOrder(draft.page_order)){
+    pageOrder=[...draft.page_order];
+    index=Math.max(0,pageOrder.indexOf(pageKeyFromHash())>=0?pageOrder.indexOf(pageKeyFromHash()):index);
+    orderRestored=pageOrder.some((key,i)=>key!==initialPageOrder[i]);
+  }
   data.pages.forEach(p=>{
     const saved=draft.pages[p.key];
     if(!saved||typeof saved!=='object')return;
@@ -1442,8 +1688,8 @@ async function restoreDraft(){
       else droppedEdits.push(p.key);                             // 模型重出过 → 路径已指到别处，丢掉
     }
   });
-  if(restored){
-    note('已读回你没提交的草稿（'+restored+' 页有意见）'
+  if(restored||orderRestored){
+    note('已读回你没提交的草稿（'+(restored?restored+' 页有意见':'页面顺序')+'）'
       +(droppedEdits.length?('；'+droppedEdits.join('、')+' 的画面已被模型重出，那几页的直改没有恢复'):''),'ok');
   }
 }
@@ -1460,6 +1706,7 @@ async function restoreDraft(){
  */
 function pendingWork(){
   const out=[];
+  if(pageOrderChanged())out.push('页面顺序已调整');
   data.pages.forEach(p=>{
     const s=state[p.key],bits=[];
     if(s.feedback.trim())bits.push('意见');
@@ -1522,10 +1769,12 @@ function sizePreview(){
   const stage=$('.stage'),box=$('#preview');
   box.style.width=Math.max(80,Math.min(stage.clientWidth-16,(stage.clientHeight-56)*16/9))+'px';
   updateHighlightOverlay();
+  positionInlineCanvasEditor();
 }
 
 /* ---- 指针事件：支持「框选问题」与「选择与拖拽微调 SVG 元素」双模式 ---- */
 $('#preview').onpointerdown=e=>{
+  if(e.target===$('#inlineCanvasEditor'))return;
   if(marking){
     start=point(e);
     $('#preview').setPointerCapture(e.pointerId);
@@ -1606,12 +1855,9 @@ $('#preview').onpointerup=()=>{
 };
 $('#preview').ondblclick=e=>{
   if(marking||previous)return;
-  const picked=pickSelectableSvgTarget(e.target);
+  const picked=pickSelectableSvgTarget(e.target)||findSvgEl(selectedReviewId);
   if(picked&&picked.tagName.toLowerCase()==='text'){
-    selectedReviewId=picked.getAttribute('data-review-id');
-    updateToolbarSelection();
-    const inp=$('#inlineTextInput');
-    if(!inp.disabled){inp.focus();inp.select()}
+    startInlineTextEdit(picked);
   }
 };
 
@@ -1627,7 +1873,7 @@ window.addEventListener('keydown',e=>{
 
 window.addEventListener('resize',sizePreview);
 $('#slide').onload=sizePreview;
-window.addEventListener('beforeunload',e=>{if(Object.values(state).some(x=>x.feedback||x.assets.length||x.annotations.length||x.svg_edits.length)){e.preventDefault();e.returnValue=''}});
+window.addEventListener('beforeunload',e=>{if(pageOrderChanged()||Object.values(state).some(x=>x.feedback||x.assets.length||x.annotations.length||x.svg_edits.length)){e.preventDefault();e.returnValue=''}});
 
 const BRIDGE_TIMEOUT_MS=2500;
 function connectWithTimeout(ms){
@@ -1645,7 +1891,7 @@ function sayReadOnly(why){
   $('#addDrop').hidden=true;
 }
 (async function boot(){
-  const fromHash=data.pages.findIndex(p=>p.key===pageKeyFromHash());
+  const fromHash=pageOrder.indexOf(pageKeyFromHash());
   if(fromHash>=0)index=fromHash;      // 重新加载回到原来那一页（hash 是唯一来源）
   render();sizePreview();drawPulse();
   try{

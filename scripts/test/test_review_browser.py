@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import sys
+import time
 import unittest
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
@@ -163,7 +164,14 @@ class ReviewBrowserTests(unittest.TestCase):
                 wakes = self.posts('/__review/wake')
                 self.assertTrue(wakes, '逐页提交必须唤醒模型')
                 self.assertIn('"unit":"alpha"', wakes[0][3].replace(' ', ''))
-                wake_lines = [json.loads(line) for line in (root / review_surface.WAKE_LOG_REL).read_text(encoding='utf-8').splitlines()]
+                rows = [json.loads(line) for line in (root / review_surface.WAKE_LOG_REL).read_text(encoding='utf-8').splitlines()]
+                # 接入日志现在装**两种**行：`kind=='write'`（整份状态，先落它）与 `kind=='wake'`。
+                # 老格式没有 `kind`，当唤醒行读。别盲取最后一行 —— 提交之后还会有别的写（草稿）。
+                write_lines = [row for row in rows if row.get('kind') == 'write']
+                wake_lines = [row for row in rows if row.get('kind') in (None, 'wake')]
+                self.assertTrue(write_lines, '每次提交都要先在接入日志里留一行（先记它、再写状态）')
+                self.assertIn('顺便把副标题删掉', json.dumps(write_lines[-1]['pages'], ensure_ascii=False),
+                              '接入日志要带上人的全文 —— 这就是"文件没写"时的唯一留存')
                 self.assertEqual(wake_lines[-1]['unit'], 'alpha')
                 self.assertIn('alpha 要求修改', wake_lines[-1]['text'], '逐页提交的唤醒语要自带决定，不是"已定"')
                 self.assertIn('顺便把副标题删掉', wake_lines[-1]['text'], '唤醒语要带上意见的要点')
@@ -208,7 +216,9 @@ class ReviewBrowserTests(unittest.TestCase):
                 # 一次点击就批准：什么都不用清（验收 ①）
                 self.submit_page(page, '本页通过')
                 self.assertIn('人工批准', page.locator('#pageStatus').inner_text())
-                self.assertIn('alpha 已通过', [json.loads(line)['text'] for line in (root / review_surface.WAKE_LOG_REL).read_text(encoding='utf-8').splitlines()][-1],
+                log_rows = [json.loads(line) for line in (root / review_surface.WAKE_LOG_REL).read_text(encoding='utf-8').splitlines()]
+                wake_rows = [row for row in log_rows if row.get('kind') in (None, 'wake')]
+                self.assertIn('alpha 已通过', wake_rows[-1]['text'],
                               '通过时的唤醒语是"X 已通过。"')
                 page.get_by_text('下一页', exact=True).click()
                 page.wait_for_function("document.querySelector('#title').textContent.includes('2 / 2')")
@@ -226,7 +236,8 @@ class ReviewBrowserTests(unittest.TestCase):
                 self.assertIn('宿主未核对', page.locator('#submitMessage').inner_text(),
                               '整套提交的提示同样要分档')
                 self.assertTrue([w for w in self.posts('/__review/wake') if '整套已定' in w[3]], '整套提交要带整句覆盖唤醒')
-                last = [json.loads(line) for line in (root / review_surface.WAKE_LOG_REL).read_text(encoding='utf-8').splitlines()][-1]
+                all_rows = [json.loads(line) for line in (root / review_surface.WAKE_LOG_REL).read_text(encoding='utf-8').splitlines()]
+                last = [row for row in all_rows if row.get('kind') in (None, 'wake')][-1]
                 self.assertEqual(last['text'], '整套已定，可以进入下一步。')
                 self.assertEqual(last['unit'], '整套')
                 self.assertTrue(approved(root), '整套提交之后批准仍然成立')
@@ -311,11 +322,26 @@ class ReviewBrowserTests(unittest.TestCase):
                     review.wake = async (payload) => Object.assign({}, await original(payload),
                       { verified: { where: 'session-log', seq: 7, target: 'agent/inbox/spliced', requestId: 'r-1', equalsWakeText: true } }); }''')
                 self.submit_page(page, '本页通过')
-                self.assertIn('宿主已在会话日志里核对进入队列', page.locator('#message').inner_text())
+                self.assertIn('宿主已在会话日志里核对送达', page.locator('#message').inner_text())
                 recorded = read(root / REVIEW / 'feedback.json')['provenance'].get('wake')
                 self.assertTrue(recorded and recorded['requested'], '这次通知的核验结果要留在记录里')
                 self.assertEqual(recorded['verified']['seq'], 7)
                 self.assertEqual(recorded['verified']['equalsWakeText'], True)
+                # 只报了"有证据"、没说落哪一档 → 不许替它说成"进了当前回合"（这两件事不一样）
+                self.assertIn('宿主已在会话日志里核对送达', page.locator('#message').inner_text())
+                # 宿主报了 state 就按 state 说：插话进回合，与"还在待处理里等"必须分开讲
+                page.evaluate('''() => { const original = review.wake;
+                    review.wake = async (payload) => Object.assign({}, await original(payload),
+                      { verified: { state: 'queued', where: 'agents.get(sessionId).inbox', requestId: 'r-2' } }); }''')
+                self.submit_page(page, '本页通过')
+                self.assertIn('已排进待处理', page.locator('#message').inner_text(),
+                              '还没被回合取走就要说出来，不能笼统说成"已通知模型"')
+                page.evaluate('''() => { const original = review.wake;
+                    review.wake = async (payload) => Object.assign({}, await original(payload),
+                      { verified: { state: 'in-turn', where: 'session log: user/message', seq: 9, requestId: 'r-3' } }); }''')
+                self.submit_page(page, '本页通过')
+                self.assertIn('已经进了当前回合', page.locator('#message').inner_text(),
+                              '已经取走的那一档要说得更满一档')
                 self.assertEqual(read(root / REVIEW / 'feedback.json')['pages']['omega']['decision'], 'approved',
                                  '补写核验结果不改变任何决定')
                 # 同一次提交被重发（宿主报 duplicate）：照宿主说的讲——"已在路上"，不是失败、也不是又通知了一次
@@ -455,6 +481,63 @@ class ReviewBrowserTests(unittest.TestCase):
                 self.assertEqual(marked['writes'], 1,
                                  '一个字符只该写「当前这一页」那一个按钮的类名，不该把整条轨道写一遍')
                 self.assertIn('revise', marked['active'], '状态仍要更新：活动页应变成 revise')
+        finally:
+            for item in hosts: review_host.stop_host(item)
+            fixture.tearDown()
+
+    def test_reorder_thumbnails_and_edit_text_in_place(self):
+        """缩略图排序与画布原地改字都必须写入草稿，且不依赖顶部输入框。"""
+        fixture = fixtures.V5Tests(); fixture.setUp(); root = fixture.root.resolve()
+        hosts = []
+        try:
+            fixture.payload()
+            state = review_host.start_host(root / review_surface.SURFACE_REL); hosts.append(state)
+            from playwright.sync_api import sync_playwright
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page(viewport={'width': 1440, 'height': 900})
+                page.goto(state['url'])
+                page.wait_for_function("document.querySelector('#bridgeState').textContent.includes('已连接')")
+                page.wait_for_selector('#svgStageWrap svg text')
+
+                first = page.locator('#rail button[data-key="alpha"]')
+                second = page.locator('#rail button[data-key="omega"]')
+                first_box = first.bounding_box(); second_box = second.bounding_box()
+                page.mouse.move(first_box['x'] + first_box['width'] / 2, first_box['y'] + first_box['height'] / 2)
+                page.mouse.down()
+                page.mouse.move(second_box['x'] + second_box['width'] / 2,
+                                second_box['y'] + second_box['height'] * .85, steps=10)
+                page.mouse.up()
+                self.assertEqual(page.evaluate("() => [...document.querySelectorAll('#rail button')].map(b => b.dataset.key)"),
+                                 ['omega', 'alpha'])
+
+                text = page.locator('#svgStageWrap svg text').first
+                text_box = text.bounding_box()
+                page.mouse.dblclick(text_box['x'] + text_box['width'] / 2, text_box['y'] + text_box['height'] / 2)
+                editor = page.locator('#inlineCanvasEditor')
+                self.assertTrue(editor.is_visible(), '双击文字后必须在原地出现编辑框')
+                editor.press('ControlOrMeta+A')
+                editor.type('Edited in place')
+                editor.press('Enter')
+                self.assertFalse(editor.is_visible(), '回车后原地编辑框应收起')
+                self.assertEqual(page.locator('#svgStageWrap svg text').first.text_content(), 'Edited in place')
+
+                draft_path = root / review_surface.DRAFT_REL
+                deadline = time.monotonic() + 5
+                draft = {}
+                while time.monotonic() < deadline:
+                    try:
+                        draft = read(draft_path)
+                        if isinstance(draft, dict) and draft.get('page_order') == ['omega', 'alpha'] and draft['pages']['alpha']['svg_edits']:
+                            break
+                    except (FileNotFoundError, json.JSONDecodeError, KeyError):
+                        pass
+                    time.sleep(.05)
+                self.assertEqual(draft.get('page_order'), ['omega', 'alpha'])
+                self.assertTrue(draft['pages']['alpha']['svg_edits'])
+                self.assertTrue(page.locator('#inlineTextInput').is_hidden(),
+                                '顶部栏不应再承载主文字编辑输入框')
+                browser.close()
         finally:
             for item in hosts: review_host.stop_host(item)
             fixture.tearDown()

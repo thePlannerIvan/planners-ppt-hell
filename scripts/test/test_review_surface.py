@@ -123,7 +123,9 @@ class ReviewSurfaceTests(unittest.TestCase):
         self.assertEqual(doc['id'], 'planners-ppt-hell/visual')
         self.assertEqual(doc['entry'], '02_visual_review.html')
         self.assertEqual(doc['feedback'], 'feedback.json')
-        self.assertEqual(doc['wake']['mode'], 'queue')
+        # 唤醒走**插话**：`queue` 会把提交排到当前回合之后，模型正忙时它躺在持久队列里，
+        # 界面上同时出现「已送达」与「排队中」两份（2026-10-06 真人报的"两个通道"）。
+        self.assertEqual(doc['wake']['mode'], 'steer')
         self.assertIn('{unit}', doc['wake']['text'])
         # `draft` 与 `asset-upload` 并列：前者是「未提交的草稿」这条路，后者是上传。
         # 两个都是**承诺**（宿主支持 ∩ surface 声明），页面靠它决定要不要摆那个控件/走那条路。
@@ -218,7 +220,9 @@ class ReviewSurfaceTests(unittest.TestCase):
         status, result = http_json(base + '/__review/wake', 'POST', {'unit': 'alpha'})
         self.assertEqual(status, 200)
         self.assertFalse(result['woke'])
-        lines = [json.loads(line) for line in (self.root / review_surface.WAKE_LOG_REL).read_text(encoding='utf-8').splitlines()]
+        rows = [json.loads(line) for line in (self.root / review_surface.WAKE_LOG_REL).read_text(encoding='utf-8').splitlines()]
+        # 日志里现在有两种行：`kind=='write'`（整份状态，先落）与 `kind=='wake'`；老格式无 `kind`。
+        lines = [row for row in rows if row.get('kind') in (None, 'wake')]
         self.assertEqual(lines[-1]['unit'], 'alpha')
         self.assertIn('alpha 已定', lines[-1]['text'])
         self.assertIn('只重出这一页', lines[-1]['text'])

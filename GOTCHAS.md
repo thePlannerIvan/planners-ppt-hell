@@ -348,6 +348,24 @@
 - **证据**：`test_review_browser.py::test_reorder_thumbnails_and_edit_text_in_place`。
 - **状态**：已升级
 
+### G-34 页序只改了缩略图 DOM，刷新和收件层就会回到另一套顺序
+
+- **module**：`assets/review/review.html`（页面状态／草稿／提交）＋ `scripts/review_feedback.py`（收件校验）
+- **现象**：拖动缩略图后当前页面看起来已经换序，但刷新回到原顺序，或 `feedback.json` 没有顺序信息；模型侧无法知道作者审阅时采用的页序。
+- **原因**：页序不是单页决定，不能塞进某一页的 `decision`；只移动 DOM 也不会进入宿主的草稿／反馈文件。
+- **行为修正**：以 `page_order` 作为完整页 key 的排列，页面导航、草稿恢复与整套提交都使用同一份状态；收件层要求它覆盖完整页集合。缩略图拖拽同时提供 `Alt+↑/↓` 键盘入口。
+- **证据**：`test_v5.py::test_page_order_round_trips_through_feedback`、`test_v5.py::test_page_order_must_cover_exact_page_set`、`test_review_browser.py::test_reorder_thumbnails_and_edit_text_in_place`。
+- **状态**：已升级
+
+### G-35 原地文字编辑不能只把输入框搬到画布上，还要处理提交、取消与焦点
+
+- **module**：`assets/review/review.html`（inline editor）
+- **现象**：编辑框已经贴在文字旁，但回车、失焦、Esc 的语义不清，输入可能被追加到原文，或取消后残留一笔不可见的 edit history。
+- **原因**：SVG 文字节点不是可编辑 HTML 控件；编辑态、SVG 预览态、`svg_edits` 历史是三份不同状态，焦点切换还会触发 blur。
+- **行为修正**：双击进入时默认全选；输入只在编辑态内持有，回车／失焦提交、Esc 用会话前快照恢复；无实际变化时回收历史快照。顶部输入框降为隐藏兼容节点，不再承担主路径。
+- **证据**：`test_review_browser.py::test_reorder_thumbnails_and_edit_text_in_place`。
+- **状态**：已升级
+
 ---
 
 ## 这个文件不收什么（附理由）
