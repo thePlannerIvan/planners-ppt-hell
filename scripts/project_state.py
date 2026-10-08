@@ -17,7 +17,7 @@ import canvas_frame
 
 __all__ = [
     'PROJECT', 'CONTENT', 'REVIEW', 'VALIDATION', 'SVG', 'PNG', 'TEMPLATE_REVIEW_SNAPSHOT',
-    'DIRECTION', 'ROUTES',
+    'DIRECTION', 'ROUTES', 'WORKBENCH', 'workbench_active',
     'read', 'write', 'digest', 'sha', 'local', 'event',
     'manifest', 'content', 'sync', 'images', 'page_version', 'versions',
     'rendered', 'inspected', 'parse_position', 'POSITION_HELP', 'carry_inspection',
@@ -33,6 +33,10 @@ REVIEW = '_internal/05_review'
 VALIDATION = '_internal/04_validation'
 SVG = '_internal/02_svg_source'
 PNG = '_internal/03_png_preview/pages'
+WORKBENCH = '_internal/06_workbench'
+
+def workbench_active(root):
+    return (Path(root)/WORKBENCH/'head.json').is_file()
 TEMPLATE_REVIEW_SNAPSHOT = 'template_review_snapshot.json'
 # 这套页面的共同秩序。视频路线上它是动手前的前置（缺了 check 会拦）。
 DIRECTION = '_internal/01_content/design_direction.md'
@@ -285,6 +289,14 @@ def page_version(root, p):
     材料级的变化由 `source_digest()` 在 `review_current()` 里单独判——那是整套审阅的事，
     不是单页版本的事。
     """
+    if workbench_active(root):
+        from workbench_store import get_page
+        page=get_page(root,p['page_key'])
+        if not page['revision']: raise ValueError('Page has no saved revision: '+p['page_key'])
+        direction=root/DIRECTION
+        return digest({'revision':page['revision'],'input':p,
+                       'direction':sha(direction) if direction.is_file() else '',
+                       'template':template_version(root), 'route':route(root)})
     svg = root / SVG / (p['page_key']+'.svg')
     m = manifest(root)
     source = read(root / PROJECT / 'source/source_assets.json', {})
@@ -302,6 +314,11 @@ def source_digest(root):
     return sha(document) if document.exists() else ''
 
 def versions(root):
+    if workbench_active(root):
+        from workbench_store import ensure
+        head=ensure(root)
+        pages={p['page_key']:p for p in content(root)['pages']}
+        return {key:page_version(root,pages[key]) for key in head['order']}
     return {p['page_key']:page_version(root,p) for p in content(root)['pages']}
 
 def rendered(root, k, version):
@@ -590,7 +607,7 @@ def approved(root):
 
 def template_version(root):
     base=root/PROJECT
-    paths=[base/'fidelity_template',base/'template_visuals',base/'template_media']
+    paths=[base/'fidelity_template',base/'template_pack',base/'template_visuals',base/'template_media']
     files=[f for p in paths for f in p.rglob('*') if f.is_file()]
     files += [base/n for n in ('template_profile.json','template_asset_registry.json','template_canvas_self_review.json','template_worker_result.json') if (base/n).is_file()]
     return digest({str(f.relative_to(root)):sha(f) for f in files})

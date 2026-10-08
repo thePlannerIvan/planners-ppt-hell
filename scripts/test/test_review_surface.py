@@ -30,6 +30,7 @@ import test_v5 as fixtures  # noqa: E402
 from project_state import REVIEW, read  # noqa: E402
 from ppt_pipeline import make_review  # noqa: E402
 from review_feedback import consume  # noqa: E402
+import workbench_store as store  # noqa: E402
 import review_surface  # noqa: E402
 from lib.planners_modules import resolve_module  # noqa: E402
 sys.path.insert(0, str(resolve_module('planners-review-core') / 'scripts' / 'lib'))
@@ -129,12 +130,13 @@ class ReviewSurfaceTests(unittest.TestCase):
         self.assertIn('{unit}', doc['wake']['text'])
         # `draft` 与 `asset-upload` 并列：前者是「未提交的草稿」这条路，后者是上传。
         # 两个都是**承诺**（宿主支持 ∩ surface 声明），页面靠它决定要不要摆那个控件/走那条路。
-        self.assertEqual(doc['capabilities'], ['asset-upload', 'draft'])
+        self.assertEqual(set(doc['capabilities']), {'asset-upload', 'draft', 'command'})
         self.assertEqual(doc['draft'], 'draft.json',
                          '草稿文件必须和 feedback 分开：一个是决定，一个是没提交的草稿')
         self.assertNotEqual(doc['draft'], doc['feedback'])
-        # 宿主只 stat 它；页面收到戳之后自己去读、自己 diff（相对 surface 文件）
-        self.assertEqual(doc['watch'], ['snapshot.json'])
+        # 宿主只 stat 它；页面通过 durable draft transport 读回草稿。
+        self.assertIn('snapshot.json', doc['watch'])
+        self.assertIn('../06_workbench/head.json', doc['watch'])
         # dir 只能取项目根：页面在根上，渲染图/上传件/素材分别在 _internal 的几处（见 review_surface 的 docstring）
         self.assertEqual((surface.parent / doc['dir']).resolve(), self.root)
         self.assertTrue(review_surface.validate_surface(self.root), '公共件校验器必须认这份 surface')
@@ -180,7 +182,7 @@ class ReviewSurfaceTests(unittest.TestCase):
         for storage in ('localStorage', 'sessionStorage'):
             stripped = _re.sub(r'window\.' + storage, '', source)
             self.assertIsNone(_re.search(r'(^|[^.\w])' + storage + r'\s*[.\[]', stripped),
-                              '页面不许裸用 ' + storage + '（不透明源 iframe 里读它会直接抛 → 整页脚本当场死）')
+                              '页面不许裸用 ' + storage + '；草稿必须走 durable draft transport')
 
     def test_the_host_serves_the_entry_with_the_bridge_injected(self):
         state = self.start_host()
@@ -211,11 +213,20 @@ class ReviewSurfaceTests(unittest.TestCase):
         self.assertTrue(result['ok'])
         written = read(self.root / REVIEW / 'feedback.json')
         self.assertEqual(written['pages']['alpha']['feedback'], '标题压到了图')
-        # Skill 侧收件：规范化 + 留档，条目 id 由「哪一页 + 哪一轮」定出来
+        # Legacy write is recovery-only once the workbench store exists.
+        store.ensure(self.root)
         intake = consume(self.root)
-        self.assertFalse(intake['stale'])
-        self.assertEqual([i['pages'] for i in intake['document']['items']], [['alpha']])
-        self.assertTrue(intake['archived'].endswith('round-01.json'))
+        self.assertEqual(intake['raw_pending'], written)
+        self.assertEqual(intake['svg_edits_applied'], [])
+        head = store.state(self.root)
+        task = store.commit(self.root, {'op': 'feedback', 'operation_id': 'surface_feedback_01',
+            'scope': 'page', 'pages': {'alpha': {
+                'revision': head['pages']['alpha']['revision'],
+                'feedback': '标题压到了图',
+                'annotations': [{'x': .1, 'y': .1, 'w': .2, 'h': .2, 'text': '这块留白'}],
+                'rewrite_elements': []}}}, browser=True)
+        self.assertTrue(task['ok'])
+        self.assertEqual(store.state(self.root)['tasks'][task['task_id']]['status'], 'pending')
         # wake：宿主没有 Agent 可唤，落日志（人回对话说一声），文案来自 surface 且 {unit} 被替换
         status, result = http_json(base + '/__review/wake', 'POST', {'unit': 'alpha'})
         self.assertEqual(status, 200)
@@ -224,8 +235,8 @@ class ReviewSurfaceTests(unittest.TestCase):
         # 日志里现在有两种行：`kind=='write'`（整份状态，先落）与 `kind=='wake'`；老格式无 `kind`。
         lines = [row for row in rows if row.get('kind') in (None, 'wake')]
         self.assertEqual(lines[-1]['unit'], 'alpha')
-        self.assertIn('alpha 已定', lines[-1]['text'])
-        self.assertIn('只重出这一页', lines[-1]['text'])
+        self.assertIn('alpha 有新的工作台修改任务', lines[-1]['text'])
+        self.assertIn('只修改任务范围', lines[-1]['text'])
 
     def test_upload_lands_inside_dir_and_an_escape_is_refused(self):
         state = self.start_host()

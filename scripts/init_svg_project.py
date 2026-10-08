@@ -22,6 +22,8 @@ CANONICAL_DIRS = [
     f"{INTERNAL_ROOT}/04_validation",
     f"{INTERNAL_ROOT}/05_review/versions",
     f"{INTERNAL_ROOT}/06_ppt_output",
+    f"{INTERNAL_ROOT}/06_workbench",
+    f"{INTERNAL_ROOT}/07_candidates",
     f"{INTERNAL_ROOT}/ref",
 ]
 
@@ -438,7 +440,7 @@ def main():
     print("User-facing deliverables:")
     print("  02_visual_review.html")
     if assets:
-        print(f"  {INTERNAL_ROOT}/02_svg_source/<page_key>.svg  —— 全部页面（这条路的出口；不导出 PPTX）")
+        print(f"  {INTERNAL_ROOT}/06_workbench/snapshots/<snapshot_id>/snapshot.json")
     else:
         print("  final_deck.pptx")
     print("Internal workspace:")

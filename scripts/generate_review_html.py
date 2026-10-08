@@ -8,17 +8,19 @@
 
 页面里的资产一律走**相对 `dir`（＝项目根）的路径**，由页面向桥要 URL：`await review.asset(rel, {v})`。
 所以这里给的是 `rel` 与 `version`，不是拼好的 URL。
-同时注入每页的 `svgMarkup`（带确定性 `data-review-id` 树路径与隔离前缀 ID），供审阅工作台在舞台上进行元素级点选、框选命中检测与轻量直改（改字、改字号、拖拽位置）。
+同时注入存储分配的稳定元素 ID 与隔离前缀 SVG，供工作台进行元素级编辑。
 """
 import json
 import re
+import shlex
 import uuid
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from project_state import (PNG, REVIEW, SVG, approvals, content, images, local, read,
+from project_state import (PNG, REVIEW, SVG, content, images, local, read,
                            review_snapshot, sha, source_digest, versions, write)
 from review_surface import DRAFT_REL, resolve_module, write_surface
+from workbench_store import ensure, get_page
 
 SNAPSHOT_REL = f'{REVIEW}/snapshot.json'
 VERSIONS_REL = f'{REVIEW}/versions'
@@ -38,25 +40,28 @@ def asset_records(root, key):
             for item in images(root, root/SVG/(key+'.svg'))]
 
 
-def prepare_inline_svg(root, key):
-    """读取 `<key>.svg`，为每个可交互节点打上确定性的 `data-review-id`（XML 树路径），
-    并将内部 `id` 添加页面前缀以避免污染审阅页宿主 DOM ID（如 `#title`、`#slide`）。
-    """
-    svg_path = Path(root) / SVG / f'{key}.svg'
-    if not svg_path.is_file():
-        return ''
+def prepare_inline_svg(root, key, page_record=None):
+    """Only expose store-stamped identities; isolate SVG IDs from the host DOM."""
+    record = page_record if page_record is not None else get_page(root, key)
+    svg_path = Path(record.get('svg_path') or Path(root) / SVG / f'{key}.svg')
     try:
-        tree = ET.parse(svg_path)
-        svg_root = tree.getroot()
+        svg_root = ET.fromstring(record.get('svg') or '')
     except ET.ParseError:
         return ''
+    if any(node.tag.split('}')[-1] == 'style' and (node.text or '').strip()
+           for node in svg_root.iter()):
+        raise ValueError(f'{key}: workbench inline preview does not support SVG CSS rules; use presentation attributes')
 
     prefix = f'rvsvg_{key}_'
     id_map = {}
 
-    def walk_assign(node, path_str):
+    def walk_assign(node):
         tag = node.tag.split('}')[-1]
-        node.set('data-review-id', path_str)
+        identity = node.get('data-workbench-id')
+        if identity:
+            node.set('data-review-id', identity)
+        else:
+            node.attrib.pop('data-review-id', None)
         orig_id = node.get('id')
         if orig_id:
             new_id = prefix + orig_id
@@ -75,11 +80,10 @@ def prepare_inline_svg(root, key):
                         node.set('data-project-ver', ver)
                 except Exception:
                     pass
-        children = list(node)
-        for idx, child in enumerate(children):
-            walk_assign(child, f'{path_str}.{idx}')
+        for child in node:
+            walk_assign(child)
 
-    walk_assign(svg_root, '0')
+    walk_assign(svg_root)
 
     # Rewrite url(#...) and href="#..." references to match prefixed IDs
     if id_map:
@@ -140,7 +144,6 @@ def previous_page_feedback(root, current):
         if not isinstance(item, dict) or item.get('version') == version:
             continue
         carried[key] = {
-            'previousDecision': item.get('decision') or 'pending',
             'previousFeedback': str(item.get('feedback') or ''),
             'previousAnnotations': item.get('annotations') or [],
             'previousAssets': item.get('assets') or [],
@@ -150,16 +153,18 @@ def previous_page_feedback(root, current):
 
 
 def generate(root, template_path=None):
+    root = Path(root).resolve()
+    head = ensure(root)
     c = content(root)
     v = versions(root)
     old = review_snapshot(root)
-    allowed = approvals(root)
     carried = previous_page_feedback(root, v)
     snap = {
         'review_id': uuid.uuid4().hex,
         'versions': v,
-        'order': list(v),
-        'png_hashes': {k: sha(root/PNG/(k+'.png')) for k in v},
+        'order': list(head['order']),
+        'revisions': {k: p.get('revision') for k, p in head['pages'].items()},
+        'png_hashes': {k: sha(root/PNG/(k+'.png')) if (root/PNG/(k+'.png')).is_file() else '' for k in v},
         'assets': {k: asset_records(root, k) for k in v},
         'template_sha256': template_fingerprint(),
         'source_sha256': source_digest(root),
@@ -172,22 +177,36 @@ def generate(root, template_path=None):
         # `draft` 同一个来源（`review_surface.VISUAL['draft_rel']`），只是基准不同：
         # surface 里相对它自己，页面里相对 dir。
         'draft': DRAFT_REL,
+        'order': head['order'],
+        'workbench_root': str(root),
+        'route': head.get('route', 'slides'),
+        'export_command_base': f'python3 {shlex.quote(str(Path(__file__).parent / "orchestrate/ppt_pipeline.py"))} {shlex.quote(str(root))} export',
+        'local_fallback_command': f'python3 {shlex.quote(str(Path(__file__).with_name("review_surface.py")))} {shlex.quote(str(root))}',
         'pages': [],
     }
-    for p in c['pages']:
+    by_key = {p['page_key']: p for p in c['pages']}
+    for key in head['order']:
+        p = by_key[key]
         k = p['page_key']
+        stored = get_page(root, k)
         previous = root/REVIEW/'versions'/f'{k}-{old.get("versions", {}).get(k, "")}.png'
         data['pages'].append({
             'key': k,
             'title': p['title'],
             'png': f'{PNG}/{k}.png',
             'svg': f'{SVG}/{k}.svg',
-            'svgMarkup': prepare_inline_svg(root, k),
+            'svgMarkup': prepare_inline_svg(root, k, stored),
+            'revision': stored['revision'],
+            'svg_path': stored.get('svg_path', ''),
+            'notes': stored.get('notes', ''),
+            'protected': stored.get('protected', {}),
+            'history': stored.get('history', []),
+            'parent': stored.get('parent'),
+            'preview_pending': not (root/'_internal/06_workbench/renders'/str(stored['revision'])/'render.json').is_file(),
             'version': v[k],
             'png_sha256': snap['png_hashes'][k],
             'assets': snap['assets'][k],
             'previous': f'{VERSIONS_REL}/{previous.name}' if previous.exists() else '',
-            'decision': 'approved' if allowed.get(k, {}).get('decision') == 'approved' else 'pending',
             **carried.get(k, {}),
         })
     tpl_file = Path(template_path) if template_path else (Path(__file__).resolve().parents[1]/'assets/review/review.html')

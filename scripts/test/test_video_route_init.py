@@ -289,15 +289,22 @@ class VideoRouteInitTests(VideoRouteFixtures, unittest.TestCase):
         self.assertNotIn("No such file", payload.get("instruction", ""))
         self.assertNotIn("Errno", payload.get("instruction", ""))
         self.assertIn("还没有画出这些页面", payload["instruction"])
-        self.assertEqual(payload["state"], "CREATE")
+        self.assertEqual(payload["state"], "WORKBENCH")
         self.assertEqual(payload["pages"], ["screen-beat-01"])
 
-        (root / SVG / "screen-beat-01.svg").write_text(
+        from workbench_store import commit
+        checked=commit(root,{'op':'checkout','operation_id':'checkout_first','page_key':'screen-beat-01'})
+        self.assertTrue(checked['ok'],checked)
+        Path(checked['candidate']).parent.mkdir(parents=True,exist_ok=True)
+        Path(checked['candidate']).write_text(
             '<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080">'
             '<rect width="1920" height="1080" fill="#FFFFFF"/>'
             '<text x="120" y="180" font-size="48" font-family="Arial" fill="#111111">Evidence</text></svg>',
             encoding="utf-8",
         )
+        saved=commit(root,{'op':'save','operation_id':'save_first','page_key':'screen-beat-01',
+                          'candidate':checked['candidate'],'base_revision':checked['base_revision'],'author':'model'})
+        self.assertTrue(saved['ok'],saved)
 
         # A page without source.md must still version: the plan is the material.
         page = content(root)["pages"][0]
@@ -574,7 +581,7 @@ class ProjectStateTests(VideoRouteFixtures, unittest.TestCase):
         self.assertEqual(record["level"], "warning")
         self.assertIn("变了", record["message"])
         # warning 不拦路：状态仍然是「去画页面」。
-        self.assertEqual(payload["state"], "CREATE")
+        self.assertEqual(payload["state"], "WORKBENCH")
 
     def test_script_hash_mismatch_is_an_error(self):
         pack = self.pack(script_text="改过的口播稿\n", declared_hash="a" * 64)
@@ -706,8 +713,8 @@ class ProjectStateTests(VideoRouteFixtures, unittest.TestCase):
         root = self.tmp_path / "video"
         result = init(root, "--assets", pack / "assets", "--plan", pack / "visual-plan.json")
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("02_svg_source/<page_key>.svg", result.stdout)
-        self.assertIn("这条路的出口", result.stdout)
+        self.assertIn("06_workbench/snapshots/<snapshot_id>/snapshot.json", result.stdout)
+        self.assertIn("snapshot.json", result.stdout)
         self.assertNotIn("final_deck.pptx", result.stdout)
 
         source = self.tmp_path / "brief.md"

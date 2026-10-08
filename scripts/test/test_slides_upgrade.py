@@ -19,6 +19,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from pptx import Presentation
 
@@ -36,6 +37,7 @@ from template_library import LIBRARY_ROOT, apply_template, list_templates, valid
 import test_v5 as fixtures  # noqa: E402
 from ppt_pipeline import make_review, next_action, unresolved  # noqa: E402
 from review_feedback import consume  # noqa: E402
+import workbench_store as store  # noqa: E402
 
 
 TORTURE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
@@ -225,7 +227,7 @@ class MultimodalTemplatePackTests(unittest.TestCase):
 
 
 class ReviewWorkbenchInlineEditsTests(unittest.TestCase):
-    def test_svg_edits_writeback_and_delete_on_consume(self):
+    def test_svg_edits_use_store_save_and_legacy_payload_is_recovery_only(self):
         fixture = fixtures.V5Tests()
         fixture.setUp()
         try:
@@ -239,39 +241,30 @@ class ReviewWorkbenchInlineEditsTests(unittest.TestCase):
                 encoding="utf-8",
             )
             fixture.seal()
-            snap = make_review(root)
-            payload = {
-                "review_id": snap["review_id"],
-                "pages": {
-                    "alpha": {
-                        "decision": "approved",
-                        "feedback": "",
-                        "annotations": [],
-                        "assets": [],
-                        "svg_edits": [
-                            {"review_id": "0.1", "tag": "rect", "dx": 0, "dy": 0, "deleted": True},
-                            {"review_id": "0.2", "tag": "text", "text": "Direct Title", "font_size": 52, "dx": 24, "dy": 12},
-                        ],
-                    },
-                    "omega": {
-                        "decision": "approved",
-                        "feedback": "",
-                        "annotations": [],
-                        "assets": [],
-                    },
-                },
-                "overall_feedback": "",
-            }
-            intake = fixture.submit(payload)
-            self.assertFalse(intake["stale"])
-            self.assertIn("alpha", intake["svg_edits_applied"])
-            alpha_svg = (root / ps.SVG / "alpha.svg").read_text(encoding="utf-8")
+            store.ensure(root)
+            page = store.get_page(root, 'alpha')
+            tree = ET.fromstring(page['svg'])
+            rect_id = next(node.get(store.ID_ATTR) for node in tree.iter()
+                           if node.tag.split('}')[-1] == 'rect' and node.get('fill') == '#E2E8F0')
+            text_id = next(node.get(store.ID_ATTR) for node in tree.iter()
+                           if node.tag.split('}')[-1] == 'text')
+            saved = store.commit(root, {'op': 'save', 'operation_id': 'inline_store_save',
+                'page_key': 'alpha', 'base_revision': page['revision'], 'author': 'human',
+                'edits': [{'element_id': rect_id, 'kind': 'delete'},
+                          {'element_id': text_id, 'kind': 'text', 'value': 'Direct Title'},
+                          {'element_id': text_id, 'kind': 'attributes',
+                           'attributes': {'font-size': '52', 'x': '144', 'y': '192'}}]}, browser=True)
+            self.assertTrue(saved['ok'], saved)
+            alpha_svg = store.get_page(root, 'alpha')['svg']
             self.assertNotIn("#E2E8F0", alpha_svg, "Deleted rect 0.1 must be removed from alpha.svg")
             self.assertIn("Direct Title", alpha_svg)
             self.assertIn('font-size="52"', alpha_svg)
-            self.assertEqual(unresolved(root), [])
-            self.assertTrue(ps.approved(root))
-            self.assertEqual(next_action(root)["state"], "EXPORT")
+            raw = {'pages': {'alpha': {'svg_edits': [{'review_id': rect_id, 'deleted': True}]}}}
+            ps.write(root / ps.REVIEW / 'feedback.json', raw)
+            intake = consume(root)
+            self.assertEqual(intake['raw_pending'], raw)
+            self.assertEqual(intake['svg_edits_applied'], [])
+            self.assertEqual(store.get_page(root, 'alpha')['svg'], alpha_svg)
         finally:
             fixture.tearDown()
 

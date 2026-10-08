@@ -1,12 +1,5 @@
 #!/usr/bin/env python3
-"""视频路线与幻灯片路线是两个终态：一个有 PPTX，一个到 SVG 为止。
-
-用户拿到这套页面的方式不同（做 PPT 还是录视频），所以「完成」的定义也不同：
-
-- 幻灯片：`final_deck.pptx` 存在、hash 对得上、导出后复核过。
-- 视频画面：全部页面 `check` 无 error + **作者提交过整套审阅**；`final_deck.pptx`、
-  `EXPORT`、`EXPORT_VERIFY` 都不出现在这条路上，审阅是门不是可选项。
-"""
+"""Persistent routes: technical evidence remains, ordinary page approvals are retired."""
 import json
 import subprocess
 import sys
@@ -33,7 +26,7 @@ PIPELINE = SCRIPTS / "orchestrate" / "ppt_pipeline.py"
 def svg_markup(text="Evidence"):
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{FRAME_W_INT}" height="{FRAME_H_INT}" '
             f'viewBox="{FRAME_VIEWBOX}"><rect width="{FRAME_W_INT}" height="{FRAME_H_INT}" fill="#FFFFFF"/>'
-            f'<text x="120" y="180" font-size="48" font-family="Arial" fill="#111111">{text}</text></svg>')
+            f'<text id="title" x="120" y="180" font-size="48" font-family="Arial" fill="#111111">{text}</text></svg>')
 
 
 class RouteTerminalStateTests(unittest.TestCase):
@@ -98,6 +91,8 @@ class RouteTerminalStateTests(unittest.TestCase):
 
     def seal(self, verdict="clean"):
         """造出「check 过、也看过图」的状态：这是夹具，不是流程。"""
+        from workbench_store import ensure
+        ensure(self.root)
         records = {}
         for key, version in versions(self.root).items():
             png = self.root / PNG / f"{key}.png"
@@ -111,11 +106,7 @@ class RouteTerminalStateTests(unittest.TestCase):
         write(self.root / VALIDATION / "inspections.json", records)
 
     def submit_review(self):
-        """按**新接缝**交一套审阅：页面经宿主写整份状态（宿主原样落盘）→ Skill 收件。
-
-        以前这里调 `save_feedback`（旧服务器的写入口）。写入口退役了，但这条用例要证的事
-        一个字没变：整套批准之后视频路线才算过关。
-        """
+        """A legacy approval file cannot close the persistent workbench."""
         from ppt_pipeline import make_review
         snapshot = make_review(self.root)
         payload = {"review_id": snapshot["review_id"],
@@ -147,7 +138,7 @@ class RouteTerminalStateTests(unittest.TestCase):
         self.build_slides_project()
         (self.root / DIRECTION).unlink()
         # 幻灯片路线保持现状：方向文件是推荐的前置，不是门。
-        self.assertEqual(next_action(self.root)["state"], "CREATE")
+        self.assertEqual(next_action(self.root)["state"], "WORKBENCH")
 
     # ---- B4：next 给动作，不给 errno ----
 
@@ -156,32 +147,32 @@ class RouteTerminalStateTests(unittest.TestCase):
         for key in self.keys:
             (self.root / SVG / f"{key}.svg").unlink()
         payload = next_action(self.root)
-        self.assertEqual(payload["state"], "CREATE")
+        self.assertEqual(payload["state"], "WORKBENCH")
         self.assertEqual(payload["pages"], self.keys)
         self.assertNotIn("No such file", payload["instruction"])
         self.assertNotIn("Errno", payload["instruction"])
         self.assertIn("beat-01", payload["instruction"])
         self.assertIn("还没有画出这些页面", payload["instruction"])
         # 原始异常仍然留痕，只是不当指令用。
-        self.assertIn("No such file", payload.get("detail", ""))
+        self.assertIn("no saved revision", payload.get("detail", ""))
 
     def test_next_names_only_the_pages_that_are_missing(self):
         self.build_video_project()
         (self.root / SVG / "beat-02.svg").unlink()
         payload = next_action(self.root)
-        self.assertEqual(payload["state"], "CREATE")
+        self.assertEqual(payload["state"], "WORKBENCH")
         self.assertEqual(payload["pages"], ["beat-02"])
         self.assertIn("check --pages beat-02", payload["instruction"])
 
-    # ---- B2／B3：终态与审阅是门 ----
+    # ---- Review is an available action, not a terminal gate. ----
 
-    def test_review_is_a_gate_and_no_export_option_is_offered(self):
+    def test_review_is_available_and_snapshot_export_needs_no_approval(self):
         self.build_video_project()
         self.seal()
         payload = next_action(self.root)
-        self.assertEqual(payload["state"], "VISUAL_REVIEW")
-        self.assertFalse(payload["export_available"])
-        self.assertIn("02_svg_source", payload["deliverable"])
+        self.assertEqual(payload["state"], "WORKBENCH")
+        self.assertTrue(payload["export_available"])
+        self.assertIn("review", payload["actions"])
         self.assertNotIn("go straight to export", payload["instruction"])
         # 这条路上不出现 PPTX 交付物，也不出现导出状态。
         self.assertNotIn("final_deck.pptx", json.dumps(payload, ensure_ascii=False))
@@ -191,37 +182,44 @@ class RouteTerminalStateTests(unittest.TestCase):
         self.build_video_project()
         self.seal(verdict="must_fix")
         payload = next_action(self.root)
-        self.assertEqual(payload["state"], "CREATE")
+        self.assertEqual(payload["state"], "WORKBENCH")
         self.assertEqual(payload["pages"], self.keys)
 
-    def test_complete_needs_the_review_record_and_no_pptx(self):
+    def test_review_record_does_not_make_a_permanent_terminal_state(self):
         self.build_video_project()
         self.seal()
         self.submit_review()
         payload = next_action(self.root)
-        self.assertEqual(payload["state"], "COMPLETE")
-        self.assertIn("02_svg_source", payload["deliverable"])
+        self.assertEqual(payload["state"], "WORKBENCH")
+        self.assertTrue(payload['export_available'])
+        self.assertIn('export',payload['actions'])
         self.assertNotIn("pptx", payload)
         self.assertFalse((self.root / "final_deck.pptx").exists())
         self.assertEqual(payload["pages"], self.keys)
         # 终态里没有一个字在说 PPTX。
         self.assertNotIn("final_deck.pptx", json.dumps(payload, ensure_ascii=False))
 
-    def test_page_changed_after_review_sends_it_back_to_review(self):
+    def test_page_changed_after_review_remains_workbench(self):
         self.build_video_project()
         self.seal()
         self.submit_review()
-        self.assertEqual(next_action(self.root)["state"], "COMPLETE")
-        (self.root / SVG / "beat-01.svg").write_text(svg_markup("Changed"), encoding="utf-8")
+        self.assertEqual(next_action(self.root)["state"], "WORKBENCH")
+        from workbench_store import commit
+        checked=commit(self.root,{"op":"checkout","operation_id":"checkout_changed","page_key":"beat-01"})
+        path=Path(checked["candidate"]);path.write_text(path.read_text().replace("Evidence","Changed"))
+        saved=commit(self.root,{"op":"save","operation_id":"save_changed","author":"model","page_key":"beat-01",
+                               "candidate":checked["candidate"],"base_revision":checked["base_revision"]})
+        self.assertTrue(saved["ok"],saved)
         self.seal()
         payload = next_action(self.root)
-        self.assertEqual(payload["state"], "VISUAL_REVIEW")
+        self.assertEqual(payload["state"], "WORKBENCH")
 
-    def test_export_and_export_inspect_are_refused_on_the_video_route(self):
+    def test_video_export_is_snapshot_not_pptx(self):
         self.build_video_project()
         self.seal()
-        with self.assertRaisesRegex(ValueError, "不导出 PPTX"):
-            export(self.root)
+        result=export(self.root)
+        self.assertEqual(result["route"],"video")
+        self.assertTrue(Path(result["snapshot_path"]).is_file())
         from ppt_pipeline import export_inspect
         with self.assertRaisesRegex(ValueError, "不导出 PPTX"):
             export_inspect(self.root, "note", [])
@@ -234,14 +232,14 @@ class RouteTerminalStateTests(unittest.TestCase):
                                 capture_output=True, text=True)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["route"], "video")
-        self.assertEqual(payload["state"], "VISUAL_REVIEW")
+        self.assertEqual(payload["state"], "WORKBENCH")
 
     def test_slides_route_still_ends_at_the_pptx(self):
         self.build_slides_project()
         self.seal()
         self.submit_review()
         payload = next_action(self.root)
-        self.assertEqual(payload["state"], "EXPORT")
+        self.assertEqual(payload["state"], "WORKBENCH")
         self.assertEqual(payload["route"], "slides")
 
     # ---- B1：inspect 的牙齿 ----
@@ -310,7 +308,7 @@ class RouteTerminalStateTests(unittest.TestCase):
         records["beat-01"].pop("verdict")
         write(self.root / VALIDATION / "inspections.json", records)
         payload = next_action(self.root)
-        self.assertEqual(payload["state"], "CREATE")
+        self.assertEqual(payload["state"], "WORKBENCH")
         self.assertIn("beat-01", payload["pages"])
 
 

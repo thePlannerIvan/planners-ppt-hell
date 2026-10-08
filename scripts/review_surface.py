@@ -54,14 +54,15 @@ VISUAL = {
     # 曾经只有 feedback：于是「我改了东西」和「告诉模型可以动手」被绑成一个动作 ——
     # 不提交就只活在内存里，刷新即丢（真人反馈 2026-10-05）。
     'draft_rel': 'draft.json',
-    'watch': ['snapshot.json'],
+    'watch': ['snapshot.json', '../06_workbench/head.json'],
     'id': 'planners-ppt-hell/visual',
-    'title': '整套页面审阅',
-    'description': '逐页看实际渲染图，框选或写意见；每页可单独提交，模型只重出提交的那一页。',
+    'title': '页面工作台',
+    'description': '持续编辑 SVG 页面，保存当前版本并提交修改任务。',
     # 逐页审阅要人补图（换一张渲染图、贴一张截图）→ 声明上传能力。
-    'capabilities': ['asset-upload', 'draft'],
+    'capabilities': ['asset-upload', 'draft', 'command'],
+    'command_backend': 'svg-workbench/1',
     # 逐页：单位是 page_key，所以唤醒语带 `{unit}`；页面会用整句覆盖（自带决定）。
-    'wake_text': '{unit} 已定；只重出这一页，其余页不要动。',
+    'wake_text': '{unit} 有新的工作台修改任务；读取持久任务及其页面版本，只修改任务范围。',
 }
 
 # ── 面二：模板审阅（整批决定 + 模板整体版本）────────────────────────────────────
@@ -146,6 +147,7 @@ def surface_document(root, name='visual'):
         # 人点「本页要求修改」的语义是"现在就按这个改"，所以走步骤边界。
         'wake': {'mode': 'steer', 'text': face['wake_text']},
         'capabilities': list(face['capabilities']),
+        **({'command_backend': face['command_backend']} if face.get('command_backend') else {}),
         'watch': list(face['watch']),
     }
 

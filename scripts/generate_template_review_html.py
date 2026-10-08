@@ -21,9 +21,12 @@ import html
 import json
 import re
 import uuid
+import xml.etree.ElementTree as ET
 
 from project_state import PROJECT, TEMPLATE_REVIEW_SNAPSHOT, sha, template_version, write
 from pathlib import Path
+ET.register_namespace('', 'http://www.w3.org/2000/svg')
+ET.register_namespace('xlink', 'http://www.w3.org/1999/xlink')
 
 # 页面里的资产引用一律**相对 `dir`**（＝项目根），由页面经桥取 URL（R2 的第一个基准）。
 # 原来写的是 `/_internal/...` 这种绝对路径：不透明帧里它指向宿主 origin，取不到。
@@ -62,6 +65,56 @@ def inline_canvas(path):
             return tag_text
         return tag_text[:-1] + f' data-asset="{MEDIA_PREFIX}{already.group(3)}">'
     return IMAGE_TAG.sub(tag, text)
+
+
+def inline_pack_canvas(root,path,tokens):
+    tree=ET.parse(path).getroot()
+    style=ET.Element('{http://www.w3.org/2000/svg}style')
+    style.text=tokens
+    tree.insert(0,style)
+    for node in tree.iter():
+        if node.tag.split('}')[-1]!='image': continue
+        attr='href' if 'href' in node.attrib else '{http://www.w3.org/1999/xlink}href'
+        href=node.get(attr,'')
+        if href.startswith('data:'): continue
+        target=(path.parent/href).resolve()
+        if root not in target.parents or not target.is_file():
+            raise ValueError('Template image must resolve inside project: '+href)
+        rel=target.relative_to(root).as_posix()
+        node.set(attr,rel);node.set('data-asset',rel)
+    return ET.tostring(tree,encoding='unicode')
+
+
+def generate_pack_review(root):
+    from template.template_library import validate_pack_dir
+    pack=root/PROJECT/'template_pack'
+    validation=validate_pack_dir(pack)
+    if not validation['valid']: raise ValueError('Incomplete template pack: '+str(validation['issues']))
+    tokens=(pack/'tokens.css').read_text(encoding='utf-8')
+    paths=[pack/'skyline_shell.svg',*sorted((pack/'primitives').glob('*.svg'))]
+    layouts=[path.relative_to(pack).as_posix() for path in paths]
+    cards=[]
+    for index,(path,identity) in enumerate(zip(paths,layouts),1):
+        cards.append(f'''<article class="card"><header><h2>{esc(identity)}</h2></header>
+<div class="compare"><section class="canvas">{inline_pack_canvas(root,path,tokens)}</section></div>
+<div class="decision"><fieldset data-decision="{esc(identity)}"><legend>此原语如何处理？</legend>
+<label class="choice pass"><input type="radio" name="decision-{index}" value="pass"><span>通过</span></label>
+<label class="choice discard"><input type="radio" name="decision-{index}" value="discard"><span>舍弃</span></label>
+<label class="choice revise"><input type="radio" name="decision-{index}" value="revise"><span>返修</span></label></fieldset>
+<textarea data-feedback="{esc(identity)}" placeholder="单独反馈"></textarea></div></article>''')
+    anchors=''.join(f'<figure><img src="{esc(path.relative_to(root).as_posix())}" '
+                    f'data-asset="{esc(path.relative_to(root).as_posix())}" alt="{esc(path.name)}"></figure>'
+                    for path in sorted((pack/'anchors').glob('*.png')))
+    contact=f'<pre>{esc(tokens)}</pre><pre>{esc((pack/"SPEC.md").read_text(encoding="utf-8"))}</pre><div class="thumbs">{anchors}</div>'
+    version=template_version(root);review_id=uuid.uuid4().hex
+    page=(PAGE.replace('__CARDS__',''.join(cards)).replace('__CONTACT__',contact)
+          .replace('__LAYOUTS__',json.dumps(layouts,ensure_ascii=False))
+          .replace('__REVIEW_ID__',review_id).replace('__VERSION__',version[:12]))
+    out=root/'00_template_review.html';out.write_text(page,encoding='utf-8')
+    write(root/PROJECT/TEMPLATE_REVIEW_SNAPSHOT,
+          {'review_id':review_id,'template_version':version,'html_sha256':sha(out),
+           'layouts':layouts,'package_format':'four_piece'})
+    return out
 
 
 PAGE = '''<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>模板人工审阅</title>
@@ -241,6 +294,8 @@ def main():
     args = parser.parse_args()
     root = Path(args.project_dir).resolve()
     project = root / "_internal" / "00_project"
+    if (project/'template_pack').is_dir():
+        print(generate_pack_review(root));return
     registry = load(project / "fidelity_template" / "template_registry.json")
     profile = load(project / "template_profile.json")
     assets = load(project / "template_asset_registry.json")

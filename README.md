@@ -130,7 +130,7 @@ git clone https://github.com/thePlannerIvan/planners-ppt-hell.git ~/.claude/skil
 
 没有模板时自主选择视觉；严格品牌复用与模板提取按需启用。画幅默认 16:9，开局确认一次（唯一 owner：`scripts/canvas_frame.py`）；模板库在开局挑一个即可，不需要经过模板提取。
 
-导出前会跑检查画面（与转换 PPT 共用同一套坐标几何），未审阅时提醒一次；审阅不是导出的前置门。
+普通页面没有批准门。导出固定快照并运行技术检查；每个快照输出存入 _internal/06_ppt_output/<snapshot_id>/，根 final_deck.pptx 只是最近成功输出的兼容副本。
 
 ## 视频画面路线
 
@@ -139,9 +139,9 @@ python scripts/init_svg_project.py <project>/<画面目录> \
     --assets <包>/assets --plan <包>/visual-plan.json
 ```
 
-视觉身份来自 `video-craft` 的**风格库**（`visual/themes/`），**不套模板库**——模板库的条目带锁层，锁层里烤着满幅不透明矩形和一条落在字幕区上的页脚线。完整任务见 [references/workflow/03_video_route.md](references/workflow/03_video_route.md)；这条路上**整套审阅是门**，出口是 `_internal/02_svg_source/<page_key>.svg` 全部页面。
+视觉身份来自 Video Craft 的主题或已确认自主方向。普通 SVG 不要求逐页/整套批准，录制或交接用不可变 snapshot.json；完整流程见 [视频路线](references/workflow/03_video_route.md)。
 
-v5 不使用独立 Layout 审阅、强制子 Agent 或三页批次门禁。旧项目需用已归档的旧版本完成，不能直接混用新状态机。
+工作台持续可编辑，没有永久 COMPLETE。5.0 项目首次接入导入既有 SVG；更早项目不混用旧状态机。模板入库仍需当前包人工确认。
 
 ## 验证
 
@@ -178,3 +178,8 @@ planners-ppt-hell/
 代码以 [AGPL-3.0-only](LICENSE) 发布；请保留 [NOTICE](NOTICE) 中的项目来源与作者信息。闭源授权、私有部署、企业模板适配、工作流定制与培训见 [COMMERCIAL.md](COMMERCIAL.md)。
 
 由阿祖不看 TVC 创建与维护 · https://demyth.info · Lawyif@163.com。
+
+## 工作台版本与选定输出
+
+模型用 store checkout → 编辑候选 → save，基版与用户修改保护由程序验证。_internal/02_svg_source 是可重建视图，直接覆盖会被检测。
+从网页输出按钮启动、指定既有快照或复核历史输出时，读 [项目契约的选定版本输出](references/contracts/project_contract.md#选定版本输出)。转换器本身无审批环境变量门；项目输出仍走控制器快照与技术检查。

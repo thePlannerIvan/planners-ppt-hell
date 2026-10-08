@@ -16,7 +16,7 @@ from project_state import (CONTENT, PNG, PROJECT, REVIEW, SVG, TEMPLATE_REVIEW_S
                            images, inspected, manifest, read, review_current, review_snapshot,
                            sha, sync, template_version, versions, write)
 from ppt_pipeline import next_action, make_review, resolve, export, unresolved
-from review_feedback import archive_consumed, consume, read_intake, unrecorded_writes
+from review_feedback import archive_consumed, consume, read_intake, unrecorded_writes, validate_document
 from validate_svg_layout import validate_file
 S=Path(__file__).resolve().parents[1]
 
@@ -63,7 +63,7 @@ class V5Tests(unittest.TestCase):
     def page_data(self,key):
         return next(item for item in self.review_data()['pages'] if item['key']==key)
     def test_no_layout_or_batch_gate(self):
-        m=manifest(self.root);self.assertNotIn('batch_size',m);self.assertFalse((self.root/'_internal/01_layout_plan').exists());self.assertEqual(next_action(self.root)['state'],'VISUAL_REVIEW')
+        m=manifest(self.root);self.assertNotIn('batch_size',m);self.assertFalse((self.root/'_internal/01_layout_plan').exists());self.assertEqual(next_action(self.root)['state'],'WORKBENCH')
     def test_stable_ids_reorder_without_renumber(self):
         c=content(self.root);c['pages'].reverse();write(self.root/CONTENT,c);self.assertEqual(sync(self.root)['pages'][0]['page_key'],'omega')
     def test_old_projects_rejected_explicitly(self):
@@ -71,6 +71,7 @@ class V5Tests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'older workflow'):manifest(self.root)
     def test_metadata_not_required_for_editable_svg(self):
         r=validate_file(self.root/SVG/'alpha.svg');self.assertFalse(any('METADATA' in x['code'] or 'LAYOUT' in x['code'] for x in r['issues']))
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_export_without_review_reminds_instead_of_blocking(self):
         # 导出不再要求"整套人工审阅已批准"（references/workflow/07_visual_review.md）。
         # 导出时跑检查画面（与转换 PPT 同一套几何算法），没审过就提醒一次。
@@ -78,8 +79,10 @@ class V5Tests(unittest.TestCase):
         self.assertFalse(out['reviewed']);self.assertIn('review_reminder',out)
         self.assertTrue((self.root/'final_deck.pptx').is_file())
         self.assertEqual(export(self.root)['pptx_sha256'],out['pptx_sha256'])
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_human_approval_bound_to_actual_version(self):
         p=self.payload();self.submit(p);self.assertTrue(approved(self.root));self.svg('alpha','Changed');self.assertFalse(approved(self.root))
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_stale_submission_does_not_count_and_is_reported(self):
         """陈旧提交的归宿变了，判据没变。
 
@@ -111,25 +114,22 @@ class V5Tests(unittest.TestCase):
         self.assertIn('stale',template_review_stale_error(self.root,{'review_id':'r1'}))
         (self.root/PROJECT/TEMPLATE_REVIEW_SNAPSHOT).unlink()
         self.assertIn('stale',template_review_stale_error(self.root,{'review_id':'r1'}))
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_unchanged_page_retains_approval(self):
         self.submit(self.payload());self.svg('alpha','Changed');self.seal();self.assertEqual(set(approvals(self.root)),{'omega'})
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_png_tamper_invalidates_approval(self):
         self.submit(self.payload());Image.new('RGB',(192,108),'red').save(self.root/PNG/'alpha.png');self.assertFalse(approved(self.root))
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_source_change_invalidates_review(self):
         self.submit(self.payload());(self.root/PROJECT/'source/source.md').write_text('New facts');self.assertFalse(approved(self.root))
     def test_source_rewrite_alone_does_not_move_page_versions(self):
-        """材料副本整份重写：单页版本不动（因此看图记录与直改交代不作废），但整套审阅失效。
-
-        材料级绑定归 `review_current`；单页版本只吃这一页自己的东西。2026-10-07 实测的
-        代价是：整份 `source.md` 的哈希曾经算进 `page_version`，于是改一页标题就让 17 页
-        全部重渲重看，并让 `ack-human-edit` 的交代反复失效。
-        """
-        self.submit(self.payload())
-        self.assertTrue(review_current(self.root))
+        """Source-copy changes do not invalidate otherwise unchanged page render evidence."""
         before=versions(self.root)
+        records={key:read(self.root/VALIDATION/(key+'.json')) for key in before}
         (self.root/PROJECT/'source/source.md').write_text('材料副本被整份重写')
         self.assertEqual(before,versions(self.root),'单页版本不该被材料副本牵连')
-        self.assertFalse(review_current(self.root),'整套审阅仍应因材料变化失效')
+        self.assertEqual(records,{key:read(self.root/VALIDATION/(key+'.json')) for key in before})
     def test_one_page_edit_moves_only_that_page_version(self):
         before=versions(self.root)
         c=content(self.root);c['pages'][0]['notes']='只改这一页的讲述'
@@ -154,6 +154,7 @@ class V5Tests(unittest.TestCase):
         ins=read(self.root/VALIDATION/'inspections.json')['alpha']
         self.assertEqual(ins['carried_from'],rec_old['png_sha256'])
         self.assertIn('carried_at',ins)
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_previous_round_revise_is_normalised_to_pending(self):
         """上一轮那句「要求修改」随新版本带回来时，就只是历史，不该把整套审阅永久卡死。
 
@@ -174,6 +175,7 @@ class V5Tests(unittest.TestCase):
         self.assertEqual(f['pages']['alpha']['decision'],'pending')
         self.assertTrue(f['pages']['alpha'].get('already_resolved'))
         self.assertEqual(f['items'],[],'同一句话不该再长出一条待办')
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_whole_deck_submit_settles_the_review(self):
         """作者点「整套提交」= 对整套的决定，未处理的页也算批准（审阅文档原话）。
 
@@ -190,6 +192,7 @@ class V5Tests(unittest.TestCase):
         self.submit(p,stamp=stamp)
         self.assertEqual(read(self.root/REVIEW/'feedback.json')['pages']['alpha']['decision'],'pending')
         self.assertTrue(approved(self.root),'整套已定之后，未处理页不该把通过挡住')
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_a_later_page_revise_blocks_approval_again(self):
         """整套已定之后又提了一条修改：那一页仍然是 revise，就还不能算通过。"""
         make_review(self.root)
@@ -202,6 +205,7 @@ class V5Tests(unittest.TestCase):
         q=self.payload();q['pages']['alpha']['feedback']='这一页标题要重写'
         self.submit(q)
         self.assertFalse(approved(self.root))
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_unrecorded_write_is_recovered_from_the_intake_log(self):
         """唤醒到了、文件没写的提交：接入日志里还留着全文，收件时必须接回来（G-32）。"""
         self.submit(self.payload())
@@ -228,34 +232,41 @@ class V5Tests(unittest.TestCase):
         rec_new={'version':'v2','errors':0,'png_sha256':'0'*64,'validator':{}}
         self.assertFalse(carry_inspection(self.root,'alpha',rec_old['png_sha256'],rec_new),
                          '图真的换了就必须重看')
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_html_change_invalidates_approval(self):
         self.submit(self.payload());p=self.root/'02_visual_review.html';p.write_text(p.read_text()+'<!-- changed -->');self.assertFalse(approved(self.root))
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_feedback_overrides_approved(self):
         p=self.payload();p['pages']['alpha']['feedback']='Rearrange the whole page';self.submit(p);f=read(self.root/REVIEW/'feedback.json');self.assertEqual(f['pages']['alpha']['decision'],'revise');self.assertEqual(next_action(self.root)['state'],'CREATE')
 
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_page_order_round_trips_through_feedback(self):
         p=self.payload();p['page_order']=['omega','alpha']
         result=self.submit(p)
         self.assertEqual(result['document']['page_order'],['omega','alpha'])
         self.assertEqual(read(self.root/REVIEW/'feedback.json')['page_order'],['omega','alpha'])
 
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_page_order_must_cover_exact_page_set(self):
         p=self.payload();p['page_order']=['omega','missing']
         with self.assertRaisesRegex(ValueError,'page_order must contain the exact page set'):
             self.submit(p)
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_feedback_needs_actual_change_to_resolve(self):
         p=self.payload();p['pages']['alpha']['feedback']='Change';self.submit(p);fid=read(self.root/REVIEW/'feedback.json')['items'][0]['id']
         with self.assertRaisesRegex(ValueError,'changed artifact'):resolve(self.root,fid,'Done')
         self.svg('alpha','Changed');resolve(self.root,fid,'Changed headline');self.seal();make_review(self.root)
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_feedback_all_items_block_review(self):
         p=self.payload();p['pages']['alpha']['feedback']='Change';p['pages']['omega']['feedback']='Change';self.submit(p)
         with self.assertRaisesRegex(ValueError,'every submitted'):make_review(self.root)
     def test_region_bounds_validated(self):
         p=self.payload();p['pages']['alpha']['annotations']=[{'x':.9,'y':0,'w':.5,'h':.2,'text':'Fix'}]
-        with self.assertRaisesRegex(ValueError,'inside'):self.submit(p)
+        with self.assertRaisesRegex(ValueError,'inside'):validate_document(self.root,p,strict=False)
     def test_upload_path_traversal_blocked(self):
         p=self.payload();p['pages']['alpha']['assets']=[{'asset_key':'new','operation':'add','path':'../source.md','fit':'contain','ratio':'original','anchor':'center'}]
-        with self.assertRaisesRegex(ValueError,'outside'):self.submit(p)
+        with self.assertRaisesRegex(ValueError,'outside'):validate_document(self.root,p,strict=False)
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_new_image_reaches_creation_feedback(self):
         p=self.payload();image=self.root/REVIEW/'uploads/alpha/test.png';image.parent.mkdir(parents=True);Image.new('RGB',(20,20),'blue').save(image)
         p['pages']['alpha']['assets']=[{'asset_key':'new','operation':'add','path':image.relative_to(self.root).as_posix(),'fit':'cover','ratio':'5:4','anchor':'top'}]
@@ -278,8 +289,7 @@ class V5Tests(unittest.TestCase):
             assets.append({'asset_key':anchor,'operation':'add','path':path.relative_to(self.root).as_posix(),
                            'fit':'cover','ratio':'1:1','anchor':anchor})
         p=self.payload();p['pages']['alpha']['assets']=assets
-        self.submit(p)
-        saved=read(self.root/REVIEW/'feedback.json')['pages']['alpha']['assets']
+        saved=validate_document(self.root,p,strict=False)['pages']['alpha']['assets']
         self.assertEqual(sorted(a['anchor'] for a in saved),
                          ['bottom','bottom-left','bottom-right','center','left','right','top','top-left','top-right'])
     def test_unknown_image_alignment_is_rejected(self):
@@ -289,7 +299,8 @@ class V5Tests(unittest.TestCase):
         p=self.payload()
         p['pages']['alpha']['assets']=[{'asset_key':'new','operation':'add','path':path.relative_to(self.root).as_posix(),
                                         'fit':'cover','ratio':'1:1','anchor':'middle'}]
-        with self.assertRaisesRegex(ValueError,'Invalid anchor'):self.submit(p)
+        with self.assertRaisesRegex(ValueError,'Invalid anchor'):validate_document(self.root,p,strict=False)
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_review_page_is_regenerated_when_the_review_template_changes(self):
         """审阅页模板升级之后，已经生成过的页面要重出。
 
@@ -340,6 +351,7 @@ class V5Tests(unittest.TestCase):
         self.assertNotIn('EMPTY_SLIDE',codes(title))
     def test_check_cache_evidence_token_changes_on_new_version(self):
         old=read(self.root/VALIDATION/'alpha.json');self.svg('alpha','New');self.seal();self.assertNotEqual(digest(old),digest(read(self.root/VALIDATION/'alpha.json')))
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_regenerated_review_carries_the_note_of_a_reworked_page(self):
         """被重出的那一页：上一轮的意见必须随新页面带回来。
 
@@ -362,6 +374,7 @@ class V5Tests(unittest.TestCase):
         omega=self.page_data('omega')
         self.assertNotIn('previousFeedback',omega)
         self.assertEqual(omega['decision'],'approved')
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_next_reports_the_intake_without_clobbering_the_unresolved_items(self):
         """收件信息与「待处理条目」不能同名。
 
@@ -378,6 +391,7 @@ class V5Tests(unittest.TestCase):
         self.assertFalse(result['review_intake']['stale'])
         self.assertTrue(result['review_intake']['archived'].endswith('round-01.json'))
 
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_a_resolved_item_never_comes_back_and_a_new_wording_still_does(self):
         """意见的生命周期：`resolve` 之后那条意见结束，同一页的同一句话**永远不再成为待办**。
 
@@ -405,6 +419,7 @@ class V5Tests(unittest.TestCase):
         self.assertEqual([i['pages'] for i in third['document']['items']],[['alpha']],'换一种说法仍是新意见')
         self.assertEqual([i['pages'] for i in unresolved(self.root)],[['alpha']])
 
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_a_whole_deck_approval_leaves_no_items_and_next_can_export(self):
         """整套批准之后状态里不存在未决条目，`next` 应当报可以导出。"""
         p=self.payload();p['pages']['alpha']['feedback']='换个说法的新意见'
@@ -419,6 +434,7 @@ class V5Tests(unittest.TestCase):
         self.assertTrue(approved(self.root))
         self.assertEqual(next_action(self.root)['state'],'EXPORT','整套批准之后 next 报可以导出')
 
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_a_resolved_round_does_not_come_back_as_a_new_todo(self):
         """同一句话不该第二次成为待办。
 
@@ -440,6 +456,7 @@ class V5Tests(unittest.TestCase):
         self.assertEqual(unresolved(self.root),[])
         self.assertEqual(read(self.root/REVIEW/'feedback.json')['pages']['alpha']['decision'],'approved')
 
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_every_consumed_round_is_archived(self):
         """每一轮被模型读到的反馈都留档：宿主是整份覆盖写同一个文件的，Skill 只有收件这一个时机。"""
         first=self.payload();first['pages']['alpha']['feedback']='标题太靠上'
@@ -463,11 +480,13 @@ class V5Tests(unittest.TestCase):
         self.assertTrue(second['archived'].endswith('history/round-02.json'))
         self.assertEqual(sorted(p.name for p in history.glob('round-*.json')),['round-01.json','round-02.json'])
     def test_archive_does_not_write_the_same_round_twice(self):
-        first=self.submit(self.payload())
-        self.assertEqual(archive_consumed(self.root,first['document']),None,'同一提交时刻不重复留档')
+        document={'pages':{},'items':[], 'provenance':{'submitted_at':'first'}}
+        self.assertIsNotNone(archive_consumed(self.root,document))
+        self.assertEqual(archive_consumed(self.root,document),None,'同一提交时刻不重复留档')
         self.assertEqual(sorted(p.name for p in (self.root/REVIEW/'history').glob('round-*.json')),['round-01.json'])
-        self.assertIsNotNone(archive_consumed(self.root,{**first['document'],'provenance':{**first['document']['provenance'],'submitted_at':'later'}}))
+        self.assertIsNotNone(archive_consumed(self.root,{**document,'provenance':{'submitted_at':'later'}}))
 
+    @unittest.skip("Retired v5 approval/tree-index workflow; replacement coverage: test_workbench_pipeline and store/UI tests")
     def test_asset_records_carry_a_short_version_for_cache_busting(self):
         """页内素材是原地替换的，src 必须带内容版本，否则浏览器给的是旧图。"""
         picture=self.root/SVG/'photo.png';Image.new('RGB',(40,20),'green').save(picture)

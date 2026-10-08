@@ -8,13 +8,14 @@ import re
 import shutil
 import sys
 import tempfile
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from layout_canvas import ensure_layout_canvases, registry_canvases_ready  # noqa: E402
-from project_state import template_review_snapshot  # noqa: E402
+from project_state import template_review_snapshot, template_version  # noqa: E402
 from template_visual_gate import review_issues as template_canvas_review_issues  # noqa: E402
 
 SKILL_ROOT = Path(__file__).resolve().parents[2]
@@ -154,10 +155,10 @@ def build_manifest(pack_dir, template_id, name, description="", is_default=False
         "template_id": template_id,
         "name": name,
         "description": description,
-        "status": "approved",
+        "status": "candidate",
         "is_default": bool(is_default),
         "published_at": datetime.now(timezone.utc).isoformat(),
-        "canvas_size": "1920x1080",
+        "canvas_size": ET.parse(pack_dir/'skyline_shell.svg').getroot().get('viewBox',''),
         "four_piece_contract": {
             "tokens_css": "tokens.css",
             "skyline_shell_svg": "skyline_shell.svg",
@@ -202,6 +203,10 @@ def list_templates(library_root=None):
 
 
 def require_approved_feedback(project):
+    import template_feedback
+    intake=template_feedback.consume(project.parents[1])
+    if not intake or intake['stale'] or intake['errors']:
+        raise ValueError('template package requires valid human approval of the current package')
     feedback = read_json(project / "template_feedback.json", {})
     if feedback.get("approved") is not True:
         raise ValueError("template package cannot be published without human approval")
@@ -214,6 +219,10 @@ def require_approved_feedback(project):
     snapshot = template_review_snapshot(project_root)
     if not snapshot or str(feedback.get("review_id", "")) != str(snapshot.get("review_id", "")):
         raise ValueError("template approval is not bound to the current review page; rerun template-review and decide again")
+    if snapshot.get('template_version') != template_version(project_root):
+        raise ValueError('template approval is stale after package changes')
+    if set(feedback['layouts']) != set(snapshot.get('layouts', [])):
+        raise ValueError('template approval must cover the exact current package layout set')
     review_html = project_root / "00_template_review.html"
     source = provenance.get("source")
     if (source not in {"review_server", "template_review_page"}
@@ -221,6 +230,10 @@ def require_approved_feedback(project):
             or not review_html.is_file() or provenance.get("html_sha256") != sha256(review_html)):
         raise ValueError("template approval is not bound to the current review page HTML")
     visuals = project / "template_visuals"
+    if (project/'template_pack').is_dir():
+        if provenance.get('template_package_sha256') != template_feedback.package_hashes(project_root):
+            raise ValueError('template approval is not bound to the current four-piece package')
+        return feedback
     current_png = {path.name: sha256(path) for path in visuals.glob("*.png")}
     if not current_png or provenance.get("png_sha256") != current_png:
         raise ValueError("template approval is not bound to the current rendered template pages")
@@ -238,7 +251,7 @@ def require_approved_feedback(project):
     return feedback
 
 
-def publish_template(project_root, template_id="", name="", description="", library_root=None):
+def publish_template(project_root, template_id="", name="", description="", library_root=None, replace=False):
     """Publish a v2 4-piece multimodal template pack from `<project_root>/_internal/00_project/template_pack`."""
     project_root = Path(project_root).resolve()
     lib_root = Path(library_root).resolve() if library_root else LIBRARY_ROOT
@@ -247,30 +260,51 @@ def publish_template(project_root, template_id="", name="", description="", libr
     if not validation["valid"]:
         raise ValueError(f"Project template_pack is incomplete: {validation['issues']}")
 
-    feedback = read_json(project_root / "_internal" / "00_project" / "template_feedback.json", {})
+    feedback = require_approved_feedback(project_root/'_internal/00_project')
     final_name = name or feedback.get("template_name") or project_root.name
     final_id = template_id or slugify(final_name)
 
-    dest = lib_root / final_id
-    if dest.exists():
-        shutil.rmtree(dest)
+    dest = (lib_root / final_id).resolve()
+    if dest.parent != lib_root.resolve(): raise ValueError('template ID must stay within library root')
+    if dest.exists() and not replace:
+        raise ValueError('template already exists; explicit --replace preserves the old package in .history')
     lib_root.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(source_pack, dest)
+    staging=Path(tempfile.mkdtemp(prefix=f'.{final_id}.',dir=lib_root))
+    backup=None
+    try:
+        shutil.copytree(source_pack,staging,dirs_exist_ok=True)
+        # Recheck copied bytes so a package changed during publishing cannot inherit approval.
+        if package_hashes(staging)!=package_hashes(source_pack):
+            raise ValueError('template package changed during publishing')
+        approved_hashes={str((source_pack/rel).relative_to(project_root)):value
+                         for rel,value in package_hashes(staging).items()}
+        if approved_hashes!=feedback['provenance']['template_package_sha256']:
+            raise ValueError('staged package differs from approved package')
+        result=build_manifest(staging,template_id=final_id,name=final_name,
+                              description=description or feedback.get('overall_feedback',''))
+        result['status']='approved'
+        result['approval']={'review_id':feedback['review_id'],
+                            'template_version':template_version(project_root)}
+        (staging/'manifest.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        if dest.exists():
+            history=lib_root/'.history'/final_id
+            history.mkdir(parents=True,exist_ok=True)
+            backup=history/datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+            dest.rename(backup)
+        try: staging.rename(dest)
+        except OSError:
+            if backup: backup.rename(dest)
+            raise
+        return result
+    finally:
+        if staging.exists(): shutil.rmtree(staging)
 
-    return build_manifest(
-        dest,
-        template_id=final_id,
-        name=final_name,
-        description=description or feedback.get("overall_feedback", ""),
-        is_default=False,
-    )
 
-
-def publish(project_root, template_id="", name="", description="", library_root=None):
+def publish(project_root, template_id="", name="", description="", library_root=None, replace=False):
     project_root = Path(project_root).resolve()
     project = project_root / "_internal" / "00_project"
-    if (project / "template_pack").is_dir() and not (project / "fidelity_template").is_dir():
-        return publish_template(project_root, template_id=template_id, name=name, description=description, library_root=library_root)
+    if (project / "template_pack").is_dir():
+        return publish_template(project_root, template_id=template_id, name=name, description=description, library_root=library_root,replace=replace)
 
     feedback = require_approved_feedback(project)
     profile = read_json(project / "template_profile.json", {})
@@ -451,6 +485,7 @@ def main():
     p_pub.add_argument("--name", default="")
     p_pub.add_argument("--description", default="")
     p_pub.add_argument("--library-root", default=None)
+    p_pub.add_argument('--replace',action='store_true',help='Replace this ID and preserve the old package in .history')
 
     p_app = sub.add_parser("apply")
     p_app.add_argument("project_dir")
@@ -467,7 +502,7 @@ def main():
             sys.exit(1)
     elif args.command == "publish":
         result = publish(args.project_dir, template_id=args.template_id, name=args.name,
-                         description=args.description, library_root=args.library_root)
+                         description=args.description, library_root=args.library_root,replace=args.replace)
     else:
         result = apply_template(args.project_dir, args.template_id, library_root=args.library_root)
     print(json.dumps(result, ensure_ascii=False, indent=2))

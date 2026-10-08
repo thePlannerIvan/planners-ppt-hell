@@ -1,23 +1,25 @@
 # 转可编辑 PPT 的双向契约与专属约束（SVG-to-PPT Rules v6.0）
 
-**只有幻灯片出口（`slides`）读取本文件。** 本文件定义了 SVG 源码与 `native_svg_to_ppt.py`（v6.0 原生形状转换器）之间的精确双向契约。通用排版规则见 `svg_rules.md` 与 `style_system.md`。
+**只有幻灯片出口（`slides`）读取本文件。** 本文件说明 SVG 与 `native_svg_to_ppt.py` 的转换约束。通用规则见 [SVG 规则](svg_rules.md) 与 [设计原则](style_system.md)。具体支持范围以转换器报告、几何测试与实际 PPTX 渲染为准。
 
 ---
 
-## 1. 物理尺寸与字号换算（写死标尺，无需重算）
+## 1. 物理尺寸与字号换算
 
-- **画布到幻灯片映射**：`1920 × 1080 px` 对应 `13.333 × 7.5 in`（标准 16:9 宽屏 PPT），因此：
+- **默认标尺示例**：`1920 × 1080 px` 对应 `13.333 × 7.5 in` 时：
   - **1 SVG px = 0.5 pt**（`FONT_SCALE = 0.5`）
   - `44px = 22pt`（主标题）｜`28px = 14pt`（卡片主标题）｜`20px = 10pt`（正文）｜`14px = 7pt`（辅助标签/图注）
 - **字号硬下限**：
   - `讲` 页（现场投屏）：任何可见 `<text>` **≥ 18px（9pt）**
   - `读` 页（商业提案/留档报告）：正文 **≥ 16px（8pt）**，角标与数据来源底线 **≥ 12px（6pt）**
 
+控制器使用 `--auto-size --match-aspect`，画幅由冻结 SVG 推导；不要把上述默认标尺当作所有模板的固定坐标或字号。具体主题采用其当前 SPEC / tokens。
+
 ---
 
-## 2. `native_svg_to_ppt.py` v6.0 原生支持的能力清单（放心使用）
+## 2. 转换器能力与检查范围
 
-v6.0 转换器已打通以下 6 大核心能力，无需再写繁琐的手工 workaround：
+转换器处理以下特性；复杂组合仍需核对转换报告与实际 PPTX 渲染：
 
 1. **页内 `<style>` 与 `:root` `var(--...)` CSS 变量自动展开**：
    - 支持在 `<style>` 中定义 `:root { --accent-brand: #E60012; ... }` 及 `.class` / `#id` / `tag` 样式规则；转换器会在导出 PPTX 前自动求值并内联为标准 SVG 属性。
@@ -58,7 +60,10 @@ v6.0 转换器已打通以下 6 大核心能力，无需再写繁琐的手工 wo
 
 ---
 
-## 5. 导出前硬门禁与 `EXPORT_VERIFY` 闭环
+## 5. 固定快照与输出复核
 
-- `export` 命令在调用 `native_svg_to_ppt.py` 之前会强制逐页运行 `validate_svg_layout.py --route slides`；凡有 `error`（包括 `LINE_CROSSES_TEXT`、`EMOJI_IN_SLIDE_TEXT`、`TEXT_OVERLAP`、`OUT_OF_BOUNDS`）一律阻断导出。
-- 导出 `.pptx` 后，必须经过 LibreOffice → PDF → PNG 渲染（`EXPORT_VERIFY`），逐页核对最终 PPTX 渲染图中的文字换行、水印层级、渐变方向与图片裁切。
+- `export --snapshot <snapshot.json>` 校验该快照的 SVG、资产、页序与页级 mode，逐页运行 `validate_svg_layout.py --route slides`；error 阻断输出。未指定路径时才创建当前快照。普通页面批准与待办反馈不是导出门。
+- 转换器可直接调用，`--help` 不依赖环境批准变量；控制器提供快照装配、校验和记录，不把它解释为用户批准。
+- 实际文件、notes 与转换报告按 snapshot_id 隔离，根 final_deck.pptx 仅为最新兼容副本；记录的 output_path 才是本次复核对象。
+- 用实际可用的 PPTX 渲染工具生成逐页预览，核对文字换行、层级与图片裁切，再运行 `export-inspect --snapshot <同一snapshot.json>`。未实际渲染时报告尚未复核，保留 EXPORT_VERIFY，不伪造工具结果。
+- 当前快照未冻结模板 registry / direction；导出记录 `template_verification=intrinsic_svg_only`。模板语义或品牌符合性需另行明确复核范围，不能拿后来变化的模板替旧快照背书。

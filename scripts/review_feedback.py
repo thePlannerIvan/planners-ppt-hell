@@ -340,6 +340,9 @@ def apply_pending_svg_edits(root, data):
       微调先写入 `.svg`，模型在此基础上继续修改，绝不覆盖用户的手动微调。
     """
     root = Path(root)
+    from project_state import workbench_active
+    if workbench_active(root):
+        raise ValueError('Legacy tree-index edits cannot write a workbench; recover raw feedback instead')
     supplied = data.get('pages')
     if not isinstance(supplied, dict):
         return []
@@ -665,6 +668,13 @@ def consume(root):
     data = read(path, None)
     if not isinstance(data, dict) or not data:
         return None
+    from project_state import workbench_active
+    if workbench_active(root):
+        return {'path':str(path.resolve()),'raw_pending':data,
+                'unrecorded':unrecorded_writes(root),'svg_edits_applied':[],
+                'message':'Legacy feedback preserved without applying tree-index edits. '
+                          'Recover against current stable elements through the workbench; '
+                          'model tasks come from store state, not this file.'}
     snapshot = review_snapshot(root)
     same_review_id = str(data.get('review_id') or '') == str(snapshot.get('review_id') or '')
     applied_svg_pages = []

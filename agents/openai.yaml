@@ -1,4 +1,4 @@
 interface:
   display_name: "Planner's PPT Hell"
-  short_description: "主 Agent 自主制作、看图修订与整套审阅的可编辑 PPT 工作流"
-  default_prompt: "使用 planners-ppt-hell 将我的材料制作成可编辑 PPT。保留轻量内容底稿，自主设计实际页面并逐页看图检查，整套审阅后导出。"
+  short_description: "持续 SVG 页面工作台，输出可编辑 PPT 与视频固定版本快照"
+  default_prompt: "使用 planners-ppt-hell 从逐页稿或视频画面契约制作持续 SVG 工作台，保留来源与用户修改，逐页看图检查，并按选定固定快照输出可编辑 PPT 或视频静态画面。"

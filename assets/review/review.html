@@ -63,8 +63,9 @@ header small{color:var(--dsw-alias-label-tertiary);font:var(--dsw-font-xxs-12)}
 .rail-tag{font:var(--dsw-font-xxxs-strong-11);color:var(--dsw-alias-state-warn-label)}
 .rail-tag:empty{display:none}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--dsw-alias-state-idle-primary);margin-right:6px}
-.approved .dot{background:var(--dsw-alias-state-success-primary)}
-.revise .dot{background:var(--dsw-alias-state-warn-primary)}
+.clean .dot{background:var(--dsw-alias-state-success-primary)}
+.error .dot,.conflict .dot{background:var(--dsw-alias-state-error-primary)}
+.pending .dot,.saving .dot{background:var(--dsw-alias-state-warn-primary)}
 .updated .dot{background:var(--dsw-alias-state-business-primary)}
 
 /* Center Stage */
@@ -184,6 +185,21 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
   header small{display:none}
   #inlineTextInput{width:140px}
 }
+@media(max-width:700px){
+  header{height:auto;min-height:48px;padding:8px;gap:8px;flex-wrap:wrap}
+  header .brand-left{gap:8px;min-width:0;max-width:100%}
+  header b#project{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #pageStatus{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+  .workspace{grid-template-columns:72px minmax(0,1fr);grid-template-rows:minmax(240px,1fr) auto;overflow:auto;align-items:stretch}
+  .rail{grid-row:1;min-height:240px}
+  .stage{grid-row:1;min-height:240px;padding:8px}
+  .stage-hint{display:none}
+  .panel{grid-column:1/-1;overflow:visible}
+  footer{height:auto;min-height:60px;padding:8px;flex-wrap:wrap}
+  footer .tools{max-width:100%;overflow-x:auto;flex-wrap:nowrap}
+  footer button{white-space:nowrap}
+  #message{max-width:100%;overflow-wrap:anywhere}
+}
 </style>
 
 <header>
@@ -215,12 +231,15 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
     <span id="posDeltaBadge" class="sr-only">Δx: 0, Δy: 0</span>
     <button id="deleteElBtn" class="compact-btn" onclick="deleteSelectedSvgElement()" disabled title="删除选中的元素（快捷键：Delete / Backspace）">删除</button>
     <button id="commentElBtn" class="compact-btn" onclick="commentOnSelected()" disabled title="针对该元素添加批注">对此项提意见</button>
+    <label><input id="allowRewrite" type="checkbox" disabled>允许改写所选文字</label>
     <button id="undoEditBtn" class="compact-btn" onclick="undoLastSvgEdit()" disabled title="撤销本页上一次微调">撤销</button>
     <button id="resetEditsBtn" class="compact-btn" onclick="resetPageSvgEdits()" hidden title="还原所有微调">重置</button>
   </div>
 
   <div class="toolbar-group">
     <button id="compare" class="compact-btn" onclick="togglePrevious()">查看修改前</button>
+    <select id="historyRevision" aria-label="页面版本历史" onchange="document.querySelector('#restoreRevision').disabled=this.value===page().revision||!this.value"></select>
+    <button id="restoreRevision" class="compact-btn" onclick="restoreHistoricalRevision()" disabled>恢复版本</button>
   </div>
 </div>
 
@@ -245,6 +264,7 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
 
   <aside class="panel">
     <p id="updatedNote" class="muted" hidden style="background:var(--dsw-alias-state-business-tertiary);color:var(--dsw-alias-state-business-primary);padding:6px 8px;border-radius:5px"></p>
+    <p id="previewState" class="muted" role="status"></p>
     <p id="previousNote" class="muted" hidden style="white-space:pre-wrap;background:var(--dsw-alias-bg-module-platform);padding:6px 8px;border-radius:5px"></p>
 
     <div id="svgEditsPanel" class="svg-edits-box" hidden>
@@ -257,12 +277,14 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
 
     <h3>本页反馈</h3>
     <textarea id="feedback" placeholder="填写本页修改意见…"></textarea>
+    <div id="rewriteScope" class="muted"></div>
 
     <h3>本页图片</h3>
-    <p class="muted">支持替换、拖入或粘贴图片</p>
-    <p class="muted">改完点「本页要求修改」提交：模型按这三项重出这一页。预览框里就是提交后的结果</p>
     <div id="assets"></div>
     <div class="drop" id="addDrop" tabindex="0">新增图片：点击、拖入或粘贴<input id="newFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></div>
+    <h3>页面备注</h3>
+    <textarea id="notes" aria-label="页面备注"></textarea>
+    <p id="taskState" class="muted" role="status"></p>
   </aside>
 </div>
 
@@ -270,38 +292,51 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
   <div class="tools">
     <button onclick="go(-1)">上一页</button>
     <button onclick="go(1)">下一页</button>
-    <button onclick="decideCurrent('revise')">本页要求修改</button>
-    <button class="good" onclick="decideCurrent('approved')">本页通过</button>
+    <button id="pageDispatch" onclick="dispatchFeedback('page')" hidden>本页要求修改</button>
+    <button id="saveEdits" onclick="flushWorkbench()">保存</button>
+    <button id="exportOutput" onclick="exportWorkbench()">导出 PPT</button>
     <button onclick="askReload()">重新加载</button>
+    <button id="localFallback" onclick="showLocalFallback()" hidden>本地工作台</button>
   </div>
   <span id="message"></span>
   <button class="primary" onclick="showSubmit()">整套提交</button>
 </footer>
 
 <dialog id="reloadDialog">
-  <h2>重新加载会丢掉还没提交的东西</h2>
+  <h2>尚有未保存内容</h2>
   <p id="reloadWhat"></p>
-  <p class="muted">页面上的意见、框选、直改、图只活在内存里，<b>只有提交那一刻才落盘</b>。重新加载＝从磁盘重读这一版页面。</p>
-  <p class="muted">注意：<b>直接改的那几处，即使先提交也不会立刻回来</b> —— 它们已经写进内存里的画面，要等模型按意见重出这一页，才会重新出现在页面上。</p>
   <div class="tools">
-    <button class="primary" onclick="saveAndReload()">先提交再重新加载</button>
-    <button onclick="discardAndReload()">丢弃并重新加载</button>
+    <button class="primary" onclick="saveAndReload()">保存后重新加载</button>
+    <button onclick="discardAndReload()">保留恢复草稿并重新加载</button>
     <button onclick="document.querySelector('#reloadDialog').close()">返回</button>
   </div>
   <p id="reloadMessage"></p>
 </dialog>
 
 <dialog id="submitDialog">
-  <h2>整套提交</h2>
+  <h2>整套修改任务</h2>
   <p id="stats"></p>
   <textarea id="overall" placeholder="整套补充意见（可选）"></textarea>
-  <p class="muted">“批准未处理页”会将未表态的页面一并标记为通过。</p>
   <div class="tools">
-    <button onclick="submitBatch(false)">提交已有决定</button>
-    <button class="good" onclick="submitBatch(true)">批准未处理页并提交</button>
+    <button class="primary" onclick="submitBatch()">提交整套修改任务</button>
     <button onclick="document.querySelector('#submitDialog').close()">返回</button>
   </div>
   <p id="submitMessage"></p>
+</dialog>
+
+<dialog id="fallbackDialog">
+  <h2>同一项目的本地工作台</h2>
+  <p>当前宿主不支持持久保存命令，改动尚未保存。请启动同一项目的本地工作台；不要新建或复制项目。</p>
+  <pre id="fallbackCommand" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+  <button onclick="document.querySelector('#fallbackDialog').close()">返回</button>
+</dialog>
+<dialog id="exportDialog">
+  <h2>输出快照</h2>
+  <p id="exportState" role="status"></p>
+  <pre id="exportPath" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+  <h3>导出命令</h3>
+  <pre id="exportCommand" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+  <button onclick="document.querySelector('#exportDialog').close()">返回</button>
 </dialog>
 
 <dialog id="regionDialog">
@@ -328,6 +363,7 @@ if(!document.body.hasAttribute('data-ds-dark-theme')&&window.matchMedia
   document.body.setAttribute('data-ds-dark-theme','');
 }
 let review=null,index=0,marking=false,start=null,rect=null,pendingTargets=[],pendingTargetSummary='',previous=false,uploads=0,stale=false,staleKeys=[],slideSeq=0,canUpload=false;
+let workbenchReady=false;
 let selectedReviewId=null,dragState=null,activeRegionIdx=-1;
 let railDragState=null,railSuppressClick=false,inlineEditorState=null;
 const updatedPages=new Set();
@@ -337,7 +373,7 @@ function drawPulse(){
 }
 const $=s=>document.querySelector(s);
 const data=__DATA__;
-let pageOrder=data.pages.map(p=>p.key);
+let pageOrder=data.order||data.pages.map(p=>p.key);
 const initialPageOrder=[...pageOrder];
 const orderedPages=()=>pageOrder.map(key=>data.pages.find(p=>p.key===key)).filter(Boolean);
 const page=()=>orderedPages()[index]||data.pages[0];
@@ -347,7 +383,7 @@ const validPageOrder=order=>Array.isArray(order)&&order.length===data.pages.leng
 const pageOrderChanged=()=>pageOrder.some((key,i)=>key!==initialPageOrder[i]);
 /* 当前页记在地址的 hash 上（`#page_14`）。
  *
- * **不能用 localStorage／sessionStorage**：插件的不透明 iframe 里读它会直接抛，而且那个源
+ * **不要依赖浏览器站点存储**：插件的不透明 iframe 里读它会直接抛，而且那个源
  * 每次加载都是新的，存了也读不回来。hash 随刷新一起保留 —— 所以「重新加载」之后人还停在
  * 原来那一页，而不是每次都被弹回第 1 页（真人反馈 2026-10-05）。
  *
@@ -365,23 +401,27 @@ function syncHash(){
 }
 addEventListener('hashchange',()=>{
   const at=pageOrder.indexOf(pageKeyFromHash());
-  if(at>=0&&at!==index){index=at;render()}
+  if(at>=0&&at!==index)selectPage(at);
 });
-const labels={pending:'未处理',approved:'人工批准',revise:'要求修改'};
 const CIRCLED=['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
 const numBadge=i=>CIRCLED[i]||String(i+1);
 const TAG_NAMES={text:'文字',rect:'色块',line:'线条',circle:'圆形',ellipse:'椭圆',path:'图形',polygon:'图形',polyline:'线条',image:'图片',g:'模块'};
 const tagLabel=t=>TAG_NAMES[t]||'元素';
 
 const state=Object.fromEntries(data.pages.map(p=>[p.key,{
-  decision:p.decision,
   feedback:'',
+  rewrite_elements:[],
+  notes:p.notes||'',
   annotations:[],
   assets:[],
   svg_edits:[],
-  edit_history:[]
+  edit_history:[],
+  saved_edits:[],
+  saved_notes:p.notes||'',
+  save_status:'clean',
+  pending_save:null,
+  task:null
 }]));
-const initial=structuredClone(state);
 const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>((window.crypto&&crypto.randomUUID)?crypto.randomUUID():'f'+Math.random().toString(16).slice(2)+Date.now().toString(16));
 function note(text,kind){const el=$('#message');el.textContent=text||'';el.className=kind||''}
@@ -397,10 +437,8 @@ const assetUrls=new Map();
 async function assetFor(rel,v){
   const cacheKey=rel+'\u0000'+(v==null?'':String(v));
   if(assetUrls.has(cacheKey))return assetUrls.get(cacheKey);
-  // 桥还没接上：给一个同源降级地址（无插件宿主下它就是对的）。**不缓存它** ——
-  // 插件模式里页面在 `/api/review.page?…` 上，这个地址必然 404；缓存了就会把破图钉死一整场，
-  // 而且桥接上以后再也换不回来（轨道本来就跑在握手之前）。
-  if(!review)return '/'+rel+(v?'?v='+encodeURIComponent(String(v)):'');
+  // Project assets always require the host bridge, including before its handshake.
+  if(!review)return '';
   let url='';
   try{url=await review.asset(rel,v?{v:String(v)}:undefined)}
   catch(error){note('取不到资源：'+error.message,'error');return ''}
@@ -409,21 +447,22 @@ async function assetFor(rel,v){
 }
 
 // 注意：`changed(p)` 判定的是「是否需要大模型重画」（feedback / annotations / assets）。
-// 纯画布微调（`svg_edits`）不强制把页面锁死在 revise —— 用户可以直接点「本页通过」0 秒落盘生效！
+// Direct edits save through the store; feedback dispatch remains independent.
 function changed(p){const s=state[p.key];return !!(s.feedback.trim()||s.annotations.length||s.assets.length)}
 function status(){
   const s=state[page().key];
-  const suffix=(s.svg_edits&&s.svg_edits.length)?' · 已微调 '+s.svg_edits.length+' 处':'';
-  const orderSuffix=pageOrderChanged()?' · 已排序':'';
-  $('#pageStatus').textContent=labels[s.decision]+suffix+orderSuffix;
+  const dirty=pageDirty(page());
+  const label={clean:'已保存',saving:'保存中',error:'未保存',conflict:'版本冲突',pending:'待保存'};
+  $('#pageStatus').textContent=(dirty&&s.save_status==='clean'?'待保存':label[s.save_status])+' · '+(page().revision||'未登记');
+  $('#taskState').textContent=s.task?'修改任务 '+s.task.id+' · '+s.task.status:'';
+  scheduleWorkbench();
   scheduleDraft();   // 状态变了就排一次草稿（打字、框选、直改、拖动、上传、决定都会走到这里）
 }
 function autoState(){
   const p=page(),s=state[p.key];
-  s.decision=changed(p)?'revise':initial[p.key].decision;
   updateRail([p.key]);status();   // 逐字符路径：只碰当前页
 }
-$('#project').textContent=(data.project||'项目')+' · 整套审阅';
+$('#project').textContent=(data.project||'项目')+' · 页面工作台';
 
 function setMode(mode){
   if(mode==='mark'){
@@ -440,7 +479,7 @@ function setMode(mode){
 
 function railClass(i,p){
   const s=state[p.key];
-  return s.decision+(i===index?' active':'')+(updatedPages.has(p.key)?' updated':'');
+  return s.save_status+(i===index?' active':'')+(updatedPages.has(p.key)?' updated':'');
 }
 function railTagText(s){
   return (s.annotations.length?s.annotations.length+'框 ':'')+(s.svg_edits.length?s.svg_edits.length+'改':'');
@@ -471,7 +510,7 @@ function reorderPages(sourceKey,targetKey,before){
   index=Math.max(0,pageOrder.indexOf(currentKey));
   drawRail();
   status();
-  note('页面顺序已调整，提交整套审阅后生效','ok');
+  note('页面顺序待保存');
   return true;
 }
 function handleRailPointerDown(e){
@@ -569,7 +608,7 @@ function drawRail(){
     b.append(meta);
     b.onclick=()=>{
       if(railSuppressClick)return;
-      index=pageOrder.indexOf(p.key);render();
+      selectPage(pageOrder.indexOf(p.key));
     };
     b.ondragstart=e=>handleRailNativeDragStart(e,b);
     b.ondragover=e=>handleRailNativeDragOver(e,b);
@@ -608,7 +647,7 @@ function updateRail(keys){
   const targets=(keys&&keys.length)?keys:railButtons.keys();
   for(const key of targets){
     const at=railButtons.get(key);if(!at)continue;
-    const p=data.pages[at.i],s=state[key];
+    const p=data.pages.find(p=>p.key===key),s=state[key];
     at.b.className=railClass(at.i,p);
     at.b.title=updatedPages.has(p.key)?'画面已更新，待复核':'拖动调整页面顺序；Alt+↑/↓ 也可移动';
     at.tag.textContent=railTagText(s);
@@ -622,7 +661,7 @@ function currentSvgRoot(){
 function findSvgEl(reviewId){
   if(!reviewId)return null;
   const svg=currentSvgRoot();
-  return svg?svg.querySelector('[data-review-id="'+reviewId+'"]'):null;
+  return svg?[...svg.querySelectorAll('[data-review-id]')].find(el=>el.getAttribute('data-review-id')===reviewId)||null:null;
 }
 function extractTextState(el){
   const tspans=[...el.querySelectorAll(':scope > tspan')];
@@ -715,7 +754,17 @@ function mountInlineSvg(p){
     return;
   }
   wrap.hidden=false;
-  wrap.innerHTML=p.svgMarkup;
+  const parsed=new DOMParser().parseFromString(p.svgMarkup,'image/svg+xml');
+  const source=parsed.documentElement;
+  const xlink='http://www.w3.org/1999/xlink';
+  // Remove direct image URLs while detached: insertion must not race authenticated asset loading.
+  source.querySelectorAll('image').forEach(el=>{
+    const href=el.getAttribute('href')||el.getAttributeNS(xlink,'href')||'';
+    if(href&&!href.startsWith('data:')){
+      el.removeAttribute('href');el.removeAttributeNS(xlink,'href');
+    }
+  });
+  if(source.localName==='svg')wrap.append(document.importNode(source,true));
   const svg=wrap.querySelector('svg');
   if(!svg){
     wrap.hidden=true;
@@ -804,21 +853,26 @@ function positionInlineCanvasEditor(){
   const session=inlineEditorState,editor=$('#inlineCanvasEditor'),el=session&&session.el;
   if(!session||!el||editor.hidden)return;
   const previewRect=$('#preview').getBoundingClientRect();
-  const elRect=el.getBoundingClientRect();
-  if(!previewRect.width||!elRect.width){editor.hidden=true;return}
+  let elRect=el.getBoundingClientRect();
+  if(!previewRect.width)return;
+  if(elRect.width)session.lastRect=elRect;
+  else elRect=session.lastRect||{left:previewRect.left,top:previewRect.top,width:84,height:28};
   const left=Math.max(0,elRect.left-previewRect.left-4);
   const top=Math.max(0,elRect.top-previewRect.top-4);
   const width=Math.min(previewRect.width-left,Math.max(84,elRect.width+12));
   const height=Math.min(previewRect.height-top,Math.max(28,elRect.height+10));
   const style=getComputedStyle(el);
+  const matrix=el.getScreenCTM();
+  const fontScale=matrix?Math.hypot(matrix.a,matrix.b):1;
   Object.assign(editor.style,{left:left+'px',top:top+'px',width:width+'px',height:height+'px',
-    font:style.font,color:style.fill||style.color,textAlign:style.textAnchor==='middle'?'center':'left'});
+    font:style.font,fontSize:(parseFloat(style.fontSize)*fontScale)+'px',lineHeight:'1.12',
+    color:style.fill||style.color,textAlign:style.textAnchor==='middle'?'center':'left'});
 }
 function endInlineTextEdit(commit=true){
   const session=inlineEditorState;
   if(!session)return;
   const editor=$('#inlineCanvasEditor');
-  const p=page(),s=state[p.key];
+  const p=data.pages.find(p=>p.key===session.pageKey),s=state[p.key];
   if(commit)commitInlineTextEditorValue();
   if(!commit&&session.dirty){
     s.svg_edits=session.historyBefore||[];
@@ -865,6 +919,8 @@ function commitInlineTextEditorValue(){
 }
 function applyInlineTextEditorValue(){
   ensureInlineEditHistory();
+  retainRecoveryDraft();
+  if(!inlineEditorState?.composing)commitInlineTextEditorValue();
 }
 function startInlineTextEdit(el){
   if(!el||el.tagName.toLowerCase()!=='text'||previous)return;
@@ -873,17 +929,23 @@ function startInlineTextEdit(el){
   selectedReviewId=el.getAttribute('data-review-id');
   const text=extractTextState(el);
   const editor=$('#inlineCanvasEditor');
-  inlineEditorState={el,reviewId:selectedReviewId,dirty:false,historyBefore:null};
+  inlineEditorState={el,pageKey:page().key,reviewId:selectedReviewId,dirty:false,historyBefore:null,composing:false};
   editor.value=text.text;
   editor.hidden=false;
   editor.setAttribute('data-review-id',selectedReviewId);
   positionInlineCanvasEditor();
-  requestAnimationFrame(()=>{editor.focus();editor.select()});
+  editor.focus();editor.select();
   updateToolbarSelection();
   positionInlineCanvasEditor();
 }
 $('#inlineCanvasEditor').oninput=applyInlineTextEditorValue;
+$('#inlineCanvasEditor').oncompositionstart=()=>{if(inlineEditorState)inlineEditorState.composing=true};
+$('#inlineCanvasEditor').oncompositionend=()=>{
+  if(inlineEditorState)inlineEditorState.composing=false;
+  commitInlineTextEditorValue();
+};
 $('#inlineCanvasEditor').onkeydown=e=>{
+  if(e.isComposing||inlineEditorState?.composing)return;
   if(e.key==='Escape'){e.preventDefault();endInlineTextEdit(false);return}
   if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();endInlineTextEdit(true);e.target.blur()}
 };
@@ -892,6 +954,9 @@ $('#inlineCanvasEditor').onblur=()=>endInlineTextEdit(true);
 function updateToolbarSelection(){
   const el=findSvgEl(selectedReviewId);
   const s=state[page().key];
+  $('#allowRewrite').disabled=!el||!['text','tspan'].includes(el.localName)||previous;
+  $('#allowRewrite').checked=!!el&&s.rewrite_elements.includes(selectedReviewId);
+  $('#rewriteScope').textContent=s.rewrite_elements.length?'允许改写：'+s.rewrite_elements.join('、'):'';
   $('#undoEditBtn').disabled=!(s.edit_history&&s.edit_history.length);
   $('#resetEditsBtn').hidden=!(s.svg_edits&&s.svg_edits.length);
   drawSvgEditsPanel();
@@ -1026,6 +1091,7 @@ function undoLastSvgEdit(){
   const p=page(),s=state[p.key];
   if(!s.edit_history||!s.edit_history.length)return;
   s.svg_edits=s.edit_history.pop();
+  s.allow_restore=true;
   mountInlineSvg(p);
   updateRail();status();
 }
@@ -1034,6 +1100,7 @@ function resetPageSvgEdits(){
   if(!s.svg_edits||!s.svg_edits.length)return;
   pushHistorySnapshot();
   s.svg_edits=[];
+  s.allow_restore=true;
   mountInlineSvg(p);
   updateRail();status();
 }
@@ -1066,7 +1133,7 @@ function pickSelectableSvgTarget(target){
       const tag=curr.tagName.toLowerCase();
       if(tag==='defs'||tag==='style'||tag==='clippath'||tag==='lineargradient')return null;
       // Skip full-bleed background rect (1920x1080) so clicks on empty background deselect cleanly
-      if(tag==='rect'&&curr.getAttribute('data-review-id')==='0.0'){
+      if(tag==='rect'){
         const w=parseFloat(curr.getAttribute('width')||'0');
         const h=parseFloat(curr.getAttribute('height')||'0');
         if(w>=1900&&h>=1060)return null;
@@ -1095,7 +1162,9 @@ async function render(){
   $('#feedback').value=s.feedback;
   const updated=updatedPages.has(p.key);
   $('#updatedNote').hidden=!updated;
-  $('#updatedNote').textContent=updated?'这一页的画面已更新，复核无误后可点「本页通过」。':'';
+  $('#updatedNote').textContent=updated?'这一页已有新版本。':'';
+  $('#notes').value=s.notes;
+  drawHistory(p);
   const prev=p.previousFeedback||'';
   const prevRegions=(p.previousAnnotations||[]).map(a=>String(a&&a.text||'').trim()).filter(Boolean);
   const prevAssets=(p.previousAssets||[]).length;
@@ -1113,7 +1182,15 @@ async function render(){
   drawRail();drawAssets();drawRegions();status();drawStale();
 }
 
-function go(d){index=Math.max(0,Math.min(data.pages.length-1,index+d));render()}
+function selectPage(next){
+  const before=page();
+  endInlineTextEdit(true);
+  void savePage(before);
+  void saveDraft();
+  index=Math.max(0,Math.min(data.pages.length-1,next));
+  render();
+}
+function go(d){selectPage(index+d)}
 function togglePrevious(){
   endInlineTextEdit(true);
   previous=!previous;
@@ -1125,6 +1202,14 @@ function togglePrevious(){
   assetFor(previous?p.previous:p.png,previous?undefined:p.version).then(url=>{if(url)$('#slide').src=url});
 }
 $('#feedback').oninput=e=>{state[page().key].feedback=e.target.value;autoState()};
+$('#notes').oninput=e=>{state[page().key].notes=e.target.value;status()};
+$('#allowRewrite').onchange=e=>{
+  if(!selectedReviewId)return;
+  const s=state[page().key];
+  s.rewrite_elements=s.rewrite_elements.filter(id=>id!==selectedReviewId);
+  if(e.target.checked)s.rewrite_elements.push(selectedReviewId);
+  updateToolbarSelection();autoState();
+};
 
 /* ---- 框选批注 + 画布常驻编号框 + 自动命中检测 ---- */
 function startRegion(){
@@ -1154,7 +1239,7 @@ function hitTestSvgElements(normRect){
     if(el.dataset&&el.dataset.deleted==='1')return;
     if(el.closest&&el.closest('[data-deleted="1"]'))return;
     const rid=el.getAttribute('data-review-id');
-    if(!rid||rid==='0'||rid==='0.0')return;
+    if(!rid||el===svg)return;
     const tag=el.tagName.toLowerCase();
     if(!['text','rect','image','path','polygon','circle','ellipse'].includes(tag))return;
     const er=el.getBoundingClientRect();
@@ -1436,7 +1521,6 @@ async function upload(file,key,isNew){
     state[targetKey].assets=state[targetKey].assets.filter(x=>x.asset_key!==key);
     state[targetKey].assets.push({asset_key:key,operation:(isNew||existing?.operation==='add')?'add':'replace',
       path:rel,sha256:sha,fit:'contain',ratio:'original',anchor:'center'});
-    state[targetKey].decision='revise';
     note('图片已上传（版本 '+(sha?sha.slice(0,12):'未给 hash')+'）；提交后更新页面','ok');
     if(page().key===targetKey)drawAssets();
     updateRail();status();
@@ -1454,8 +1538,7 @@ $('#newFile').onchange=e=>{if(e.target.files[0])upload(e.target.files[0],'new_'+
 /* ---- 提交 ---- */
 function drawStale(){
   const box=$('#staleNote');box.hidden=!stale;
-  if(stale)box.textContent='这一页已更新，先复核：'+(staleKeys.length?staleKeys.join('、'):'整套审阅页已重出')
-    +'。点「重新加载」看新图，再提交（模型只重出提交的那一页）。';
+  if(stale)box.textContent='新版本与未保存内容冲突：'+staleKeys.join('、')+'。输入已保留为恢复草稿，未覆盖当前版本。';
 }
 async function readSnapshot(){
   if(!review)return null;
@@ -1476,30 +1559,37 @@ async function refreshStale(){
 }
 async function onHostChanged(){
   pulseCount++;lastPulseAt=new Date().toLocaleTimeString('zh-CN',{hour12:false});drawPulse();
-  const snapshot=await readSnapshot();
-  if(!snapshot)return;
-  const known=data.pages.filter(p=>snapshot.versions[p.key]);
-  if(known.length!==data.pages.length){await refreshStale();return}
-  const changedPages=data.pages.filter(p=>snapshot.versions[p.key]!==p.version);
-  data.review_id=snapshot.review_id;
-  if(!changedPages.length){stale=false;staleKeys=[];drawStale();return}
-  for(const p of changedPages){
-    const before=p.version;
-    p.version=snapshot.versions[p.key];
-    if(snapshot.png_hashes&&snapshot.png_hashes[p.key])p.png_sha256=snapshot.png_hashes[p.key];
-    p.previous='_internal/05_review/versions/'+p.key+'-'+before+'.png';
-    // When host updates a slide, switch stage view to its fresh PNG so updated image is shown immediately
-    p.svgMarkup='';
-    state[p.key].svg_edits=[];
-    state[p.key].edit_history=[];
-    updatedPages.add(p.key);
-    if(state[p.key].decision==='approved')state[p.key].decision='pending';
-  }
-  stale=false;staleKeys=[];drawStale();
-  await swapImages(changedPages);
-  updateRail(changedPages.map(p=>p.key));
-  status();
-  if(updatedPages.has(page().key))render();
+  if(!canCommand)return;
+  try{
+    const head=await workbenchCommand({op:'state'});
+    for(const p of data.pages){
+      const revision=head.pages?.[p.key]?.revision;
+      if(!revision||revision===p.revision||saveQueues.has(p.key))continue;
+      if(pageDirty(p)||inlineEditorState?.pageKey===p.key){
+        state[p.key].save_status='conflict';
+        state[p.key].current_revision=revision;
+        retainRecoveryDraft();
+        continue;
+      }
+      const record=await workbenchCommand({op:'get',page_key:p.key});
+      await mergeStoredPage(p,record);
+      updatedPages.add(p.key);
+    }
+    if(validPageOrder(head.order)&&!pageOrderChanged()){
+      const selected=page().key;
+      pageOrder=[...head.order];initialPageOrder.splice(0,initialPageOrder.length,...head.order);
+      index=pageOrder.indexOf(selected);
+    }
+    for(const task of Object.values(head.tasks||{})){
+      for(const key of Object.keys(task.pages||{})){
+        if(state[key]&&(!state[key].task||state[key].task.id===task.task_id))state[key].task={id:task.task_id,status:task.status};
+      }
+    }
+    staleKeys=data.pages.filter(p=>state[p.key].save_status==='conflict').map(p=>p.key);
+    stale=!!staleKeys.length;drawStale();
+    if(updatedPages.has(page().key)&&!pageDirty(page())&&!inlineEditorState)mountInlineSvg(page());
+    updateRail();status();
+  }catch(error){note('读取新版本失败：'+error.message,'error')}
 }
 async function swapImages(pages_){
   for(const p of pages_){
@@ -1524,21 +1614,18 @@ function collect(){
   const pages={};
   orderedPages().forEach(p=>{
     const s=state[p.key];const feedback=s.feedback.trim();
-    const has=!!(feedback||s.annotations.length||s.assets.length);
-    const svgEdits=cleanSvgEditsForExport(s.svg_edits);
     const entry={
-      decision:has?'revise':s.decision,
+      revision:p.revision,
       feedback,
       annotations:s.annotations,
       assets:s.assets.map(a=>({...a})),
       version:p.version,
       png_sha256:p.png_sha256
     };
-    if(svgEdits.length)entry.svg_edits=svgEdits;
     pages[p.key]=entry;
   });
   const overall=$('#overall').value.trim();
-  const items=Object.entries(pages).filter(([,entry])=>entry.decision==='revise')
+  const items=Object.entries(pages).filter(([,entry])=>entry.feedback||entry.annotations.length||entry.assets.length)
     .map(([key,entry])=>{
       const it={id:uid(),pages:[key],feedback:entry.feedback,annotations:entry.annotations,assets:entry.assets};
       if(entry.svg_edits)it.svg_edits=entry.svg_edits;
@@ -1560,115 +1647,308 @@ function wakeNote(verified){
   return '宿主已在会话日志里核对送达';
 }
 async function push(wake){
-  if(!review){note('本页只读：没有连上审阅宿主，反馈存不进去（请让宿主打开这一页）','warn');return {ok:false}}
-  if(uploads){note('请等待图片上传完成','error');return {ok:false}}
-  await refreshStale();
-  if(stale){drawStale();note('这一页已更新，先复核（或点「重新加载」）','error');return {ok:false}}
-  const document=collect();
-  try{
-    await review.write(document);
-    await clearDraft();   // 提交过的不再是"没提交的"，刷新不该把它们当草稿恢复回来
-    let verified=null, duplicate=false, notice='';
-    if(wake){
-      const result=await review.wake(wake);
-      verified=(result&&result.verified)||null;
-      duplicate=!!(result&&result.duplicate);
-      notice=(result&&result.notice)||'';
-      try{
-        await review.write({...document,provenance:{...document.provenance,
-          wake:{requested:true,verified,at:new Date().toISOString()}}});
-      }catch(error){}
-    }
-    return {ok:true,verified,duplicate,notice};
-  }catch(error){note('保存失败：'+error.message,'error');return {ok:false}}
+  return {ok:await flushWorkbench()};
 }
-async function decideCurrent(value){
-  const p=page(),s=state[p.key];
-  if(value==='approved'&&changed(p)){note('本页还有意见、框选或图片改动：清空（图片点「重置修改」）后才能通过','error');return}
-  if(value==='revise'&&!changed(p)){note('先写一句要改什么，或框选一处问题，再点「本页要求修改」','error');return}
-  s.decision=value;updateRail();status();
-  const gist=(s.feedback.trim()||((s.annotations[0]||{}).text||'').trim()).slice(0,40);
-  const wake=value==='approved'
-    ?{unit:p.key,text:p.key+' 已通过。'}
-    :{unit:p.key,text:p.key+' 要求修改'+(gist?'：'+gist:'')+' —— 只重出这一页，其余页不要动。'};
-  const sent=await push(wake);
-  if(!sent.ok)return;
-  if(sent.duplicate){
-    note(sent.notice||'已写入；本次没有新增通知（同一次提交之前已送达）','ok');
-    return;
+
+const SAVE_DELAY_MS=500;
+const saveQueues=new Map();
+let canCommand=false,saveTimer=null,orderCommand=null,dispatchBusy=false,pendingDispatch=null;
+let pendingSnapshot=null,lastOutput=null,exportBusy=false;
+let recoveryReady=false;
+const editSignature=edits=>JSON.stringify(edits||[]);
+function pageDirty(p){
+  const s=state[p.key];
+  return editSignature(s.svg_edits)!==editSignature(s.saved_edits)||s.notes!==s.saved_notes||!!s.pending_save;
+}
+function showLocalFallback(){
+  $('#fallbackCommand').textContent=data.local_fallback_command||'请让主任务用同一项目目录启动 review_surface.py。';
+  $('#fallbackDialog').showModal();
+}
+function commandUnsupported(message){
+  canCommand=false;
+  $('#localFallback').hidden=false;
+  $('#bridgeState').classList.add('readonly-warn');
+  $('#bridgeState').textContent='持久保存不可用';
+  note('未保存：'+message+'。请使用同一项目的本地工作台。','error');
+}
+async function workbenchCommand(command){
+  if(!canCommand||!review||typeof review.command!=='function')throw new Error('宿主不支持 command');
+  const receipt=await review.command(command);
+  if(!receipt||receipt.ok!==true){
+    const error=new Error(receipt?.error||'后端没有确认持久保存');
+    error.receipt=receipt||{};
+    if(/unsupported|capability|backend/.test(String(receipt?.code||'')))commandUnsupported(error.message);
+    throw error;
   }
-  note('已写入 '+p.key+' 的决定，并已通知模型'+(value==='approved'?'「已通过」':'「只重出这一页」')
-    +'（'+wakeNote(sent.verified)+'）',sent.verified?'ok':'warn');
+  return receipt;
 }
-/* ---- 草稿：自动落盘，刷新自动读回 ----
- *
- * **「我改了东西」和「告诉模型可以动手」是两件事。** 以前只有后者（提交 = 写 feedback.json
- * + 唤醒），所以没提交的意见/框选/直改/图只活在内存里，刷新即丢 —— 人点一下「重新加载」，
- * 改的那句就没了（真人反馈 2026-10-05）。
- *
- * 现在：任何状态变化都排一次草稿（停手 0.8 秒才写，打字过程中不必每一击都发请求），写进
- * surface 声明的 `draft` 文件。它**不唤醒模型、也不进模型那一侧的轮次** —— 模型只认
- * `feedback.json`（决定）。刷新时读回来，页面就是刷新前的样子。
- *
- * 恢复只按一条硬规矩：**直改要按页版本判定**。模型已经重出过的那一页，旧直改套不上新画面
- * （`review_id` 是元素树路径，重画以后同一个路径指向别的元素），所以丢掉；意见、框选、图这些
- * 是"人写的字"，照常恢复。
- */
+function baselineElement(p,id){
+  const doc=new DOMParser().parseFromString(p.svgMarkup||'','image/svg+xml');
+  return [...doc.querySelectorAll('[data-workbench-id]')].find(el=>el.getAttribute('data-workbench-id')===id);
+}
+function patchEdits(p,desired,acknowledged){
+  const output=[];
+  const ids=new Set([...desired,...acknowledged].map(rec=>rec.review_id));
+  for(const id of ids){
+    const after=desired.find(rec=>rec.review_id===id)||{};
+    const before=acknowledged.find(rec=>rec.review_id===id)||{};
+    if(JSON.stringify(after)===JSON.stringify(before))continue;
+    const base=baselineElement(p,id);
+    if(!base)throw new Error('元素 '+id+' 无稳定绑定；恢复草稿已保留');
+    if(after.deleted){if(!before.deleted)output.push({element_id:id,kind:'delete'});continue}
+    if(before.deleted)throw new Error('已保存的删除需要先恢复历史版本');
+    const original=extractTextState(base);
+    const beforeText=before.text===undefined?original.text:before.text;
+    const afterText=after.text===undefined?original.text:after.text;
+    if(beforeText!==afterText){
+      const spans=[...base.querySelectorAll(':scope > tspan')];
+      const lines=after.lines||String(afterText).split('\n');
+      if(spans.length&&spans.length===lines.length&&spans.every(el=>el.getAttribute('data-workbench-id'))){
+        spans.forEach((el,i)=>output.push({element_id:el.getAttribute('data-workbench-id'),kind:'text',value:lines[i]}));
+      }else output.push({element_id:id,kind:'text',value:afterText});
+    }
+    const attributes={};
+    if(before.font_size!==after.font_size){
+      attributes['font-size']=after.font_size===undefined?base.getAttribute('font-size'):String(after.font_size);
+      base.querySelectorAll(':scope > tspan[font-size]').forEach(el=>{
+        output.push({element_id:el.getAttribute('data-workbench-id'),kind:'attributes',attributes:{'font-size':after.font_size===undefined?el.getAttribute('font-size'):String(after.font_size)}});
+      });
+    }
+    if((before.dx||0)!==(after.dx||0)||(before.dy||0)!==(after.dy||0)){
+      const originalTransform=base.getAttribute('transform');
+      const delta=(after.dx||after.dy)?'translate('+Math.round(after.dx||0)+', '+Math.round(after.dy||0)+')':'';
+      attributes.transform=delta?(delta+(originalTransform?' '+originalTransform:'')):originalTransform;
+    }
+    if(Object.keys(attributes).length)output.push({element_id:id,kind:'attributes',attributes});
+  }
+  return output;
+}
+function scheduleWorkbench(){
+  retainRecoveryDraft();
+  clearTimeout(saveTimer);
+  if(!canCommand)return;
+  saveTimer=setTimeout(()=>{
+    for(const p of data.pages)if(pageDirty(p)&&state[p.key].save_status!=='conflict'&&!(inlineEditorState?.pageKey===p.key&&inlineEditorState.composing))void savePage(p);
+    if(pageOrderChanged())void saveOrder();
+  },SAVE_DELAY_MS);
+}
+async function savePage(p){
+  if(!p)return false;
+  const s=state[p.key];
+  if(saveQueues.has(p.key))return saveQueues.get(p.key);
+  if(!pageDirty(p))return true;
+  if(!canCommand){s.save_status='error';commandUnsupported('宿主没有持久保存能力');return false}
+  if(s.save_status==='conflict'){note(p.key+' 版本冲突，输入和恢复草稿仍保留','error');return false}
+  const work=(async()=>{
+    try{
+      while(pageDirty(p)){
+        if(!s.pending_save){
+          const restoring=s.allow_restore&&s.saved_edits.some(rec=>rec.deleted&&!s.svg_edits.find(next=>next.review_id===rec.review_id)?.deleted);
+          if(restoring){
+            if(!p.session_revision)throw new Error('没有可恢复的基版');
+            if(!s.pending_restore)s.pending_restore={op:'restore',operation_id:'restore_'+uid(),page_key:p.key,base_revision:p.revision,revision:p.session_revision};
+            const restored=await workbenchCommand(s.pending_restore);
+            if(!restored.revision)throw new Error('缺少恢复保存回执');
+            p.revision=restored.revision;s.saved_edits=[];s.saved_notes=state[p.key].saved_notes;s.pending_restore=null;
+          }
+          s.allow_restore=false;
+          s.pending_save={command:{op:'save',operation_id:'save_'+uid(),page_key:p.key,base_revision:p.revision,author:'human',
+            edits:patchEdits(p,s.svg_edits,s.saved_edits),notes:s.notes},edits:structuredClone(s.svg_edits),notes:s.notes};
+        }
+        const pending=s.pending_save;
+        s.save_status='saving';retainRecoveryDraft();drawSaveStatus();
+        const receipt=await workbenchCommand(pending.command);
+        if(!receipt.revision||receipt.page_key!==p.key)throw new Error('缺少页面版本保存回执');
+        p.session_revision=p.session_revision||p.revision;
+        p.revision=receipt.revision;
+        p.preview_pending=receipt.rendered!==true;
+        s.saved_edits=pending.edits;s.saved_notes=pending.notes;s.pending_save=null;
+        s.save_status=pageDirty(p)?'pending':'clean';
+        retainRecoveryDraft();void saveDraft();drawSaveStatus();
+        try{
+          const current=await workbenchCommand({op:'get',page_key:p.key});
+          if(current.revision===p.revision){p.history=current.history||[];p.parent=current.parent;if(page().key===p.key)drawHistory(p)}
+        }catch(error){/* Save receipt remains authoritative even if history refresh fails. */}
+      }
+      return true;
+    }catch(error){
+      s.save_status=error.receipt?.code==='conflict'?'conflict':'error';
+      s.current_revision=error.receipt?.current_revision;
+      s.recovery=error.receipt?.recovery;
+      retainRecoveryDraft();void saveDraft();drawSaveStatus();
+      note(p.key+' 未保存：'+error.message+'；输入已保留','error');return false;
+    }
+  })();
+  saveQueues.set(p.key,work);
+  try{return await work}finally{saveQueues.delete(p.key)}
+}
+function drawSaveStatus(){
+  const s=state[page().key];
+  const label={clean:'已保存',pending:'待保存',saving:'保存中',error:'未保存',conflict:'版本冲突'};
+  $('#pageStatus').textContent=label[s.save_status]+' · '+(page().revision||'未登记');
+  $('#previewState').textContent=page().preview_pending?'SVG 已保存 · PNG 预览待更新':'';
+  updateRail([page().key]);
+}
+async function saveOrder(){
+  if(!pageOrderChanged())return true;
+  try{
+    if(!orderCommand)orderCommand={op:'order',operation_id:'order_'+uid(),order:[...pageOrder],base_order:[...initialPageOrder]};
+    const receipt=await workbenchCommand(orderCommand);
+    if(!validPageOrder(receipt.order))throw new Error('未收到页序保存回执');
+    initialPageOrder.splice(0,initialPageOrder.length,...receipt.order);orderCommand=null;
+    retainRecoveryDraft();
+    return !pageOrderChanged()||await saveOrder();
+  }catch(error){note('页序未保存：'+error.message,'error');retainRecoveryDraft();return false}
+}
+async function flushWorkbench(pages=data.pages){
+  endInlineTextEdit(true);clearTimeout(saveTimer);
+  let saved=true;
+  for(const p of pages)if(!await savePage(p))saved=false;
+  if(pageOrderChanged()&&!await saveOrder())saved=false;
+  await saveDraft();
+  if(saved)note('页面编辑已保存','ok');
+  return saved;
+}
+function drawHistory(p){
+  const select=$('#historyRevision');
+  const selected=select.value;
+  select.replaceChildren();
+  for(const entry of p.history||[{revision:p.revision,author:'current'}]){
+    const option=document.createElement('option');option.value=entry.revision||'';
+    option.textContent=(entry.revision===p.revision?'当前 · ':'')+(entry.created_at?new Date(entry.created_at).toLocaleString('zh-CN')+' · ':'')+(entry.author||'')+' · '+String(entry.revision||'').slice(0,12);
+    select.append(option);
+  }
+  if([...select.options].some(option=>option.value===selected))select.value=selected;
+  $('#restoreRevision').disabled=!select.value||select.value===p.revision;
+  $('#previewState').textContent=p.preview_pending?'SVG 已保存 · PNG 预览待更新':'';
+}
+async function restoreHistoricalRevision(){
+  const p=page(),s=state[p.key],revision=$('#historyRevision').value;
+  if(!revision||revision===p.revision)return;
+  if(!await flushWorkbench([p]))return;
+  try{
+    if(!s.pending_history)s.pending_history={op:'restore',operation_id:'history_'+uid(),page_key:p.key,base_revision:p.revision,revision};
+    const receipt=await workbenchCommand(s.pending_history);
+    if(!receipt.revision)throw new Error('没有收到历史恢复回执');
+    const stored=await workbenchCommand({op:'get',page_key:p.key});
+    if(stored.revision!==receipt.revision)throw new Error('恢复后又有新版本，恢复草稿已保留');
+    s.pending_history=null;
+    await mergeStoredPage(p,stored);p.preview_pending=true;
+    mountInlineSvg(p);drawHistory(p);status();await saveDraft();
+    note('已恢复为新版本 '+receipt.revision+'，历史仍保留','ok');
+  }catch(error){retainRecoveryDraft();note('恢复未完成：'+error.message,'error')}
+}
+const shellQuote=value=>"'"+String(value).replace(/'/g,"'\\''")+"'";
+async function exportWorkbench(){
+  if(exportBusy)return false;
+  exportBusy=true;$('#exportOutput').disabled=true;
+  try{
+    if(!await flushWorkbench())return false;
+    if(!pendingSnapshot)pendingSnapshot={op:'snapshot',operation_id:'snapshot_'+uid(),purpose:data.route||'slides'};
+    retainRecoveryDraft();await saveDraft();
+    const receipt=await workbenchCommand(pendingSnapshot);
+    if(!receipt.snapshot_id||!receipt.path)throw new Error('没有收到完整的快照回执');
+    lastOutput=receipt;pendingSnapshot=null;retainRecoveryDraft();await saveDraft();
+    const command=(data.export_command_base||'ppt_pipeline export')+' --snapshot '+shellQuote(receipt.path);
+    $('#exportPath').textContent=receipt.path;
+    $('#exportCommand').textContent=command;
+    $('#exportState').textContent='快照 '+receipt.snapshot_id+' 已固定 · 尚未生成输出文件';
+    if(review.transport==='postMessage'){
+      try{
+        await review.wake({unit:'输出',text:'输出快照 '+receipt.snapshot_id+' 已持久保存。执行 '+command+'。必须通过 load_snapshot 核验并消费此确切快照路径，不得新建快照或读取变化中的当前页；无需页面批准或反馈任务。'});
+        $('#exportState').textContent='快照已固定 · 已通知导出 · 输出文件尚未确认';
+      }catch(error){$('#exportState').textContent='快照已固定 · 导出通知失败：'+error.message}
+    }else $('#exportState').textContent='快照已固定 · 等待回到对话执行导出命令';
+    $('#exportDialog').showModal();return true;
+  }catch(error){retainRecoveryDraft();note('输出快照未确认：'+error.message+'；重试将沿用操作 ID','error');return false}
+  finally{exportBusy=false;$('#exportOutput').disabled=false}
+}
+async function dispatchFeedback(scope){
+  if(dispatchBusy)return false;
+  if(scope==='page'&&review?.transport!=='postMessage'){note('此宿主仅支持整套修改任务','error');return false}
+  const targets=scope==='page'?[page()]:orderedPages();
+  if(!targets.some(p=>changed(p))&&!$('#overall').value.trim()){note('先填写修改意见或添加批注、图片','error');return false}
+  if(uploads){note('请等待图片上传完成','error');return false}
+  dispatchBusy=true;
+  try{
+    if(!await flushWorkbench(targets))return false;
+    if(!pendingDispatch){
+      const pages={};
+      for(const p of targets){
+        const s=state[p.key];
+        pages[p.key]={revision:p.revision,feedback:s.feedback,annotations:structuredClone(s.annotations),assets:structuredClone(s.assets),rewrite_elements:[...s.rewrite_elements]};
+      }
+      pendingDispatch={op:'feedback',operation_id:'feedback_'+uid(),scope,pages,overall_feedback:scope==='deck'?$('#overall').value.trim():''};
+    }
+    const command=pendingDispatch;
+    const receipt=await workbenchCommand(command);
+    if(!receipt.task_id)throw new Error('没有收到持久任务 ID');
+    for(const key of Object.keys(command.pages))state[key].task={id:receipt.task_id,status:'pending'};
+    pendingDispatch=null;
+    retainRecoveryDraft();await saveDraft();status();
+    try{
+      const delivery=await review.wake({unit:scope==='page'?targets[0].key:'整套',text:'工作台修改任务 '+receipt.task_id+' 已持久保存；读取该任务与绑定页面版本，只修改任务范围。'});
+      note('任务 '+receipt.task_id+' 已保存（'+wakeNote(delivery?.verified)+'）','ok');
+    }catch(error){note('任务 '+receipt.task_id+' 已保存，通知未送达：'+error.message,'warn')}
+    return true;
+  }catch(error){retainRecoveryDraft();note('任务未提交：'+error.message+'；意见已保留','error');return false}
+  finally{dispatchBusy=false}
+}
+/* Recovery drafts retain pending commands and stable-ID edits across version conflicts.
+ * They never replace a durable page-save receipt and never wake the model. */
 const DRAFT_REL=data.draft||'';
 const DRAFT_DEBOUNCE_MS=800;
-let canDraft=false,draftTimer=null,draftBusy=false,draftQueued=false,lastDraftSaved='';
+let canDraft=false,draftTimer=null,draftPromise=null,lastDraftSaved='';
+let memoryRecoveryDraft=null;
+function retainRecoveryDraft(){
+  if(!recoveryReady)return;
+  memoryRecoveryDraft=draftPayload();
+}
 
 function draftPayload(pages){
   const out={};
   data.pages.forEach(p=>{
     const s=state[p.key];
-    out[p.key]={decision:s.decision,feedback:s.feedback,annotations:s.annotations,
-      assets:s.assets.map(a=>({...a})),svg_edits:s.svg_edits,version:p.version};
+    out[p.key]={feedback:s.feedback,rewrite_elements:s.rewrite_elements,annotations:s.annotations,notes:s.notes,saved_notes:s.saved_notes,
+      assets:s.assets.map(a=>({...a})),svg_edits:s.svg_edits,saved_edits:s.saved_edits,version:p.version,
+      revision:p.revision,base_markup:p.svgMarkup,session_revision:p.session_revision,
+      pending_save:s.pending_save,pending_restore:s.pending_restore,pending_history:s.pending_history,allow_restore:s.allow_restore,save_status:s.save_status,task:s.task};
   });
-  return {review_id:data.review_id,page_order:[...pageOrder],at:new Date().toISOString(),pages:pages||out};
+  return {review_id:data.review_id,page_order:[...pageOrder],at:new Date().toISOString(),pages:pages||out,
+    overall_feedback:$('#overall').value,
+    pending_dispatch:pendingDispatch,order_command:orderCommand,pending_snapshot:pendingSnapshot,last_output:lastOutput,
+    inline_editor:inlineEditorState?{page_key:inlineEditorState.pageKey,element_id:inlineEditorState.reviewId,value:$('#inlineCanvasEditor').value}:null};
 }
 /* 状态变了就排一次。`status()` 是所有变更路径的汇合点：打字、框选、直改、拖动、上传、决定。 */
 function scheduleDraft(){
-  if(!DRAFT_REL||!review||!canDraft)return;
+  retainRecoveryDraft();
+  if(!recoveryReady||!DRAFT_REL||!review||!canDraft)return;
   clearTimeout(draftTimer);
   draftTimer=setTimeout(saveDraft,DRAFT_DEBOUNCE_MS);
 }
 async function saveDraft(){
-  if(!DRAFT_REL||!review||!canDraft)return false;
-  if(draftBusy){draftQueued=true;return false}
-  let body;
-  try{body=JSON.stringify(draftPayload())}catch(error){return false}
-  if(body===lastDraftSaved)return true;
-  draftBusy=true;
-  try{
-    await review.draft(JSON.parse(body));
-    lastDraftSaved=body;
-    return true;
-  }catch(error){
-    // 存不进就**关掉这条路并说出来** —— 静默失败会让人以为刷新是安全的。
-    canDraft=false;
-    note('草稿存不进（'+error.message+'）：没提交的改动只在这台机器的内存里，刷新会丢。','warn');
-    return false;
-  }finally{
-    draftBusy=false;
-    if(draftQueued){draftQueued=false;scheduleDraft()}
-  }
-}
-/* 提交成功之后把草稿清空：那些东西已经不是"没提交的"了，刷新不该把它们又当成草稿恢复回来
- * （已提交的那一轮由页面自己的「上一轮你说的」那块只读地显示）。 */
-async function clearDraft(){
-  if(!DRAFT_REL||!review||!canDraft)return;
-  try{
-    await review.draft({review_id:data.review_id,page_order:[...initialPageOrder],at:new Date().toISOString(),pages:{}});
-    lastDraftSaved='';
-  }catch(error){/* 清不掉不影响正确性：下次任何改动都会覆盖它 */}
+  retainRecoveryDraft();
+  if(!recoveryReady||!DRAFT_REL||!review||!canDraft)return false;
+  if(draftPromise){await draftPromise;return saveDraft()}
+  const payload=draftPayload();
+  const signature=JSON.stringify({...payload,at:undefined});
+  if(signature===lastDraftSaved)return true;
+  draftPromise=(async()=>{
+    try{
+      const receipt=await review.draft(payload);
+      if(receipt?.ok===false)throw new Error(receipt.error||'草稿未保存');
+      lastDraftSaved=signature;return true;
+    }catch(error){note('恢复草稿未落盘：'+error.message+'；请勿关闭未保存的页面。','warn');return false}
+  })();
+  try{return await draftPromise}finally{draftPromise=null}
 }
 async function restoreDraft(){
-  if(!DRAFT_REL||!review||!canDraft)return;
   let draft=null;
-  try{draft=JSON.parse(await review.readText(DRAFT_REL))}catch(error){return}   // 还没存过 → 正常
+  if(DRAFT_REL&&review&&canDraft){try{draft=JSON.parse(await review.readText(DRAFT_REL))}catch(error){}}
+  if(memoryRecoveryDraft&&(!draft||memoryRecoveryDraft.at>draft.at))draft=memoryRecoveryDraft;
   if(!draft||typeof draft!=='object'||!draft.pages)return;
-  let restored=0;const droppedEdits=[];
+  if(typeof draft.overall_feedback==='string')$('#overall').value=draft.overall_feedback;
+  let restored=0;
   let orderRestored=false;
   if(validPageOrder(draft.page_order)){
     pageOrder=[...draft.page_order];
@@ -1682,28 +1962,86 @@ async function restoreDraft(){
     if(typeof saved.feedback==='string'&&saved.feedback.trim()){s.feedback=saved.feedback;restored++}
     if(Array.isArray(saved.annotations)&&saved.annotations.length)s.annotations=saved.annotations;
     if(Array.isArray(saved.assets)&&saved.assets.length)s.assets=saved.assets;
-    if(saved.decision&&saved.decision!==s.decision)s.decision=saved.decision;
-    if(Array.isArray(saved.svg_edits)&&saved.svg_edits.length){
-      if(saved.version===p.version)s.svg_edits=saved.svg_edits;   // 画面没变 → 旧直改照样成立
-      else droppedEdits.push(p.key);                             // 模型重出过 → 路径已指到别处，丢掉
+    if(saved.task)s.task=saved.task;
+    s.pending_history=saved.pending_history||null;
+    s.rewrite_elements=Array.isArray(saved.rewrite_elements)?saved.rewrite_elements:[];
+    const pending=!!saved.pending_save||editSignature(saved.svg_edits)!==editSignature(saved.saved_edits)
+      ||saved.notes!==saved.saved_notes||draft.inline_editor?.page_key===p.key;
+    if(pending){
+      s.svg_edits=saved.svg_edits||[];s.saved_edits=saved.saved_edits||[];
+      s.notes=saved.notes||'';s.saved_notes=saved.saved_notes||'';
+      s.pending_save=saved.pending_save||null;
+      s.pending_restore=saved.pending_restore||null;s.allow_restore=!!saved.allow_restore;
+      if(saved.base_markup)p.svgMarkup=saved.base_markup;
+      p.session_revision=saved.session_revision;
+      const current=p.revision;p.revision=saved.revision;
+      s.save_status=current!==saved.revision&&!s.pending_save?'conflict':'pending';
+      if(s.save_status==='conflict')s.current_revision=current;
+      const editor=draft.inline_editor;
+      if(editor?.page_key===p.key){
+        const base=baselineElement(p,editor.element_id);
+        if(base){
+          const rec=s.svg_edits.find(rec=>rec.review_id===editor.element_id)||{review_id:editor.element_id,tag:'text',orig_text:extractTextState(base).text,dx:0,dy:0};
+          rec.text=editor.value;rec.lines=editor.value.split('\n');
+          if(!s.svg_edits.includes(rec))s.svg_edits.push(rec);
+        }
+      }
+      restored++;
     }
   });
+  pendingDispatch=draft.pending_dispatch||null;orderCommand=draft.order_command||null;
+  pendingSnapshot=draft.pending_snapshot||null;lastOutput=draft.last_output||null;
   if(restored||orderRestored){
-    note('已读回你没提交的草稿（'+(restored?restored+' 页有意见':'页面顺序')+'）'
-      +(droppedEdits.length?('；'+droppedEdits.join('、')+' 的画面已被模型重出，那几页的直改没有恢复'):''),'ok');
+    note('已读回恢复草稿（'+(restored?restored+' 页':'页面顺序')+'），冲突内容不会自动覆盖新版本。','warn');
   }
 }
 
-/* ---- 「重新加载」不能把人还没提交的东西悄悄丢掉 ----
- *
- * 页面上的意见、框选、直改、图都只活在内存里（`state`），**只有「提交」那一刻才落盘**。
- * `location.reload()` 会从磁盘重读这一版页面 —— 没提交的因此全部消失。实测（2026-10-05）：
- * 作者在画布上改完一句、点「重新加载」，那句就没了。
- *
- * 这里不替人做决定：有未提交内容就先把后果摊开说清，由人选「先提交」还是「丢弃」。
- * 用页面自己的 dialog 而不是 `window.confirm`：插件的不透明 iframe 没开 `allow-modals`，
- * 原生弹窗会被 sandbox 静默拦掉 —— 那等于又变回静默丢弃。
- */
+async function mergeStoredPage(p,record){
+  if(pageDirty(p))return false;
+  const doc=new DOMParser().parseFromString(record.svg||'','image/svg+xml');
+  const svg=doc.documentElement;
+  if(svg.tagName==='parsererror')throw new Error('版本 SVG 无效');
+  if([...svg.querySelectorAll('style')].some(el=>el.textContent.trim())){
+    if(page().key===p.key){$('#svgStageWrap').replaceChildren();$('#slide').style.opacity='0'}
+    throw new Error('工作台内联预览不支持 SVG CSS 规则，请使用 presentation attributes；保存版本未丢失');
+  }
+  const idMap=new Map();
+  svg.querySelectorAll('[id]').forEach(el=>{
+    const old=el.id,next='rvsvg_'+p.key+'_'+old;idMap.set(old,next);el.setAttribute('data-orig-id',old);el.id=next;
+  });
+  [svg,...svg.querySelectorAll('*')].forEach(el=>{
+    const identity=el.getAttribute('data-workbench-id');
+    if(identity)el.setAttribute('data-review-id',identity);
+    for(const attr of [...el.attributes]){
+      const value=attr.value.replace(/url\(\s*#([^)\s]+)\s*\)/g,(match,id)=>'url(#'+(idMap.get(id)||id)+')');
+      if(value!==attr.value)el.setAttribute(attr.name,value);
+      if((attr.localName==='href')&&value.startsWith('#')&&idMap.has(value.slice(1)))el.setAttribute(attr.name,'#'+idMap.get(value.slice(1)));
+    }
+    if(el.localName==='style'&&el.textContent)el.textContent=el.textContent.replace(/url\(\s*#([^)\s]+)\s*\)/g,(match,id)=>'url(#'+(idMap.get(id)||id)+')');
+  });
+  const rootPath=String(data.workbench_root||'').replace(/\/$/,'')+'/';
+  const svgPath=record.svg_path||'';
+  if(svgPath&&!svgPath.startsWith(rootPath))throw new Error('版本资产不在当前项目内');
+  const folder=svgPath.slice(rootPath.length).split('/').slice(0,-1);
+  for(const el of svg.querySelectorAll('image')){
+    const href=el.getAttribute('href')||el.getAttributeNS('http://www.w3.org/1999/xlink','href')||'';
+    if(!href||/^(data:|https?:|#)/.test(href))continue;
+    const parts=[...folder];
+    for(const part of href.split('/')){if(part==='..')parts.pop();else if(part&&part!=='.')parts.push(part)}
+    const rel=parts.join('/');
+    const asset=(record.assets||[]).find(item=>item.path===href);
+    el.setAttribute('data-project-rel',rel);el.setAttribute('data-project-ver',String(asset?.sha256||'').slice(0,12));
+  }
+  p.svgMarkup=new XMLSerializer().serializeToString(svg);
+  p.revision=record.revision;p.svg_path=record.svg_path;p.protected=record.protected;p.session_revision=null;
+  p.history=record.history||[];p.parent=record.parent;
+  const s=state[p.key];
+  s.svg_edits=[];s.saved_edits=[];s.edit_history=[];s.notes=record.notes||'';s.saved_notes=s.notes;s.save_status='clean';
+  if(page().key===p.key)$('#notes').value=s.notes;
+  return true;
+}
+
+/* Flush durable edits before refresh. Conflicts keep recoverable inputs. */
 function pendingWork(){
   const out=[];
   if(pageOrderChanged())out.push('页面顺序已调整');
@@ -1713,19 +2051,13 @@ function pendingWork(){
     if(s.annotations.length)bits.push(s.annotations.length+' 处框选');
     if(s.svg_edits.length)bits.push(s.svg_edits.length+' 处直改');
     if(s.assets.length)bits.push(s.assets.length+' 张图');
-    if(s.decision!==initial[p.key].decision)bits.push('「'+labels[s.decision]+'」的决定');
+    if(s.notes!==s.saved_notes)bits.push('备注');
     if(bits.length)out.push(p.key+'：'+bits.join('、'));
   });
   return out;
 }
 async function askReload(){
-  // 草稿这条路通了，刷新就是安全的：先把最后一笔刷出去（防抖窗口里可能还没写），再刷新。
-  if(DRAFT_REL&&review&&canDraft){
-    clearTimeout(draftTimer);
-    const saved=await saveDraft();
-    if(saved){location.reload();return}
-    // 存不进 → 掉到下面的弹窗，由人决定
-  }
+  if(await flushWorkbench()&&await saveDraft()){location.reload();return}
   const work=pendingWork();
   if(!work.length){location.reload();return}
   $('#reloadWhat').textContent='还没提交的有 —— '+work.join('；');
@@ -1733,35 +2065,25 @@ async function askReload(){
   $('#reloadDialog').showModal();
 }
 async function saveAndReload(){
-  const sent=await push(null);            // 只落盘，不唤醒：要不要叫模型由人自己决定
-  if(!sent.ok){
-    $('#reloadMessage').textContent='没能保存（上面那句提示说了原因）。要放弃这些改动，就选「丢弃并重新加载」。';
+  if(!await flushWorkbench()){
+    $('#reloadMessage').textContent='尚未收到持久保存回执，输入与恢复草稿已保留。';
     return;
   }
   location.reload();
 }
-function discardAndReload(){
-  $('#reloadDialog').close();
-  location.reload();
+async function discardAndReload(){
+  retainRecoveryDraft();
+  if(!await saveDraft()){note('恢复草稿未落盘，请先使用本地工作台或重试。','error');return}
+  $('#reloadDialog').close();location.reload();
 }
 function showSubmit(){
-  const values=Object.values(state);
-  $('#stats').textContent=['approved','revise','pending'].map(s=>labels[s]+' '+values.filter(x=>x.decision===s).length+' 页').join(' / ');
+  endInlineTextEdit(true);
+  $('#stats').textContent=data.pages.filter(p=>changed(p)).length+' 页有修改要求';
   $('#submitDialog').showModal();
 }
-async function submitBatch(approvePending){
-  if(approvePending)for(const s of Object.values(state))if(s.decision==='pending')s.decision='approved';
-  const sent=await push({unit:'整套',text:'整套已定，可以进入下一步。'});
-  if(sent.ok){
-    if(sent.duplicate){
-      const said=sent.notice||'已写入；本次没有新增通知（同一次提交之前已送达）';
-      $('#submitMessage').textContent=said;
-      note(said,'ok');
-    }else{
-      const how=wakeNote(sent.verified);
-      $('#submitMessage').textContent='已写入审阅反馈，并已通知模型整套已定（'+how+'）。';
-      note('整套反馈已写入，并已通知模型整套已定（'+how+'）',sent.verified?'ok':'warn');
-    }
+$('#overall').oninput=()=>scheduleDraft();
+async function submitBatch(){
+  if(await dispatchFeedback('deck')){
     $('#submitDialog').close();
   } else $('#submitMessage').textContent=$('#message').textContent;
 }
@@ -1873,7 +2195,11 @@ window.addEventListener('keydown',e=>{
 
 window.addEventListener('resize',sizePreview);
 $('#slide').onload=sizePreview;
-window.addEventListener('beforeunload',e=>{if(pageOrderChanged()||Object.values(state).some(x=>x.feedback||x.assets.length||x.annotations.length||x.svg_edits.length)){e.preventDefault();e.returnValue=''}});
+window.addEventListener('beforeunload',e=>{
+  retainRecoveryDraft();
+  if(pageOrderChanged()||data.pages.some(pageDirty)||inlineEditorState?.dirty){e.preventDefault();e.returnValue=''}
+});
+window.addEventListener('pagehide',()=>{retainRecoveryDraft()});
 
 const BRIDGE_TIMEOUT_MS=2500;
 function connectWithTimeout(ms){
@@ -1891,6 +2217,7 @@ function sayReadOnly(why){
   $('#addDrop').hidden=true;
 }
 (async function boot(){
+  $('#exportOutput').textContent=data.route==='video'?'输出视频画面':'导出 PPT';
   const fromHash=pageOrder.indexOf(pageKeyFromHash());
   if(fromHash>=0)index=fromHash;      // 重新加载回到原来那一页（hash 是唯一来源）
   render();sizePreview();drawPulse();
@@ -1898,22 +2225,43 @@ function sayReadOnly(why){
     if(window.ReviewBridge)review=await connectWithTimeout(BRIDGE_TIMEOUT_MS);
   }catch(error){review=null}
   if(!review){
+    await restoreDraft();recoveryReady=true;await render();
+    workbenchReady=true;
+    document.documentElement.dataset.workbenchReady='true';
     sayReadOnly(window.ReviewBridge
       ? '连不上审阅宿主（握手未落地）：本页只读 —— 内容可以看，反馈存不进去。'
-      : '没有加载到审阅桥：本页只读 —— 内容可以看，反馈存不进去（请让宿主打开这一页）。');
+      : '没有加载到审阅桥：改动尚未保存。');
+    $('#localFallback').hidden=false;
     return;
   }
   const can=applyUploadCapability();
-  $('#bridgeState').textContent='已连接审阅宿主（'+review.transport+'）· 逐页提交会写反馈并通知模型'
+  $('#bridgeState').textContent='已连接工作台（'+review.transport+'）'
     +(can?' · 可上传图片':' · 这个宿主不支持上传');
-  // 轨道是在**握手之前**建的（`render()` 排在前面），那时 `assetFor` 只能给降级地址；
-  // 插件模式下那个地址 404，缩略图就整场是破的 —— 桥接上以后必须重建一次，让图真正取到。
+  // Initial rail images have no src. Rebuild now that authenticated bridge assets are available.
   drawRail();
   // 草稿：能力是「宿主支持 ∩ surface 声明」。读回没提交的东西，然后重画一次让它们显出来
   // （直改要靠 `mountInlineSvg()` 里的 `replaySvgEditsOnDom()` 重放）。
   canDraft=DRAFT_REL!==''&&Array.isArray(review.capabilities)&&review.capabilities.indexOf('draft')>=0;
-  if(canDraft){await restoreDraft();render()}
+  await restoreDraft();recoveryReady=true;
+  canCommand=Array.isArray(review.capabilities)&&review.capabilities.includes('command')&&typeof review.command==='function';
+  $('#pageDispatch').hidden=review.transport!=='postMessage';
+  if(!canCommand)commandUnsupported('宿主没有声明 command 能力');
+  else{
+    try{
+      const head=await workbenchCommand({op:'state'});
+      for(const p of data.pages){
+        if(!pageDirty(p))await mergeStoredPage(p,await workbenchCommand({op:'get',page_key:p.key}));
+        else if(!state[p.key].pending_save)state[p.key].save_status=p.revision!==head.pages?.[p.key]?.revision?'conflict':'pending';
+      }
+      if(validPageOrder(head.order)&&!pageOrderChanged()){
+        const key=page().key;pageOrder=[...head.order];initialPageOrder.splice(0,initialPageOrder.length,...head.order);index=pageOrder.indexOf(key);
+      }
+    }catch(error){commandUnsupported(error.message)}
+  }
+  await render();
+  workbenchReady=true;
+  document.documentElement.dataset.workbenchReady='true';
   review.on('changed',()=>onHostChanged());
-  refreshStale();
+  void onHostChanged();
 })();
 </script></html>

@@ -1815,13 +1815,6 @@ def main():
     global _conversion_warnings
     global _strict_missing_images
 
-    if os.environ.get("SMART_SVG_EXPORT_APPROVED_BY_PIPELINE") != "1":
-        print(
-            "ERROR: direct PPT export is blocked. Run `python scripts/orchestrate/ppt_pipeline.py <project_dir> export` after export-ready passes.",
-            file=sys.stderr,
-        )
-        sys.exit(2)
-
     parser = argparse.ArgumentParser(
         description='Smart SVG -> PPTX Converter v6.0')
     parser.add_argument('svgs', nargs='+', help='SVG files (in slide order)')

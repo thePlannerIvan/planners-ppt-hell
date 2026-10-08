@@ -39,6 +39,10 @@ def png_hashes(root):
 
 def package_hashes(root):
     """模板包（registry / canvases / previews）此刻的字节摘要 —— 重建模板之后批准自动作废。"""
+    pack=Path(root)/PROJECT/'template_pack'
+    if pack.is_dir():
+        from template_library import package_hashes as pack_hashes
+        return {str((pack/rel).relative_to(Path(root))):value for rel,value in pack_hashes(pack).items()}
     base = Path(root)/PROJECT/'fidelity_template'
     files = [base/'template_registry.json',
              *sorted((base/'layout_canvases').glob('*.svg')),
@@ -107,6 +111,9 @@ def _candidate_audit_ready(root):
 
 
 def _fidelity_ready(root):
+    if (Path(root)/PROJECT/'template_pack').is_dir():
+        from template_library import validate_pack_dir
+        return validate_pack_dir(Path(root)/PROJECT/'template_pack')['valid']
     registry = read(Path(root)/PROJECT/REGISTRY, {})
     layouts = registry.get('layouts') if isinstance(registry, dict) else None
     if not isinstance(layouts, dict) or not layouts:
@@ -202,8 +209,8 @@ def consume(root):
     document = {
         **data,
         # 派生量：Skill 重新算过的那一份（页面写的那个值不采信）
-        'approved': summary['all_pass'],
-        'all_approved': summary['all_pass'],
+        'approved': summary['all_pass'] and not reason and not errors,
+        'all_approved': summary['all_pass'] and not reason and not errors,
         'discarded_layouts': summary['discarded_layouts'],
         'revision_layouts': summary['revision_layouts'],
         'submitted_at': submitted_at,
