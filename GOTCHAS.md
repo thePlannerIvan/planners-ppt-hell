@@ -348,23 +348,16 @@
 - **证据**：`test_review_browser.py::test_reorder_thumbnails_and_edit_text_in_place`。
 - **状态**：已升级
 
-### G-34 页序只改了缩略图 DOM，刷新和收件层就会回到另一套顺序
+---
 
-- **module**：`assets/review/review.html`（页面状态／草稿／提交）＋ `scripts/review_feedback.py`（收件校验）
-- **现象**：拖动缩略图后当前页面看起来已经换序，但刷新回到原顺序，或 `feedback.json` 没有顺序信息；模型侧无法知道作者审阅时采用的页序。
-- **原因**：页序不是单页决定，不能塞进某一页的 `decision`；只移动 DOM 也不会进入宿主的草稿／反馈文件。
-- **行为修正**：以 `page_order` 作为完整页 key 的排列，页面导航、草稿恢复与整套提交都使用同一份状态；收件层要求它覆盖完整页集合。缩略图拖拽同时提供 `Alt+↑/↓` 键盘入口。
-- **证据**：`test_v5.py::test_page_order_round_trips_through_feedback`、`test_v5.py::test_page_order_must_cover_exact_page_set`、`test_review_browser.py::test_reorder_thumbnails_and_edit_text_in_place`。
-- **状态**：已升级
+### G-36 模板升级不传到已有项目，也不重载已打开的页面
 
-### G-35 原地文字编辑不能只把输入框搬到画布上，还要处理提交、取消与焦点
-
-- **module**：`assets/review/review.html`（inline editor）
-- **现象**：编辑框已经贴在文字旁，但回车、失焦、Esc 的语义不清，输入可能被追加到原文，或取消后残留一笔不可见的 edit history。
-- **原因**：SVG 文字节点不是可编辑 HTML 控件；编辑态、SVG 预览态、`svg_edits` 历史是三份不同状态，焦点切换还会触发 blur。
-- **行为修正**：双击进入时默认全选；输入只在编辑态内持有，回车／失焦提交、Esc 用会话前快照恢复；无实际变化时回收历史快照。顶部输入框降为隐藏兼容节点，不再承担主路径。
-- **证据**：`test_review_browser.py::test_reorder_thumbnails_and_edit_text_in_place`。
-- **状态**：已升级
+- **module**：`scripts/generate_review_html.py`（`make_review`／`template_fingerprint`）＋ 宿主（`dsh-review-dock`／`serve-review.mjs` 的 `watch`）
+- **现象**：模板（`assets/review/review.html`）加了两个新能力（拖动缩略图换页序、画布上原地改字）之后，已审阅项目里的 `02_visual_review.html` 还是旧的——页面上没有那两个能力；而且侧栏里**已经打开**的那份页面照旧跑旧代码，一整天看不出模板换过。
+- **原因**：两层。① 页面是**按项目生成一次**的（模板 ＋ 内联令牌表 ＋ 该项目数据）：重出的闸门（快照里的 `template_sha256` vs 当前 `template_fingerprint()`）只在 `make_review` 被调用时才算，**没有任何东西盯模板、也没有任何东西替已有项目跑它**。② 宿主每次请求都从磁盘读入口 HTML，但它唯一的那个"戳"盯的是 `snapshot.json`（**数据**），不盯入口文件（**代码**），所以已打开的 iframe 不会因为页面代码变了就自己重载。
+- **行为修正**：**不改（作者 2026-10-07 决定，只记档）**。这是设计选择，不是缺陷：模板升级后，谁用到哪个项目，就在**那个项目**跑一次 `review`（闸门会正确重出——指纹对不上），页面若已打开则点一下「重新加载」。副作用记在这里，免得下次误判成"升级失败"：重出会换 `review_id`，旧提交不再绑当前页面（若它本来就已失效，等于没有再丢什么；原件在 `history/round-NN.json`）。
+- **证据**：2026-10-07 实测——模板 17:11／17:24 改的（`inlineCanvasEditor`×10、`dragstart`／`dragover`），项目页面 16:48 生成（两项均 0）；跑一次 `review --surface-only` 后项目页面 `dragstart` 1/1、`dragover` 3/3、`inlineCanvasEditor` 10/10、`page_order` 5/5，快照指纹随之更新；宿主 surface 只声明 `watch: ["snapshot.json"]`。
+- **状态**：候选（有意保留；别当缺陷再提）
 
 ---
 
