@@ -29,7 +29,7 @@ SVG 工作台持续存在。用户改字与模型候选共用版本存储；PPT 
 
 读 [04_svg_stage.md](references/workflow/04_svg_stage.md)。模型先 checkout 当前页，编辑返回的候选，再通过 store CLI 提交 author=model、candidate、base_revision。_internal/02_svg_source 是可重建兼容视图，不是生成脚本写入位置。
 读取 notes、protected 与待办 tasks；冲突时保留候选并重新读取。遗漏用户操作会被拦下，明确改写范围只来自浏览器任务授权。
-逐页 check、查看当前 PNG、记录实际 inspect。打开工作台与反馈恢复见 [07_visual_review.md](references/workflow/07_visual_review.md)；反馈不是批准，未完成反馈不阻止独立输出。
+逐页 check、查看当前 PNG、记录实际 inspect。打开工作台与反馈恢复见 [07_visual_review.md](references/workflow/07_visual_review.md)；反馈不是批准，未完成反馈不阻止独立输出。运行在 DSH 时用 `review_open` 自动加载同一工作台到侧栏；非 DSH 自动启动或复用 `planners-review-core` 本地宿主。两路共用同一份 Workbench Store、草稿和命令回执。
 结束条件：本轮提交有保存回执，技术问题与实际看图结果可查。工作台可继续修改，没有永久 COMPLETE。
 
 ## 4. 输出

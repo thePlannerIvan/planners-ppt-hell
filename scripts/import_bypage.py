@@ -64,7 +64,7 @@ def import_bypage(production, project):
     if payload.get('version') != 'bypage-production/1' or payload.get('route') != 'slides':
         raise ValueError('Expected bypage-production/1 slides export')
     upstream = payload.get('upstream', {})
-    for name in ('copy', 'memory', 'source_index', 'audit', 'feedback', 'asset_manifest',
+    for name in ('copy', 'memory', 'source_index', 'audit', 'asset_manifest',
                  'deliverable', 'delivered_asset_manifest'):
         if name not in upstream:
             raise ValueError(f'Missing canonical Bypage binding: {name}')
@@ -75,10 +75,20 @@ def import_bypage(production, project):
     source_path = (files['audit'][0].parent / audit['source_index']['path']).resolve()
     if source_path != files['source_index'][0]:
         raise ValueError('Audit source index differs from Bypage baseline')
-    feedback = json.loads(files['feedback'][1])
-    feedback_hash = feedback_source_hash(files['copy'][1], files['audit'][1], files['asset_manifest'][1])
-    if feedback.get('overall_decision') != 'approve' or feedback.get('source_sha256') != feedback_hash:
-        raise ValueError('Complete-copy feedback does not bind the baseline/audit/asset manifest')
+    if 'workbench' in files:
+        snapshot = json.loads(files['workbench'][1])
+        if (snapshot.get('version') != 'content-workbench-snapshot/1'
+                or snapshot.get('source') != upstream['copy']
+                or snapshot.get('dependencies', {}).get('audit') != upstream['audit']
+                or snapshot.get('dependencies', {}).get('asset_manifest') != upstream['asset_manifest']):
+            raise ValueError('Saved workbench does not bind the baseline/audit/asset manifest')
+    elif 'feedback' in files:
+        feedback = json.loads(files['feedback'][1])
+        feedback_hash = feedback_source_hash(files['copy'][1], files['audit'][1], files['asset_manifest'][1])
+        if feedback.get('overall_decision') != 'approve' or feedback.get('source_sha256') != feedback_hash:
+            raise ValueError('Complete-copy feedback does not bind the baseline/audit/asset manifest')
+    else:
+        raise ValueError('Missing saved workbench or legacy feedback binding')
     pages = payload.get('pages', [])
     order = payload.get('order', [])
     keys = [page.get('page_key') for page in pages]

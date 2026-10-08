@@ -1,6 +1,7 @@
 <!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>整套 PPT 审阅工作台</title>
 <style>
 __DSH_TOKENS__
+__REVIEW_UI__
 
 /* ============================================================================
  * 我们自己的规则。**几何一行没动**（尺寸、间距、栅格、flex/grid 全部原样），
@@ -204,6 +205,7 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
 
 <header>
   <div class="brand-left">
+    <span class="review-brand"><span class="review-brand-mark" aria-hidden="true"></span><span>Logics</span></span>
     <b id="project"></b>
     <span id="pageStatus" class="toolbar-metric" style="background:var(--dsw-alias-bg-module-platform);color:var(--dsw-alias-label-primary);border-color:var(--dsw-alias-border-l2)"></span>
   </div>
@@ -290,16 +292,16 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
 
 <footer>
   <div class="tools">
-    <button onclick="go(-1)">上一页</button>
-    <button onclick="go(1)">下一页</button>
-    <button id="pageDispatch" onclick="dispatchFeedback('page')" hidden>本页要求修改</button>
-    <button id="saveEdits" onclick="flushWorkbench()">保存</button>
-    <button id="exportOutput" onclick="exportWorkbench()">导出 PPT</button>
-    <button onclick="askReload()">重新加载</button>
+    <button id="pagePrev" class="review-secondary-action" onclick="go(-1)" title="上一页" aria-label="上一页"><span data-review-icon="ChevronUp"></span><span>上一页</span></button>
+    <button id="pageNext" class="review-secondary-action" onclick="go(1)" title="下一页" aria-label="下一页"><span>下一页</span><span data-review-icon="ChevronDown"></span></button>
+    <button id="pageDispatch" class="review-primary-action" onclick="dispatchFeedback('page')" hidden>修改本页</button>
+    <button id="saveEdits" class="review-secondary-action" onclick="flushWorkbench()">保存</button>
+    <button id="exportOutput" class="review-primary-action" onclick="exportWorkbench()">导出 PPT</button>
+    <button class="review-secondary-action" onclick="askReload()">重新加载</button>
     <button id="localFallback" onclick="showLocalFallback()" hidden>本地工作台</button>
   </div>
   <span id="message"></span>
-  <button class="primary" onclick="showSubmit()">整套提交</button>
+  <button class="review-primary-action" onclick="showSubmit()">提交修改任务</button>
 </footer>
 
 <dialog id="reloadDialog">
@@ -351,6 +353,8 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
 
 {{REVIEW_BRIDGE}}
 <script>
+__REVIEW_UI_SCRIPT__
+ReviewUI.refresh(document);
 /* 审阅页（ppt-hell 的审阅面入口，review-surface/2.0.0）。
    同一份代码两种宿主：有插件 → DSH 侧栏 iframe + postMessage；没插件 → serve-review.mjs + fetch。
    差异全在桥里，这里不分支。页面**不带桥的副本**：注入点独立成行，宿主 serve 时把它换成**整段注入**。 */
@@ -1149,6 +1153,8 @@ function pickSelectableSvgTarget(target){
 }
 
 async function render(){
+  $('#pagePrev').disabled=index===0;
+  $('#pageNext').disabled=index===data.pages.length-1;
   endInlineTextEdit(true);
   const seq=++slideSeq;
   marking=false;previous=false;
@@ -1188,6 +1194,8 @@ function selectPage(next){
   void savePage(before);
   void saveDraft();
   index=Math.max(0,Math.min(data.pages.length-1,next));
+  $('#pagePrev').disabled=index===0;
+  $('#pageNext').disabled=index===data.pages.length-1;
   render();
 }
 function go(d){selectPage(index+d)}
