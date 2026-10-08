@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+  <!-- Corner Hairline Cross Markers -->
+  <g stroke="#CBD5E1" stroke-width="1.5">
+    <line x1="90" y1="80" x2="110" y2="80"/>
+    <line x1="100" y1="70" x2="100" y2="90"/>
+    <line x1="1810" y1="80" x2="1830" y2="80"/>
+    <line x1="1820" y1="70" x2="1820" y2="90"/>
+    <line x1="90" y1="940" x2="110" y2="940"/>
+    <line x1="100" y1="930" x2="100" y2="950"/>
+    <line x1="1810" y1="940" x2="1830" y2="940"/>
+    <line x1="1820" y1="930" x2="1820" y2="950"/>
+  </g>
+  <!-- Top Running Header (y=80) -->
+  <text x="140" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">42 / 52 · MONOLITHIC FACADE &amp; TELEMETRY PLAQUES</text>
+  <text x="1780" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">252DF ARCHITECTURE</text>
+  <!-- Top Headline (y=140) -->
+  <text x="100" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="44" font-weight="900" fill="#111111" letter-spacing="-1">MONOLITHIC COGNITIVE ARCHITECTURE</text>
+  <text x="1820" y="145" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280" text-anchor="end">ELEVATION VIEW // SCALE 1:50</text>
+
+  <!-- Central Letterbox Architectural Image (x=100, y=180, w=1720, h=410) -->
+  <g transform="translate(100, 180)">
+    <clipPath id="centerImageClip48">
+      <rect width="1720" height="410"/>
+    </clipPath>
+    <g clip-path="url(#centerImageClip48)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="1720" height="410" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect width="1720" height="410" fill="none" stroke="#CBD5E1" stroke-width="1.5"/>
+  </g>
+
+  <!-- Bottom 3-Column Structured Telemetry Plaques (x=100, 693, 1286; w=533, h=220, y=625) -->
+  <g transform="translate(100, 625)">
+    <rect width="533" height="220" fill="#FFFFFF"/>
+    <rect x="0" y="0" width="533" height="4" fill="#E2F827"/>
+    <text x="36" y="45" font-family='monospace' font-size="16" font-weight="800" fill="#111111">01 // GEOMETRIC INTEGRITY</text>
+    <text x="36" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="800" fill="#111111">Brutalist Grid Foundation</text>
+    <text x="36" y="120" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">Rigid proportions eliminate visual noise</text>
+    <text x="36" y="148" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">and enforce structural dominance.</text>
+    <text x="36" y="195" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">CONFIDENCE: 99.4%</text>
+  </g>
+
+  <g transform="translate(693, 625)">
+    <rect width="533" height="220" fill="#FFFFFF"/>
+    <rect x="0" y="0" width="533" height="4" fill="#111111"/>
+    <text x="36" y="45" font-family='monospace' font-size="16" font-weight="800" fill="#111111">02 // TONAL CALIBRATION</text>
+    <text x="36" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="800" fill="#111111">Obsidian &amp; Titanium</text>
+    <text x="36" y="120" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">Deep black voids paired with matte grey</text>
+    <text x="36" y="148" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">create extreme clarity under scrutiny.</text>
+    <text x="36" y="195" font-family='monospace' font-size="14" font-weight="700" fill="#6B7280">CONTRAST RATIO: 14.8:1</text>
+  </g>
+
+  <g transform="translate(1286, 625)">
+    <rect width="533" height="220" fill="#FFFFFF"/>
+    <rect x="0" y="0" width="533" height="4" fill="#E2F827"/>
+    <text x="36" y="45" font-family='monospace' font-size="16" font-weight="800" fill="#111111">03 // ACCENT VELOCITY</text>
+    <text x="36" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="800" fill="#111111">Fluorescent Lime Puncture</text>
+    <text x="36" y="120" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">Singular fluorescent accent points direct</text>
+    <text x="36" y="148" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">attention to decisive conclusions.</text>
+    <text x="36" y="195" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">ACCENT HEX: #E2F827</text>
+  </g>
+  <!-- Bottom Divider Line (y=880) -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Bottom Running Footer (y=940) -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="0" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">COCKPIT TELEMETRY // MONOLITHIC FACADE &amp; TELEMETRY PLAQUES</text>
+    <text x="1720" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER // IVAN</text>
+  </g>
+</svg>

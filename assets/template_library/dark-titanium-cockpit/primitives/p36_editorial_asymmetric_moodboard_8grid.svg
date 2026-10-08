@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+  <!-- Corner Hairline Cross Markers -->
+  <g stroke="#CBD5E1" stroke-width="1.5">
+    <line x1="90" y1="80" x2="110" y2="80"/>
+    <line x1="100" y1="70" x2="100" y2="90"/>
+    <line x1="1810" y1="80" x2="1830" y2="80"/>
+    <line x1="1820" y1="70" x2="1820" y2="90"/>
+    <line x1="90" y1="940" x2="110" y2="940"/>
+    <line x1="100" y1="930" x2="100" y2="950"/>
+    <line x1="1810" y1="940" x2="1830" y2="940"/>
+    <line x1="1820" y1="930" x2="1820" y2="950"/>
+  </g>
+  <!-- Top Running Header (y=80) -->
+  <text x="140" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">36 / 52 · EDITORIAL ASYMMETRIC VISUAL COLLAGE</text>
+  <text x="1780" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">BRAINWAVE EDITORIAL</text>
+  <!-- Hero Large Image Block (x=100, y=140, w=680, h=710) -->
+  <g transform="translate(100, 140)">
+    <clipPath id="heroClip53">
+      <rect width="680" height="710"/>
+    </clipPath>
+    <g clip-path="url(#heroClip53)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="680" height="710" preserveAspectRatio="xMidYMid slice"/>
+      <rect x="0" y="620" width="680" height="90" fill="#0C0D11" fill-opacity="0.9"/>
+      <text x="36" y="658" font-family='monospace' font-size="16" font-weight="700" fill="#E2F827">● ANCHOR HERO MONOLITH // PRIMARY ELEVATION</text>
+      <text x="36" y="688" font-family='monospace' font-size="13" font-weight="600" fill="#9CA3AF">SWISS NEO-BRUTALIST ARCHITECTURAL STUDY 2026</text>
+    </g>
+  </g>
+
+  <!-- Middle 4 Sub-blocks (x=810, 1150; y=140, 505; w=320, h=345) -->
+  <g transform="translate(810, 140)">
+    <clipPath id="sub1Clip53">
+      <rect width="320" height="230"/>
+    </clipPath>
+    <g clip-path="url(#sub1Clip53)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="320" height="230" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="230" width="320" height="115" fill="#FFFFFF"/>
+    <text x="20" y="265" font-family='monospace' font-size="13" font-weight="800" fill="#E2F827">SECTION 01</text>
+    <text x="20" y="295" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111">Pylon Juncture</text>
+    <text x="20" y="325" font-family='monospace' font-size="12" font-weight="600" fill="#6B7280">TOLERANCE: 0.02mm</text>
+  </g>
+
+  <g transform="translate(1150, 140)">
+    <clipPath id="sub2Clip53">
+      <rect width="320" height="230"/>
+    </clipPath>
+    <g clip-path="url(#sub2Clip53)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="320" height="230" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="230" width="320" height="115" fill="#FFFFFF"/>
+    <text x="20" y="265" font-family='monospace' font-size="13" font-weight="800" fill="#111111">SECTION 02</text>
+    <text x="20" y="295" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111">Angular Facet</text>
+    <text x="20" y="325" font-family='monospace' font-size="12" font-weight="600" fill="#6B7280">AZIMUTH: 45.0°</text>
+  </g>
+
+  <g transform="translate(810, 505)">
+    <clipPath id="sub3Clip53">
+      <rect width="320" height="230"/>
+    </clipPath>
+    <g clip-path="url(#sub3Clip53)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="320" height="230" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="230" width="320" height="115" fill="#FFFFFF"/>
+    <text x="20" y="265" font-family='monospace' font-size="13" font-weight="800" fill="#111111">SECTION 03</text>
+    <text x="20" y="295" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111">Bedrock Tie</text>
+    <text x="20" y="325" font-family='monospace' font-size="12" font-weight="600" fill="#6B7280">FORCE: 340kN</text>
+  </g>
+
+  <g transform="translate(1150, 505)">
+    <clipPath id="sub4Clip53">
+      <rect width="320" height="230"/>
+    </clipPath>
+    <g clip-path="url(#sub4Clip53)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="320" height="230" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="230" width="320" height="115" fill="#FFFFFF"/>
+    <text x="20" y="265" font-family='monospace' font-size="13" font-weight="800" fill="#E2F827">SECTION 04</text>
+    <text x="20" y="295" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111">Terminal Cap</text>
+    <text x="20" y="325" font-family='monospace' font-size="12" font-weight="600" fill="#6B7280">SEAL: HERMETIC</text>
+  </g>
+
+  <!-- Right Typography Pillar (x=1490, y=140, w=330, h=710) -->
+  <g transform="translate(1490, 140)">
+    <rect width="330" height="710" fill="#FFFFFF"/>
+    <rect x="0" y="0" width="330" height="4" fill="#E2F827"/>
+    <g transform="translate(36, 50)">
+      <text x="0" y="25" font-family='monospace' font-size="14" font-weight="800" fill="#111111">MANIFESTO // 2026</text>
+      <text x="0" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="36" font-weight="900" fill="#111111">CLARITY</text>
+      <text x="0" y="125" font-family='system-ui, -apple-system, sans-serif' font-size="36" font-weight="900" fill="#111111">OVER</text>
+      <text x="0" y="170" font-family='system-ui, -apple-system, sans-serif' font-size="36" font-weight="900" fill="#111111">CLUTTER</text>
+      <text x="0" y="230" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">The purpose of Swiss</text>
+      <text x="0" y="258" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">brutalist architecture is</text>
+      <text x="0" y="286" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">to strip superficial</text>
+      <text x="0" y="314" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">decoration and present</text>
+      <text x="0" y="342" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">truth without distortion.</text>
+
+      <rect x="0" y="400" width="258" height="40" rx="2" fill="#111111"/>
+      <text x="129" y="425" font-family='monospace' font-size="14" font-weight="800" fill="#E2F827" text-anchor="middle">DISCOVER SPEC -&gt;</text>
+    </g>
+  </g>
+  <!-- Bottom Divider Line (y=880) -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Bottom Running Footer (y=940) -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="0" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">COCKPIT TELEMETRY // EDITORIAL ASYMMETRIC VISUAL COLLAGE</text>
+    <text x="1720" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER // IVAN</text>
+  </g>
+</svg>

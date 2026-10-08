@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#0C0D11"/>
+
+  <!-- Top Metadata -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="900" fill="#9CA3AF" letter-spacing="2">03 / 52 · BRUTALIST MANIFESTO</text>
+  <text x="1820" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="900" fill="#E2F827" text-anchor="end">HOPEFUL SHIFT</text>
+
+  <!-- Monumental Grotesk Bold Typography (132px) -->
+  <g font-family='system-ui, -apple-system, sans-serif' font-size="132" font-weight="900" fill="#FFFFFF" letter-spacing="-3">
+    <!-- Line 1 -->
+    <text x="100" y="260">FOR BRANDS</text>
+    
+    <!-- Line 2: Interrupted by Parenthetical Dark Pill -->
+    <text x="100" y="420">(</text>
+    <g transform="translate(160, 325)">
+      <rect width="470" height="105" rx="16" fill="#181B24" stroke="#2B303E" stroke-width="1.5"/>
+      <text x="28" y="45" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="900" fill="#E2F827" letter-spacing="1">● ACTION DIRECTIVE</text>
+      <text x="28" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#FFFFFF">DO THINGS THAT MATTER</text>
+    </g>
+    <text x="660" y="420">) ON A</text>
+
+    <!-- Line 3 -->
+    <text x="100" y="580" fill="#E2F827">MISSION -&gt;</text>
+  </g>
+
+  <!-- 12-point Sunburst / Asterisk Glyph (Electric Lime) -->
+  <g transform="translate(1520, 360)">
+    <line x1="-70" y1="0" x2="70" y2="0" stroke="#E2F827" stroke-width="20" stroke-linecap="round"/>
+    <line x1="-60.6" y1="-35" x2="60.6" y2="35" stroke="#E2F827" stroke-width="20" stroke-linecap="round"/>
+    <line x1="-35" y1="-60.6" x2="35" y2="60.6" stroke="#E2F827" stroke-width="20" stroke-linecap="round"/>
+    <line x1="0" y1="-70" x2="0" y2="70" stroke="#E2F827" stroke-width="20" stroke-linecap="round"/>
+    <line x1="35" y1="-60.6" x2="-35" y2="60.6" stroke="#E2F827" stroke-width="20" stroke-linecap="round"/>
+    <line x1="60.6" y1="-35" x2="-60.6" y2="35" stroke="#E2F827" stroke-width="20" stroke-linecap="round"/>
+  </g>
+
+  <!-- Lower Section: Solid Contrast Elements -->
+  <!-- Left: Black Block with Yellow/White Manifesto -->
+  <g transform="translate(100, 680)">
+    <rect width="780" height="280" rx="16" fill="#181B24" stroke="#2B303E" stroke-width="1.5"/>
+    <g transform="translate(50, 45)">
+      <text x="0" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#E2F827">● STRATEGIC CORE // 战役信条</text>
+      <text x="0" y="70" font-family='system-ui, -apple-system, sans-serif' font-size="30" font-weight="900" fill="#FFFFFF">平庸的方案制造信息垃圾，</text>
+      <text x="0" y="112" font-family='system-ui, -apple-system, sans-serif' font-size="30" font-weight="900" fill="#FFFFFF">锋利的方案重塑受众心智。</text>
+      <text x="0" y="165" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#9CA3AF">不在过程中搞虚假精致与琐碎折衷，</text>
+      <text x="0" y="195" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#9CA3AF">敢于在第一秒亮出具有排他性的绝对主张。</text>
+    </g>
+  </g>
+
+  <!-- Right: Giant Data Callout Floating in Void -->
+  <g transform="translate(1020, 680)">
+    <text x="0" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="110" font-weight="900" fill="#FFFFFF" letter-spacing="-3">85%</text>
+    <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#FFFFFF">的决策者在最初 3 秒内决定是否继续深入</text>
+    <text x="0" y="185" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#8E92A4">真正的排版自信是敢于留白、敢于亮出超大字号，</text>
+    <text x="0" y="215" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#8E92A4">让关键意志如穿甲弹般直击人心。</text>
+    <text x="0" y="260" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="900" fill="#E2F827">SEE CASE STUDY -&gt;</text>
+  </g>
+</svg>

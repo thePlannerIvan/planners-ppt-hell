@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#0C0D11"/>
+
+  <!-- Top Metadata -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">13 / 52 · MECHANISM ARCHITECTURE</text>
+  <text x="1820" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#E2F827" text-anchor="end">THREE-PILLAR VOID</text>
+
+  <!-- Section Title Floating in Upper Half -->
+  <g transform="translate(100, 160)">
+    <text x="0" y="45" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#FFFFFF" letter-spacing="-1">三阶跃迁 // 认知穿透机制模型</text>
+    <text x="0" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#8E92A4">保留 70% 纯黑虚空，仅以超高纤细数字与底部紧凑描述锚定结构</text>
+  </g>
+
+  <!-- 3 Slender Columns -->
+  <!-- Column 1 -->
+  <g transform="translate(100, 280)">
+    <line x1="0" y1="0" x2="520" y2="0" stroke="#252733" stroke-width="1.5"/>
+    <text x="0" y="160" font-family='system-ui, -apple-system, sans-serif' font-size="140" font-weight="100" fill="#1F222B" letter-spacing="-6">01</text>
+    <g transform="translate(0, 360)">
+      <text x="0" y="0" font-family='monospace' font-size="18" font-weight="800" fill="#E2F827">● STEP 01 · DIAGNOSIS</text>
+      <text x="0" y="45" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#FFFFFF">认知断层定位</text>
+      <text x="0" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#8E92A4">穿透公开原声与行业数据，</text>
+      <text x="0" y="120" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#8E92A4">锁定真偏见与伪需求的断层。</text>
+    </g>
+  </g>
+
+  <!-- Column 2 -->
+  <g transform="translate(700, 280)">
+    <line x1="0" y1="0" x2="520" y2="0" stroke="#252733" stroke-width="1.5"/>
+    <text x="0" y="160" font-family='system-ui, -apple-system, sans-serif' font-size="140" font-weight="100" fill="#1F222B" letter-spacing="-6">02</text>
+    <g transform="translate(0, 360)">
+      <text x="0" y="0" font-family='monospace' font-size="18" font-weight="800" fill="#E2F827">● STEP 02 · REFRAME</text>
+      <text x="0" y="45" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#FFFFFF">战略叙事重构</text>
+      <text x="0" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#8E92A4">将工业感偏见重构为极客科技</text>
+      <text x="0" y="120" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#8E92A4">纯粹性，反常识确立第一性主张。</text>
+    </g>
+  </g>
+
+  <!-- Column 3 -->
+  <g transform="translate(1300, 280)">
+    <line x1="0" y1="0" x2="520" y2="0" stroke="#252733" stroke-width="1.5"/>
+    <text x="0" y="160" font-family='system-ui, -apple-system, sans-serif' font-size="140" font-weight="100" fill="#1F222B" letter-spacing="-6">03</text>
+    <g transform="translate(0, 360)">
+      <text x="0" y="0" font-family='monospace' font-size="18" font-weight="800" fill="#E2F827">● STEP 03 · MONUMENT</text>
+      <text x="0" y="45" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#FFFFFF">心智资产立碑</text>
+      <text x="0" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#8E92A4">将战略翻译为高辨识符码资产，</text>
+      <text x="0" y="120" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#8E92A4">在发布会与货架建立垄断性记忆。</text>
+    </g>
+  </g>
+</svg>

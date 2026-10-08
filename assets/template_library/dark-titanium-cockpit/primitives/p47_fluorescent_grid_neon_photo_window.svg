@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#E2F827"/>
+  <!-- Corner Hairline Cross Markers -->
+  <g stroke="#111111" stroke-width="1.5">
+    <line x1="90" y1="80" x2="110" y2="80"/>
+    <line x1="100" y1="70" x2="100" y2="90"/>
+    <line x1="1810" y1="80" x2="1830" y2="80"/>
+    <line x1="1820" y1="70" x2="1820" y2="90"/>
+    <line x1="90" y1="940" x2="110" y2="940"/>
+    <line x1="100" y1="930" x2="100" y2="950"/>
+    <line x1="1810" y1="940" x2="1830" y2="940"/>
+    <line x1="1820" y1="930" x2="1820" y2="950"/>
+  </g>
+  <!-- Top Running Header (y=80) -->
+  <text x="140" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" letter-spacing="2">47 / 52 · FLUORESCENT GRID INTEGRATED PHOTO WINDOW</text>
+  <text x="1780" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">DIGITS NEON</text>
+  <!-- Left Radical Statement (x=100..900, y=160) -->
+  <g transform="translate(100, 160)">
+    <text x="0" y="40" font-family='monospace' font-size="20" font-weight="900" fill="#111111" letter-spacing="1">● MANIFESTO // ACCENT PUNCTURE</text>
+    <text x="0" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="76" font-weight="900" fill="#111111" letter-spacing="-2">RADICAL</text>
+    <text x="0" y="210" font-family='system-ui, -apple-system, sans-serif' font-size="76" font-weight="900" fill="#111111" letter-spacing="-2">PRECISION</text>
+
+    <!-- Inverted Black Block -->
+    <g transform="translate(0, 270)">
+      <rect width="720" height="260" fill="#111111"/>
+      <g transform="translate(45, 50)">
+        <text x="0" y="25" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">GRID ARCHITECTURE // 2026</text>
+        <text x="0" y="70" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="800" fill="#FFFFFF">荧光绿不是装饰，而是思维的聚光灯。</text>
+        <text x="0" y="110" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#9CA3AF">高饱和度单点刺穿，在纯黑与钛灰中</text>
+        <text x="0" y="138" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#9CA3AF">瞬间锁定全场注意力与核心决策逻辑。</text>
+        <line x1="0" y1="165" x2="630" y2="165" stroke="#374151" stroke-width="1"/>
+        <text x="0" y="195" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">ACCENT HEX: #E2F827 // CONTRAST PASS</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Right Integrated Photo Window (x=960..1820, w=860, h=710, y=140) -->
+  <g transform="translate(960, 140)">
+    <rect width="860" height="710" fill="#0C0D11"/>
+    <!-- Image Slot inside black frame -->
+    <g transform="translate(30, 30)">
+      <clipPath id="neonWinClip58">
+        <rect width="800" height="530"/>
+      </clipPath>
+      <g clip-path="url(#neonWinClip58)">
+        <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="800" height="530" preserveAspectRatio="xMidYMid slice"/>
+      </g>
+      <!-- Engineering Reticles in Neon Window -->
+      <g stroke="#E2F827" stroke-width="1.5">
+        <line x1="20" y1="20" x2="40" y2="20"/>
+        <line x1="20" y1="20" x2="20" y2="40"/>
+        <line x1="780" y1="20" x2="760" y2="20"/>
+        <line x1="780" y1="20" x2="780" y2="40"/>
+      </g>
+    </g>
+    <!-- Bottom Telemetry in Dark Frame -->
+    <g transform="translate(45, 600)">
+      <text x="0" y="25" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">MONOLITH WINDOW // SENSOR TELEMETRY</text>
+      <text x="0" y="55" font-family='monospace' font-size="14" font-weight="600" fill="#ECEEF2">RESOLUTION: 1920×1080 // SAMPLING: 60 FPS // BUFFER: 100%</text>
+    </g>
+  </g>
+  <!-- Bottom Divider Line (y=880) -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#111111" stroke-width="1.5"/>
+
+  <!-- Bottom Running Footer (y=940) -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="0" font-family='monospace' font-size="16" font-weight="700" fill="#222222">COCKPIT TELEMETRY // FLUORESCENT GRID INTEGRATED PHOTO WINDOW</text>
+    <text x="1720" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER // IVAN</text>
+  </g>
+</svg>

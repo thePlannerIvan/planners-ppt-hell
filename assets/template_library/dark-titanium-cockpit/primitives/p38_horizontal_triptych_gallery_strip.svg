@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+  <!-- Corner Hairline Cross Markers -->
+  <g stroke="#CBD5E1" stroke-width="1.5">
+    <line x1="90" y1="80" x2="110" y2="80"/>
+    <line x1="100" y1="70" x2="100" y2="90"/>
+    <line x1="1810" y1="80" x2="1830" y2="80"/>
+    <line x1="1820" y1="70" x2="1820" y2="90"/>
+    <line x1="90" y1="940" x2="110" y2="940"/>
+    <line x1="100" y1="930" x2="100" y2="950"/>
+    <line x1="1810" y1="940" x2="1830" y2="940"/>
+    <line x1="1820" y1="930" x2="1820" y2="950"/>
+  </g>
+  <!-- Top Running Header (y=80) -->
+  <text x="140" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">38 / 52 · HORIZONTAL TRIPTYCH GALLERY STRIP</text>
+  <text x="1780" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">EXO PORTFOLIO</text>
+  <!-- 3 Equal Columns (x=100, 693, 1286; w=533, y=140..850) -->
+  <!-- Col 1 -->
+  <g transform="translate(100, 140)">
+    <clipPath id="col1Clip51">
+      <rect width="533" height="450"/>
+    </clipPath>
+    <g clip-path="url(#col1Clip51)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="533" height="450" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="450" width="533" height="260" fill="#FFFFFF"/>
+    <rect x="36" y="480" width="110" height="26" rx="2" fill="#E2F827"/>
+    <text x="91" y="498" font-family='monospace' font-size="13" font-weight="900" fill="#111111" text-anchor="middle">PHASE 01</text>
+    <text x="36" y="545" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111">Spatial Topology</text>
+    <text x="36" y="585" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">Geometric form generation establishing</text>
+    <text x="36" y="612" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">unbreakable structural equilibrium.</text>
+    <line x1="36" y1="655" x2="497" y2="655" stroke="#CBD5E1" stroke-width="1"/>
+    <text x="36" y="685" font-family='monospace' font-size="14" font-weight="700" fill="#111111">EQUILIBRIUM: +1.000 // VECTOR 01</text>
+  </g>
+
+  <!-- Col 2 -->
+  <g transform="translate(693, 140)">
+    <clipPath id="col2Clip51">
+      <rect width="533" height="450"/>
+    </clipPath>
+    <g clip-path="url(#col2Clip51)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="533" height="450" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="450" width="533" height="260" fill="#FFFFFF"/>
+    <rect x="36" y="480" width="110" height="26" rx="2" fill="#111111"/>
+    <text x="91" y="498" font-family='monospace' font-size="13" font-weight="900" fill="#E2F827" text-anchor="middle">PHASE 02</text>
+    <text x="36" y="545" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111">Material Synthesis</text>
+    <text x="36" y="585" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">Monochrome mineral textures reflecting</text>
+    <text x="36" y="612" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">high-density cognitive weight.</text>
+    <line x1="36" y1="655" x2="497" y2="655" stroke="#CBD5E1" stroke-width="1"/>
+    <text x="36" y="685" font-family='monospace' font-size="14" font-weight="700" fill="#111111">DENSITY: 2.85 g/cm³ // VECTOR 02</text>
+  </g>
+
+  <!-- Col 3 -->
+  <g transform="translate(1286, 140)">
+    <clipPath id="col3Clip51">
+      <rect width="533" height="450"/>
+    </clipPath>
+    <g clip-path="url(#col3Clip51)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="533" height="450" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="450" width="533" height="260" fill="#FFFFFF"/>
+    <rect x="36" y="480" width="110" height="26" rx="2" fill="#E2F827"/>
+    <text x="91" y="498" font-family='monospace' font-size="13" font-weight="900" fill="#111111" text-anchor="middle">PHASE 03</text>
+    <text x="36" y="545" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111">Execution Horizon</text>
+    <text x="36" y="585" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">Final validation confirming complete</text>
+    <text x="36" y="612" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">spec adherence across all nodes.</text>
+    <line x1="36" y1="655" x2="497" y2="655" stroke="#CBD5E1" stroke-width="1"/>
+    <text x="36" y="685" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">VERIFIED: PASS // VECTOR 03</text>
+  </g>
+  <!-- Bottom Divider Line (y=880) -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Bottom Running Footer (y=940) -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="0" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">COCKPIT TELEMETRY // HORIZONTAL TRIPTYCH GALLERY STRIP</text>
+    <text x="1720" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER // IVAN</text>
+  </g>
+</svg>

@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#E2F827"/>
+
+  <!-- Header -->
+  <text x="100" y="80" font-family='monospace' font-size="18" font-weight="800" fill="#111111" letter-spacing="2">49 / 52 · CRITICAL TELEMETRY</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="800" fill="#111111" text-anchor="end">PEAK THROUGHPUT</text>
+
+  <!-- Giant Headline &amp; Subtitle -->
+  <g transform="translate(100, 130)">
+    <text x="0" y="100" font-family='system-ui, -apple-system, sans-serif' font-size="120" font-weight="900" fill="#111111" letter-spacing="-3">DATA</text>
+    <text x="380" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="26" font-weight="900" fill="#111111">UNCOMPROMISED ACCELERATION IN HIGH-STAKES PITCHES</text>
+    <text x="380" y="115" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#111111">通过荧光绿原爆点撕裂平庸汇报惯性，直接确立绝对战略压制力</text>
+  </g>
+
+  <!-- Left Black Hero Stage (x=100..680, Borderless Solid Black Card) -->
+  <g transform="translate(100, 310)">
+    <rect width="580" height="520" rx="16" fill="#111111"/>
+    <g transform="translate(50, 60)">
+      <text x="0" y="25" font-family='monospace' font-size="18" font-weight="900" fill="#E2F827">// CLOSURE VELOCITY</text>
+      <text x="0" y="110" font-family='monospace' font-size="88" font-weight="900" fill="#FFFFFF">4.8X</text>
+      <text x="0" y="160" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#FFFFFF">FASTER DECISION CLOSURE</text>
+
+      <line x1="0" y1="200" x2="480" y2="200" stroke="#333333" stroke-width="1.5"/>
+
+      <text x="0" y="245" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#D1D5DB">实测 50 场真实高管提案，</text>
+      <text x="0" y="278" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#D1D5DB">荧光原爆点在第三个议题节点切入时，</text>
+      <text x="0" y="311" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#D1D5DB">能瞬间唤醒注意力并将决策周期缩短 79%。</text>
+
+      <g transform="translate(0, 370)">
+        <rect width="240" height="38" rx="19" fill="#E2F827"/>
+        <text x="120" y="24" font-family='monospace' font-size="16" font-weight="900" fill="#111111" text-anchor="middle">EMPIRICAL PROOF</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Right Black Column Chart Stage (x=730..1820, Borderless Solid Black Card) -->
+  <g transform="translate(730, 310)">
+    <rect width="1090" height="520" rx="16" fill="#111111"/>
+
+    <!-- Chart Grid &amp; Bars -->
+    <g transform="translate(60, 40)">
+      <text x="0" y="30" font-family='monospace' font-size="18" font-weight="900" fill="#E2F827">// STRATEGIC IMPACT VOLUME (2021-2026)</text>
+
+      <!-- Baseline -->
+      <line x1="40" y1="400" x2="940" y2="400" stroke="#FFFFFF" stroke-width="2"/>
+
+      <!-- Bar 1: 2021 (12k) -->
+      <g transform="translate(70, 0)">
+        <rect x="0" y="330" width="100" height="70" rx="4" fill="#FFFFFF"/>
+        <text x="50" y="315" font-family='monospace' font-size="18" font-weight="800" fill="#FFFFFF" text-anchor="middle">12k</text>
+        <text x="50" y="430" font-family='monospace' font-size="18" font-weight="700" fill="#9CA3AF" text-anchor="middle">2021</text>
+      </g>
+
+      <!-- Bar 2: 2022 (28k) -->
+      <g transform="translate(220, 0)">
+        <rect x="0" y="270" width="100" height="130" rx="4" fill="#FFFFFF"/>
+        <text x="50" y="255" font-family='monospace' font-size="18" font-weight="800" fill="#FFFFFF" text-anchor="middle">28k</text>
+        <text x="50" y="430" font-family='monospace' font-size="18" font-weight="700" fill="#9CA3AF" text-anchor="middle">2022</text>
+      </g>
+
+      <!-- Bar 3: 2023 (45k) -->
+      <g transform="translate(370, 0)">
+        <rect x="0" y="200" width="100" height="200" rx="4" fill="#FFFFFF"/>
+        <text x="50" y="185" font-family='monospace' font-size="18" font-weight="800" fill="#FFFFFF" text-anchor="middle">45k</text>
+        <text x="50" y="430" font-family='monospace' font-size="18" font-weight="700" fill="#9CA3AF" text-anchor="middle">2023</text>
+      </g>
+
+      <!-- Bar 4: 2024 (67k) -->
+      <g transform="translate(520, 0)">
+        <rect x="0" y="130" width="100" height="270" rx="4" fill="#FFFFFF"/>
+        <text x="50" y="115" font-family='monospace' font-size="18" font-weight="800" fill="#FFFFFF" text-anchor="middle">67k</text>
+        <text x="50" y="430" font-family='monospace' font-size="18" font-weight="700" fill="#9CA3AF" text-anchor="middle">2024</text>
+      </g>
+
+      <!-- Bar 5: 2025 (89k) -->
+      <g transform="translate(670, 0)">
+        <rect x="0" y="70" width="100" height="330" rx="4" fill="#FFFFFF"/>
+        <text x="50" y="55" font-family='monospace' font-size="18" font-weight="800" fill="#FFFFFF" text-anchor="middle">89k</text>
+        <text x="50" y="430" font-family='monospace' font-size="18" font-weight="700" fill="#9CA3AF" text-anchor="middle">2025</text>
+      </g>
+
+      <!-- Bar 6: 2026 (142k Peak Highlight in Fluorescent Lime) -->
+      <g transform="translate(820, 0)">
+        <rect x="0" y="10" width="100" height="390" rx="4" fill="#E2F827"/>
+        <text x="50" y="-5" font-family='monospace' font-size="20" font-weight="900" fill="#E2F827" text-anchor="middle">142k</text>
+        <text x="50" y="430" font-family='monospace' font-size="18" font-weight="900" fill="#E2F827" text-anchor="middle">2026*</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Bottom Divider Line -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#111111" stroke-width="2"/>
+
+  <!-- Footer -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="900" fill="#111111">LIME DATA BLAST // HIGH SATURATION OVERDRIVE</text>
+    <text x="1720" y="20" font-family='monospace' font-size="18" font-weight="900" fill="#111111" text-anchor="end">THE PLANNER SYSTEM</text>
+  </g>
+</svg>

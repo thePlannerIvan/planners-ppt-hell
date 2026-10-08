@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <radialGradient id="aura05" cx="55%" cy="32%" r="50%">
+      <stop offset="0%" stop-color="#E2F827" stop-opacity="0.38"/>
+      <stop offset="50%" stop-color="#E2F827" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#ECEEF2" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+
+  <!-- Atmospheric Glow in background -->
+  <ellipse cx="1100" cy="320" rx="550" ry="320" fill="url(#aura05)"/>
+
+  <!-- Top bar metadata -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="1">52 / 52 · CAPITAL &amp; TRAJECTORY</text>
+  <g transform="translate(1720, 58)">
+    <rect width="100" height="34" rx="17" fill="none" stroke="#111111" stroke-width="1.5"/>
+    <text x="50" y="23" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111" text-anchor="middle">INDEX</text>
+  </g>
+
+  <!-- Big Metric &amp; Header -->
+  <g transform="translate(100, 160)">
+    <text x="0" y="105" font-family='system-ui, -apple-system, sans-serif' font-size="124" font-weight="900" fill="#111111" letter-spacing="-3">$500.2M</text>
+    
+    <!-- Target tag with hairline connection -->
+    <line x1="580" y1="80" x2="680" y2="80" stroke="#111111" stroke-width="1.5"/>
+    <g transform="translate(680, 58)">
+      <rect width="180" height="42" rx="21" fill="none" stroke="#111111" stroke-width="1.5"/>
+      <text x="90" y="27" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111" text-anchor="middle">Target Valuation</text>
+    </g>
+
+    <text x="1100" y="65" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#111111">Current Key Backers:</text>
+    <text x="1100" y="95" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#6B7280">Global Tier-1 Consumer Growth Funds &amp; Industrial Heritage Capital</text>
+  </g>
+
+  <!-- Horizontal Connected Progress Pill Chain -->
+  <g transform="translate(100, 320)">
+    <!-- Pill 1: Solid Lime -->
+    <g transform="translate(0, 0)">
+      <rect width="400" height="110" rx="55" fill="#E2F827" stroke="#111111" stroke-width="2"/>
+      <text x="45" y="55" font-family='system-ui, -apple-system, sans-serif' font-size="34" font-weight="900" fill="#111111">40%</text>
+      <text x="45" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#111111">认知重塑与第一性爆破</text>
+    </g>
+    <!-- Pill 2: White Outline -->
+    <g transform="translate(440, 0)">
+      <rect width="400" height="110" rx="55" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>
+      <text x="45" y="55" font-family='system-ui, -apple-system, sans-serif' font-size="34" font-weight="900" fill="#111111">30%</text>
+      <text x="45" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#111111">全域货架心智占位</text>
+    </g>
+    <!-- Pill 3: White Outline -->
+    <g transform="translate(880, 0)">
+      <rect width="400" height="110" rx="55" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>
+      <text x="45" y="55" font-family='system-ui, -apple-system, sans-serif' font-size="34" font-weight="900" fill="#111111">20%</text>
+      <text x="45" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#111111">研发壁垒与风味架构</text>
+    </g>
+    <!-- Pill 4: White Outline -->
+    <g transform="translate(1320, 0)">
+      <rect width="400" height="110" rx="55" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>
+      <text x="45" y="55" font-family='system-ui, -apple-system, sans-serif' font-size="34" font-weight="900" fill="#111111">10%</text>
+      <text x="45" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#111111">私域社群长效自繁衍</text>
+    </g>
+  </g>
+
+  <!-- Sweeping Horizon Arc Timeline (y=520 to 980) -->
+  <g transform="translate(0, 520)">
+    <text x="100" y="60" font-family='system-ui, -apple-system, sans-serif' font-size="44" font-weight="900" fill="#111111">Milestones // 关键跃迁演进路径</text>
+    
+    <!-- Horizon Arc Hairline -->
+    <path d="M 100 130 Q 960 70 1820 130" fill="none" stroke="#111111" stroke-width="1.8"/>
+
+    <!-- 5 Timeline Nodes dropping from the arc -->
+    <g transform="translate(180, 120)">
+      <circle cx="0" cy="0" r="5" fill="#111111"/>
+      <line x1="0" y1="0" x2="0" y2="70" stroke="#111111" stroke-width="1.5"/>
+      <text x="0" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#111111">2024</text>
+      <text x="0" y="170" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#111111">原声数据断层诊断</text>
+      <text x="0" y="200" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#6B7280">锁定即溶咖啡三大偏见</text>
+    </g>
+
+    <g transform="translate(560, 95)">
+      <circle cx="0" cy="0" r="5" fill="#111111"/>
+      <line x1="0" y1="0" x2="0" y2="95" stroke="#111111" stroke-width="1.5"/>
+      <text x="0" y="155" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#111111">2025</text>
+      <text x="0" y="195" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#111111">超频冷萃超级单品</text>
+      <text x="0" y="225" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#6B7280">完成天猫/抖音双平台登顶</text>
+    </g>
+
+    <g transform="translate(960, 85)">
+      <circle cx="0" cy="0" r="7" fill="#E2F827" stroke="#111111" stroke-width="2"/>
+      <line x1="0" y1="0" x2="0" y2="105" stroke="#111111" stroke-width="1.5"/>
+      <text x="0" y="165" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#111111">2026</text>
+      <text x="0" y="205" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111">线下体验与心智立碑</text>
+      <text x="0" y="235" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="600" fill="#111111">原点概念店全面落地</text>
+    </g>
+
+    <g transform="translate(1360, 95)">
+      <circle cx="0" cy="0" r="5" fill="#111111"/>
+      <line x1="0" y1="0" x2="0" y2="95" stroke="#111111" stroke-width="1.5"/>
+      <text x="0" y="155" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#111111">2027</text>
+      <text x="0" y="195" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#111111">全球咖啡原产地供应链</text>
+      <text x="0" y="225" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#6B7280">建立全链条碳足迹认证</text>
+    </g>
+
+    <g transform="translate(1700, 120)">
+      <circle cx="0" cy="0" r="5" fill="#111111"/>
+      <line x1="0" y1="0" x2="0" y2="70" stroke="#111111" stroke-width="1.5"/>
+      <text x="0" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#111111">2028</text>
+      <text x="0" y="170" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#111111">全球化品牌生态成型</text>
+      <text x="0" y="200" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#6B7280">实现国际市场自主出海</text>
+    </g>
+  </g>
+</svg>

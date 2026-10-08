@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+
+  <!-- Header -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">11 / 52 · ALTERNATING CADENCE TIMELINE</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">6-WEEK SPRINT CADENCE</text>
+
+  <!-- Top Narrative Intro -->
+  <g transform="translate(100, 130)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="900" fill="#111111">// SPRINT TIMELINE HIGHWAY</text>
+    <text x="0" y="60" font-family='system-ui, -apple-system, sans-serif' font-size="36" font-weight="900" fill="#111111">SYNCHRONIZED BI-DIRECTIONAL EXECUTION</text>
+  </g>
+
+  <!-- Central Horizontal Timeline Axis at y=460 (x=100..1820) -->
+  <line x1="100" y1="460" x2="1820" y2="460" stroke="#111111" stroke-width="3"/>
+
+  <!-- 6 Alternating Nodes at x=220, 510, 800, 1090, 1380, 1670 (BORDERLESS WHITE CARDS) -->
+  <!-- Node 01: Week 01 (Upper) -->
+  <g transform="translate(220, 0)">
+    <circle cx="0" cy="460" r="9" fill="#111111"/>
+    <circle cx="0" cy="460" r="4" fill="#E2F827"/>
+    <line x1="0" y1="460" x2="0" y2="350" stroke="#111111" stroke-width="2"/>
+    <!-- Upper Borderless Content Card -->
+    <rect x="-110" y="230" width="220" height="110" rx="10" fill="#FFFFFF"/>
+    <text x="-90" y="260" font-family='monospace' font-size="15" font-weight="900" fill="#111111">WEEK 01</text>
+    <text x="-90" y="290" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111">Brief &amp; Sources</text>
+    <text x="-90" y="318" font-family='system-ui, -apple-system, sans-serif' font-size="14" font-weight="500" fill="#4B5563">原始材料结构化录入</text>
+  </g>
+
+  <!-- Node 02: Week 02 (Lower) -->
+  <g transform="translate(510, 0)">
+    <circle cx="0" cy="460" r="9" fill="#111111"/>
+    <circle cx="0" cy="460" r="4" fill="#E2F827"/>
+    <line x1="0" y1="460" x2="0" y2="570" stroke="#111111" stroke-width="2"/>
+    <!-- Lower Borderless Content Card -->
+    <rect x="-110" y="570" width="220" height="110" rx="10" fill="#FFFFFF"/>
+    <text x="-90" y="600" font-family='monospace' font-size="15" font-weight="900" fill="#111111">WEEK 02</text>
+    <text x="-90" y="630" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111">Method Matrix</text>
+    <text x="-90" y="658" font-family='system-ui, -apple-system, sans-serif' font-size="14" font-weight="500" fill="#4B5563">匹配 52 种策划模型</text>
+  </g>
+
+  <!-- Node 03: Week 03 (Upper) -->
+  <g transform="translate(800, 0)">
+    <circle cx="0" cy="460" r="9" fill="#111111"/>
+    <circle cx="0" cy="460" r="4" fill="#E2F827"/>
+    <line x1="0" y1="460" x2="0" y2="350" stroke="#111111" stroke-width="2"/>
+    <!-- Upper Borderless Content Card -->
+    <rect x="-110" y="230" width="220" height="110" rx="10" fill="#FFFFFF"/>
+    <text x="-90" y="260" font-family='monospace' font-size="15" font-weight="900" fill="#111111">WEEK 03</text>
+    <text x="-90" y="290" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111">Story Battle</text>
+    <text x="-90" y="318" font-family='system-ui, -apple-system, sans-serif' font-size="14" font-weight="500" fill="#4B5563">锁定核心策略主张</text>
+  </g>
+
+  <!-- Node 04: Week 04 (Lower) -->
+  <g transform="translate(1090, 0)">
+    <circle cx="0" cy="460" r="9" fill="#111111"/>
+    <circle cx="0" cy="460" r="4" fill="#E2F827"/>
+    <line x1="0" y1="460" x2="0" y2="570" stroke="#111111" stroke-width="2"/>
+    <!-- Lower Borderless Content Card -->
+    <rect x="-110" y="570" width="220" height="110" rx="10" fill="#FFFFFF"/>
+    <text x="-90" y="600" font-family='monospace' font-size="15" font-weight="900" fill="#111111">WEEK 04</text>
+    <text x="-90" y="630" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111">Page Contracts</text>
+    <text x="-90" y="658" font-family='system-ui, -apple-system, sans-serif' font-size="14" font-weight="500" fill="#4B5563">逐页内容稿与审阅面</text>
+  </g>
+
+  <!-- Node 05: Week 05 (Upper) -->
+  <g transform="translate(1380, 0)">
+    <circle cx="0" cy="460" r="9" fill="#111111"/>
+    <circle cx="0" cy="460" r="4" fill="#E2F827"/>
+    <line x1="0" y1="460" x2="0" y2="350" stroke="#111111" stroke-width="2"/>
+    <!-- Upper Borderless Content Card -->
+    <rect x="-110" y="230" width="220" height="110" rx="10" fill="#FFFFFF"/>
+    <text x="-90" y="260" font-family='monospace' font-size="15" font-weight="900" fill="#111111">WEEK 05</text>
+    <text x="-90" y="290" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111">Vector Polish</text>
+    <text x="-90" y="318" font-family='system-ui, -apple-system, sans-serif' font-size="14" font-weight="500" fill="#4B5563">SVG 驾驶舱视觉装配</text>
+  </g>
+
+  <!-- Node 06: Week 06 (Lower) -->
+  <g transform="translate(1670, 0)">
+    <circle cx="0" cy="460" r="9" fill="#111111"/>
+    <circle cx="0" cy="460" r="4" fill="#E2F827"/>
+    <line x1="0" y1="460" x2="0" y2="570" stroke="#111111" stroke-width="2"/>
+    <!-- Lower Borderless Hero Dark Card -->
+    <rect x="-110" y="570" width="220" height="110" rx="10" fill="#111111"/>
+    <text x="-90" y="600" font-family='monospace' font-size="15" font-weight="900" fill="#E2F827">WEEK 06</text>
+    <text x="-90" y="630" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#FFFFFF">Delivery Pass</text>
+    <text x="-90" y="658" font-family='system-ui, -apple-system, sans-serif' font-size="14" font-weight="500" fill="#9CA3AF">零缺陷全案终审交付</text>
+  </g>
+
+  <!-- Bottom Deliverables Black Container (x=100, y=725, w=1720, h=120, BORDERLESS) -->
+  <g transform="translate(100, 725)">
+    <rect width="1720" height="120" rx="12" fill="#111111"/>
+    <g transform="translate(50, 45)">
+      <text x="0" y="25" font-family='monospace' font-size="18" font-weight="900" fill="#E2F827">[DELIVERABLES]</text>
+      <g transform="translate(180, 0)">
+        <text x="0" y="25" font-family='monospace' font-size="16" font-weight="800" fill="#FFFFFF">01 // SOURCE PACK</text>
+        <text x="360" y="25" font-family='monospace' font-size="16" font-weight="800" fill="#FFFFFF">02 // STRATEGY SPEC</text>
+        <text x="740" y="25" font-family='monospace' font-size="16" font-weight="800" fill="#FFFFFF">03 // BY-PAGE DECK</text>
+        <text x="1120" y="25" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">04 // PRODUCTION PPTX</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Bottom Divider Line -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Footer -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280">ALTERNATING CADENCE TIMELINE // SPRINT HIGHWAY</text>
+    <text x="1720" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER SYSTEM</text>
+  </g>
+</svg>

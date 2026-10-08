@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+  <!-- Corner Hairline Cross Markers -->
+  <g stroke="#CBD5E1" stroke-width="1.5">
+    <line x1="90" y1="80" x2="110" y2="80"/>
+    <line x1="100" y1="70" x2="100" y2="90"/>
+    <line x1="1810" y1="80" x2="1830" y2="80"/>
+    <line x1="1820" y1="70" x2="1820" y2="90"/>
+    <line x1="90" y1="940" x2="110" y2="940"/>
+    <line x1="100" y1="930" x2="100" y2="950"/>
+    <line x1="1810" y1="940" x2="1830" y2="940"/>
+    <line x1="1820" y1="930" x2="1820" y2="950"/>
+  </g>
+  <!-- Top Running Header (y=80) -->
+  <text x="140" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">45 / 52 · CENTER MONUMENTAL VISUAL &amp; FLOATING SEAL</text>
+  <text x="1780" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">252DF DESIGNER</text>
+  <!-- Left Narrative Column (x=100..560, w=460, y=160) -->
+  <g transform="translate(100, 160)">
+    <text x="0" y="30" font-family='monospace' font-size="18" font-weight="800" fill="#111111">PORTFOLIO // PROFILE</text>
+    <text x="0" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="44" font-weight="900" fill="#111111">ARCHITECTURAL</text>
+    <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="44" font-weight="900" fill="#111111">DIRECTION</text>
+    <text x="0" y="210" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#4B5563">The Swiss Cockpit system was</text>
+    <text x="0" y="240" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#4B5563">created to restore intellectual dignity</text>
+    <text x="0" y="270" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#4B5563">to slide deck presentations.</text>
+    <line x1="0" y1="320" x2="420" y2="320" stroke="#CBD5E1" stroke-width="1.5"/>
+    <text x="0" y="360" font-family='monospace' font-size="16" font-weight="700" fill="#111111">EXPERIENCE: 14 YEARS</text>
+    <text x="0" y="390" font-family='monospace' font-size="16" font-weight="700" fill="#111111">PRINCIPLE: RADICAL RESTRAINT</text>
+  </g>
+
+  <!-- Center Dominant Visual (x=590..1330, w=740, h=690, y=140) -->
+  <g transform="translate(590, 140)">
+    <clipPath id="portraitClip55">
+      <rect width="740" height="690"/>
+    </clipPath>
+    <g clip-path="url(#portraitClip55)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="740" height="690" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <!-- Floating Engineering Seal (x=580, y=530, w=130, h=130) -->
+    <rect x="580" y="530" width="130" height="130" fill="#E2F827"/>
+    <circle cx="645" cy="595" r="45" fill="none" stroke="#111111" stroke-width="2"/>
+    <text x="645" y="585" font-family='monospace' font-size="13" font-weight="900" fill="#111111" text-anchor="middle">CERTIFIED</text>
+    <text x="645" y="605" font-family='monospace' font-size="13" font-weight="900" fill="#111111" text-anchor="middle">SWISS</text>
+    <text x="645" y="625" font-family='monospace' font-size="12" font-weight="700" fill="#111111" text-anchor="middle">2026</text>
+  </g>
+
+  <!-- Right Metric Column (x=1360..1820, w=460, y=160) -->
+  <g transform="translate(1360, 160)">
+    <!-- Card 1 -->
+    <rect width="460" height="150" fill="#FFFFFF"/>
+    <text x="36" y="45" font-family='system-ui, -apple-system, sans-serif' font-size="44" font-weight="900" fill="#111111">61</text>
+    <text x="36" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111">Archetype Templates</text>
+    <text x="36" y="115" font-family='monospace' font-size="14" font-weight="600" fill="#6B7280">Covering editorial, data &amp; hardware</text>
+
+    <!-- Card 2 -->
+    <rect y="180" width="460" height="150" fill="#FFFFFF"/>
+    <text x="36" y="225" font-family='system-ui, -apple-system, sans-serif' font-size="44" font-weight="900" fill="#111111">0</text>
+    <text x="36" y="265" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111">Bento Clutter Tolerated</text>
+    <text x="36" y="295" font-family='monospace' font-size="14" font-weight="600" fill="#6B7280">Zero nested cards or bubbly badges</text>
+
+    <!-- Card 3 -->
+    <rect y="360" width="460" height="150" fill="#FFFFFF"/>
+    <text x="36" y="405" font-family='system-ui, -apple-system, sans-serif' font-size="44" font-weight="900" fill="#111111">100%</text>
+    <text x="36" y="445" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#111111">Vector Precision</text>
+    <text x="36" y="475" font-family='monospace' font-size="14" font-weight="600" fill="#E2F827">Strict mathematical alignment</text>
+  </g>
+  <!-- Bottom Divider Line (y=880) -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Bottom Running Footer (y=940) -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="0" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">COCKPIT TELEMETRY // CENTER MONUMENTAL VISUAL &amp; FLOATING SEAL</text>
+    <text x="1720" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER // IVAN</text>
+  </g>
+</svg>

@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+  <!-- Corner Hairline Cross Markers -->
+  <g stroke="#CBD5E1" stroke-width="1.5">
+    <line x1="90" y1="80" x2="110" y2="80"/>
+    <line x1="100" y1="70" x2="100" y2="90"/>
+    <line x1="1810" y1="80" x2="1830" y2="80"/>
+    <line x1="1820" y1="70" x2="1820" y2="90"/>
+    <line x1="90" y1="940" x2="110" y2="940"/>
+    <line x1="100" y1="930" x2="100" y2="950"/>
+    <line x1="1810" y1="940" x2="1830" y2="940"/>
+    <line x1="1820" y1="930" x2="1820" y2="950"/>
+  </g>
+  <!-- Top Running Header (y=80) -->
+  <text x="140" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">43 / 52 · HORIZON PANORAMIC STRIP &amp; SUNKEN LEDGER</text>
+  <text x="1780" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">CLINE MINIMAL</text>
+  <!-- Top Ultra-Wide Horizon Panoramic Strip (x=100, y=140, w=1720, h=390) -->
+  <g transform="translate(100, 140)">
+    <clipPath id="horizonClip61">
+      <rect width="1720" height="390"/>
+    </clipPath>
+    <g clip-path="url(#horizonClip61)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="1720" height="390" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect width="1720" height="390" fill="none" stroke="#CBD5E1" stroke-width="1.5"/>
+    <rect x="30" y="30" width="280" height="28" rx="2" fill="#0C0D11" fill-opacity="0.85"/>
+    <text x="170" y="49" font-family='monospace' font-size="13" font-weight="700" fill="#E2F827" text-anchor="middle">HORIZON PERSPECTIVE // 1720×390</text>
+  </g>
+
+  <!-- Bottom Sunken Data Ledger (x=100, y=560, w=1720, h=280) -->
+  <g transform="translate(100, 560)">
+    <rect width="1720" height="280" fill="#FFFFFF"/>
+    <!-- 4 Ledger Columns (x=36, 460, 884, 1308; w=380) -->
+    <!-- Col 1 -->
+    <g transform="translate(36, 40)">
+      <text x="0" y="20" font-family='monospace' font-size="14" font-weight="800" fill="#111111">LEDGER 01 // HORIZON</text>
+      <rect x="0" y="30" width="80" height="3" fill="#E2F827"/>
+      <text x="0" y="70" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="800" fill="#111111">Panoramic Balance</text>
+      <text x="0" y="105" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#4B5563">Cinematic wide-aspect framing</text>
+      <text x="0" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#4B5563">grounding the audience gaze.</text>
+      <text x="0" y="180" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">RATIO: 4.41:1</text>
+    </g>
+
+    <!-- Col 2 -->
+    <g transform="translate(460, 40)">
+      <text x="0" y="20" font-family='monospace' font-size="14" font-weight="800" fill="#111111">LEDGER 02 // SUBSTRATE</text>
+      <rect x="0" y="30" width="80" height="3" fill="#111111"/>
+      <text x="0" y="70" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="800" fill="#111111">Mineral Density</text>
+      <text x="0" y="105" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#4B5563">Pure concrete and titanium</text>
+      <text x="0" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#4B5563">textures creating physical weight.</text>
+      <text x="0" y="180" font-family='monospace' font-size="14" font-weight="700" fill="#6B7280">WEIGHT: SUBSTANTIAL</text>
+    </g>
+
+    <!-- Col 3 -->
+    <g transform="translate(884, 40)">
+      <text x="0" y="20" font-family='monospace' font-size="14" font-weight="800" fill="#111111">LEDGER 03 // ALIGNMENT</text>
+      <rect x="0" y="30" width="80" height="3" fill="#E2F827"/>
+      <text x="0" y="70" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="800" fill="#111111">Mathematical Grid</text>
+      <text x="0" y="105" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#4B5563">Sub-pixel vector coordinates</text>
+      <text x="0" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#4B5563">locking typography to layout seams.</text>
+      <text x="0" y="180" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">PRECISION: EXACT</text>
+    </g>
+
+    <!-- Col 4 -->
+    <g transform="translate(1308, 40)">
+      <text x="0" y="20" font-family='monospace' font-size="14" font-weight="800" fill="#111111">LEDGER 04 // FINALITY</text>
+      <rect x="0" y="30" width="80" height="3" fill="#111111"/>
+      <text x="0" y="70" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="800" fill="#111111">Complete Delivery</text>
+      <text x="0" y="105" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#4B5563">All 61 slides unified into a single</text>
+      <text x="0" y="130" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#4B5563">Swiss neo-brutalist masterpiece.</text>
+      <text x="0" y="180" font-family='monospace' font-size="14" font-weight="700" fill="#111111">TOTAL SLIDES: 61</text>
+    </g>
+  </g>
+  <!-- Bottom Divider Line (y=880) -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Bottom Running Footer (y=940) -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="0" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">COCKPIT TELEMETRY // HORIZON PANORAMIC STRIP &amp; SUNKEN LEDGER</text>
+    <text x="1720" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER // IVAN</text>
+  </g>
+</svg>

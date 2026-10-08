@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#0C0D11"/>
+  <!-- Corner Hairline Cross Markers -->
+  <g stroke="#374151" stroke-width="1.5">
+    <line x1="90" y1="80" x2="110" y2="80"/>
+    <line x1="100" y1="70" x2="100" y2="90"/>
+    <line x1="1810" y1="80" x2="1830" y2="80"/>
+    <line x1="1820" y1="70" x2="1820" y2="90"/>
+    <line x1="90" y1="940" x2="110" y2="940"/>
+    <line x1="100" y1="930" x2="100" y2="950"/>
+    <line x1="1810" y1="940" x2="1830" y2="940"/>
+    <line x1="1820" y1="930" x2="1820" y2="950"/>
+  </g>
+  <!-- Top Running Header (y=80) -->
+  <text x="140" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827" letter-spacing="2">44 / 52 · EDGE-INFILTRATED MONUMENTAL HARDWARE</text>
+  <text x="1780" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#9CA3AF" text-anchor="end">TESLA BRUTALIST</text>
+  <!-- Left Narrative Column (x=100..840, w=740, y=140) -->
+  <g transform="translate(100, 140)">
+    <rect width="180" height="28" rx="2" fill="#222736"/>
+    <text x="90" y="19" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827" text-anchor="middle">● CHASSIS CORE V6</text>
+    <text x="0" y="100" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#FFFFFF" letter-spacing="-1">KINETIC</text>
+    <text x="0" y="160" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#FFFFFF" letter-spacing="-1">ACCELERATION</text>
+    <text x="0" y="220" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="500" fill="#9CA3AF">Monolithic form factors designed for</text>
+    <text x="0" y="252" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="500" fill="#9CA3AF">maximum cognitive torque and precision.</text>
+
+    <!-- 3 Tier Spec Ledger -->
+    <g transform="translate(0, 320)">
+      <line x1="0" y1="0" x2="680" y2="0" stroke="#222736" stroke-width="1.5"/>
+      <text x="0" y="55" font-family='system-ui, -apple-system, sans-serif' font-size="48" font-weight="900" fill="#E2F827">0.02s</text>
+      <text x="180" y="45" font-family='monospace' font-size="18" font-weight="800" fill="#ECEEF2">DECISION DISPATCH LATENCY</text>
+      <text x="180" y="70" font-family='system-ui, -apple-system, sans-serif' font-size="14" font-weight="500" fill="#6B7280">Hardware-level pipeline bypass</text>
+
+      <line x1="0" y1="100" x2="680" y2="100" stroke="#222736" stroke-width="1.5"/>
+      <text x="0" y="155" font-family='system-ui, -apple-system, sans-serif' font-size="48" font-weight="900" fill="#FFFFFF">100%</text>
+      <text x="180" y="145" font-family='monospace' font-size="18" font-weight="800" fill="#ECEEF2">DETERMINISTIC RENDERING</text>
+      <text x="180" y="170" font-family='system-ui, -apple-system, sans-serif' font-size="14" font-weight="500" fill="#6B7280">Reproducible vector frame synthesis</text>
+
+      <line x1="0" y1="200" x2="680" y2="200" stroke="#222736" stroke-width="1.5"/>
+      <text x="0" y="255" font-family='system-ui, -apple-system, sans-serif' font-size="48" font-weight="900" fill="#FFFFFF">16-R</text>
+      <text x="180" y="245" font-family='monospace' font-size="18" font-weight="800" fill="#ECEEF2">PARALLEL CORE EXECUTION</text>
+      <text x="180" y="270" font-family='system-ui, -apple-system, sans-serif' font-size="14" font-weight="500" fill="#6B7280">Multi-threaded orchestration cluster</text>
+      <line x1="0" y1="300" x2="680" y2="300" stroke="#222736" stroke-width="1.5"/>
+    </g>
+  </g>
+
+  <!-- Right Edge-Infiltrated Hero Image (x=900..1820, w=920, h=710, y=140) -->
+  <g transform="translate(900, 140)">
+    <clipPath id="rightHeroClip49">
+      <rect width="920" height="710"/>
+    </clipPath>
+    <g clip-path="url(#rightHeroClip49)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="920" height="710" preserveAspectRatio="xMidYMid slice"/>
+      <!-- Measurement Ruler along Left Edge -->
+      <g stroke="#374151" stroke-width="1.5">
+        <line x1="20" y1="40" x2="20" y2="670"/>
+        <line x1="20" y1="40" x2="35" y2="40"/>
+        <line x1="20" y1="250" x2="35" y2="250"/>
+        <line x1="20" y1="460" x2="35" y2="460"/>
+        <line x1="20" y1="670" x2="35" y2="670"/>
+      </g>
+      <text x="45" y="45" font-family='monospace' font-size="12" font-weight="700" fill="#E2F827">AXIS_Z: 00.0</text>
+      <text x="45" y="675" font-family='monospace' font-size="12" font-weight="700" fill="#E2F827">AXIS_Z: 71.0</text>
+    </g>
+  </g>
+  <!-- Bottom Divider Line (y=880) -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#22252E" stroke-width="1.5"/>
+
+  <!-- Bottom Running Footer (y=940) -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="0" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">COCKPIT TELEMETRY // EDGE-INFILTRATED MONUMENTAL HARDWARE</text>
+    <text x="1720" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#FFFFFF" text-anchor="end">THE PLANNER // IVAN</text>
+  </g>
+</svg>

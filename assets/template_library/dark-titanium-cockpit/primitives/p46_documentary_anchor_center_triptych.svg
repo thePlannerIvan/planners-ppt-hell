@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#ECEEF2"/>
+  <!-- Corner Hairline Cross Markers -->
+  <g stroke="#CBD5E1" stroke-width="1.5">
+    <line x1="90" y1="80" x2="110" y2="80"/>
+    <line x1="100" y1="70" x2="100" y2="90"/>
+    <line x1="1810" y1="80" x2="1830" y2="80"/>
+    <line x1="1820" y1="70" x2="1820" y2="90"/>
+    <line x1="90" y1="940" x2="110" y2="940"/>
+    <line x1="100" y1="930" x2="100" y2="950"/>
+    <line x1="1810" y1="940" x2="1830" y2="940"/>
+    <line x1="1820" y1="930" x2="1820" y2="950"/>
+  </g>
+  <!-- Top Running Header (y=80) -->
+  <text x="140" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">46 / 52 · TRIPTYCH WITH CENTER DOCUMENTARY ANCHOR</text>
+  <text x="1780" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">FIELD EVIDENCE</text>
+  <!-- Left Telemetry Column (x=100..540, w=440, h=710, y=140) -->
+  <g transform="translate(100, 140)">
+    <rect width="440" height="710" fill="#FFFFFF"/>
+    <rect x="0" y="0" width="440" height="4" fill="#111111"/>
+    <g transform="translate(36, 50)">
+      <rect width="140" height="26" rx="2" fill="#ECEEF2"/>
+      <text x="70" y="18" font-family='monospace' font-size="13" font-weight="700" fill="#111111" text-anchor="middle">PREMISE // 01</text>
+      <text x="0" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="30" font-weight="900" fill="#111111">EVIDENCE</text>
+      <text x="0" y="120" font-family='system-ui, -apple-system, sans-serif' font-size="30" font-weight="900" fill="#111111">OVER HYPOTHESIS</text>
+      <text x="0" y="180" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">True strategic authority</text>
+      <text x="0" y="208" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">is grounded in tangible,</text>
+      <text x="0" y="236" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">unassailable field artifacts.</text>
+
+      <line x1="0" y1="280" x2="368" y2="280" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="0" y="320" font-family='monospace' font-size="14" font-weight="700" fill="#111111">LOC: 31.23° N, 121.47° E</text>
+      <text x="0" y="350" font-family='monospace' font-size="14" font-weight="700" fill="#6B7280">TIMESTAMP: 2026-10-08</text>
+    </g>
+  </g>
+
+  <!-- Center Dominant Visual Anchor (x=570..1350, w=780, h=710, y=140) -->
+  <g transform="translate(570, 140)">
+    <clipPath id="docCenterClip57">
+      <rect width="780" height="710"/>
+    </clipPath>
+    <g clip-path="url(#docCenterClip57)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="780" height="710" preserveAspectRatio="xMidYMid slice"/>
+      <rect x="0" y="630" width="780" height="80" fill="#0C0D11" fill-opacity="0.9"/>
+      <text x="36" y="665" font-family='monospace' font-size="15" font-weight="800" fill="#E2F827">● DOCUMENTARY ANCHOR // PHYSICAL ARTIFACT CONFIRMATION</text>
+      <text x="36" y="692" font-family='monospace' font-size="13" font-weight="600" fill="#9CA3AF">VERIFIED BY SWISS NEO-BRUTALIST PROTOCOL</text>
+    </g>
+  </g>
+
+  <!-- Right Telemetry Column (x=1380..1820, w=440, h=710, y=140) -->
+  <g transform="translate(1380, 140)">
+    <rect width="440" height="710" fill="#FFFFFF"/>
+    <rect x="0" y="0" width="440" height="4" fill="#E2F827"/>
+    <g transform="translate(36, 50)">
+      <rect width="140" height="26" rx="2" fill="#E2F827"/>
+      <text x="70" y="18" font-family='monospace' font-size="13" font-weight="900" fill="#111111" text-anchor="middle">OUTCOME // 02</text>
+      <text x="0" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="30" font-weight="900" fill="#111111">SYNTHESIS</text>
+      <text x="0" y="120" font-family='system-ui, -apple-system, sans-serif' font-size="30" font-weight="900" fill="#111111">COMPLETE</text>
+      <text x="0" y="180" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">The resulting artifact</text>
+      <text x="0" y="208" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">operates with deterministic</text>
+      <text x="0" y="236" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#4B5563">rendering precision.</text>
+
+      <line x1="0" y1="280" x2="368" y2="280" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="0" y="320" font-family='monospace' font-size="14" font-weight="700" fill="#111111">STATUS: CERTIFIED</text>
+      <text x="0" y="350" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">VERDICT: PASS</text>
+    </g>
+  </g>
+  <!-- Bottom Divider Line (y=880) -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- Bottom Running Footer (y=940) -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="0" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">COCKPIT TELEMETRY // TRIPTYCH WITH CENTER DOCUMENTARY ANCHOR</text>
+    <text x="1720" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#111111" text-anchor="end">THE PLANNER // IVAN</text>
+  </g>
+</svg>

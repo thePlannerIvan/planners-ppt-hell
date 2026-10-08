@@ -6,6 +6,8 @@
 
 接收 Bypage 成品、委派资料整理或恢复该链路的项目时，按名称找到 `planners-bypage` 并读取 `references/content-handoff.md`。沿用同一项目记忆与来源索引，保存正式稿、核查、批准反馈与制作快照的原路径；本地 `source.md`、`page_content.json` 和 `source_assets.json` 是制作派生文件，保留 Bypage 页号/来源 ID/资产 ID 的映射。
 
+同时承接原项目记忆中的方法采用记录和已确认论证关系。出现新的表达组织问题时可读取并调用 `planners-method-wiki`，只发展适用的画面或论证表达；方法查询不另建来源索引、不重复事实核查，也不重新决定策略。
+
 `--source` 初始化保留内容但只生成空的制作页面骨架；按实际 By-page 填写本阶段的 `page_content.json`，不是初始化成功就完成内容适配。Production Notes 的内联图片路径先相对原交付稿解析，再映射到登记的 PPT 本地资产路径；Markdown 图片链接的自动规范化不覆盖这些内联路径。
 
 | 通道 | 什么时候走 | 内容从哪来 |

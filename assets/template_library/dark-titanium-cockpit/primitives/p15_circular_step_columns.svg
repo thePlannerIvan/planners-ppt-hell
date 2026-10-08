@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#0C0D11"/>
+
+  <!-- Header -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#9CA3AF" letter-spacing="2">15 / 52 · FOUR-STAGE WORKFLOW</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827" text-anchor="end">STEP COLUMNS</text>
+
+  <!-- Slide Title -->
+  <g transform="translate(100, 160)">
+    <text x="0" y="44" font-family='system-ui, -apple-system, sans-serif' font-size="52" font-weight="900" fill="#FFFFFF" letter-spacing="-1">FOUR-STAGE METHODOLOGICAL ENGINE</text>
+    <text x="0" y="86" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="500" fill="#9CA3AF">Rigorous sequence of gates governing strategy from conception to delivery.</text>
+  </g>
+
+  <!-- Four Vertical Columns (x=100, 530, 960, 1390; w=400, h=540) -->
+
+  <!-- Column 1 -->
+  <g transform="translate(100, 280)">
+    <rect width="400" height="540" fill="#14161F" stroke="#282C3D" stroke-width="1.5"/>
+    <!-- Floating Circle Badge -->
+    <circle cx="60" cy="50" r="28" fill="#E2F827"/>
+    <text x="60" y="58" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111" text-anchor="middle">1</text>
+    <g transform="translate(40, 120)">
+      <text x="0" y="25" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">STAGE 01</text>
+      <text x="0" y="65" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#FFFFFF">DIAGNOSE</text>
+      <text x="0" y="115" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#9CA3AF">全量资料无损吸纳，</text>
+      <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#9CA3AF">建立溯源锚定证据索引，</text>
+      <text x="0" y="175" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#9CA3AF">穿透核心真实冲突。</text>
+
+      <line x1="0" y1="230" x2="320" y2="230" stroke="#222533" stroke-width="1"/>
+      <text x="0" y="270" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">GATE: PROVENANCE LOCK</text>
+    </g>
+  </g>
+
+  <!-- Column 2 -->
+  <g transform="translate(540, 280)">
+    <rect width="400" height="540" fill="#14161F" stroke="#282C3D" stroke-width="1.5"/>
+    <circle cx="60" cy="50" r="28" fill="#E2F827"/>
+    <text x="60" y="58" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111" text-anchor="middle">2</text>
+    <g transform="translate(40, 120)">
+      <text x="0" y="25" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">STAGE 02</text>
+      <text x="0" y="65" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#FFFFFF">DIVERGE</text>
+      <text x="0" y="115" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#9CA3AF">50+ 战略假说发散，</text>
+      <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#9CA3AF">多视角盲审压力测试，</text>
+      <text x="0" y="175" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#9CA3AF">探索非共识破局解法。</text>
+
+      <line x1="0" y1="230" x2="320" y2="230" stroke="#222533" stroke-width="1"/>
+      <text x="0" y="270" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">GATE: HYPOTHESIS PASS</text>
+    </g>
+  </g>
+
+  <!-- Column 3 -->
+  <g transform="translate(980, 280)">
+    <rect width="400" height="540" fill="#14161F" stroke="#282C3D" stroke-width="1.5"/>
+    <circle cx="60" cy="50" r="28" fill="#E2F827"/>
+    <text x="60" y="58" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111" text-anchor="middle">3</text>
+    <g transform="translate(40, 120)">
+      <text x="0" y="25" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">STAGE 03</text>
+      <text x="0" y="65" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#FFFFFF">CONVERGE</text>
+      <text x="0" y="115" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#9CA3AF">收敛至唯一战略重锤，</text>
+      <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#9CA3AF">建立不可逆护城河定义，</text>
+      <text x="0" y="175" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#9CA3AF">完成逐页文案结构冻结。</text>
+
+      <line x1="0" y1="230" x2="320" y2="230" stroke="#222533" stroke-width="1"/>
+      <text x="0" y="270" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">GATE: STORYLINE LOCK</text>
+    </g>
+  </g>
+
+  <!-- Column 4 (Highlighted in Electric Lime) -->
+  <g transform="translate(1420, 280)">
+    <rect width="400" height="540" fill="#14161F" stroke="#E2F827" stroke-width="2"/>
+    <circle cx="60" cy="50" r="28" fill="#E2F827"/>
+    <text x="60" y="58" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111" text-anchor="middle">4</text>
+    <g transform="translate(40, 120)">
+      <text x="0" y="25" font-family='monospace' font-size="16" font-weight="900" fill="#E2F827">● STAGE 04 // FINAL</text>
+      <text x="0" y="65" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#FFFFFF">DELIVER</text>
+      <text x="0" y="115" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">瑞士极客版式高保真生成，</text>
+      <text x="0" y="145" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">全自动化巡检无缺陷，</text>
+      <text x="0" y="175" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="400" fill="#D1D5DB">原生 PPTX 导出交付客户。</text>
+
+      <line x1="0" y1="230" x2="320" y2="230" stroke="#333333" stroke-width="1"/>
+      <text x="0" y="270" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">GATE: ZERO DEFECT PASS</text>
+    </g>
+  </g>
+
+  <!-- Bottom Divider Line -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#22252E" stroke-width="1.5"/>
+
+  <!-- Footer -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280">CIRCULAR STEP ANCHORS // DISCIPLINED CADENCE</text>
+    <text x="1720" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#FFFFFF" text-anchor="end">THE PLANNER SYSTEM</text>
+  </g>
+</svg>

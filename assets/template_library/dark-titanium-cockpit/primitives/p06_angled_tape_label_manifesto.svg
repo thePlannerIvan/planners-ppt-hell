@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#0C0D11"/>
+
+  <!-- Header -->
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#9CA3AF" letter-spacing="2">06 / 52 · MARKET BREAKTHROUGH</text>
+  <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827" text-anchor="end">TAPE MANIFESTO</text>
+
+  <!-- Big Hero Typography across Center -->
+  <g transform="translate(100, 240)">
+    <text x="0" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="96" font-weight="900" fill="#FFFFFF" letter-spacing="-3">DO NOT COMPETE</text>
+    <text x="0" y="210" font-family='system-ui, -apple-system, sans-serif' font-size="96" font-weight="900" fill="#FFFFFF" letter-spacing="-3">IN NOISY CROWDS.</text>
+
+    <!-- Angled Tape Sticker Polygon (slanted by math coordinates) -->
+    <g transform="translate(0, 260)">
+      <polygon points="0,30 480,0 490,90 10,120" fill="#E2F827"/>
+      <text x="240" y="65" font-family='system-ui, -apple-system, sans-serif' font-size="28" font-weight="900" fill="#111111" text-anchor="middle" letter-spacing="2">MAXIMUM LEVERAGE // 2026</text>
+    </g>
+
+    <g transform="translate(0, 420)">
+      <text x="0" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="76" font-weight="900" fill="#E2F827" letter-spacing="-2">CREATE A CATEGORY OF ONE.</text>
+      <text x="0" y="140" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="500" fill="#D1D5DB">成为不可替代的唯一，而非在旧坐标系里内卷争抢。</text>
+    </g>
+  </g>
+
+  <!-- Bottom 3 Takeaway Cards (x=1000..1820, y=240..600) -->
+  <g transform="translate(1180, 240)">
+    <rect width="640" height="110" fill="#14161F" stroke="#222533" stroke-width="1.5"/>
+    <text x="30" y="45" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">PRINCIPLE 01</text>
+    <text x="30" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="700" fill="#FFFFFF">颠覆品类定义：改写行业评判标准</text>
+
+    <g transform="translate(0, 130)">
+      <rect width="640" height="110" fill="#14161F" stroke="#222533" stroke-width="1.5"/>
+      <text x="30" y="45" font-family='monospace' font-size="16" font-weight="800" fill="#E2F827">PRINCIPLE 02</text>
+      <text x="30" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="700" fill="#FFFFFF">抢占认知高地：率先确立先锋语境</text>
+    </g>
+
+    <g transform="translate(0, 260)">
+      <rect width="640" height="110" fill="#14161F" stroke="#E2F827" stroke-width="1.5"/>
+      <text x="30" y="45" font-family='monospace' font-size="16" font-weight="900" fill="#E2F827">● PRINCIPLE 03 // LOCK</text>
+      <text x="30" y="85" font-family='system-ui, -apple-system, sans-serif' font-size="20" font-weight="800" fill="#FFFFFF">壁垒自我加固：形成结构性护城河</text>
+    </g>
+  </g>
+
+  <!-- Bottom Divider Line -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#22252E" stroke-width="1.5"/>
+
+  <!-- Footer -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="20" font-family='monospace' font-size="18" font-weight="700" fill="#6B7280">TACTICAL TAPE STICKER // DISRUPTIVE ACCENT</text>
+    <text x="1720" y="20" font-family='monospace' font-size="18" font-weight="800" fill="#FFFFFF" text-anchor="end">THE PLANNER SYSTEM</text>
+  </g>
+</svg>

@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#0C0D11"/>
+  <!-- Corner Hairline Cross Markers -->
+  <g stroke="#374151" stroke-width="1.5">
+    <line x1="90" y1="80" x2="110" y2="80"/>
+    <line x1="100" y1="70" x2="100" y2="90"/>
+    <line x1="1810" y1="80" x2="1830" y2="80"/>
+    <line x1="1820" y1="70" x2="1820" y2="90"/>
+    <line x1="90" y1="940" x2="110" y2="940"/>
+    <line x1="100" y1="930" x2="100" y2="950"/>
+    <line x1="1810" y1="940" x2="1830" y2="940"/>
+    <line x1="1820" y1="930" x2="1820" y2="950"/>
+  </g>
+  <!-- Top Running Header (y=80) -->
+  <text x="140" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827" letter-spacing="2">50 / 52 · SCIENTIFIC TOMOGRAPHY SLICE &amp; PUNCHCARD PLAQUE</text>
+  <text x="1780" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#9CA3AF" text-anchor="end">BRAINWAVE SCIENCE</text>
+  <!-- Central Panoramic Scientific Tomography Slice (x=100, y=140, w=1720, h=450) -->
+  <g transform="translate(100, 140)">
+    <clipPath id="tomoClip60">
+      <rect width="1720" height="450"/>
+    </clipPath>
+    <g clip-path="url(#tomoClip60)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="1720" height="450" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <!-- Scientific Grid Hairline & Ticks -->
+    <g stroke="#E2F827" stroke-width="1.5">
+      <line x1="30" y1="30" x2="1690" y2="30"/>
+      <line x1="30" y1="20" x2="30" y2="40"/>
+      <line x1="445" y1="25" x2="445" y2="35"/>
+      <line x1="860" y1="20" x2="860" y2="40"/>
+      <line x1="1275" y1="25" x2="1275" y2="35"/>
+      <line x1="1690" y1="20" x2="1690" y2="40"/>
+    </g>
+    <text x="40" y="60" font-family='monospace' font-size="13" font-weight="700" fill="#E2F827">TOMOGRAPHY SCAN // CROSS-SECTION AXIS-X // 0.000 mm</text>
+  </g>
+
+  <!-- Floating Neo-Brutalist Punchcard Sticker (x=1360, y=340, w=460, h=280) -->
+  <g transform="translate(1360, 340)">
+    <rect width="460" height="280" fill="#E2F827"/>
+    <g transform="translate(36, 36)">
+      <text x="0" y="20" font-family='monospace' font-size="14" font-weight="900" fill="#111111">PUNCHCARD MATRIX // 2026</text>
+      <text x="0" y="55" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="900" fill="#111111">VALIDATION HASH</text>
+      <!-- Perforation Holes Pattern -->
+      <g font-family='monospace' font-size="20" fill="#111111">
+        <text x="0" y="100">● ○ ● ● ○ ● ○ ○ ● ●</text>
+        <text x="0" y="130">○ ● ● ○ ● ● ○ ● ● ○</text>
+        <text x="0" y="160">● ● ○ ● ○ ● ● ○ ● ●</text>
+      </g>
+      <line x1="0" y1="185" x2="388" y2="185" stroke="#111111" stroke-width="1.5"/>
+      <text x="0" y="215" font-family='monospace' font-size="13" font-weight="800" fill="#111111">SHA256: e8b94f...991c [VERIFIED]</text>
+    </g>
+  </g>
+
+  <!-- Bottom 3-Column Telemetry Ledger (x=100, y=620, w=1220, h=220) -->
+  <g transform="translate(100, 620)">
+    <rect width="1220" height="220" fill="#141720"/>
+    <g transform="translate(36, 40)">
+      <text x="0" y="20" font-family='monospace' font-size="15" font-weight="800" fill="#E2F827">DATA_STREAM_01 // RESOLUTION</text>
+      <text x="0" y="55" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="800" fill="#ECEEF2">Sub-Angstrom Surface Fidelity</text>
+      <text x="0" y="90" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#9CA3AF">Direct cross-sectional laser interferometry confirming flawless geometric alignment.</text>
+      <text x="0" y="125" font-family='monospace' font-size="14" font-weight="700" fill="#6B7280">INTERFEROMETER: ACTIVE // WAVELENGTH: 532 nm // NOISE: -120 dB</text>
+    </g>
+  </g>
+  <!-- Bottom Divider Line (y=880) -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#22252E" stroke-width="1.5"/>
+
+  <!-- Bottom Running Footer (y=940) -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="0" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">COCKPIT TELEMETRY // SCIENTIFIC TOMOGRAPHY SLICE &amp; PUNCHCARD PLAQUE</text>
+    <text x="1720" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#FFFFFF" text-anchor="end">THE PLANNER // IVAN</text>
+  </g>
+</svg>

@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#0C0D11"/>
+  <!-- Corner Hairline Cross Markers -->
+  <g stroke="#374151" stroke-width="1.5">
+    <line x1="90" y1="80" x2="110" y2="80"/>
+    <line x1="100" y1="70" x2="100" y2="90"/>
+    <line x1="1810" y1="80" x2="1830" y2="80"/>
+    <line x1="1820" y1="70" x2="1820" y2="90"/>
+    <line x1="90" y1="940" x2="110" y2="940"/>
+    <line x1="100" y1="930" x2="100" y2="950"/>
+    <line x1="1810" y1="940" x2="1830" y2="940"/>
+    <line x1="1820" y1="930" x2="1820" y2="950"/>
+  </g>
+  <!-- Top Running Header (y=80) -->
+  <text x="140" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827" letter-spacing="2">41 / 52 · CYBERNETIC DUAL-COCKPIT HUD SPLIT</text>
+  <text x="1780" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#9CA3AF" text-anchor="end">DIGITS INTERFACE</text>
+  <!-- Left Hero Image Window (x=100..920, w=820, h=720, y=130) -->
+  <g transform="translate(100, 130)">
+    <clipPath id="leftImageClip47">
+      <rect width="820" height="720"/>
+    </clipPath>
+    <g clip-path="url(#leftImageClip47)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="820" height="720" preserveAspectRatio="xMidYMid slice"/>
+      <!-- HUD Reticle Overlay -->
+      <g stroke="#E2F827" stroke-width="1.5" fill="none">
+        <path d="M 30 50 L 30 30 L 50 30"/>
+        <path d="M 790 50 L 790 30 L 770 30"/>
+        <path d="M 30 670 L 30 690 L 50 690"/>
+        <path d="M 790 670 L 790 690 L 770 690"/>
+      </g>
+      <!-- HUD Telemetry Badge -->
+      <rect x="30" y="650" width="280" height="32" fill="#0C0D11" fill-opacity="0.9"/>
+      <text x="45" y="671" font-family='monospace' font-size="13" font-weight="700" fill="#E2F827">TARGET LOCK: LAT 31.23° // MONOLITH</text>
+    </g>
+  </g>
+
+  <!-- Right Dual-Layer Cockpit Cards (x=960..1820, w=860, y=130) -->
+  <!-- Upper Card (h=345) -->
+  <g transform="translate(960, 130)">
+    <rect width="860" height="345" fill="#141720"/>
+    <rect x="40" y="40" width="180" height="28" rx="2" fill="#E2F827"/>
+    <text x="130" y="59" font-family='monospace' font-size="14" font-weight="900" fill="#111111" text-anchor="middle">● RADAR TELEMETRY</text>
+    <text x="40" y="140" font-family='system-ui, -apple-system, sans-serif' font-size="64" font-weight="900" fill="#FFFFFF">99.98%</text>
+    <text x="40" y="180" font-family='monospace' font-size="18" font-weight="700" fill="#9CA3AF">COGNITIVE FIDELITY BENCHMARK</text>
+    <text x="40" y="230" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#9CA3AF">All telemetry streams processed via zero-copy</text>
+    <text x="40" y="258" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="500" fill="#9CA3AF">in-memory execution rings.</text>
+    <line x1="40" y1="295" x2="820" y2="295" stroke="#222736" stroke-width="1.5"/>
+    <text x="40" y="325" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">BANDWIDTH: 100 Gbps // PACKET LOSS: 0.00%</text>
+  </g>
+
+  <!-- Lower Card (h=345, y=505) -->
+  <g transform="translate(960, 505)">
+    <rect width="860" height="345" fill="#141720"/>
+    <rect x="40" y="40" width="180" height="28" rx="2" fill="#222736"/>
+    <text x="130" y="59" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827" text-anchor="middle">● ANCHOR MATRIX</text>
+    <!-- 3 Rows -->
+    <g transform="translate(40, 110)">
+      <line x1="0" y1="0" x2="780" y2="0" stroke="#282E3E" stroke-width="1"/>
+      <text x="0" y="30" font-family='monospace' font-size="18" font-weight="700" fill="#ECEEF2">NODE_01 // TITANIUM MONOLITH</text>
+      <text x="780" y="30" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827" text-anchor="end">STATUS: NOMINAL</text>
+
+      <line x1="0" y1="65" x2="780" y2="65" stroke="#282E3E" stroke-width="1"/>
+      <text x="0" y="95" font-family='monospace' font-size="18" font-weight="700" fill="#ECEEF2">NODE_02 // VECTOR ACCELERATOR</text>
+      <text x="780" y="95" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827" text-anchor="end">LATENCY: 0.8ms</text>
+
+      <line x1="0" y1="130" x2="780" y2="130" stroke="#282E3E" stroke-width="1"/>
+      <text x="0" y="160" font-family='monospace' font-size="18" font-weight="700" fill="#ECEEF2">NODE_03 // PARALLEL COMPOSITOR</text>
+      <text x="780" y="160" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827" text-anchor="end">FPS: 120.0</text>
+    </g>
+  </g>
+  <!-- Bottom Divider Line (y=880) -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#22252E" stroke-width="1.5"/>
+
+  <!-- Bottom Running Footer (y=940) -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="0" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">COCKPIT TELEMETRY // CYBERNETIC DUAL-COCKPIT HUD SPLIT</text>
+    <text x="1720" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#FFFFFF" text-anchor="end">THE PLANNER // IVAN</text>
+  </g>
+</svg>

@@ -2,7 +2,7 @@
   <rect width="1920" height="1080" fill="#ECEEF2"/>
 
   <!-- Header -->
-  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">17 / 33 · CLARITY LAW</text>
+  <text x="100" y="80" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="700" fill="#6B7280" letter-spacing="2">17 / 52 · CLARITY LAW</text>
   <text x="1820" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#111111" text-anchor="end">MODULAR MATRIX</text>
 
   <!-- Left Quote Stage (x=100..750) -->

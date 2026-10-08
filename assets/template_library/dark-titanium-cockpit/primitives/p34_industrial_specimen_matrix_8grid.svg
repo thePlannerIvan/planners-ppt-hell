@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#0C0D11"/>
+  <!-- Corner Hairline Cross Markers -->
+  <g stroke="#374151" stroke-width="1.5">
+    <line x1="90" y1="80" x2="110" y2="80"/>
+    <line x1="100" y1="70" x2="100" y2="90"/>
+    <line x1="1810" y1="80" x2="1830" y2="80"/>
+    <line x1="1820" y1="70" x2="1820" y2="90"/>
+    <line x1="90" y1="940" x2="110" y2="940"/>
+    <line x1="100" y1="930" x2="100" y2="950"/>
+    <line x1="1810" y1="940" x2="1830" y2="940"/>
+    <line x1="1820" y1="930" x2="1820" y2="950"/>
+  </g>
+  <!-- Top Running Header (y=80) -->
+  <text x="140" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827" letter-spacing="2">34 / 52 · 8-GRID INDUSTRIAL SPECIMEN MATRIX</text>
+  <text x="1780" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#9CA3AF" text-anchor="end">ELIZABETH BENNET SPECIMEN</text>
+  <!-- Specimen 01 -->
+  <g transform="translate(100, 140)">
+    <clipPath id="specClip50_1">
+      <rect width="410" height="220"/>
+    </clipPath>
+    <g clip-path="url(#specClip50_1)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="410" height="220" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="220" width="410" height="110" fill="#141720"/>
+    <text x="24" y="255" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">[SPECIMEN-01]</text>
+    <text x="24" y="285" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#ECEEF2">Monolith Structural Core</text>
+    <text x="24" y="312" font-family='monospace' font-size="13" font-weight="500" fill="#6B7280">COORD: 100,140 // SEC_LVL: 04</text>
+  </g>
+  <!-- Specimen 02 -->
+  <g transform="translate(536, 140)">
+    <clipPath id="specClip50_2">
+      <rect width="410" height="220"/>
+    </clipPath>
+    <g clip-path="url(#specClip50_2)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="410" height="220" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="220" width="410" height="110" fill="#141720"/>
+    <text x="24" y="255" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">[SPECIMEN-02]</text>
+    <text x="24" y="285" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#ECEEF2">Monolith Structural Core</text>
+    <text x="24" y="312" font-family='monospace' font-size="13" font-weight="500" fill="#6B7280">COORD: 536,140 // SEC_LVL: 04</text>
+  </g>
+  <!-- Specimen 03 -->
+  <g transform="translate(972, 140)">
+    <clipPath id="specClip50_3">
+      <rect width="410" height="220"/>
+    </clipPath>
+    <g clip-path="url(#specClip50_3)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="410" height="220" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="220" width="410" height="110" fill="#141720"/>
+    <text x="24" y="255" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">[SPECIMEN-03]</text>
+    <text x="24" y="285" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#ECEEF2">Monolith Structural Core</text>
+    <text x="24" y="312" font-family='monospace' font-size="13" font-weight="500" fill="#6B7280">COORD: 972,140 // SEC_LVL: 04</text>
+  </g>
+  <!-- Specimen 04 -->
+  <g transform="translate(1408, 140)">
+    <clipPath id="specClip50_4">
+      <rect width="410" height="220"/>
+    </clipPath>
+    <g clip-path="url(#specClip50_4)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="410" height="220" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="220" width="410" height="110" fill="#141720"/>
+    <text x="24" y="255" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">[SPECIMEN-04]</text>
+    <text x="24" y="285" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#ECEEF2">Monolith Structural Core</text>
+    <text x="24" y="312" font-family='monospace' font-size="13" font-weight="500" fill="#6B7280">COORD: 1408,140 // SEC_LVL: 04</text>
+  </g>
+  <!-- Specimen 05 -->
+  <g transform="translate(100, 495)">
+    <clipPath id="specClip50_5">
+      <rect width="410" height="220"/>
+    </clipPath>
+    <g clip-path="url(#specClip50_5)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="410" height="220" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="220" width="410" height="110" fill="#141720"/>
+    <text x="24" y="255" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">[SPECIMEN-05]</text>
+    <text x="24" y="285" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#ECEEF2">Monolith Structural Core</text>
+    <text x="24" y="312" font-family='monospace' font-size="13" font-weight="500" fill="#6B7280">COORD: 100,495 // SEC_LVL: 04</text>
+  </g>
+  <!-- Specimen 06 -->
+  <g transform="translate(536, 495)">
+    <clipPath id="specClip50_6">
+      <rect width="410" height="220"/>
+    </clipPath>
+    <g clip-path="url(#specClip50_6)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="410" height="220" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="220" width="410" height="110" fill="#141720"/>
+    <text x="24" y="255" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">[SPECIMEN-06]</text>
+    <text x="24" y="285" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#ECEEF2">Monolith Structural Core</text>
+    <text x="24" y="312" font-family='monospace' font-size="13" font-weight="500" fill="#6B7280">COORD: 536,495 // SEC_LVL: 04</text>
+  </g>
+  <!-- Specimen 07 -->
+  <g transform="translate(972, 495)">
+    <clipPath id="specClip50_7">
+      <rect width="410" height="220"/>
+    </clipPath>
+    <g clip-path="url(#specClip50_7)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="410" height="220" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="220" width="410" height="110" fill="#141720"/>
+    <text x="24" y="255" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">[SPECIMEN-07]</text>
+    <text x="24" y="285" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#ECEEF2">Monolith Structural Core</text>
+    <text x="24" y="312" font-family='monospace' font-size="13" font-weight="500" fill="#6B7280">COORD: 972,495 // SEC_LVL: 04</text>
+  </g>
+  <!-- Specimen 08 -->
+  <g transform="translate(1408, 495)">
+    <clipPath id="specClip50_8">
+      <rect width="410" height="220"/>
+    </clipPath>
+    <g clip-path="url(#specClip50_8)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="410" height="220" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="220" width="410" height="110" fill="#141720"/>
+    <text x="24" y="255" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">[SPECIMEN-08]</text>
+    <text x="24" y="285" font-family='system-ui, -apple-system, sans-serif' font-size="18" font-weight="800" fill="#ECEEF2">Monolith Structural Core</text>
+    <text x="24" y="312" font-family='monospace' font-size="13" font-weight="500" fill="#6B7280">COORD: 1408,495 // SEC_LVL: 04</text>
+  </g>
+  <!-- Bottom Divider Line (y=880) -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#22252E" stroke-width="1.5"/>
+
+  <!-- Bottom Running Footer (y=940) -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="0" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">COCKPIT TELEMETRY // 8-GRID INDUSTRIAL SPECIMEN MATRIX</text>
+    <text x="1720" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#FFFFFF" text-anchor="end">THE PLANNER // IVAN</text>
+  </g>
+</svg>

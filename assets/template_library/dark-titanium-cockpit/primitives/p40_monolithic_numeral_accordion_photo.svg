@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#0C0D11"/>
+  <!-- Corner Hairline Cross Markers -->
+  <g stroke="#374151" stroke-width="1.5">
+    <line x1="90" y1="80" x2="110" y2="80"/>
+    <line x1="100" y1="70" x2="100" y2="90"/>
+    <line x1="1810" y1="80" x2="1830" y2="80"/>
+    <line x1="1820" y1="70" x2="1820" y2="90"/>
+    <line x1="90" y1="940" x2="110" y2="940"/>
+    <line x1="100" y1="930" x2="100" y2="950"/>
+    <line x1="1810" y1="940" x2="1830" y2="940"/>
+    <line x1="1820" y1="930" x2="1820" y2="950"/>
+  </g>
+  <!-- Top Running Header (y=80) -->
+  <text x="140" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827" letter-spacing="2">40 / 52 · MONOLITHIC ACCORDION &amp; ARCHITECTURAL BACKING</text>
+  <text x="1780" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#9CA3AF" text-anchor="end">FACTURE ARCHITECTURE</text>
+  <!-- 4 Columns (x=100, 536, 972, 1408; w=410, h=720, y=130..850) -->
+  <!-- Col 1 -->
+  <g transform="translate(100, 130)">
+    <rect width="410" height="720" fill="#141720"/>
+    <text x="36" y="140" font-family='system-ui, -apple-system, sans-serif' font-size="130" font-weight="300" fill="#282E3E">01</text>
+    <rect x="36" y="440" width="150" height="28" rx="2" fill="#222736"/>
+    <text x="111" y="459" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827" text-anchor="middle">● FOUNDATION</text>
+    <text x="36" y="520" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="800" fill="#ECEEF2">Structural Core</text>
+    <text x="36" y="560" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#9CA3AF">Rigid framework designed for</text>
+    <text x="36" y="588" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#9CA3AF">high-concurrency telemetry.</text>
+    <line x1="36" y1="640" x2="374" y2="640" stroke="#282E3E" stroke-width="1"/>
+    <text x="36" y="675" font-family='monospace' font-size="14" font-weight="700" fill="#6B7280">CODE: SYS_INIT // 01</text>
+  </g>
+
+  <!-- Col 2: Architectural Hero Column with Abstract Image -->
+  <g transform="translate(536, 130)">
+    <clipPath id="col2Clip46">
+      <rect width="410" height="720"/>
+    </clipPath>
+    <g clip-path="url(#col2Clip46)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="410" height="720" preserveAspectRatio="xMidYMid slice"/>
+      <rect x="0" y="540" width="410" height="180" fill="#0C0D11" fill-opacity="0.88"/>
+      <rect x="36" y="570" width="170" height="28" rx="2" fill="#E2F827"/>
+      <text x="121" y="589" font-family='monospace' font-size="14" font-weight="900" fill="#111111" text-anchor="middle">● MONOLITH CORE</text>
+      <text x="36" y="635" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="800" fill="#ECEEF2">Brutalist Facade</text>
+      <text x="36" y="670" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#9CA3AF">Physical manifestation of logic.</text>
+    </g>
+  </g>
+
+  <!-- Col 3 -->
+  <g transform="translate(972, 130)">
+    <rect width="410" height="720" fill="#141720"/>
+    <text x="36" y="140" font-family='system-ui, -apple-system, sans-serif' font-size="130" font-weight="300" fill="#282E3E">02</text>
+    <rect x="36" y="440" width="150" height="28" rx="2" fill="#222736"/>
+    <text x="111" y="459" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827" text-anchor="middle">● SYNTHESIS</text>
+    <text x="36" y="520" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="800" fill="#ECEEF2">Cognitive Layer</text>
+    <text x="36" y="560" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#9CA3AF">Autonomous orchestrations</text>
+    <text x="36" y="588" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#9CA3AF">resolving complex dependencies.</text>
+    <line x1="36" y1="640" x2="374" y2="640" stroke="#282E3E" stroke-width="1"/>
+    <text x="36" y="675" font-family='monospace' font-size="14" font-weight="700" fill="#6B7280">CODE: SYS_EXEC // 02</text>
+  </g>
+
+  <!-- Col 4 -->
+  <g transform="translate(1408, 130)">
+    <rect width="410" height="720" fill="#141720"/>
+    <rect x="0" y="0" width="410" height="4" fill="#E2F827"/>
+    <text x="36" y="140" font-family='system-ui, -apple-system, sans-serif' font-size="130" font-weight="300" fill="#282E3E">03</text>
+    <rect x="36" y="440" width="150" height="28" rx="2" fill="#222736"/>
+    <text x="111" y="459" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827" text-anchor="middle">● DELIVERY</text>
+    <text x="36" y="520" font-family='system-ui, -apple-system, sans-serif' font-size="24" font-weight="800" fill="#ECEEF2">Runtime Verification</text>
+    <text x="36" y="560" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#9CA3AF">Deterministic verification</text>
+    <text x="36" y="588" font-family='system-ui, -apple-system, sans-serif' font-size="16" font-weight="500" fill="#9CA3AF">guaranteeing flawless output.</text>
+    <line x1="36" y1="640" x2="374" y2="640" stroke="#282E3E" stroke-width="1"/>
+    <text x="36" y="675" font-family='monospace' font-size="14" font-weight="700" fill="#6B7280">CODE: SYS_PASS // 03</text>
+  </g>
+  <!-- Bottom Divider Line (y=880) -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#22252E" stroke-width="1.5"/>
+
+  <!-- Bottom Running Footer (y=940) -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="0" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">COCKPIT TELEMETRY // MONOLITHIC ACCORDION &amp; ARCHITECTURAL BACKING</text>
+    <text x="1720" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#FFFFFF" text-anchor="end">THE PLANNER // IVAN</text>
+  </g>
+</svg>

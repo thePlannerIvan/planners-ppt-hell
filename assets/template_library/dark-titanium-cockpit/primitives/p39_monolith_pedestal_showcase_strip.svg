@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#0C0D11"/>
+  <!-- Corner Hairline Cross Markers -->
+  <g stroke="#374151" stroke-width="1.5">
+    <line x1="90" y1="80" x2="110" y2="80"/>
+    <line x1="100" y1="70" x2="100" y2="90"/>
+    <line x1="1810" y1="80" x2="1830" y2="80"/>
+    <line x1="1820" y1="70" x2="1820" y2="90"/>
+    <line x1="90" y1="940" x2="110" y2="940"/>
+    <line x1="100" y1="930" x2="100" y2="950"/>
+    <line x1="1810" y1="940" x2="1830" y2="940"/>
+    <line x1="1820" y1="930" x2="1820" y2="950"/>
+  </g>
+  <!-- Top Running Header (y=80) -->
+  <text x="140" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#E2F827" letter-spacing="2">39 / 52 · 4-PEDESTAL MONOLITH SHOWCASE STRIP</text>
+  <text x="1780" y="80" font-family='monospace' font-size="18" font-weight="700" fill="#9CA3AF" text-anchor="end">ELIZABETH BENNET PEDESTAL</text>
+  <!-- 4 Pedestal Columns (x=100, 536, 972, 1408; w=410, h=710, y=140..850) -->
+  <!-- Col 1 -->
+  <g transform="translate(100, 140)">
+    <clipPath id="pedClip1_52">
+      <rect width="410" height="420"/>
+    </clipPath>
+    <g clip-path="url(#pedClip1_52)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="410" height="420" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="420" width="410" height="290" fill="#141720"/>
+    <text x="36" y="475" font-family='monospace' font-size="32" font-weight="900" fill="#E2F827">01</text>
+    <text x="36" y="515" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="800" fill="#ECEEF2">Monolith Pylon</text>
+    <text x="36" y="555" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#9CA3AF">Vertical compression member</text>
+    <text x="36" y="582" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#9CA3AF">bearing primary telemetry load.</text>
+    <line x1="36" y1="620" x2="374" y2="620" stroke="#282E3E" stroke-width="1"/>
+    <text x="36" y="655" font-family='monospace' font-size="14" font-weight="700" fill="#6B7280">LOAD CAPACITY: 4200 kN</text>
+    <text x="36" y="682" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">MATERIAL: OBSIDIAN TITANIUM</text>
+  </g>
+
+  <!-- Col 2 -->
+  <g transform="translate(536, 140)">
+    <clipPath id="pedClip2_52">
+      <rect width="410" height="420"/>
+    </clipPath>
+    <g clip-path="url(#pedClip2_52)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="410" height="420" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="420" width="410" height="290" fill="#141720"/>
+    <text x="36" y="475" font-family='monospace' font-size="32" font-weight="900" fill="#FFFFFF">02</text>
+    <text x="36" y="515" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="800" fill="#ECEEF2">Vector Truss</text>
+    <text x="36" y="555" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#9CA3AF">Angular bracing structure</text>
+    <text x="36" y="582" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#9CA3AF">damping vibrational drift.</text>
+    <line x1="36" y1="620" x2="374" y2="620" stroke="#282E3E" stroke-width="1"/>
+    <text x="36" y="655" font-family='monospace' font-size="14" font-weight="700" fill="#6B7280">RIGIDITY: 98.6 GPa</text>
+    <text x="36" y="682" font-family='monospace' font-size="14" font-weight="700" fill="#FFFFFF">TOLERANCE: ±0.01 mm</text>
+  </g>
+
+  <!-- Col 3 -->
+  <g transform="translate(972, 140)">
+    <clipPath id="pedClip3_52">
+      <rect width="410" height="420"/>
+    </clipPath>
+    <g clip-path="url(#pedClip3_52)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="410" height="420" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="420" width="410" height="290" fill="#141720"/>
+    <text x="36" y="475" font-family='monospace' font-size="32" font-weight="900" fill="#FFFFFF">03</text>
+    <text x="36" y="515" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="800" fill="#ECEEF2">Parametric Strut</text>
+    <text x="36" y="555" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#9CA3AF">Dynamic load redistributor</text>
+    <text x="36" y="582" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#9CA3AF">balancing multi-agent stress.</text>
+    <line x1="36" y1="620" x2="374" y2="620" stroke="#282E3E" stroke-width="1"/>
+    <text x="36" y="655" font-family='monospace' font-size="14" font-weight="700" fill="#6B7280">CYCLE COUNT: 1.2M</text>
+    <text x="36" y="682" font-family='monospace' font-size="14" font-weight="700" fill="#FFFFFF">DEFLECTION: &lt; 0.05 mm</text>
+  </g>
+
+  <!-- Col 4 -->
+  <g transform="translate(1408, 140)">
+    <clipPath id="pedClip4_52">
+      <rect width="410" height="420"/>
+    </clipPath>
+    <g clip-path="url(#pedClip4_52)">
+      <image href="../assets/abstract_placeholder.jpg" x="0" y="0" width="410" height="420" preserveAspectRatio="xMidYMid slice"/>
+    </g>
+    <rect y="420" width="410" height="290" fill="#141720"/>
+    <text x="36" y="475" font-family='monospace' font-size="32" font-weight="900" fill="#E2F827">04</text>
+    <text x="36" y="515" font-family='system-ui, -apple-system, sans-serif' font-size="22" font-weight="800" fill="#ECEEF2">Anchor Foundation</text>
+    <text x="36" y="555" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#9CA3AF">Terminal bedrock coupling</text>
+    <text x="36" y="582" font-family='system-ui, -apple-system, sans-serif' font-size="15" font-weight="500" fill="#9CA3AF">locking system geometry.</text>
+    <line x1="36" y1="620" x2="374" y2="620" stroke="#282E3E" stroke-width="1"/>
+    <text x="36" y="655" font-family='monospace' font-size="14" font-weight="700" fill="#6B7280">STATUS: ANCHORED</text>
+    <text x="36" y="682" font-family='monospace' font-size="14" font-weight="700" fill="#E2F827">PASS: ZERO-DEFECT</text>
+  </g>
+  <!-- Bottom Divider Line (y=880) -->
+  <line x1="100" y1="880" x2="1820" y2="880" stroke="#22252E" stroke-width="1.5"/>
+
+  <!-- Bottom Running Footer (y=940) -->
+  <g transform="translate(100, 940)">
+    <text x="0" y="0" font-family='monospace' font-size="16" font-weight="700" fill="#6B7280">COCKPIT TELEMETRY // 4-PEDESTAL MONOLITH SHOWCASE STRIP</text>
+    <text x="1720" y="0" font-family='monospace' font-size="16" font-weight="800" fill="#FFFFFF" text-anchor="end">THE PLANNER // IVAN</text>
+  </g>
+</svg>
