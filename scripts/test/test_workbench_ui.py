@@ -299,7 +299,7 @@ class WorkbenchBrowserTests(WorkbenchGeneratorTests):
         latest = get_page(self.root, 'alpha')['revision']
         self.page.locator('#historyRevision').select_option(first)
         self.page.locator('#restoreRevision').click()
-        self.page.wait_for_function("document.querySelector('#message').textContent.includes('已恢复为新版本')")
+        self.page.wait_for_function("document.querySelector('#message').textContent.includes('已恢复历史版本')")
         restored = get_page(self.root, 'alpha')
         self.assertNotIn(restored['revision'], (first, latest))
         self.assertEqual(self.text(), 'Original')
@@ -380,6 +380,57 @@ class WorkbenchBrowserTests(WorkbenchGeneratorTests):
                 target.mkdir(parents=True, exist_ok=True)
                 self.page.screenshot(path=str(target / f'workbench-{width}.png'))
         self.assertEqual(self.errors, [])
+
+    def test_user_surface_hides_internal_ids_and_technical_status(self):
+        self.page.evaluate("""() => {
+          const p=page();
+          p.history=[
+            {revision:p.revision,author:'model',created_at:'2026-10-09T10:00:00Z'},
+            {revision:'r_old_secret',author:'model',created_at:'2026-10-08T10:00:00Z'}
+          ];
+          state.alpha.task={id:'task_r_secret',status:'resolved'};
+          p.preview_pending=true;
+          drawHistory(p);status();drawSaveStatus();
+        }""")
+        visible = self.page.locator('body').inner_text()
+        self.assertNotRegex(visible, r'\br_[A-Za-z0-9_-]+\b')
+        self.assertNotIn('model', visible)
+        self.assertNotIn('resolved', visible)
+        self.assertNotIn('SVG 已保存', visible)
+        self.assertIn('修改任务已提交', self.page.locator('#taskState').inner_text())
+        history_labels = self.page.locator('#historyRevision').locator('option').all_inner_texts()
+        self.assertEqual(history_labels[0], '当前版本')
+        self.assertTrue(history_labels[1].startswith('历史版本 · '))
+        self.assertFalse(self.page.locator('#microEditBar').is_visible())
+        self.assertTrue(self.page.locator('.review-brand-mark').is_visible())
+        self.assertFalse(self.page.get_by_text('Logics', exact=True).is_visible())
+
+    def test_inline_editor_has_contrast_safe_text_for_white_svg(self):
+        self.page.evaluate("() => document.querySelector('#svgStageWrap text').setAttribute('fill','white')")
+        self.edit('Contrast-safe text')
+        color, background = self.page.evaluate("""() => {
+          const style=getComputedStyle(document.querySelector('#inlineCanvasEditor'));
+          return [style.color,style.backgroundColor];
+        }""")
+
+        def channels(value):
+            return [int(channel) for channel in re.findall(r'\d+', value)[:3]]
+
+        def luminance(rgb):
+            values=[channel / 255 for channel in rgb]
+            values=[value / 12.92 if value <= .03928 else ((value + .055) / 1.055) ** 2.4 for value in values]
+            return .2126 * values[0] + .7152 * values[1] + .0722 * values[2]
+
+        ratio=(max(luminance(channels(color)), luminance(channels(background))) + .05) / (min(luminance(channels(color)), luminance(channels(background))) + .05)
+        self.assertGreaterEqual(ratio, 4.5)
+        self.assertEqual(channels(background), [255, 255, 255])
+        self.assertFalse(self.page.locator('#microEditBar').is_hidden())
+
+    def test_footer_has_one_primary_and_icon_reload(self):
+        self.assertEqual(self.page.locator('footer .review-primary-action:visible').count(), 1)
+        self.assertTrue(self.page.locator('#saveEdits.review-secondary-action').is_visible())
+        self.assertTrue(self.page.locator('#exportOutput.review-secondary-action').is_visible())
+        self.assertEqual(self.page.locator('#reloadButton [data-review-icon="RefreshCw"]').count(), 1)
 
     def test_overall_only_feedback_restores_and_dispatches_from_dialog(self):
         self.page.evaluate('() => showSubmit()')

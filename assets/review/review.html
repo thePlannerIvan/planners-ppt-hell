@@ -24,11 +24,12 @@ header b#project{font:var(--dsw-font-s-strong-14)}
 header .status-pills{display:flex;align-items:center;gap:12px;font:var(--dsw-font-xxs-12);color:var(--dsw-alias-label-secondary)}
 header .status-pills p{position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;margin:0}
 header .status-pills p.readonly-warn{position:static;left:auto;top:auto;opacity:1;pointer-events:auto;margin:0;padding:2px 8px;border-radius:var(--dsw-radius-xs);background:var(--dsw-alias-state-warn-tertiary);color:var(--dsw-alias-state-warn-label)}
-header small{color:var(--dsw-alias-label-tertiary);font:var(--dsw-font-xxs-12)}
+header small{display:none}
 .sr-only{position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none}
+.review-brand > span:last-child{display:none}
 
 /* Top PPT-style Ribbon / Toolbar — Strict single-line nowrap, zero button deformation */
-.ppt-toolbar{height:52px;background:var(--dsw-alias-bg-layer-1);border-bottom:1px solid var(--dsw-alias-border-l1);padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.ppt-toolbar{height:52px;background:var(--dsw-alias-bg-layer-1);border-bottom:1px solid var(--dsw-alias-border-l1);padding:0 16px;display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-shrink:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
 .ppt-toolbar::-webkit-scrollbar{display:none}
 .ppt-toolbar button,.ppt-toolbar .toolbar-metric,.ppt-toolbar .selected-badge{white-space:nowrap;flex-shrink:0}
 .toolbar-group{display:flex;align-items:center;gap:6px;flex-shrink:0}
@@ -37,7 +38,8 @@ header small{color:var(--dsw-alias-label-tertiary);font:var(--dsw-font-xxs-12)}
 .tool-mode:hover:not(.active){background:var(--dsw-alias-interactive-bg-hover)}
 .tool-mode.active{background:var(--dsw-alias-button-ghost-active-fill);color:var(--dsw-alias-label-primary);border-color:var(--dsw-alias-button-ghost-active-border);box-shadow:none}
 .tool-mode.active:hover{background:var(--dsw-alias-button-ghost-active-hover)}
-.micro-edit-bar{display:flex;align-items:center;gap:6px;background:var(--dsw-alias-bg-module-platform);padding:4px 8px;border-radius:var(--dsw-radius-sm);border:1px solid var(--dsw-alias-border-l1);flex-shrink:0;flex-wrap:nowrap}
+.micro-edit-bar{display:none;align-items:center;gap:6px;background:var(--dsw-alias-bg-module-platform);padding:4px 8px;border-radius:var(--dsw-radius-sm);border:1px solid var(--dsw-alias-border-l1);flex-shrink:0;flex-wrap:nowrap}
+.micro-edit-bar.contextual-active{display:flex}
 .selected-badge{font:var(--dsw-font-xxs-strong-12);color:var(--dsw-alias-label-secondary);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:4px}
 #inlineTextInput{width:210px;min-width:130px;height:28px;padding:0 8px;border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-xs);background:var(--dsw-specific-input-major);font:inherit;color:var(--dsw-alias-label-primary)}
 #inlineTextInput:disabled{background:var(--dsw-alias-bg-skeleton);color:var(--dsw-alias-label-tertiary)}
@@ -78,7 +80,7 @@ header small{color:var(--dsw-alias-label-tertiary);font:var(--dsw-font-xxs-12)}
 .preview img#slide{width:100%;height:100%;object-fit:contain;background:var(--dsw-alias-bg-layer-1);user-select:none;display:block}
 .preview.marking{cursor:crosshair;touch-action:none}
 .preview.marking .svg-stage-wrap,.preview.marking .region-overlay{pointer-events:none}
-.inline-canvas-editor{position:absolute;z-index:12;display:block;resize:none;overflow:hidden;padding:3px 5px;border:2px solid var(--ds-static-blue-500,var(--dsw-static-blue-500));border-radius:3px;background:var(--dsw-specific-input-major);color:var(--dsw-alias-label-primary);box-shadow:var(--dsw-elevation-panel);line-height:1.12;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}
+.inline-canvas-editor{position:absolute;z-index:12;display:block;resize:none;overflow:hidden;padding:3px 5px;border:2px solid var(--ds-static-blue-500,var(--dsw-static-blue-500));border-radius:3px;background:#fff!important;color:#0b0b10!important;caret-color:#0b0b10;box-shadow:var(--dsw-elevation-panel);line-height:1.12;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}
 .inline-canvas-editor:focus{outline:none}
 
 /* Live Inline SVG Overlay */
@@ -164,6 +166,9 @@ button:disabled{opacity:.45;cursor:default}
 .svg-edit-item:last-child{border-bottom:0}
 
 footer{height:60px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--dsw-alias-bg-layer-1);border-top:1px solid var(--dsw-alias-border-l2);flex-shrink:0}
+footer .tools{min-width:0;overflow-x:auto;flex-wrap:nowrap}
+footer #message{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#previewState,#previousNote{display:none!important}
 dialog h2{margin:0 0 10px;font:var(--dsw-font-base-strong-16)}
 dialog{border:0;border-radius:var(--dsw-radius-lg);padding:24px;width:min(540px,92vw);box-shadow:var(--dsw-elevation-prominent);background:var(--dsw-menu-surface-fill);backdrop-filter:var(--dsw-menu-backdrop-filter);color:var(--dsw-alias-label-primary)}
 dialog::backdrop{background:var(--dsw-alias-bg-mask-1)}
@@ -185,6 +190,7 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
   .workspace{grid-template-columns:100px minmax(200px,1fr) 280px;gap:8px;padding:8px}
   header small{display:none}
   #inlineTextInput{width:140px}
+  .ppt-toolbar{padding:0 10px}
 }
 @media(max-width:700px){
   header{height:auto;min-height:48px;padding:8px;gap:8px;flex-wrap:wrap}
@@ -196,8 +202,10 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
   .stage{grid-row:1;min-height:240px;padding:8px}
   .stage-hint{display:none}
   .panel{grid-column:1/-1;overflow:visible}
-  footer{height:auto;min-height:60px;padding:8px;flex-wrap:wrap}
-  footer .tools{max-width:100%;overflow-x:auto;flex-wrap:nowrap}
+  footer{height:auto;min-height:60px;padding:8px;display:grid;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:6px}
+  footer .tools{width:100%;max-width:100%;overflow-x:auto;flex-wrap:nowrap}
+  footer #message{order:-1;max-width:100%;white-space:normal}
+  footer>.review-primary-action{width:100%}
   footer button{white-space:nowrap}
   #message{max-width:100%;overflow-wrap:anywhere}
 }
@@ -205,7 +213,7 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
 
 <header>
   <div class="brand-left">
-    <span class="review-brand"><span class="review-brand-mark" aria-hidden="true"></span><span>Logics</span></span>
+    <span class="review-brand" aria-label="审阅工作台"><span class="review-brand-mark" aria-hidden="true"></span><span aria-hidden="true">Logics</span></span>
     <b id="project"></b>
     <span id="pageStatus" class="toolbar-metric" style="background:var(--dsw-alias-bg-module-platform);color:var(--dsw-alias-label-primary);border-color:var(--dsw-alias-border-l2)"></span>
   </div>
@@ -218,9 +226,9 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
 
 <div class="ppt-toolbar">
   <div class="toolbar-group">
-    <button id="modeSelect" class="tool-mode active" onclick="setMode('select')" title="点选画布上的文字或图形，直接改字、调字号或拖动位置">选择与微调</button>
-    <button id="mark" class="tool-mode" onclick="startRegion()" title="在画布上拖出矩形框写修改意见">框选问题</button>
-    <button class="compact-btn" onclick="clearRegions()">清空框选</button>
+    <button id="modeSelect" class="tool-mode active" onclick="setMode('select')" title="点选画布上的文字或图形，直接改字、调字号或拖动位置"><span data-review-icon="MousePointer2"></span><span>选择与微调</span></button>
+    <button id="mark" class="tool-mode" onclick="startRegion()" title="在画布上拖出矩形框写修改意见"><span data-review-icon="SquareDashed"></span><span>框选问题</span></button>
+    <button class="review-icon-button" onclick="clearRegions()" title="清空框选" aria-label="清空框选"><span data-review-icon="Trash2"></span></button>
   </div>
 
   <div class="micro-edit-bar" id="microEditBar">
@@ -231,17 +239,17 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
     <span id="fontSizeLabel" class="toolbar-metric">--px</span>
     <button id="fontIncBtn" class="compact-btn" onclick="stepFontSize(2)" disabled title="字号 +2px">A+</button>
     <span id="posDeltaBadge" class="sr-only">Δx: 0, Δy: 0</span>
-    <button id="deleteElBtn" class="compact-btn" onclick="deleteSelectedSvgElement()" disabled title="删除选中的元素（快捷键：Delete / Backspace）">删除</button>
-    <button id="commentElBtn" class="compact-btn" onclick="commentOnSelected()" disabled title="针对该元素添加批注">对此项提意见</button>
+    <button id="deleteElBtn" class="review-icon-button" onclick="deleteSelectedSvgElement()" disabled title="删除选中的元素（快捷键：Delete / Backspace）" aria-label="删除选中的元素"><span data-review-icon="Trash2"></span></button>
+    <button id="commentElBtn" class="review-icon-button" onclick="commentOnSelected()" disabled title="针对该元素添加批注" aria-label="对此项提意见"><span data-review-icon="MessageSquare"></span></button>
     <label><input id="allowRewrite" type="checkbox" disabled>允许改写所选文字</label>
-    <button id="undoEditBtn" class="compact-btn" onclick="undoLastSvgEdit()" disabled title="撤销本页上一次微调">撤销</button>
-    <button id="resetEditsBtn" class="compact-btn" onclick="resetPageSvgEdits()" hidden title="还原所有微调">重置</button>
+    <button id="undoEditBtn" class="review-icon-button" onclick="undoLastSvgEdit()" disabled title="撤销本页上一次微调" aria-label="撤销本页上一次微调"><span data-review-icon="Undo2"></span></button>
+    <button id="resetEditsBtn" class="review-icon-button" onclick="resetPageSvgEdits()" hidden title="还原所有微调" aria-label="还原所有微调"><span data-review-icon="History"></span></button>
   </div>
 
   <div class="toolbar-group">
-    <button id="compare" class="compact-btn" onclick="togglePrevious()">查看修改前</button>
+    <button id="compare" class="review-secondary-action" onclick="togglePrevious()"><span data-review-icon="History"></span><span>查看修改前</span></button>
     <select id="historyRevision" aria-label="页面版本历史" onchange="document.querySelector('#restoreRevision').disabled=this.value===page().revision||!this.value"></select>
-    <button id="restoreRevision" class="compact-btn" onclick="restoreHistoricalRevision()" disabled>恢复版本</button>
+    <button id="restoreRevision" class="review-secondary-action" onclick="restoreHistoricalRevision()" disabled><span data-review-icon="Undo2"></span><span>恢复版本</span></button>
   </div>
 </div>
 
@@ -294,14 +302,14 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
   <div class="tools">
     <button id="pagePrev" class="review-secondary-action" onclick="go(-1)" title="上一页" aria-label="上一页"><span data-review-icon="ChevronUp"></span><span>上一页</span></button>
     <button id="pageNext" class="review-secondary-action" onclick="go(1)" title="下一页" aria-label="下一页"><span>下一页</span><span data-review-icon="ChevronDown"></span></button>
-    <button id="pageDispatch" class="review-primary-action" onclick="dispatchFeedback('page')" hidden>修改本页</button>
-    <button id="saveEdits" class="review-secondary-action" onclick="flushWorkbench()">保存</button>
-    <button id="exportOutput" class="review-primary-action" onclick="exportWorkbench()">导出 PPT</button>
-    <button class="review-secondary-action" onclick="askReload()">重新加载</button>
+    <button id="pageDispatch" class="review-secondary-action" onclick="dispatchFeedback('page')" hidden><span data-review-icon="MessageSquare"></span><span>修改本页</span></button>
+    <button id="saveEdits" class="review-secondary-action" onclick="flushWorkbench()"><span data-review-icon="Save"></span><span>保存</span></button>
+    <button id="exportOutput" class="review-secondary-action" onclick="exportWorkbench()"><span data-review-icon="Download"></span><span>导出 PPT</span></button>
+    <button id="reloadButton" class="review-icon-button" onclick="askReload()" title="重新加载" aria-label="重新加载"><span data-review-icon="RefreshCw"></span></button>
     <button id="localFallback" onclick="showLocalFallback()" hidden>本地工作台</button>
   </div>
   <span id="message"></span>
-  <button class="review-primary-action" onclick="showSubmit()">提交修改任务</button>
+  <button class="review-primary-action" onclick="showSubmit()"><span data-review-icon="Send"></span><span>提交修改任务</span></button>
 </footer>
 
 <dialog id="reloadDialog">
@@ -457,8 +465,8 @@ function status(){
   const s=state[page().key];
   const dirty=pageDirty(page());
   const label={clean:'已保存',saving:'保存中',error:'未保存',conflict:'版本冲突',pending:'待保存'};
-  $('#pageStatus').textContent=(dirty&&s.save_status==='clean'?'待保存':label[s.save_status])+' · '+(page().revision||'未登记');
-  $('#taskState').textContent=s.task?'修改任务 '+s.task.id+' · '+s.task.status:'';
+  $('#pageStatus').textContent=dirty&&s.save_status==='clean'?'待保存':label[s.save_status];
+  $('#taskState').textContent=s.task?'修改任务已提交':'';
   scheduleWorkbench();
   scheduleDraft();   // 状态变了就排一次草稿（打字、框选、直改、拖动、上传、决定都会走到这里）
 }
@@ -870,7 +878,7 @@ function positionInlineCanvasEditor(){
   const fontScale=matrix?Math.hypot(matrix.a,matrix.b):1;
   Object.assign(editor.style,{left:left+'px',top:top+'px',width:width+'px',height:height+'px',
     font:style.font,fontSize:(parseFloat(style.fontSize)*fontScale)+'px',lineHeight:'1.12',
-    color:style.fill||style.color,textAlign:style.textAnchor==='middle'?'center':'left'});
+    textAlign:style.textAnchor==='middle'?'center':'left'});
 }
 function endInlineTextEdit(commit=true){
   const session=inlineEditorState;
@@ -958,6 +966,7 @@ $('#inlineCanvasEditor').onblur=()=>endInlineTextEdit(true);
 function updateToolbarSelection(){
   const el=findSvgEl(selectedReviewId);
   const s=state[page().key];
+  $('#microEditBar').classList.toggle('contextual-active',!!el&&!previous&&el.dataset.deleted!=='1');
   $('#allowRewrite').disabled=!el||!['text','tspan'].includes(el.localName)||previous;
   $('#allowRewrite').checked=!!el&&s.rewrite_elements.includes(selectedReviewId);
   $('#rewriteScope').textContent=s.rewrite_elements.length?'允许改写：'+s.rewrite_elements.join('、'):'';
@@ -1793,8 +1802,8 @@ async function savePage(p){
 function drawSaveStatus(){
   const s=state[page().key];
   const label={clean:'已保存',pending:'待保存',saving:'保存中',error:'未保存',conflict:'版本冲突'};
-  $('#pageStatus').textContent=label[s.save_status]+' · '+(page().revision||'未登记');
-  $('#previewState').textContent=page().preview_pending?'SVG 已保存 · PNG 预览待更新':'';
+  $('#pageStatus').textContent=label[s.save_status];
+  $('#previewState').textContent='';
   updateRail([page().key]);
 }
 async function saveOrder(){
@@ -1823,12 +1832,12 @@ function drawHistory(p){
   select.replaceChildren();
   for(const entry of p.history||[{revision:p.revision,author:'current'}]){
     const option=document.createElement('option');option.value=entry.revision||'';
-    option.textContent=(entry.revision===p.revision?'当前 · ':'')+(entry.created_at?new Date(entry.created_at).toLocaleString('zh-CN')+' · ':'')+(entry.author||'')+' · '+String(entry.revision||'').slice(0,12);
+    option.textContent=entry.revision===p.revision?'当前版本':(entry.created_at?'历史版本 · '+new Date(entry.created_at).toLocaleString('zh-CN'):'历史版本');
     select.append(option);
   }
   if([...select.options].some(option=>option.value===selected))select.value=selected;
   $('#restoreRevision').disabled=!select.value||select.value===p.revision;
-  $('#previewState').textContent=p.preview_pending?'SVG 已保存 · PNG 预览待更新':'';
+  $('#previewState').textContent='';
 }
 async function restoreHistoricalRevision(){
   const p=page(),s=state[p.key],revision=$('#historyRevision').value;
@@ -1843,7 +1852,7 @@ async function restoreHistoricalRevision(){
     s.pending_history=null;
     await mergeStoredPage(p,stored);p.preview_pending=true;
     mountInlineSvg(p);drawHistory(p);status();await saveDraft();
-    note('已恢复为新版本 '+receipt.revision+'，历史仍保留','ok');
+    note('已恢复历史版本，历史仍保留','ok');
   }catch(error){retainRecoveryDraft();note('恢复未完成：'+error.message,'error')}
 }
 const shellQuote=value=>"'"+String(value).replace(/'/g,"'\\''")+"'";
@@ -1860,7 +1869,7 @@ async function exportWorkbench(){
     const command=(data.export_command_base||'ppt_pipeline export')+' --snapshot '+shellQuote(receipt.path);
     $('#exportPath').textContent=receipt.path;
     $('#exportCommand').textContent=command;
-    $('#exportState').textContent='快照 '+receipt.snapshot_id+' 已固定 · 尚未生成输出文件';
+    $('#exportState').textContent='输出快照已固定 · 尚未生成输出文件';
     if(review.transport==='postMessage'){
       try{
         await review.wake({unit:'输出',text:'输出快照 '+receipt.snapshot_id+' 已持久保存。执行 '+command+'。必须通过 load_snapshot 核验并消费此确切快照路径，不得新建快照或读取变化中的当前页；无需页面批准或反馈任务。'});
@@ -1896,8 +1905,8 @@ async function dispatchFeedback(scope){
     retainRecoveryDraft();await saveDraft();status();
     try{
       const delivery=await review.wake({unit:scope==='page'?targets[0].key:'整套',text:'工作台修改任务 '+receipt.task_id+' 已持久保存；读取该任务与绑定页面版本，只修改任务范围。'});
-      note('任务 '+receipt.task_id+' 已保存（'+wakeNote(delivery?.verified)+'）','ok');
-    }catch(error){note('任务 '+receipt.task_id+' 已保存，通知未送达：'+error.message,'warn')}
+      note('修改任务已提交','ok');
+    }catch(error){note('修改任务已提交，通知未送达','warn')}
     return true;
   }catch(error){retainRecoveryDraft();note('任务未提交：'+error.message+'；意见已保留','error');return false}
   finally{dispatchBusy=false}
@@ -1952,7 +1961,7 @@ async function saveDraft(){
 }
 async function restoreDraft(){
   let draft=null;
-  if(DRAFT_REL&&review&&canDraft){try{draft=JSON.parse(await review.readText(DRAFT_REL))}catch(error){}}
+  if(DRAFT_REL&&review&&canDraft){try{draft=JSON.parse(await review.readText(DRAFT_REL,{optional:true}))}catch(error){}}
   if(memoryRecoveryDraft&&(!draft||memoryRecoveryDraft.at>draft.at))draft=memoryRecoveryDraft;
   if(!draft||typeof draft!=='object'||!draft.pages)return;
   if(typeof draft.overall_feedback==='string')$('#overall').value=draft.overall_feedback;
