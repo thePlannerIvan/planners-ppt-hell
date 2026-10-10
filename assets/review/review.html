@@ -3,12 +3,7 @@
 __DSH_TOKENS__
 __REVIEW_UI__
 
-/* ============================================================================
- * 我们自己的规则。**几何一行没动**（尺寸、间距、栅格、flex/grid 全部原样），
- * 只把颜色 / 圆角 / 阴影 / 字族换成上面那套 DSH token。
- * 层次读法：bg-base 画布 → bg-module-platform 侧栏凹面 → bg-document-preview 被审的纸
- *          → bg-layer-1 浮层；分隔一律用 border-l1/l2 细线，不用灰块。
- * ========================================================================== */
+/* The workbench uses shared review tokens; slide artwork keeps its own styling. */
 *{box-sizing:border-box}
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 body{margin:0;height:100vh;overflow:hidden;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font:var(--dsw-font-xs-13);display:flex;flex-direction:column}
@@ -34,21 +29,33 @@ header small{display:none}
 .ppt-toolbar button,.ppt-toolbar .toolbar-metric,.ppt-toolbar .selected-badge{white-space:nowrap;flex-shrink:0}
 .toolbar-group{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .toolbar-divider{width:1px;height:26px;background:var(--dsw-alias-border-l2);margin:0 6px;flex-shrink:0}
-.tool-mode{font:var(--dsw-font-xs-strong-13);border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);height:28px;padding:0 12px;border-radius:var(--dsw-radius-sm);transition:all var(--ds-transition-duration-fast) var(--ds-ease-in-out);white-space:nowrap;flex-shrink:0}
+.tool-mode{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:var(--dsw-font-xs-strong-13);border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);height:34px;padding:0 11px;border-radius:6px;transition:background .16s;white-space:nowrap;flex-shrink:0}
 .tool-mode:hover:not(.active){background:var(--dsw-alias-interactive-bg-hover)}
 .tool-mode.active{background:var(--dsw-alias-button-ghost-active-fill);color:var(--dsw-alias-label-primary);border-color:var(--dsw-alias-button-ghost-active-border);box-shadow:none}
 .tool-mode.active:hover{background:var(--dsw-alias-button-ghost-active-hover)}
-.micro-edit-bar{display:none;align-items:center;gap:6px;background:var(--dsw-alias-bg-module-platform);padding:4px 8px;border-radius:var(--dsw-radius-sm);border:1px solid var(--dsw-alias-border-l1);flex-shrink:0;flex-wrap:nowrap}
+.micro-edit-bar{display:none;position:fixed;z-index:20;align-items:center;gap:4px;background:var(--dsw-alias-bg-layer-1);padding:5px;border-radius:6px;border:1px solid var(--dsw-alias-border-l2);box-shadow:var(--dsw-elevation-panel);line-height:normal;max-width:calc(100vw - 16px)}
 .micro-edit-bar.contextual-active{display:flex}
 .selected-badge{font:var(--dsw-font-xxs-strong-12);color:var(--dsw-alias-label-secondary);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:4px}
 #inlineTextInput{width:210px;min-width:130px;height:28px;padding:0 8px;border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-xs);background:var(--dsw-specific-input-major);font:inherit;color:var(--dsw-alias-label-primary)}
 #inlineTextInput:disabled{background:var(--dsw-alias-bg-skeleton);color:var(--dsw-alias-label-tertiary)}
 .edit-hint{font:var(--dsw-font-xxs-12);color:var(--dsw-alias-label-secondary);white-space:nowrap;padding:0 4px}
 .toolbar-metric{font:var(--dsw-font-xxs-12);font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-secondary);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-xs);height:24px;padding:0 8px;min-width:48px;display:inline-flex;align-items:center;justify-content:center}
-.compact-btn{height:24px;padding:0 8px;font:var(--dsw-font-xxs-strong-12);border-radius:var(--dsw-radius-xs);white-space:nowrap;flex-shrink:0}
+.compact-btn{height:34px;min-width:34px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;font:var(--dsw-font-xxs-strong-12);border-radius:6px;white-space:nowrap;flex-shrink:0}
+.ppt-toolbar button,.ppt-toolbar select,.micro-edit-bar button,.micro-edit-bar input{height:34px;min-height:34px;font-size:13px}
+.ppt-toolbar [data-review-icon],.micro-edit-bar [data-review-icon],footer [data-review-icon]{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;flex:0 0 18px}
+.toolbar-spacer{flex:1}
+.version-menu{position:relative;flex-shrink:0}
+.version-menu summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 11px;border:1px solid var(--dsw-alias-border-l2);border-radius:6px}
+.version-menu summary::-webkit-details-marker{display:none}
+.version-controls{position:fixed;right:16px;top:100px;z-index:24;display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:6px;box-shadow:var(--dsw-elevation-panel)}
+.version-controls button,.version-controls select{width:180px}
+#fontSizeLabel{width:64px;text-align:center;padding:0 4px;border:1px solid var(--dsw-alias-border-l2);border-radius:6px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary)}
+#fontSizeLabel:disabled{opacity:.45}
 
 /* Main 3-column PPT Workspace */
 .workspace{flex:1;min-height:0;display:grid;grid-template-columns:148px minmax(320px,1fr) 340px;gap:14px;padding:12px 16px}
+.workspace.panel-collapsed{grid-template-columns:148px minmax(0,1fr)}
+.workspace.panel-collapsed .panel{display:none}
 .rail,.panel{overflow:auto}
 .rail{background:var(--dsw-specific-sidebar-fill);border-radius:var(--dsw-radius-md);padding:8px}
 .rail button{display:block;width:100%;height:auto;padding:6px;border:2px solid transparent;border-radius:var(--dsw-radius-sm);background:var(--dsw-alias-bg-layer-1);margin-bottom:8px;text-align:left;transition:border-color var(--ds-transition-duration-fast) var(--ds-ease-in-out),transform var(--ds-transition-duration-fast) var(--ds-ease-in-out)}
@@ -75,7 +82,7 @@ header small{display:none}
 .stage{min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden;background:var(--dsw-alias-bg-document-preview);border-radius:var(--dsw-radius-md);padding:12px;position:relative}
 .stage-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;padding:0 4px}
 .stage h2{font:var(--dsw-font-base-strong-16);margin:0;color:var(--dsw-alias-label-primary);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stage-hint{font:var(--dsw-font-xxs-12);color:var(--dsw-alias-label-secondary);white-space:nowrap;flex-shrink:0}
+.stage-hint{display:none}
 .preview{position:relative;width:100%;line-height:0;max-height:calc(100% - 44px);aspect-ratio:16/9;background:var(--dsw-alias-bg-layer-1);border-radius:var(--dsw-radius-sm);box-shadow:var(--dsw-elevation-panel);overflow:hidden;user-select:none}
 .preview img#slide{width:100%;height:100%;object-fit:contain;background:var(--dsw-alias-bg-layer-1);user-select:none;display:block}
 .preview.marking{cursor:crosshair;touch-action:none}
@@ -167,20 +174,44 @@ button:disabled{opacity:.45;cursor:default}
 
 footer{height:60px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--dsw-alias-bg-layer-1);border-top:1px solid var(--dsw-alias-border-l2);flex-shrink:0}
 footer .tools{min-width:0;overflow-x:auto;flex-wrap:nowrap}
-footer #message{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.footer-actions{display:flex;gap:8px;align-items:center;min-width:0}
+footer .footer-spacer{flex:1}
 #previewState,#previousNote{display:none!important}
 dialog h2{margin:0 0 10px;font:var(--dsw-font-base-strong-16)}
 dialog{border:0;border-radius:var(--dsw-radius-lg);padding:24px;width:min(540px,92vw);box-shadow:var(--dsw-elevation-prominent);background:var(--dsw-menu-surface-fill);backdrop-filter:var(--dsw-menu-backdrop-filter);color:var(--dsw-alias-label-primary)}
 dialog::backdrop{background:var(--dsw-alias-bg-mask-1)}
 dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-sm);margin:8px 0;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary)}
 /* 提示行做成他们的 toast：深底浅字，带圆角与浮起 */
-#message{background:var(--dsw-alias-toast-bg);color:var(--dsw-alias-toast-label);max-width:50vw;font:var(--dsw-font-xs-strong-13);padding:5px 12px;border-radius:var(--dsw-radius-sm)}
+#message{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);z-index:40;width:max-content;max-width:min(520px,calc(100vw - 24px));font:var(--dsw-font-xs-strong-13);padding:9px 14px;border-radius:6px;background:var(--dsw-alias-toast-bg);color:var(--dsw-alias-toast-label);box-shadow:var(--dsw-elevation-panel);line-height:1.5;overflow-wrap:anywhere}
 #message:empty{display:none}
-#message.ok{background:var(--dsw-alias-state-success-primary);color:var(--dsw-alias-label-primary-foreground)}
+#message.ok{background:var(--dsw-alias-toast-bg);color:var(--dsw-alias-toast-label)}
 #message.warn{background:var(--dsw-alias-state-warn-primary);color:var(--dsw-alias-label-primary-foreground)}
 #message.error{background:var(--dsw-alias-state-error-primary);color:var(--dsw-alias-label-primary-foreground)}
 #regions{max-height:170px;overflow:auto}
 #regionNote{width:100%}
+.find-panel{padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);flex-shrink:0}
+.find-panel input,.find-panel select{height:34px;min-width:0;padding:0 8px;border:1px solid var(--dsw-alias-border-l2);border-radius:6px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);font:inherit}
+.find-panel input{width:180px}
+.find-panel .find-controls{display:flex;align-items:center;gap:6px;max-width:100%}
+#findCount{min-width:76px;color:var(--dsw-alias-label-secondary);font-size:12px;white-space:nowrap}
+.svg-stage-wrap .find-match{filter:drop-shadow(0 0 3px var(--review-accent))}
+.panel-section{border-bottom:1px solid var(--dsw-alias-border-l1);padding:12px 0}
+.panel-section summary{display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-weight:600;padding:2px 0;list-style:none}
+.panel-section summary::after{content:'+';font-size:16px;color:var(--dsw-alias-label-secondary)}
+.panel-section[open] summary::after{content:'−'}
+.panel-section[open] summary{margin-bottom:10px}
+.feedback-record{padding:10px 0;border-bottom:1px solid var(--dsw-alias-border-l1);font-size:12px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.feedback-record:last-child{border-bottom:0}
+.feedback-record .record-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--dsw-alias-label-secondary);margin-bottom:6px}
+.feedback-record p{margin:4px 0}
+.feedback-record button{margin-top:6px}
+.region-popover{position:fixed;z-index:30;width:min(300px,calc(100vw - 24px));padding:12px;border:1px solid var(--dsw-alias-border-l2);border-radius:6px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);box-shadow:var(--dsw-elevation-panel);line-height:1.5}
+.region-popover h3{margin:0 0 8px;font-size:13px}
+.region-popover textarea{min-height:86px;resize:vertical}
+.region-popover .tools{margin-top:8px}
+#regionRewriteLabel{font-size:12px;display:flex;align-items:center;gap:6px;margin-top:8px}
+#regionHitInfo{display:none}
+#retrySave{color:var(--review-accent)}
 .region-hit-hint{font:var(--dsw-font-xxs-12);color:var(--dsw-alias-state-business-primary);background:var(--dsw-alias-state-business-tertiary);border:1px solid var(--dsw-alias-border-l1);border-radius:var(--dsw-radius-sm);padding:6px 10px;margin-bottom:6px}
 
 /* 键盘焦点：他们的环宽是 2px，颜色由组件各自给；这里用他们的蓝（也是选中/多选用的那只） */
@@ -188,26 +219,35 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
 
 @media(max-width:1100px){
   .workspace{grid-template-columns:100px minmax(200px,1fr) 280px;gap:8px;padding:8px}
+  .workspace.panel-collapsed{grid-template-columns:100px minmax(0,1fr)}
   header small{display:none}
   #inlineTextInput{width:140px}
   .ppt-toolbar{padding:0 10px}
 }
 @media(max-width:700px){
+  .ppt-toolbar{height:auto;min-height:52px;flex-wrap:wrap;padding:8px 10px;gap:6px;overflow:visible}
+  .ppt-toolbar .toolbar-spacer{display:none}
   header{height:auto;min-height:48px;padding:8px;gap:8px;flex-wrap:wrap}
   header .brand-left{gap:8px;min-width:0;max-width:100%}
   header b#project{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #pageStatus{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
   .workspace{grid-template-columns:72px minmax(0,1fr);grid-template-rows:minmax(240px,1fr) auto;overflow:auto;align-items:stretch}
+  .workspace.panel-collapsed{grid-template-columns:72px minmax(0,1fr);grid-template-rows:minmax(240px,1fr)}
   .rail{grid-row:1;min-height:240px}
   .stage{grid-row:1;min-height:240px;padding:8px}
   .stage-hint{display:none}
   .panel{grid-column:1/-1;overflow:visible}
   footer{height:auto;min-height:60px;padding:8px;display:grid;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:6px}
   footer .tools{width:100%;max-width:100%;overflow-x:auto;flex-wrap:nowrap}
-  footer #message{order:-1;max-width:100%;white-space:normal}
-  footer>.review-primary-action{width:100%}
+  .footer-actions{flex-wrap:wrap;justify-content:flex-end}
+  .footer-actions button{flex:1;min-width:max-content}
+  footer .footer-spacer{display:none}
   footer button{white-space:nowrap}
   #message{max-width:100%;overflow-wrap:anywhere}
+  .find-panel{padding:8px}
+  .find-panel input{width:145px}
+  .micro-edit-bar{gap:2px;padding:4px}
+  .micro-edit-bar button{width:30px;min-width:30px;height:32px;min-height:32px}
 }
 </style>
 
@@ -216,6 +256,7 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
     <span class="review-brand" aria-label="审阅工作台"><span class="review-brand-mark" aria-hidden="true"></span><span aria-hidden="true">Logics</span></span>
     <b id="project"></b>
     <span id="pageStatus" class="toolbar-metric" style="background:var(--dsw-alias-bg-module-platform);color:var(--dsw-alias-label-primary);border-color:var(--dsw-alias-border-l2)"></span>
+    <button id="retrySave" class="review-secondary-action" onclick="retryAutosave()" hidden>重试保存</button>
   </div>
   <div class="status-pills">
     <p id="bridgeState">正在连接审阅宿主…</p>
@@ -226,31 +267,51 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
 
 <div class="ppt-toolbar">
   <div class="toolbar-group">
-    <button id="modeSelect" class="tool-mode active" onclick="setMode('select')" title="点选画布上的文字或图形，直接改字、调字号或拖动位置"><span data-review-icon="MousePointer2"></span><span>选择与微调</span></button>
-    <button id="mark" class="tool-mode" onclick="startRegion()" title="在画布上拖出矩形框写修改意见"><span data-review-icon="SquareDashed"></span><span>框选问题</span></button>
-    <button class="review-icon-button" onclick="clearRegions()" title="清空框选" aria-label="清空框选"><span data-review-icon="Trash2"></span></button>
+    <button id="modeSelect" class="tool-mode active" onclick="setMode('select')" title="选择元素" aria-pressed="true"><span data-review-icon="MousePointer2"></span><span>选择</span></button>
+    <button id="mark" class="tool-mode" onclick="startRegion()" title="框选区域并添加批注" aria-pressed="false"><span data-review-icon="SquareDashed"></span><span>框选</span></button>
   </div>
+  <button id="findToggle" class="review-icon-button" onclick="toggleFind()" title="查找与替换" aria-label="查找与替换" aria-expanded="false" aria-controls="findPanel"><span data-review-icon="Search"></span></button>
+  <button id="undoEditBtn" class="review-icon-button" onclick="undoLastSvgEdit()" disabled title="撤销本页上一次编辑" aria-label="撤销本页上一次编辑"><span data-review-icon="Undo2"></span></button>
+  <span class="toolbar-spacer"></span>
+  <details class="version-menu" id="versionMenu">
+    <summary title="页面版本"><span data-review-icon="History"></span><span>版本</span></summary>
+    <div class="version-controls">
+      <button id="compare" class="review-secondary-action" onclick="togglePrevious()" disabled><span>查看修改前</span></button>
+      <select id="historyRevision" aria-label="页面版本历史" onchange="previewHistoricalVersion(this.value)"></select>
+      <button id="restoreRevision" class="review-secondary-action" onclick="confirmHistoricalRestore()" disabled><span data-review-icon="Undo2"></span><span>恢复版本</span></button>
+      <button id="resetEditsBtn" class="review-secondary-action" onclick="resetPageSvgEdits()" hidden>还原本轮微调</button>
+    </div>
+  </details>
+  <button id="togglePanel" class="review-icon-button" onclick="togglePanel()" title="收起反馈侧栏" aria-label="收起反馈侧栏" aria-expanded="true" aria-controls="reviewPanel"><span data-review-icon="PanelRightClose"></span></button>
+</div>
 
-  <div class="micro-edit-bar" id="microEditBar">
-    <span id="selectedBadge" class="selected-badge">未选中</span>
-    <span id="editHint" class="edit-hint">双击文字原地编辑</span>
+<div id="findPanel" class="find-panel" hidden>
+  <div class="find-controls">
+    <input id="findQuery" type="search" placeholder="查找文字" aria-label="查找文字">
+    <select id="findScope" aria-label="查找范围"><option value="page">当前页</option><option value="deck">整套</option></select>
+    <span id="findCount" role="status">0 处匹配</span>
+    <button id="findPrev" class="review-icon-button" onclick="goFindMatch(-1)" title="上一个匹配" aria-label="上一个匹配"><span data-review-icon="ChevronUp"></span></button>
+    <button id="findNext" class="review-icon-button" onclick="goFindMatch(1)" title="下一个匹配" aria-label="下一个匹配"><span data-review-icon="ChevronDown"></span></button>
+  </div>
+  <div class="find-controls">
+    <input id="replaceValue" placeholder="替换为" aria-label="替换为">
+    <button id="replaceOne" class="review-secondary-action" onclick="replaceMatches()">替换</button>
+    <button id="replaceAll" class="review-secondary-action" onclick="confirmReplaceAll()">全部替换</button>
+    <button id="undoReplace" class="review-icon-button" onclick="undoReplaceBatch()" disabled title="撤销上次替换" aria-label="撤销上次替换"><span data-review-icon="Undo2"></span></button>
+  </div>
+  <button class="review-icon-button" onclick="toggleFind(false)" title="关闭查找" aria-label="关闭查找"><span data-review-icon="X"></span></button>
+</div>
+
+<div class="micro-edit-bar" id="microEditBar" role="toolbar" aria-label="元素编辑">
+    <span id="selectedBadge" class="sr-only"></span>
+    <span id="editHint" class="sr-only"></span>
     <input id="inlineTextInput" type="text" hidden aria-hidden="true">
     <button id="fontDecBtn" class="compact-btn" onclick="stepFontSize(-2)" disabled title="字号 -2px">A-</button>
-    <span id="fontSizeLabel" class="toolbar-metric">--px</span>
+    <input id="fontSizeLabel" type="number" min="6" max="400" step="1" disabled aria-label="字号" title="字号">
     <button id="fontIncBtn" class="compact-btn" onclick="stepFontSize(2)" disabled title="字号 +2px">A+</button>
     <span id="posDeltaBadge" class="sr-only">Δx: 0, Δy: 0</span>
     <button id="deleteElBtn" class="review-icon-button" onclick="deleteSelectedSvgElement()" disabled title="删除选中的元素（快捷键：Delete / Backspace）" aria-label="删除选中的元素"><span data-review-icon="Trash2"></span></button>
     <button id="commentElBtn" class="review-icon-button" onclick="commentOnSelected()" disabled title="针对该元素添加批注" aria-label="对此项提意见"><span data-review-icon="MessageSquare"></span></button>
-    <label><input id="allowRewrite" type="checkbox" disabled>允许改写所选文字</label>
-    <button id="undoEditBtn" class="review-icon-button" onclick="undoLastSvgEdit()" disabled title="撤销本页上一次微调" aria-label="撤销本页上一次微调"><span data-review-icon="Undo2"></span></button>
-    <button id="resetEditsBtn" class="review-icon-button" onclick="resetPageSvgEdits()" hidden title="还原所有微调" aria-label="还原所有微调"><span data-review-icon="History"></span></button>
-  </div>
-
-  <div class="toolbar-group">
-    <button id="compare" class="review-secondary-action" onclick="togglePrevious()"><span data-review-icon="History"></span><span>查看修改前</span></button>
-    <select id="historyRevision" aria-label="页面版本历史" onchange="document.querySelector('#restoreRevision').disabled=this.value===page().revision||!this.value"></select>
-    <button id="restoreRevision" class="review-secondary-action" onclick="restoreHistoricalRevision()" disabled><span data-review-icon="Undo2"></span><span>恢复版本</span></button>
-  </div>
 </div>
 
 <div class="workspace">
@@ -272,7 +333,7 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
     </div>
   </section>
 
-  <aside class="panel">
+  <aside class="panel" id="reviewPanel">
     <p id="updatedNote" class="muted" hidden style="background:var(--dsw-alias-state-business-tertiary);color:var(--dsw-alias-state-business-primary);padding:6px 8px;border-radius:5px"></p>
     <p id="previewState" class="muted" role="status"></p>
     <p id="previousNote" class="muted" hidden style="white-space:pre-wrap;background:var(--dsw-alias-bg-module-platform);padding:6px 8px;border-radius:5px"></p>
@@ -282,19 +343,23 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
       <div id="svgEditsList"></div>
     </div>
 
-    <h3><span>框选与批注</span><small class="muted" id="regionCountHint"></small></h3>
+    <h3 id="annotationHeading" hidden><span>新批注</span><small class="muted" id="regionCountHint"></small></h3>
     <div id="regions"></div>
 
-    <h3>本页反馈</h3>
+    <h3>新修改意见</h3>
     <textarea id="feedback" placeholder="填写本页修改意见…"></textarea>
     <div id="rewriteScope" class="muted"></div>
 
-    <h3>本页图片</h3>
+    <details class="panel-section" open><summary>本页图片</summary>
     <div id="assets"></div>
     <div class="drop" id="addDrop" tabindex="0">新增图片：点击、拖入或粘贴<input id="newFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></div>
-    <h3>页面备注</h3>
+    </details>
+    <details class="panel-section"><summary>页面备注</summary>
     <textarea id="notes" aria-label="页面备注"></textarea>
+    </details>
     <p id="taskState" class="muted" role="status"></p>
+    <details id="pendingTaskSection" class="panel-section" open hidden><summary>已提交 <span id="pendingCount"></span></summary><div id="pendingTasks"></div></details>
+    <details id="historySection" class="panel-section" hidden><summary>历史反馈 <span id="historyCount"></span></summary><div id="feedbackHistory"></div></details>
   </aside>
 </div>
 
@@ -302,25 +367,25 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
   <div class="tools">
     <button id="pagePrev" class="review-secondary-action" onclick="go(-1)" title="上一页" aria-label="上一页"><span data-review-icon="ChevronUp"></span><span>上一页</span></button>
     <button id="pageNext" class="review-secondary-action" onclick="go(1)" title="下一页" aria-label="下一页"><span>下一页</span><span data-review-icon="ChevronDown"></span></button>
-    <button id="pageDispatch" class="review-secondary-action" onclick="dispatchFeedback('page')" hidden><span data-review-icon="MessageSquare"></span><span>修改本页</span></button>
-    <button id="saveEdits" class="review-secondary-action" onclick="flushWorkbench()"><span data-review-icon="Save"></span><span>保存</span></button>
-    <button id="exportOutput" class="review-secondary-action" onclick="exportWorkbench()"><span data-review-icon="Download"></span><span>导出 PPT</span></button>
-    <button id="reloadButton" class="review-icon-button" onclick="askReload()" title="重新加载" aria-label="重新加载"><span data-review-icon="RefreshCw"></span></button>
+    <button id="reloadButton" class="review-icon-button" onclick="askReload()" title="保存并同步最新页面" aria-label="刷新工作台"><span data-review-icon="RefreshCw"></span></button>
     <button id="localFallback" onclick="showLocalFallback()" hidden>本地工作台</button>
   </div>
-  <span id="message"></span>
-  <button class="review-primary-action" onclick="showSubmit()"><span data-review-icon="Send"></span><span>提交修改任务</span></button>
-</footer>
-
-<dialog id="reloadDialog">
-  <h2>尚有未保存内容</h2>
-  <p id="reloadWhat"></p>
-  <div class="tools">
-    <button class="primary" onclick="saveAndReload()">保存后重新加载</button>
-    <button onclick="discardAndReload()">保留恢复草稿并重新加载</button>
-    <button onclick="document.querySelector('#reloadDialog').close()">返回</button>
+  <span class="footer-spacer"></span>
+  <div class="footer-actions">
+    <button id="exportOutput" class="review-secondary-action" onclick="exportWorkbench()"><span data-review-icon="Download"></span><span id="exportLabel">导出 PPT</span></button>
+    <button id="pageDispatch" class="review-secondary-action" onclick="dispatchFeedback('page')" hidden><span data-review-icon="MessageSquare"></span><span>修改本页</span></button>
+    <button class="review-primary-action" onclick="showSubmit()"><span data-review-icon="Send"></span><span>提交整套修改</span></button>
   </div>
-  <p id="reloadMessage"></p>
+</footer>
+<span id="message" role="status" aria-live="polite"></span>
+
+<dialog id="replaceDialog">
+  <h2>全部替换</h2><p id="replaceSummary"></p>
+  <div class="tools"><button id="confirmReplaceAll" class="review-primary-action" onclick="replaceMatches(true)">确认替换</button><button class="review-secondary-action" onclick="document.querySelector('#replaceDialog').close()">取消</button></div>
+</dialog>
+<dialog id="restoreDialog">
+  <h2>恢复页面版本</h2><p>恢复为所选版本，当前版本仍保留在历史中。</p>
+  <div class="tools"><button class="review-primary-action" onclick="document.querySelector('#restoreDialog').close();restoreHistoricalRevision()">恢复</button><button class="review-secondary-action" onclick="document.querySelector('#restoreDialog').close()">取消</button></div>
 </dialog>
 
 <dialog id="submitDialog">
@@ -349,15 +414,16 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
   <button onclick="document.querySelector('#exportDialog').close()">返回</button>
 </dialog>
 
-<dialog id="regionDialog">
-  <h3>这个区域需要怎么改？</h3>
+<div id="regionDialog" class="region-popover" role="dialog" aria-label="添加批注" hidden>
+  <h3>修改意见</h3>
   <div id="regionHitInfo" class="region-hit-hint" hidden></div>
   <textarea id="regionNote" placeholder="写清这处需要怎么改…"></textarea>
+  <label id="regionRewriteLabel" hidden><input id="allowRewrite" type="checkbox">允许模型修改这段文字</label>
   <div class="tools">
-    <button class="primary" onclick="saveRegion()">保存标注</button>
-    <button onclick="cancelRegion()">取消</button>
+    <button class="review-primary-action" onclick="saveRegion()">添加批注</button>
+    <button class="review-secondary-action" onclick="cancelRegion()">取消</button>
   </div>
-</dialog>
+</div>
 
 {{REVIEW_BRIDGE}}
 <script>
@@ -376,8 +442,9 @@ if(!document.body.hasAttribute('data-ds-dark-theme')&&window.matchMedia
 }
 let review=null,index=0,marking=false,start=null,rect=null,pendingTargets=[],pendingTargetSummary='',previous=false,uploads=0,stale=false,staleKeys=[],slideSeq=0,canUpload=false;
 let workbenchReady=false;
-let selectedReviewId=null,dragState=null,activeRegionIdx=-1;
+let selectedReviewId=null,dragState=null,activeRegionIdx=-1,historicalMarkup=null,historyPreviewSeq=0;
 let railDragState=null,railSuppressClick=false,inlineEditorState=null;
+let feedbackTasks={},panelCollapsed=false,syncBusy=false,hostSync=null,noteTimer=null,feedbackSaveStatus='clean';
 const updatedPages=new Set();
 let pulseCount=0,lastPulseAt=null;
 function drawPulse(){
@@ -436,7 +503,11 @@ const state=Object.fromEntries(data.pages.map(p=>[p.key,{
 }]));
 const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>((window.crypto&&crypto.randomUUID)?crypto.randomUUID():'f'+Math.random().toString(16).slice(2)+Date.now().toString(16));
-function note(text,kind){const el=$('#message');el.textContent=text||'';el.className=kind||''}
+function note(text,kind){
+  clearTimeout(noteTimer);
+  const el=$('#message');el.textContent=text||'';el.className=kind||'';
+  if(text&&!['error','warn'].includes(kind))noteTimer=setTimeout(()=>{el.textContent=''},3500);
+}
 
 const assetVersion=a=>String((a&&(a.version||a.sha256))||'').slice(0,12);
 /* 资源 URL 按「路径 + 版本」记住：同一版内容只向宿主取一次。
@@ -461,12 +532,88 @@ async function assetFor(rel,v){
 // 注意：`changed(p)` 判定的是「是否需要大模型重画」（feedback / annotations / assets）。
 // Direct edits save through the store; feedback dispatch remains independent.
 function changed(p){const s=state[p.key];return !!(s.feedback.trim()||s.annotations.length||s.assets.length)}
+function drawTaskState(){
+  const tasks=Object.values(feedbackTasks).filter(t=>t.pages?.[page().key]);
+  const pending=tasks.filter(t=>t.status==='pending').length;
+  $('#taskState').textContent=pending?`${pending} 项修改已提交`:tasks.some(t=>t.status==='resolved')?'修改已处理':'';
+}
+function drawFeedbackTasks(){
+  const key=page().key;
+  const tasks=Object.values(feedbackTasks).filter(t=>t.pages?.[key]).reverse();
+  const pending=tasks.filter(t=>t.status==='pending'),history=tasks.filter(t=>t.status==='resolved');
+  const makeRecord=(task,isHistory)=>{
+    const record=document.createElement('div');record.className='feedback-record';
+    const item=task.pages[key]||{};
+    const heading=document.createElement('div');heading.className='record-head';
+    const label=document.createElement('span');label.textContent=isHistory?'已处理':task.notification_failed?'已提交 · 通知失败':'已提交';
+    const date=document.createElement('time');
+    const stamp=task.resolved_at||task.created_at;
+    if(stamp){date.dateTime=stamp;date.textContent=new Date(stamp).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}
+    heading.append(label,date);record.append(heading);
+    const add=text=>{if(text){const p=document.createElement('p');p.textContent=text;record.append(p)}};
+    add(item.feedback);
+    for(const annotation of item.annotations||[])add('批注：'+annotation.text);
+    if(item.assets?.length)add('图片调整：'+item.assets.length+' 处');
+    add(task.overall_feedback);
+    if(isHistory){
+      add(task.note);
+      const button=document.createElement('button');button.className='review-secondary-action';button.textContent='重新开启';
+      button.onclick=()=>reopenFeedback(task,key);record.append(button);
+    }else if(task.notification_failed){
+      const button=document.createElement('button');button.className='review-secondary-action';button.textContent='重试通知';
+      button.onclick=()=>notifyTask(task);record.append(button);
+    }
+    return record;
+  };
+  $('#pendingTasks').replaceChildren(...pending.map(t=>makeRecord(t,false)));
+  $('#feedbackHistory').replaceChildren(...history.map(t=>makeRecord(t,true)));
+  if(pendingDispatch?.pages?.[key]){
+    const record=document.createElement('div');record.className='feedback-record';
+    const label=document.createElement('p');label.textContent=dispatchBusy?'正在提交修改意见':'修改意见尚未确认提交';
+    const text=document.createElement('p');text.textContent=pendingDispatch.pages[key].feedback||'';
+    const retry=document.createElement('button');retry.className='review-secondary-action';retry.textContent='重试提交';retry.disabled=dispatchBusy;
+    retry.onclick=()=>dispatchFeedback(pendingDispatch.scope);
+    record.append(label,text);
+    for(const a of pendingDispatch.pages[key].annotations||[]){const p=document.createElement('p');p.textContent='批注：'+a.text;record.append(p)}
+    record.append(retry);$('#pendingTasks').prepend(record);
+  }
+  const pendingCount=pending.length+(pendingDispatch?.pages?.[key]?1:0);
+  $('#pendingTaskSection').hidden=!pendingCount;$('#pendingCount').textContent=pendingCount;
+  $('#historySection').hidden=!history.length;$('#historyCount').textContent=history.length;
+  drawTaskState();
+}
+function reopenFeedback(task,key){
+  const source=task.pages?.[key],s=state[key];if(!source||!s)return;
+  s.feedback=[s.feedback,source.feedback,task.overall_feedback].filter(Boolean).join('\n');
+  // Old geometry is version-bound. Reopened annotations become plain opinions.
+  const oldNotes=(source.annotations||[]).map(a=>'批注：'+a.text);
+  if(oldNotes.length)s.feedback=[s.feedback,...oldNotes].filter(Boolean).join('\n');
+  s.assets.push(...(source.assets||[]).filter(a=>!s.assets.some(next=>next.asset_key===a.asset_key)).map(a=>structuredClone(a)));
+  if(page().key===key){$('#feedback').value=s.feedback;drawAssets();togglePanel(true)}
+  autoState();note('已转为新修改意见，尚未提交','ok');
+}
+function detachSubmittedDraft(command){
+  for(const [key,item] of Object.entries(command.pages)){
+    const s=state[key];
+    if(s.feedback===item.feedback)s.feedback='';
+    const sent=new Set((item.annotations||[]).map(a=>a.id||JSON.stringify(a)));
+    s.annotations=s.annotations.filter(a=>!sent.has(a.id||JSON.stringify(a)));
+    s.assets=s.assets.filter(a=>!(item.assets||[]).some(sent=>JSON.stringify(a)===JSON.stringify(sent)));
+    syncRewriteScope(s);
+  }
+  if(command.scope==='deck'&&$('#overall').value.trim()===command.overall_feedback)$('#overall').value='';
+  $('#feedback').value=state[page().key].feedback;drawRegions();drawAssets();updateRail();
+}
+async function notifyTask(task){
+  try{
+    if(review?.transport==='postMessage')await review.wake({unit:task.scope==='page'?Object.keys(task.pages)[0]:'整套',text:'工作台修改任务 '+task.task_id+' 已持久保存；只读取此任务与绑定页面版本，不把历史反馈作为本轮指令。'});
+    task.notification_failed=false;note('修改任务已提交','ok');return true;
+  }catch(error){task.notification_failed=true;note('修改任务已提交，通知失败；可重试通知','warn');return false}
+  finally{drawFeedbackTasks();void saveDraft()}
+}
 function status(){
-  const s=state[page().key];
-  const dirty=pageDirty(page());
-  const label={clean:'已保存',saving:'保存中',error:'未保存',conflict:'版本冲突',pending:'待保存'};
-  $('#pageStatus').textContent=dirty&&s.save_status==='clean'?'待保存':label[s.save_status];
-  $('#taskState').textContent=s.task?'修改任务已提交':'';
+  drawSaveStatus();
+  drawTaskState();
   scheduleWorkbench();
   scheduleDraft();   // 状态变了就排一次草稿（打字、框选、直改、拖动、上传、决定都会走到这里）
 }
@@ -486,6 +633,7 @@ function setMode(mode){
   $('#selection').hidden=true;
   $('#modeSelect').classList.add('active');
   $('#mark').classList.remove('active');
+  $('#modeSelect').setAttribute('aria-pressed','true');$('#mark').setAttribute('aria-pressed','false');
   $('#stageModeHint').textContent='单击元素可改字、拖动位置或按 Delete 删除';
 }
 
@@ -608,7 +756,7 @@ function drawRail(){
     b.title=updatedPages.has(p.key)?'画面已更新，待复核':'拖动调整页面顺序；Alt+↑/↓ 也可移动';
     b.setAttribute('aria-label','第 '+(i+1)+' 页：'+p.title);
     const img=document.createElement('img');img.alt='第 '+(i+1)+' 页';
-    assetFor(p.png,p.version).then(url=>{if(url)img.src=url});
+    assetFor(p.png,p.version).then(url=>{if(url&&!img.src.startsWith('data:image/png'))img.src=url});
     b.append(img);
     const meta=document.createElement('div');meta.className='rail-meta';
     const t=document.createElement('span');const d=document.createElement('span');d.className='dot';
@@ -639,6 +787,7 @@ function drawRail(){
     };
     rail.append(b);
     railButtons.set(p.key,{b:b,tag:tag,i:i});
+    if(canCommand)void refreshThumbnail(p);
   });
 }
 $('#rail').onpointerdown=handleRailPointerDown;
@@ -750,7 +899,8 @@ function replaySvgEditsOnDom(){
       return;
     }
     applyDeleteToDom(el,false);
-    if(edit.text!==undefined&&edit.text!==null)applyTextToDom(el,edit.text,edit.lines);
+    if(edit.text_nodes)applyTextNodes(el,edit.text_nodes);
+    else if(edit.text!==undefined&&edit.text!==null)applyTextToDom(el,edit.text,edit.lines);
     if(edit.font_size!==undefined&&edit.font_size!==null)applyFontSizeToDom(el,edit.font_size);
     if(edit.dx||edit.dy)applyDeltaToDom(el,edit.dx||0,edit.dy||0);
   });
@@ -759,14 +909,15 @@ function mountInlineSvg(p){
   const wrap=$('#svgStageWrap');
   wrap.replaceChildren();
   selectedReviewId=null;
-  if(!p.svgMarkup||previous){
+  const markup=previous?historicalMarkup:p.svgMarkup;
+  if(!markup){
     wrap.hidden=true;
     $('#slide').style.opacity='1';
     updateToolbarSelection();
     return;
   }
   wrap.hidden=false;
-  const parsed=new DOMParser().parseFromString(p.svgMarkup,'image/svg+xml');
+  const parsed=new DOMParser().parseFromString(markup,'image/svg+xml');
   const source=parsed.documentElement;
   const xlink='http://www.w3.org/1999/xlink';
   // Remove direct image URLs while detached: insertion must not race authenticated asset loading.
@@ -799,7 +950,7 @@ function mountInlineSvg(p){
   });
   // Keep #slide in layout for test assertions & fallback, while showing live interactive SVG on top
   $('#slide').style.opacity='0.01';
-  replaySvgEditsOnDom();
+  if(!previous)replaySvgEditsOnDom();
   updateToolbarSelection();
 }
 
@@ -831,7 +982,7 @@ function pruneNoopEditRecord(rid){
     const textChanged=rec.text!==undefined&&rec.text!==rec.orig_text;
     const fsChanged=rec.font_size!==undefined&&rec.font_size!==rec.orig_font_size;
     const posChanged=Math.abs(rec.dx||0)>=0.5||Math.abs(rec.dy||0)>=0.5;
-    return isDeleted||textChanged||fsChanged||posChanged;
+    return isDeleted||textChanged||fsChanged||posChanged||!!rec.text_nodes;
   });
 }
 function pushHistorySnapshot(){
@@ -913,6 +1064,7 @@ function commitInlineTextEditorValue(){
   const el=session.el;
   ensureInlineEditHistory();
   const rec=getOrCreateEditRecord(el);
+  delete rec.text_nodes;
   const tspans=[...el.querySelectorAll(':scope > tspan')];
   const rawVal=editor.value;
   if(tspans.length>1){
@@ -967,9 +1119,7 @@ function updateToolbarSelection(){
   const el=findSvgEl(selectedReviewId);
   const s=state[page().key];
   $('#microEditBar').classList.toggle('contextual-active',!!el&&!previous&&el.dataset.deleted!=='1');
-  $('#allowRewrite').disabled=!el||!['text','tspan'].includes(el.localName)||previous;
-  $('#allowRewrite').checked=!!el&&s.rewrite_elements.includes(selectedReviewId);
-  $('#rewriteScope').textContent=s.rewrite_elements.length?'允许改写：'+s.rewrite_elements.join('、'):'';
+  $('#rewriteScope').textContent='';
   $('#undoEditBtn').disabled=!(s.edit_history&&s.edit_history.length);
   $('#resetEditsBtn').hidden=!(s.svg_edits&&s.svg_edits.length);
   drawSvgEditsPanel();
@@ -979,7 +1129,7 @@ function updateToolbarSelection(){
     $('#inlineTextInput').disabled=true;
     $('#fontDecBtn').disabled=true;
     $('#fontIncBtn').disabled=true;
-    $('#fontSizeLabel').textContent='--px';
+    $('#fontSizeLabel').value='';$('#fontSizeLabel').disabled=true;
     $('#posDeltaBadge').textContent='Δx: 0, Δy: 0';
     $('#deleteElBtn').disabled=true;
     $('#commentElBtn').disabled=true;
@@ -1004,7 +1154,7 @@ function updateToolbarSelection(){
     $('#inlineTextInput').title=tState.isMulti?'多行文字用 " / " 分隔':'直接输入修改文字';
     $('#fontDecBtn').disabled=false;
     $('#fontIncBtn').disabled=false;
-    $('#fontSizeLabel').textContent=fs+'px';
+    $('#fontSizeLabel').value=fs;$('#fontSizeLabel').disabled=false;
     $('#editHint').textContent=inlineEditorState&&inlineEditorState.el===el?'回车完成 · Esc取消':'双击文字原地编辑';
   }else{
     $('#selectedBadge').textContent=`已选${tagLabel(tag)}`;
@@ -1012,10 +1162,40 @@ function updateToolbarSelection(){
     $('#inlineTextInput').disabled=true;
     $('#fontDecBtn').disabled=true;
     $('#fontIncBtn').disabled=true;
-    $('#fontSizeLabel').textContent='--px';
+    $('#fontSizeLabel').value='';$('#fontSizeLabel').disabled=true;
     $('#editHint').textContent='选中文字后可双击原地编辑';
   }
+  const isText=tag==='text';
+  for(const id of ['fontDecBtn','fontSizeLabel','fontIncBtn'])$('#'+id).hidden=!isText;
   updateHighlightOverlay();
+  positionElementToolbar();
+}
+
+function positionFloating(element,anchor){
+  const margin=8,width=element.offsetWidth,height=element.offsetHeight;
+  const bounds=$('#preview').getBoundingClientRect();
+  const minLeft=bounds.width>=width?Math.max(margin,bounds.left):margin;
+  const maxLeft=bounds.width>=width?Math.min(innerWidth-width-margin,bounds.right-width):innerWidth-width-margin;
+  const left=Math.max(minLeft,Math.min(maxLeft,anchor.left));
+  let top=anchor.top-height-8;
+  if(top<Math.max(margin,bounds.top))top=anchor.bottom+8;
+  if(top+height>Math.min(innerHeight-68,bounds.bottom))top=Math.max(margin,Math.min(anchor.top-height-8,innerHeight-height-68));
+  element.style.left=left+'px';element.style.top=top+'px';
+}
+function positionElementToolbar(){
+  const bar=$('#microEditBar'),el=findSvgEl(selectedReviewId);
+  if(!el||!bar.classList.contains('contextual-active'))return;
+  const anchor=(inlineEditorState&&!$('#inlineCanvasEditor').hidden)?$('#inlineCanvasEditor').getBoundingClientRect():el.getBoundingClientRect();
+  positionFloating(bar,anchor);
+}
+$('#microEditBar').onpointerdown=e=>e.stopPropagation();
+function togglePanel(force){
+  panelCollapsed=typeof force==='boolean'?!force:!panelCollapsed;
+  $('.workspace').classList.toggle('panel-collapsed',panelCollapsed);
+  const button=$('#togglePanel');button.setAttribute('aria-expanded',String(!panelCollapsed));
+  button.title=button.ariaLabel=panelCollapsed?'展开反馈侧栏':'收起反馈侧栏';
+  button.querySelector('[data-review-icon]').dataset.reviewIcon=panelCollapsed?'PanelRightOpen':'PanelRightClose';
+  ReviewUI.refresh(button);sizePreview();scheduleDraft();
 }
 
 function drawSvgEditsPanel(){
@@ -1086,6 +1266,11 @@ function stepFontSize(delta){
   updateToolbarSelection();
   updateRail();status();
 }
+$('#fontSizeLabel').onchange=e=>{
+  const el=findSvgEl(selectedReviewId),value=Number(e.target.value);
+  if(!el||!Number.isFinite(value))return;
+  stepFontSize(Math.max(8,Math.min(240,value))-readFontSize(el));
+};
 
 function deleteSelectedSvgElement(){
   const el=findSvgEl(selectedReviewId);
@@ -1165,12 +1350,14 @@ async function render(){
   $('#pagePrev').disabled=index===0;
   $('#pageNext').disabled=index===data.pages.length-1;
   endInlineTextEdit(true);
+  if(!$('#regionDialog').hidden){if($('#regionNote').value.trim())saveRegion();else cancelRegion()}
   const seq=++slideSeq;
-  marking=false;previous=false;
+  marking=false;previous=false;historicalMarkup=null;historyPreviewSeq++;
   $('#preview').classList.remove('marking');
   $('#selection').hidden=true;
   $('#modeSelect').classList.add('active');
   $('#mark').classList.remove('active');
+  $('#modeSelect').setAttribute('aria-pressed','true');$('#mark').setAttribute('aria-pressed','false');
   const p=page(),s=state[p.key];
   syncHash();   // 切页/换页都记下位置，重新加载后还停在这一页
   $('#title').textContent=(index+1)+' / '+data.pages.length+' · '+p.title;
@@ -1190,43 +1377,56 @@ async function render(){
   $('#previousNote').hidden=!prevLines.length;
   $('#previousNote').textContent=prevLines.length
     ?'上一轮你说的：'+prevLines.join('\n') :'';
-  $('#compare').disabled=!p.previous;$('#compare').textContent='查看修改前';
+  $('#compare').disabled=!p.parent&&!p.previous;$('#compare').textContent='查看修改前';
   mountInlineSvg(p);
   const url=await assetFor(p.png,p.version);
   if(seq===slideSeq&&url)$('#slide').src=url;
-  drawRail();drawAssets();drawRegions();status();drawStale();
+  drawRail();drawAssets();drawRegions();drawFeedbackTasks();status();drawStale();
+  if(!$('#findPanel').hidden)updateFindMatches();
 }
 
 function selectPage(next){
   const before=page();
   endInlineTextEdit(true);
+  if(!$('#regionDialog').hidden){if($('#regionNote').value.trim())saveRegion();else cancelRegion()}
   void savePage(before);
   void saveDraft();
   index=Math.max(0,Math.min(data.pages.length-1,next));
   $('#pagePrev').disabled=index===0;
   $('#pageNext').disabled=index===data.pages.length-1;
-  render();
+  return render();
 }
 function go(d){selectPage(index+d)}
-function togglePrevious(){
-  endInlineTextEdit(true);
-  previous=!previous;
-  $('#compare').textContent=previous?'查看当前版本':'查看修改前';
-  marking=false;$('#selection').hidden=true;
+async function previewHistoricalVersion(revision){
+  const p=page();endInlineTextEdit(true);
+  if(!await flushWorkbench([p]))return false;
+  const seq=++historyPreviewSeq;
+  if(!revision||revision===p.revision){
+    previous=false;historicalMarkup=null;
+  }else{
+    try{
+      const record=await workbenchCommand({op:'get',page_key:p.key,revision});
+      if(seq!==historyPreviewSeq||page().key!==p.key)return false;
+      historicalMarkup=prepareStoredMarkup(p,record);previous=true;
+    }catch(error){note('历史版本读取失败：'+error.message,'error');return false}
+  }
+  $('#restoreRevision').disabled=!previous;$('#compare').textContent=previous?'查看当前版本':'查看修改前';
+  marking=false;$('#selection').hidden=true;mountInlineSvg(p);drawRegions();
+  return true;
+}
+async function togglePrevious(){
   const p=page();
-  mountInlineSvg(p);
-  drawRegions();
-  assetFor(previous?p.previous:p.png,previous?undefined:p.version).then(url=>{if(url)$('#slide').src=url});
+  const revision=previous?p.revision:p.parent;
+  if(revision){await previewHistoricalVersion(revision);$('#historyRevision').value=revision}
+  else if(p.previous){
+    endInlineTextEdit(true);previous=!previous;historicalMarkup=null;mountInlineSvg(p);drawRegions();
+    assetFor(previous?p.previous:p.png,previous?undefined:p.version).then(url=>{if(url)$('#slide').src=url});
+  }
 }
 $('#feedback').oninput=e=>{state[page().key].feedback=e.target.value;autoState()};
 $('#notes').oninput=e=>{state[page().key].notes=e.target.value;status()};
-$('#allowRewrite').onchange=e=>{
-  if(!selectedReviewId)return;
-  const s=state[page().key];
-  s.rewrite_elements=s.rewrite_elements.filter(id=>id!==selectedReviewId);
-  if(e.target.checked)s.rewrite_elements.push(selectedReviewId);
-  updateToolbarSelection();autoState();
-};
+$('#allowRewrite').onchange=()=>scheduleDraft();
+$('#regionNote').oninput=()=>scheduleDraft();
 
 /* ---- 框选批注 + 画布常驻编号框 + 自动命中检测 ---- */
 function startRegion(){
@@ -1237,6 +1437,7 @@ function startRegion(){
   $('#preview').classList.add('marking');
   $('#modeSelect').classList.remove('active');
   $('#mark').classList.add('active');
+  $('#modeSelect').setAttribute('aria-pressed','false');$('#mark').setAttribute('aria-pressed','true');
   $('#stageModeHint').textContent='在画布上按住鼠标拖出框选区域';
   note('在页面上拖出需要修改的区域');
 }
@@ -1284,29 +1485,42 @@ function showRegionDialogWithHits(){
   info.hidden=false;
   info.textContent=pendingTargetSummary?`已定位：${pendingTargetSummary}`:'已框选区域';
   $('#regionNote').value='';
-  $('#regionDialog').showModal();
+  $('#allowRewrite').checked=false;
+  $('#regionRewriteLabel').hidden=!(pendingTargets.length===1&&pendingTargets[0].tag==='text');
+  $('#regionDialog').hidden=false;
+  $('#microEditBar').classList.remove('contextual-active');
+  const preview=$('#preview').getBoundingClientRect();
+  const anchor={left:preview.left+rect.x*preview.width,top:preview.top+rect.y*preview.height,bottom:preview.top+(rect.y+rect.h)*preview.height};
+  positionFloating($('#regionDialog'),anchor);$('#regionNote').focus();
 }
 function cancelRegion(){
-  $('#regionDialog').close();
+  $('#regionDialog').hidden=true;$('#regionNote').value='';
   $('#selection').hidden=true;
   rect=null;pendingTargets=[];pendingTargetSummary='';
   setMode('select');
 }
 function clearRegions(){
   state[page().key].annotations=[];
+  state[page().key].rewrite_elements=[];
   drawRegions();autoState();
 }
 function saveRegion(){
   const text=$('#regionNote').value.trim();
   if(!text)return;
-  const item={...rect,text};
+  const item={id:uid(),...rect,text};
   if(pendingTargets&&pendingTargets.length)item.targets=pendingTargets;
   if(pendingTargetSummary)item.target_summary=pendingTargetSummary;
+  if($('#allowRewrite').checked&&!$('#regionRewriteLabel').hidden){
+    const target=findSvgEl(pendingTargets[0].review_id);
+    item.rewrite_elements=target?[target,...target.querySelectorAll('[data-review-id]')].map(el=>el.getAttribute('data-review-id')):[pendingTargets[0].review_id];
+  }
   state[page().key].annotations.push(item);
+  syncRewriteScope(state[page().key]);
   cancelRegion();
   drawRegions();
   autoState();
 }
+function syncRewriteScope(s){s.rewrite_elements=[...new Set(s.annotations.flatMap(a=>a.rewrite_elements||[]))]}
 function highlightRegionPair(idx){
   activeRegionIdx=idx;
   document.querySelectorAll('#regionOverlay .canvas-region-box').forEach((el,i)=>{
@@ -1320,6 +1534,7 @@ function drawRegions(){
   const container=$('#regions');container.replaceChildren();
   const overlay=$('#regionOverlay');overlay.replaceChildren();
   const list=state[page().key].annotations||[];
+  $('#annotationHeading').hidden=!list.length;
   $('#regionCountHint').textContent=list.length?(list.length+' 处标注'):'';
   overlay.hidden=previous;
 
@@ -1351,7 +1566,7 @@ function drawRegions(){
     d.textContent=(i+1)+'. '+a.text;
     const b=document.createElement('button');
     b.textContent='删除';
-    b.onclick=()=>{state[page().key].annotations.splice(i,1);drawRegions();autoState()};
+    b.onclick=()=>{const s=state[page().key];s.annotations.splice(i,1);syncRewriteScope(s);drawRegions();autoState()};
     d.onmouseenter=()=>highlightRegionPair(i);
     d.onmouseleave=()=>highlightRegionPair(-1);
     d.append(b);
@@ -1575,6 +1790,11 @@ async function refreshStale(){
   drawStale();
 }
 async function onHostChanged(){
+  if(hostSync)return hostSync;
+  hostSync=syncFromHost();
+  try{return await hostSync}finally{hostSync=null}
+}
+async function syncFromHost(){
   pulseCount++;lastPulseAt=new Date().toLocaleTimeString('zh-CN',{hour12:false});drawPulse();
   if(!canCommand)return;
   try{
@@ -1597,7 +1817,10 @@ async function onHostChanged(){
       pageOrder=[...head.order];initialPageOrder.splice(0,initialPageOrder.length,...head.order);
       index=pageOrder.indexOf(selected);
     }
-    for(const task of Object.values(head.tasks||{})){
+    const failedNotifications=new Set(Object.values(feedbackTasks).filter(t=>t.notification_failed).map(t=>t.task_id));
+    feedbackTasks={...feedbackTasks,...head.tasks};
+    for(const task of Object.values(feedbackTasks)){
+      if(failedNotifications.has(task.task_id))task.notification_failed=true;
       for(const key of Object.keys(task.pages||{})){
         if(state[key]&&(!state[key].task||state[key].task.id===task.task_id))state[key].task={id:task.task_id,status:task.status};
       }
@@ -1605,8 +1828,11 @@ async function onHostChanged(){
     staleKeys=data.pages.filter(p=>state[p.key].save_status==='conflict').map(p=>p.key);
     stale=!!staleKeys.length;drawStale();
     if(updatedPages.has(page().key)&&!pageDirty(page())&&!inlineEditorState)mountInlineSvg(page());
-    updateRail();status();
-  }catch(error){note('读取新版本失败：'+error.message,'error')}
+    for(const key of updatedPages){const p=data.pages.find(p=>p.key===key);if(p)void refreshThumbnail(p)}
+    drawFeedbackTasks();drawRegions();drawHistory(page());updateRail();status();
+    if(!$('#findPanel').hidden)updateFindMatches();
+    return !stale;
+  }catch(error){note('读取新版本失败：'+error.message,'error');return false}
 }
 async function swapImages(pages_){
   for(const p of pages_){
@@ -1717,7 +1943,11 @@ function patchEdits(p,desired,acknowledged){
     const original=extractTextState(base);
     const beforeText=before.text===undefined?original.text:before.text;
     const afterText=after.text===undefined?original.text:after.text;
-    if(beforeText!==afterText){
+    if(after.text_nodes||before.text_nodes){
+      if(!after.text_nodes&&after.text!==undefined)applyTextToDom(base,after.text,after.lines);
+      const nodes=after.text_nodes||svgTextNodes(base).nodes.map(({element_id,slot,value})=>({element_id,slot,value}));
+      if(JSON.stringify(nodes)!==JSON.stringify(before.text_nodes))output.push({element_id:id,kind:'text_nodes',nodes});
+    }else if(beforeText!==afterText){
       const spans=[...base.querySelectorAll(':scope > tspan')];
       const lines=after.lines||String(afterText).split('\n');
       if(spans.length&&spans.length===lines.length&&spans.every(el=>el.getAttribute('data-workbench-id'))){
@@ -1781,6 +2011,7 @@ async function savePage(p){
         p.preview_pending=receipt.rendered!==true;
         s.saved_edits=pending.edits;s.saved_notes=pending.notes;s.pending_save=null;
         s.save_status=pageDirty(p)?'pending':'clean';
+        void refreshThumbnail(p);
         retainRecoveryDraft();void saveDraft();drawSaveStatus();
         try{
           const current=await workbenchCommand({op:'get',page_key:p.key});
@@ -1800,9 +2031,13 @@ async function savePage(p){
   try{return await work}finally{saveQueues.delete(p.key)}
 }
 function drawSaveStatus(){
-  const s=state[page().key];
-  const label={clean:'已保存',pending:'待保存',saving:'保存中',error:'未保存',conflict:'版本冲突'};
-  $('#pageStatus').textContent=label[s.save_status];
+  const states=Object.values(state).map(s=>s.save_status);
+  const draftPending=canDraft&&draftSignature()!==lastDraftSaved;
+  const status=states.includes('conflict')?'conflict':states.includes('error')||feedbackSaveStatus==='error'?'error':
+    states.includes('saving')||states.includes('pending')||data.pages.some(pageDirty)||draftPending?'saving':'clean';
+  const label={clean:'已保存',saving:'保存中',error:'保存失败',conflict:'版本冲突'};
+  $('#pageStatus').textContent=label[status];
+  $('#retrySave').hidden=!['error','conflict'].includes(status);
   $('#previewState').textContent='';
   updateRail([page().key]);
 }
@@ -1819,13 +2054,15 @@ async function saveOrder(){
 }
 async function flushWorkbench(pages=data.pages){
   endInlineTextEdit(true);clearTimeout(saveTimer);
+  if(!$('#regionDialog').hidden&&$('#regionNote').value.trim())saveRegion();
   let saved=true;
   for(const p of pages)if(!await savePage(p))saved=false;
   if(pageOrderChanged()&&!await saveOrder())saved=false;
-  await saveDraft();
-  if(saved)note('页面编辑已保存','ok');
+  if(!await saveDraft())saved=false;
+  drawSaveStatus();
   return saved;
 }
+async function retryAutosave(){if(await flushWorkbench())note('已保存','ok')}
 function drawHistory(p){
   const select=$('#historyRevision');
   const selected=select.value;
@@ -1837,6 +2074,7 @@ function drawHistory(p){
   }
   if([...select.options].some(option=>option.value===selected))select.value=selected;
   $('#restoreRevision').disabled=!select.value||select.value===p.revision;
+  $('#compare').disabled=!p.parent&&!p.previous;
   $('#previewState').textContent='';
 }
 async function restoreHistoricalRevision(){
@@ -1851,7 +2089,8 @@ async function restoreHistoricalRevision(){
     if(stored.revision!==receipt.revision)throw new Error('恢复后又有新版本，恢复草稿已保留');
     s.pending_history=null;
     await mergeStoredPage(p,stored);p.preview_pending=true;
-    mountInlineSvg(p);drawHistory(p);status();await saveDraft();
+    previous=false;historicalMarkup=null;
+    mountInlineSvg(p);drawHistory(p);$('#historyRevision').value=p.revision;$('#restoreRevision').disabled=true;status();await saveDraft();
     note('已恢复历史版本，历史仍保留','ok');
   }catch(error){retainRecoveryDraft();note('恢复未完成：'+error.message,'error')}
 }
@@ -1882,9 +2121,12 @@ async function exportWorkbench(){
 }
 async function dispatchFeedback(scope){
   if(dispatchBusy)return false;
+  if(!$('#regionDialog').hidden&&$('#regionNote').value.trim())saveRegion();
   if(scope==='page'&&review?.transport!=='postMessage'){note('此宿主仅支持整套修改任务','error');return false}
-  const targets=scope==='page'?[page()]:orderedPages();
-  if(!targets.some(p=>changed(p))&&!$('#overall').value.trim()){note('先填写修改意见或添加批注、图片','error');return false}
+  const overall=scope==='deck'?$('#overall').value.trim():'';
+  const targets=pendingDispatch?data.pages.filter(p=>Object.hasOwn(pendingDispatch.pages,p.key)):
+    (scope==='page'?[page()]:orderedPages()).filter(p=>changed(p)||overall);
+  if(!pendingDispatch&&!targets.length){note('先填写修改意见或添加批注、图片','error');return false}
   if(uploads){note('请等待图片上传完成','error');return false}
   dispatchBusy=true;
   try{
@@ -1896,20 +2138,22 @@ async function dispatchFeedback(scope){
         pages[p.key]={revision:p.revision,feedback:s.feedback,annotations:structuredClone(s.annotations),assets:structuredClone(s.assets),rewrite_elements:[...s.rewrite_elements]};
       }
       pendingDispatch={op:'feedback',operation_id:'feedback_'+uid(),scope,pages,overall_feedback:scope==='deck'?$('#overall').value.trim():''};
+      detachSubmittedDraft(pendingDispatch);
+      retainRecoveryDraft();drawFeedbackTasks();
+      if(!await saveDraft())return false;
     }
     const command=pendingDispatch;
     const receipt=await workbenchCommand(command);
     if(!receipt.task_id)throw new Error('没有收到持久任务 ID');
     for(const key of Object.keys(command.pages))state[key].task={id:receipt.task_id,status:'pending'};
+    const task={task_id:receipt.task_id,scope:command.scope,pages:structuredClone(command.pages),overall_feedback:command.overall_feedback,status:'pending',created_at:new Date().toISOString()};
+    feedbackTasks[task.task_id]=task;
     pendingDispatch=null;
     retainRecoveryDraft();await saveDraft();status();
-    try{
-      const delivery=await review.wake({unit:scope==='page'?targets[0].key:'整套',text:'工作台修改任务 '+receipt.task_id+' 已持久保存；读取该任务与绑定页面版本，只修改任务范围。'});
-      note('修改任务已提交','ok');
-    }catch(error){note('修改任务已提交，通知未送达','warn')}
+    await notifyTask(task);
     return true;
   }catch(error){retainRecoveryDraft();note('任务未提交：'+error.message+'；意见已保留','error');return false}
-  finally{dispatchBusy=false}
+  finally{dispatchBusy=false;drawFeedbackTasks()}
 }
 /* Recovery drafts retain pending commands and stable-ID edits across version conflicts.
  * They never replace a durable page-save receipt and never wake the model. */
@@ -1931,11 +2175,15 @@ function draftPayload(pages){
       revision:p.revision,base_markup:p.svgMarkup,session_revision:p.session_revision,
       pending_save:s.pending_save,pending_restore:s.pending_restore,pending_history:s.pending_history,allow_restore:s.allow_restore,save_status:s.save_status,task:s.task};
   });
-  return {review_id:data.review_id,page_order:[...pageOrder],at:new Date().toISOString(),pages:pages||out,
+  return {review_id:data.review_id,feedback_schema:2,page_order:[...pageOrder],at:new Date().toISOString(),pages:pages||out,
+    panel_collapsed:panelCollapsed,notification_failures:Object.values(feedbackTasks).filter(t=>t.notification_failed).map(t=>t.task_id),
+    replace_batch:lastReplaceBatch,
+    region_draft:!$('#regionDialog').hidden?{page_key:page().key,rect,targets:pendingTargets,summary:pendingTargetSummary,text:$('#regionNote').value,rewrite:$('#allowRewrite').checked}:null,
     overall_feedback:$('#overall').value,
     pending_dispatch:pendingDispatch,order_command:orderCommand,pending_snapshot:pendingSnapshot,last_output:lastOutput,
     inline_editor:inlineEditorState?{page_key:inlineEditorState.pageKey,element_id:inlineEditorState.reviewId,value:$('#inlineCanvasEditor').value}:null};
 }
+function draftSignature(){const payload=draftPayload();return JSON.stringify({...payload,at:undefined})}
 /* 状态变了就排一次。`status()` 是所有变更路径的汇合点：打字、框选、直改、拖动、上传、决定。 */
 function scheduleDraft(){
   retainRecoveryDraft();
@@ -1949,13 +2197,14 @@ async function saveDraft(){
   if(draftPromise){await draftPromise;return saveDraft()}
   const payload=draftPayload();
   const signature=JSON.stringify({...payload,at:undefined});
-  if(signature===lastDraftSaved)return true;
+  if(signature===lastDraftSaved){feedbackSaveStatus='clean';drawSaveStatus();return true}
+  feedbackSaveStatus='saving';drawSaveStatus();
   draftPromise=(async()=>{
     try{
       const receipt=await review.draft(payload);
       if(receipt?.ok===false)throw new Error(receipt.error||'草稿未保存');
-      lastDraftSaved=signature;return true;
-    }catch(error){note('恢复草稿未落盘：'+error.message+'；请勿关闭未保存的页面。','warn');return false}
+      lastDraftSaved=signature;feedbackSaveStatus='clean';drawSaveStatus();return true;
+    }catch(error){feedbackSaveStatus='error';drawSaveStatus();note('意见尚未保存：'+error.message+'；输入已保留，请重试。','warn');return false}
   })();
   try{return await draftPromise}finally{draftPromise=null}
 }
@@ -2007,14 +2256,17 @@ async function restoreDraft(){
     }
   });
   pendingDispatch=draft.pending_dispatch||null;orderCommand=draft.order_command||null;
+  lastReplaceBatch=draft.replace_batch||null;
+  $('#undoReplace').disabled=!lastReplaceBatch;
+  panelCollapsed=!!draft.panel_collapsed;togglePanel(!panelCollapsed);
+  restoredDraftMeta=draft;
   pendingSnapshot=draft.pending_snapshot||null;lastOutput=draft.last_output||null;
   if(restored||orderRestored){
     note('已读回恢复草稿（'+(restored?restored+' 页':'页面顺序')+'），冲突内容不会自动覆盖新版本。','warn');
   }
 }
 
-async function mergeStoredPage(p,record){
-  if(pageDirty(p))return false;
+function prepareStoredMarkup(p,record){
   const doc=new DOMParser().parseFromString(record.svg||'','image/svg+xml');
   const svg=doc.documentElement;
   if(svg.tagName==='parsererror')throw new Error('版本 SVG 无效');
@@ -2049,12 +2301,24 @@ async function mergeStoredPage(p,record){
     const asset=(record.assets||[]).find(item=>item.path===href);
     el.setAttribute('data-project-rel',rel);el.setAttribute('data-project-ver',String(asset?.sha256||'').slice(0,12));
   }
-  p.svgMarkup=new XMLSerializer().serializeToString(svg);
+  return new XMLSerializer().serializeToString(svg);
+}
+async function mergeStoredPage(p,record){
+  if(pageDirty(p))return false;
+  p.svgMarkup=prepareStoredMarkup(p,record);
+  const svg=new DOMParser().parseFromString(p.svgMarkup,'image/svg+xml').documentElement;
+  p.assets=[svg,...svg.querySelectorAll('*')].flatMap((el,i)=>{
+    if(el.localName!=='image'||!el.getAttribute('data-project-rel'))return [];
+    const key=el.getAttribute('data-asset-key')||el.getAttribute('data-orig-id')||'image_'+i;
+    const rel=el.getAttribute('data-project-rel'),version=el.getAttribute('data-project-ver')||'';
+    return [{asset_key:key,path:rel,version,width:Number(el.getAttribute('width')||1),height:Number(el.getAttribute('height')||1),
+      fit:(el.getAttribute('preserveAspectRatio')||'').includes('slice')?'cover':'contain'}];
+  });
   p.revision=record.revision;p.svg_path=record.svg_path;p.protected=record.protected;p.session_revision=null;
   p.history=record.history||[];p.parent=record.parent;
   const s=state[p.key];
   s.svg_edits=[];s.saved_edits=[];s.edit_history=[];s.notes=record.notes||'';s.saved_notes=s.notes;s.save_status='clean';
-  if(page().key===p.key)$('#notes').value=s.notes;
+  if(page().key===p.key){$('#notes').value=s.notes;drawAssets()}
   return true;
 }
 
@@ -2074,27 +2338,25 @@ function pendingWork(){
   return out;
 }
 async function askReload(){
-  if(await flushWorkbench()&&await saveDraft()){location.reload();return}
-  const work=pendingWork();
-  if(!work.length){location.reload();return}
-  $('#reloadWhat').textContent='还没提交的有 —— '+work.join('；');
-  $('#reloadMessage').textContent='';
-  $('#reloadDialog').showModal();
-}
-async function saveAndReload(){
-  if(!await flushWorkbench()){
-    $('#reloadMessage').textContent='尚未收到持久保存回执，输入与恢复草稿已保留。';
-    return;
+  if(syncBusy)return false;
+  syncBusy=true;$('#reloadButton').disabled=true;$('#reloadButton').setAttribute('aria-busy','true');
+  const railScroll=$('#rail').scrollTop,panelScroll=$('#reviewPanel').scrollTop;
+  try{
+    note('正在保存并同步…');
+    if(!await flushWorkbench()){note('同步未完成：当前输入尚未保存，请重试；输入已保留','error');return false}
+    const synced=await onHostChanged();
+    if(!synced){if(stale)note('版本冲突，当前输入已保留','error');return false}
+    if(!await saveDraft())return false;
+    note('已同步最新页面','ok');return true;
+  }finally{
+    $('#rail').scrollTop=railScroll;$('#reviewPanel').scrollTop=panelScroll;
+    syncBusy=false;$('#reloadButton').disabled=false;$('#reloadButton').removeAttribute('aria-busy');
   }
-  location.reload();
 }
-async function discardAndReload(){
-  retainRecoveryDraft();
-  if(!await saveDraft()){note('恢复草稿未落盘，请先使用本地工作台或重试。','error');return}
-  $('#reloadDialog').close();location.reload();
-}
+function confirmHistoricalRestore(){if($('#historyRevision').value!==page().revision)$('#restoreDialog').showModal()}
 function showSubmit(){
   endInlineTextEdit(true);
+  if(!$('#regionDialog').hidden&&$('#regionNote').value.trim())saveRegion();
   $('#stats').textContent=data.pages.filter(p=>changed(p)).length+' 页有修改要求';
   $('#submitDialog').showModal();
 }
@@ -2109,6 +2371,7 @@ function sizePreview(){
   box.style.width=Math.max(80,Math.min(stage.clientWidth-16,(stage.clientHeight-56)*16/9))+'px';
   updateHighlightOverlay();
   positionInlineCanvasEditor();
+  positionElementToolbar();
 }
 
 /* ---- 指针事件：支持「框选问题」与「选择与拖拽微调 SVG 元素」双模式 ---- */
@@ -2214,9 +2477,11 @@ window.addEventListener('resize',sizePreview);
 $('#slide').onload=sizePreview;
 window.addEventListener('beforeunload',e=>{
   retainRecoveryDraft();
-  if(pageOrderChanged()||data.pages.some(pageDirty)||inlineEditorState?.dirty){e.preventDefault();e.returnValue=''}
+  if(pageOrderChanged()||data.pages.some(pageDirty)||inlineEditorState?.dirty||(canDraft&&draftSignature()!==lastDraftSaved)){e.preventDefault();e.returnValue=''}
 });
 window.addEventListener('pagehide',()=>{retainRecoveryDraft()});
+
+__WORKBENCH_TOOLS__
 
 const BRIDGE_TIMEOUT_MS=2500;
 function connectWithTimeout(ms){
@@ -2234,7 +2499,7 @@ function sayReadOnly(why){
   $('#addDrop').hidden=true;
 }
 (async function boot(){
-  $('#exportOutput').textContent=data.route==='video'?'输出视频画面':'导出 PPT';
+  $('#exportLabel').textContent=data.route==='video'?'输出视频画面':'导出 PPT';
   const fromHash=pageOrder.indexOf(pageKeyFromHash());
   if(fromHash>=0)index=fromHash;      // 重新加载回到原来那一页（hash 是唯一来源）
   render();sizePreview();drawPulse();
@@ -2266,6 +2531,21 @@ function sayReadOnly(why){
   else{
     try{
       const head=await workbenchCommand({op:'state'});
+      // 宿主是任务事实源，但不能在启动时抹掉恢复草稿留下的通知失败标记；
+      // 与后续 changed 事件走同一条合并路径。
+      const failedNotifications=new Set(Object.values(feedbackTasks).filter(t=>t.notification_failed).map(t=>t.task_id));
+      feedbackTasks={...feedbackTasks,...(head.tasks||{})};
+      for(const task of Object.values(feedbackTasks))if(failedNotifications.has(task.task_id))task.notification_failed=true;
+      if(restoredDraftMeta){
+        for(const id of restoredDraftMeta.notification_failures||[])if(feedbackTasks[id])feedbackTasks[id].notification_failed=true;
+        // Pre-v2 drafts mixed submitted tasks into new opinions. Detach only exact legacy copies.
+        if(restoredDraftMeta.feedback_schema!==2){
+          for(const task of Object.values(feedbackTasks)){
+            const legacy={...task,pages:Object.fromEntries(Object.entries(task.pages||{}).filter(([key])=>state[key]?.task?.id===task.task_id))};
+            if(Object.keys(legacy.pages).length)detachSubmittedDraft(legacy);
+          }
+        }
+      }
       for(const p of data.pages){
         if(!pageDirty(p))await mergeStoredPage(p,await workbenchCommand({op:'get',page_key:p.key}));
         else if(!state[p.key].pending_save)state[p.key].save_status=p.revision!==head.pages?.[p.key]?.revision?'conflict':'pending';
@@ -2276,6 +2556,11 @@ function sayReadOnly(why){
     }catch(error){commandUnsupported(error.message)}
   }
   await render();
+  if(restoredDraftMeta?.region_draft?.page_key===page().key){
+    const saved=restoredDraftMeta.region_draft;
+    rect=saved.rect;pendingTargets=saved.targets||[];pendingTargetSummary=saved.summary||'';
+    showRegionDialogWithHits();$('#regionNote').value=saved.text||'';$('#allowRewrite').checked=!!saved.rewrite;
+  }
   workbenchReady=true;
   document.documentElement.dataset.workbenchReady='true';
   review.on('changed',()=>onHostChanged());

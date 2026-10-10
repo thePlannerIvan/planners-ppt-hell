@@ -9,6 +9,9 @@ ensure(root) 首次导入兼容 SVG，之后核对外部改写；state(root) 返
 模型命令通过 workbench_store.py --root <project> --command-json 的 JSON stdin 提交。checkout 返回固定资产引用的 candidate，save 带 author=model、candidate、base_revision。操作 ID 控制重试，基版与用户保护控制覆盖。
 版本 SVG 与资产保存后不可重写。兼容 _internal/02_svg_source 可重建，直接修改会被检测，不静默当作模型新版本。
 用户保护与任务在同一 head 持久化。浏览器反馈才可声明元素改写范围。resolve 绑定真实结果版本，不建立页面批准。
+模型收件只读取 pending task；resolved task 仍留在历史但不会重新进入新任务。浏览器提交成功后把本轮意见从新草稿移入任务记录，下一轮只提交新增意见。
+工作台刷新先取得页面编辑与草稿的持久回执，再读取 store 最新页面和任务；刷新不重载页面、不唤醒模型、不导出，也不覆盖未保存输入。版本菜单只读预览历史，恢复版本才创建新的人工作业版本。
+查找与替换只遍历当前 SVG 的 `text` / `tspan` 文本节点，保持稳定元素 ID 与格式边界；整批替换以一次可撤销批次保存，不唤醒模型。元素批注在画布旁输入，允许模型改写只加入当前批注对应任务的 rewrite scope。
 
 ## 派生证据
 

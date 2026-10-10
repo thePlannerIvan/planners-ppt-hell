@@ -317,6 +317,24 @@ def apply_edits(tree, edits, protected):
                 node.remove(child)
             node.text = value
             guard['text'] = value
+            guard.pop('text_nodes', None)
+        elif kind == 'text_nodes':
+            edits = edit.get('nodes')
+            if node.tag.split('}')[-1] != 'text' or not isinstance(edits, list) or not edits:
+                raise StoreError('invalid_edit', 'Text-node edits require a text element and nodes')
+            descendants = {child.get(ID_ATTR): child for child in node.iter()
+                           if child.tag.split('}')[-1] in ('text', 'tspan')}
+            for item in edits:
+                if not isinstance(item, dict):
+                    raise StoreError('invalid_edit', 'Text-node edits must be objects')
+                target = descendants.get(item.get('element_id'))
+                slot, value = item.get('slot'), item.get('value')
+                if target is None or slot not in ('text', 'tail') or not isinstance(value, str) or (target is node and slot == 'tail'):
+                    raise StoreError('invalid_edit', 'Text-node edits must stay inside the target text')
+                setattr(target, slot, value)
+            guard['text'] = ''.join(node.itertext())
+            # Node-level guards retain formatting boundaries without flattening tspans.
+            guard['text_nodes'] = [dict(item) for item in edits]
         elif kind == 'attributes':
             attributes = edit.get('attributes', {})
             allowed = {'x', 'y', 'dx', 'dy', 'transform', 'font-size', 'font-weight', 'font-family',
@@ -338,6 +356,17 @@ def apply_edits(tree, edits, protected):
             parent.remove(node)
         else:
             raise StoreError('invalid_edit', 'Unknown edit kind')
+    # A later human edit to a child updates its already-protected parent's text too.
+    lookup = elements(tree)
+    for identity, guard in protected.items():
+        node = lookup.get(identity)
+        if node is None or guard.get('deleted'):
+            continue
+        if 'text' in guard:
+            guard['text'] = ''.join(node.itertext())
+        if 'text_nodes' in guard:
+            guard['text_nodes'] = [{**run, 'value': getattr(lookup[run['element_id']], run['slot']) or ''}
+                                   for run in guard['text_nodes'] if run['element_id'] in lookup]
     return tree
 
 
@@ -352,6 +381,10 @@ def lost_edits(tree, protected, authorized=()):
         if node is not None and not guard.get('deleted'):
             if 'text' in guard and ''.join(node.itertext()) != guard['text']:
                 wrong = True
+            for run in guard.get('text_nodes', []):
+                target = lookup.get(run['element_id'])
+                if target is None or getattr(target, run['slot']) != run['value']:
+                    wrong = True
             if any(node.get(k) != v for k, v in guard.get('attributes', {}).items()):
                 wrong = True
         if wrong:
@@ -623,9 +656,24 @@ def commit(root, command, browser=False):
         op = command.get('op')
         if op == 'state':
             public = {key: value for key, value in head.items() if key != 'operations'}
+            if not browser:
+                public['tasks'] = {key: task for key, task in head['tasks'].items() if task.get('status') == 'pending'}
             return {**public, 'ok': True}
+        if op == 'task':
+            task = head['tasks'].get(command.get('task_id'))
+            if not task or task.get('status') != 'pending':
+                raise StoreError('inactive_task', 'Only a pending task is an active modification instruction')
+            return {'ok': True, 'task': copy.deepcopy(task)}
         if op == 'get':
             value = page_value(root, head, command.get('page_key'))
+            requested = command.get('revision')
+            if requested:
+                record = revision_record(root, requested)
+                if record['page_key'] != command.get('page_key'):
+                    raise StoreError('invalid_revision', 'Revision belongs to another page')
+                directory = revision_dir(root, requested)
+                value = {**record, 'svg': (directory / 'page.svg').read_text(),
+                         'svg_path': str(directory / 'page.svg')}
             history = []
             revision = value['revision']
             while revision:

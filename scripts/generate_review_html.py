@@ -133,7 +133,8 @@ def template_fingerprint():
     tokens = resolve_module('planners-review-core')/'assets'/'dsh-tokens.css'
     ui = resolve_module('planners-review-core')/'assets'
     ui_files = [ui/'review-ui.css', *sorted((ui/'review-ui').glob('*'))]
-    return ':'.join([sha(path), sha(tokens) if tokens.is_file() else '',
+    tools = path.with_name('workbench-tools.js')
+    return ':'.join([sha(path), sha(tools) if tools.is_file() else '', sha(tokens) if tokens.is_file() else '',
                      *(sha(file) for file in ui_files if file.is_file())])
 
 
@@ -226,6 +227,8 @@ def generate(root, template_path=None):
     html = template.replace('__DSH_TOKENS__', tokens)
     html = html.replace('__REVIEW_UI__', review_ui['css'])
     html = html.replace('__REVIEW_UI_SCRIPT__', review_ui['script'].replace('</script', '<\\/script'))
+    tools = review_template_path().with_name('workbench-tools.js').read_text(encoding='utf-8')
+    html = html.replace('__WORKBENCH_TOOLS__', tools.replace('</script', '<\\/script'))
     html = html.replace('__DATA__', json.dumps(data, ensure_ascii=False).replace('<', '\\u003c'))
     (root/'02_visual_review.html').write_text(html, encoding='utf-8')
     snap['html_sha256'] = sha(root/'02_visual_review.html')

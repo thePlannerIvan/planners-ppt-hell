@@ -4,6 +4,19 @@
 
 看每一条时问三件事：**边界怎么变了**、**哪些 module 被牵动**、**删掉了什么**。
 
+## 2026-10-09（五）· 审阅工作台：刷新同步、反馈隔离与 SVG 查找替换
+
+**触发**：真实审阅中，刷新会让未保存输入与当前页面状态产生歧义；已处理的历史意见会再次进入模型任务；逐页改字只能手工定位，且图片与缩略图在页面更新后可能显示旧资产。
+
+| 动了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| 刷新按钮改为“保存并同步最新页面”：先等待页面编辑与反馈草稿持久化，再读取宿主最新页面、任务、页序和缩略图；不做浏览器重载、不提交意见、不唤醒模型 | 刷新是工作台的安全动作，不能成为静默丢输入或重复提交的入口 | `assets/review/review.html`、`scripts/workbench_store.py`、`scripts/test/test_workbench_ui.py` | 裸 `location.reload()` 路径与普通保存按钮 |
+| 当前任务只展示 pending；已提交或 resolved 任务进入历史区，只有用户主动“重新开启”才回到当前意见；模型 `state` 与 `task` 读取也只暴露 pending | 历史反馈不能在后续模型任务中被当成新指令，避免模型重复执行旧意见 | `assets/review/review.html`、`scripts/workbench_store.py`、`scripts/test/test_workbench_store.py`、`scripts/test/test_workbench_tools.py` | 自动把历史反馈拼回下一轮任务的路径 |
+| 增加 SVG 文本查找、上一处／下一处、替换、全部替换和整批撤销；只遍历 `text`／`tspan`，保留稳定 ID、嵌套结构与样式边界 | 让逐页改字成为可控的工作台操作，而不是依赖模型重画；整批替换仍可回退 | `assets/review/workbench-tools.js`、`assets/review/review.html`、`scripts/generate_review_html.py` | 破坏嵌套 `tspan` 或重建元素 ID 的字符串替换 |
+| 版本菜单支持历史只读预览；图片与缩略图按页面版本刷新；共享 Review Core 图标修复并加入 Search | 历史版本只能查看，恢复必须显式创建新版本；页面内容更新后不能继续显示旧图 | `assets/review/review.html`、`scripts/workbench_store.py`、`00-system/planners-review-core/scripts/vendor-review-ui.mjs`、`00-system/planners-review-core/evals/test_review_ui.mjs` | 把历史版本当成当前可编辑版本的路径 |
+
+**回归**：PPT Hell 工作台 76 项 Python 回归（浏览器项需显式开启）；Review Core eval 需在允许本地监听的环境运行。新增查找替换、历史任务隔离、刷新同步、提交期间新增反馈、历史版本预览与资产刷新断言。
+
 ## 2026-10-07（二）· 页面审阅交互：页序可操作，文字在画布原地编辑
 
 **触发**：真实审阅时，缩略图只能按生成顺序阅读，改页序要离开审阅面；文字元素虽然能改，但输入框在顶部工具栏，视线和编辑目标分离。

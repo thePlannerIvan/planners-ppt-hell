@@ -58,6 +58,34 @@ class WorkbenchTests(unittest.TestCase):
         self.assertIn('Original', (store.revision_dir(self.root, old['revision']) / 'page.svg').read_text())
         self.assertEqual(store.ensure(self.root)['tasks'], {})
 
+    def test_text_nodes_preserve_nested_spans_and_tails(self):
+        current = store.get_page(self.root, 'p1')
+        self.assertTrue(self.candidate(current['svg'].replace('Original',
+            'Before <tspan id="accent" fill="red">word<tspan id="nested" font-weight="700">bold</tspan> tail</tspan> after'))['ok'])
+        result = self.save([{'element_id': 'title', 'kind': 'text_nodes', 'nodes': [
+            {'element_id': 'title', 'slot': 'text', 'value': 'Changed '},
+            {'element_id': 'accent', 'slot': 'text', 'value': 'term'},
+            {'element_id': 'nested', 'slot': 'tail', 'value': ' kept tail'}]}])
+        self.assertTrue(result['ok'], result)
+        tree = ET.fromstring(store.get_page(self.root, 'p1')['svg'])
+        accent = next(node for node in tree.iter() if node.get('id') == 'accent')
+        self.assertEqual(accent.get('fill'), 'red')
+        self.assertEqual(accent.text, 'term')
+        nested = list(accent)[0]
+        self.assertEqual(nested.get('font-weight'), '700')
+        self.assertEqual(nested.tail, ' kept tail')
+        self.assertEqual(accent.tail, ' after')
+        saved = store.get_page(self.root, 'p1')
+        self.assertEqual(self.candidate(saved['svg'].replace('term', 'lost'))['code'], 'human_edits_lost')
+        self.assertTrue(self.save([{'element_id': 'nested', 'kind': 'text', 'value': 'Human later'}])['ok'])
+        self.assertTrue(self.candidate()['ok'])
+
+    def test_text_nodes_cannot_change_outside_the_target_text(self):
+        result = self.save([{'element_id': 'title', 'kind': 'text_nodes', 'nodes': [
+            {'element_id': 'box', 'slot': 'text', 'value': 'wrong'}]}])
+        self.assertEqual(result['code'], 'invalid_edit')
+        self.assertIn('Original', store.get_page(self.root, 'p1')['svg'])
+
     def test_old_model_candidate_cannot_overwrite(self):
         old = store.get_page(self.root, 'p1')
         path = self.write('candidate.svg', old['svg'])
@@ -128,6 +156,22 @@ class WorkbenchTests(unittest.TestCase):
         self.assertEqual(first, store.commit(self.root, command, True))
         second = store.commit(self.root, {**command, 'operation_id': 'feedback_2'}, True)
         self.assertNotEqual(first['task_id'], second['task_id'])
+
+    def test_model_reads_only_pending_tasks_not_resolved_history(self):
+        revision = store.get_page(self.root, 'p1')['revision']
+        task = store.commit(self.root, {'op': 'feedback', 'operation_id': 'feedback_history', 'scope': 'page',
+            'pages': {'p1': {'revision': revision, 'feedback': 'Past opinion'}}}, True)
+        resolved = store.commit(self.root, {'op': 'resolve', 'operation_id': 'resolve_history',
+            'task_id': task['task_id'], 'results': {'p1': revision}, 'note': 'Handled'})
+        self.assertTrue(resolved['ok'])
+        self.assertNotIn(task['task_id'], store.commit(self.root, {'op': 'state'})['tasks'])
+        self.assertIn(task['task_id'], store.commit(self.root, {'op': 'state'}, True)['tasks'])
+        with self.assertRaisesRegex(store.StoreError, 'Only a pending task'):
+            store.commit(self.root, {'op': 'task', 'task_id': task['task_id']})
+        next_task = store.commit(self.root, {'op': 'feedback', 'operation_id': 'feedback_new', 'scope': 'page',
+            'pages': {'p1': {'revision': revision, 'feedback': 'New opinion'}}}, True)
+        active = store.commit(self.root, {'op': 'task', 'task_id': next_task['task_id']})['task']
+        self.assertEqual(active['pages']['p1']['feedback'], 'New opinion')
 
     def test_restore_creates_new_revision(self):
         old = store.get_page(self.root, 'p1')['revision']
