@@ -47,7 +47,7 @@ PPT 用实际渲染预览运行 `export-inspect --snapshot <同一snapshot.json>
 | SVG 特性、缺图或转换错误 | [svg_rules.md](references/domain/svg_rules.md)；PPT 再读 [svg_to_ppt_rules.md](references/domain/svg_to_ppt_rules.md) |
 | 版本、候选、反馈恢复或输出溯源 | [project_contract.md](references/contracts/project_contract.md) |
 | 新模板包制作、审阅、替换入库 | [template_package.md](references/contracts/template_package.md) |
-| 视频风格选择（本 Skill 自维护风格文档） | [03_video_route.md](references/workflow/03_video_route.md)；选 editorial-archive 再读 [video_style_editorial_archive.md](references/domain/video_style_editorial_archive.md) |
+| 视频风格选择（私有风格库挂载与开源通用降级） | [03_video_route.md](references/workflow/03_video_route.md)；运行 `python3 scripts/resolve_video_vault.py --style <style_id>` 读取 `~/.config/planners/video-vault/styles/<style_id>/page.md` 与 `anchors/`（无私有库时自动降级为 `default-clean`） |
 | 新视频风格提炼 | [08_video_style_extraction_sop.md](references/workflow/08_video_style_extraction_sop.md) |
 | 工程维护与验证 | [ARCHITECTURE.md](docs/ARCHITECTURE.md)；命令参数以各脚本 --help 为准 |
 

@@ -725,6 +725,19 @@ class ProjectStateTests(VideoRouteFixtures, unittest.TestCase):
         self.assertIn("final_deck.pptx", slides.stdout)
         self.assertNotIn("这条路的出口", slides.stdout)
 
+    def test_footage_montage_production_mode_is_rejected_with_redirect_to_video_craft(self):
+        pack = self.pack()
+        data = json.loads((pack / "visual-plan.json").read_text(encoding="utf-8"))
+        data["style_id"] = "lifestyle-cult"
+        data["production_mode"] = "footage-montage"
+        (pack / "visual-plan.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        root = self.tmp_path / "montage-video"
+        result = init(root, "--assets", pack / "assets", "--plan", pack / "visual-plan.json")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("footage-montage", result.stderr)
+        self.assertIn("video-craft", result.stderr)
+        self.assertFalse(root.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

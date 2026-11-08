@@ -47,14 +47,14 @@ STARTER_FILES = {
 # 适配器：ppt-hell 的核心（project_state、校验器、审阅、转换）不认识它。
 PLAN_SCREEN_KEYS = {
     "screen_id", "beat_id", "title", "question", "must_show", "must_express",
-    "exact_labels", "evidence", "sample",
+    "exact_labels", "evidence", "sample", "footage_request", "kick_word",
 }
 PLAN_SAMPLE_KEYS = {"layout", "assets", "captions", "note", "cols", "thumbCols"}
 PLAN_ASSET_KEYS = {
     "kind", "path", "label", "span", "mark", "zoom", "dim", "columns", "lines",
     "viewport", "limit",
 }
-PLAN_ROOT_KEYS = {"contract_version", "title", "script_hash", "screens"}
+PLAN_ROOT_KEYS = {"contract_version", "title", "script_hash", "screens", "style_id", "production_mode", "frame_preset"}
 PLAN_CONTRACT = "5.0"
 PAGE_KEY_RE = re.compile(r"[A-Za-z][A-Za-z0-9_-]{0,63}")
 
@@ -204,6 +204,11 @@ def adapt_visual_plan(plan, manifest, folder, unknown=None):
         raise ValueError(
             f"the visual-plan.json route needs contract_version {PLAN_CONTRACT!r} with a screens "
             f"array; found {plan.get('contract_version')!r}"
+        )
+    if plan.get("production_mode") == "footage-montage":
+        raise ValueError(
+            f"visual-plan.json declares production_mode='footage-montage' (style_id={plan.get('style_id')!r}): "
+            "实景/档案混剪风格无需经过 planners-ppt-hell 画静态 SVG 页面，请直接交接给 video-craft 走 montage 路线"
         )
     if not str(plan.get("title") or "").strip():
         raise ValueError("visual-plan.json must carry a non-empty title")
