@@ -4,6 +4,19 @@
 
 看每一条时问三件事：**边界怎么变了**、**哪些 module 被牵动**、**删掉了什么**。
 
+## 2026-11-11 · 用户改动优先：锁定位置、保存即重渲、自动同步
+
+| 做了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| 人改字时把该元素的几何（`x`/`y`/`transform`）一并入 guard；老修订的纯文字 guard 按当前几何隐式补齐 | 只钉文字时，模型一次「排版调整」就能把用户排好的位置挪走（Page 4 右卡 723→611），人看到的是「我改过的又被改回去了」 | `scripts/workbench_store.py`（`apply_edits` / `with_implicit_geometry` / `save_page`）、`scripts/test/test_workbench_store.py` | 「文字受保护、位置自由」的缺口 |
+| 人保存后排队 `render_revision.py` 重渲该页位图；旧版本只归档、不覆盖当前预览 | 保存只落 SVG，位图要等模型跑 check 才更新，人看到的是旧画面 | `scripts/render_revision.py`（新）、`workbench_store._queue_render` | 保存回执恒为 `rendered: false` 的静默状态 |
+| 工作台定时问 state，闲下来时静默合并新版本；人在打字/拖动/框选/有未落盘输入时不搬 DOM，也不提前报冲突 | 以前只靠宿主推 changed 事件，推丢了就只能让人手动点刷新；现在冲突要等保存真的被拒才算 | `assets/review/review.html`（`syncFromHost` / `busyWithInput` / 轮询）、`workbench-tools.js` 不变 | 「刷新按钮 = 唯一同步路径」、检测到宿主前进就立刻弹冲突 |
+| 人改字后同步更新页面标题与文案基线 | 轨道标题与 copy audit 继续挂着旧句子，同一句文案在画布、标题、基线三处各有一版 | `workbench_store.sync_human_copy`、`_internal/01_content/page_content.json` | 只改画布、标题与基线不跟随 |
+
+**边界怎么变了**：用户改过的元素 = 文字 + 位置都由用户定；模型要动，必须拿到页面反馈里针对该元素的显式授权。显示层不再需要人手动刷新，也不再在用户书写时抢占交互。
+
+**回归**：`scripts.test.test_workbench_store` 39 项、workbench store/pipeline/tools/human_edit_guard/review_surface/v5 共 154 项通过；浏览器套件 `test_review_reported_bugs` 9 项（含新增「宿主前进后自动跟上」）通过。
+
 ## 2026-11-11 · 字体链路与提醒语义（来自 cny_deck 真实提案）
 
 | 做了什么 | 为什么 | 影响了哪些 module | 删了什么 |

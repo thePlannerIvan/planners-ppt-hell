@@ -1920,14 +1920,27 @@ async function refreshStale(){
   staleKeys=known.filter(p=>snapshot.versions[p.key]!==p.version).map(p=>p.key);
   drawStale();
 }
-async function onHostChanged(){
+async function onHostChanged(force){
   if(hostSync)return hostSync;
-  hostSync=syncFromHost();
+  hostSync=syncFromHost(force);
   try{return await hostSync}finally{hostSync=null}
 }
-async function syncFromHost(){
+/* 人正在动手时不搬 DOM：打字、拖元素、框选、还有没落盘的编辑，都先让宿主版本等着。
+   这不是「冲突」——冲突只在保存真的被拒时才算。 */
+function busyWithInput(){
+  if(inlineEditorState||dragState||marking)return true;
+  if(Date.now()-lastInteractionAt<1200)return true;
+  return Object.values(state).some(s=>s.pending_save);
+}
+let syncRetryTimer=null;
+function scheduleSyncRetry(){
+  if(syncRetryTimer)return;
+  syncRetryTimer=setTimeout(()=>{syncRetryTimer=null;void onHostChanged()},1500);
+}
+async function syncFromHost(force){
   pulseCount++;lastPulseAt=new Date().toLocaleTimeString('zh-CN',{hour12:false});drawPulse();
   if(!canCommand)return;
+  if(!force&&busyWithInput()){scheduleSyncRetry();return false}
   try{
     const head=await workbenchCommand({op:'state'});
     const collectionChanged=head.order.length!==data.pages.length||head.order.some(key=>!state[key]);
@@ -1960,9 +1973,8 @@ async function syncFromHost(){
       const revision=head.pages?.[p.key]?.revision;
       if(!revision||revision===p.revision||saveQueues.has(p.key))continue;
       if(pageDirty(p)||inlineEditorState?.pageKey===p.key){
-        state[p.key].save_status='conflict';
-        state[p.key].current_revision=revision;
-        retainRecoveryDraft();
+        /* 有没落盘的输入：先不动这一页，等它保存完下一轮再同步；不当冲突处理。 */
+        scheduleSyncRetry();
         continue;
       }
       const record=await workbenchCommand({op:'get',page_key:p.key});
@@ -2055,6 +2067,14 @@ const saveQueues=new Map();
 let canCommand=false,saveTimer=null,orderCommand=null,orderSavePromise=null,orderSaveError=false,dispatchBusy=false,pendingDispatch=null;
 let pendingSnapshot=null,lastOutput=null,exportBusy=false;
 let recoveryReady=false;
+let lastInteractionAt=0;
+function markInteraction(){lastInteractionAt=Date.now()}
+for(const evt of ['pointerdown','keydown','input','wheel']){
+  document.addEventListener(evt,markInteraction,{passive:true,capture:true});
+}
+/* 宿主版本自己会往前走：定时问一次 state，看到新版本就静默合并（人闲下来才合）。
+   以前只靠宿主推 changed 事件，推丢了就只能让人手动点刷新。 */
+setInterval(()=>{if(!document.hidden)void onHostChanged()},3500);
 const editSignature=edits=>JSON.stringify(edits||[]);
 function pageDirty(p){
   const s=state[p.key];
@@ -2157,7 +2177,7 @@ async function savePage(p){
           }
           s.allow_restore=false;
           s.pending_save={command:{op:'save',operation_id:'save_'+uid(),page_key:p.key,base_revision:p.revision,author:'human',
-            edits:patchEdits(p,s.svg_edits,s.saved_edits),notes:s.notes},edits:structuredClone(s.svg_edits),notes:s.notes};
+            render:true,edits:patchEdits(p,s.svg_edits,s.saved_edits),notes:s.notes},edits:structuredClone(s.svg_edits),notes:s.notes};
         }
         const pending=s.pending_save;
         s.save_status='saving';retainRecoveryDraft();drawSaveStatus();
@@ -2688,7 +2708,7 @@ async function askReload(){
      * 不替人做「谁覆盖谁」的决定。 */
     const flushed=await flushWorkbench();
     if(!flushed)retainRecoveryDraft();
-    const synced=await onHostChanged();
+    const synced=await onHostChanged(true);   // 人主动点刷新：绕过「正在交互」的等待，但不动有未保存输入的页
     if(!await saveDraft())return false;
     if(!synced)note('已同步页面集合，但仍有没存上的输入；点「重试保存」把它们接到最新版本上','warn');
     else note(flushed?'已同步最新页面':'已同步页面集合；没存上的输入留在恢复草稿里','ok');

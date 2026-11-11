@@ -7,6 +7,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 import uuid
@@ -308,6 +309,44 @@ def get_page(root, key):
         return page_value(root, initialize(root), key)
 
 
+GEOMETRY_ATTRIBUTES = ('x', 'y', 'transform')
+
+
+def _pin_geometry(node, guard):
+    """用户改过字的元素，把它的位置也一并钉住。
+
+    只钉文字的话，模型一次「排版调整」就能把这块字挪走，人看到的是「我改过的又被改回去了」。
+    位置进 guard 之后，模型要动它必须拿到任务里的元素授权（rewrite_elements）。
+    """
+    attributes = guard.setdefault('attributes', {})
+    for attribute in GEOMETRY_ATTRIBUTES:
+        value = node.get(attribute)
+        if value is not None and attribute not in attributes:
+            attributes[attribute] = value
+
+
+def with_implicit_geometry(protected, current_svg):
+    """老修订只记了文字、没记位置的 guard：按它现在所在的位置补上。
+
+    新写入的 guard 自带几何；历史页面不能因为「当时只钉了文字」就继续让模型自由挪动。
+    """
+    if not protected or not current_svg:
+        return protected
+    lookup = elements(ET.fromstring(current_svg))
+    effective = copy.deepcopy(protected)
+    for identity, guard in effective.items():
+        if guard.get('deleted') or 'text' not in guard or 'attributes' in guard:
+            continue
+        node = lookup.get(identity)
+        if node is None:
+            continue
+        attributes = {attribute: node.get(attribute) for attribute in GEOMETRY_ATTRIBUTES
+                      if node.get(attribute) is not None}
+        if attributes:
+            guard['attributes'] = attributes
+    return effective
+
+
 def apply_edits(tree, edits, protected):
     for edit in edits:
         identity = edit.get('element_id')
@@ -327,6 +366,7 @@ def apply_edits(tree, edits, protected):
             node.text = value
             guard['text'] = value
             guard.pop('text_nodes', None)
+            _pin_geometry(node, guard)
         elif kind == 'text_nodes':
             edits = edit.get('nodes')
             if node.tag.split('}')[-1] != 'text' or not isinstance(edits, list) or not edits:
@@ -344,6 +384,7 @@ def apply_edits(tree, edits, protected):
             guard['text'] = ''.join(node.itertext())
             # Node-level guards retain formatting boundaries without flattening tspans.
             guard['text_nodes'] = [dict(item) for item in edits]
+            _pin_geometry(node, guard)
         elif kind == 'attributes':
             attributes = edit.get('attributes', {})
             allowed = {'x', 'y', 'dx', 'dy', 'transform', 'font-size', 'font-weight', 'font-family',
@@ -483,6 +524,61 @@ def revision_changes(before, after, after_svg):
             'no_change': not (added or removed or modified or notes_changed or protection_changed)}
 
 
+def _queue_render(root, key, revision):
+    """保存之后异步重渲这一页的位图。
+
+    同步渲一次要 ~2 秒，人打字时每个自动保存都等它，会把保存队列拖长；
+    后台渲、并且只写回「仍是当前版本」的那一次，位图就不会长期停在旧内容上。
+    """
+    script = Path(__file__).resolve().parent / 'render_revision.py'
+    if not script.is_file():
+        return False
+    try:
+        subprocess.Popen([sys.executable, str(script), str(Path(root).resolve()), key, revision],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+        return True
+    except OSError:
+        return False
+
+
+def sync_human_copy(root, head, key, before, tree):
+    """用户改字之后，标题和文案基线跟着走。
+
+    不跟的话：轨道标题还挂着旧句子、copy audit 还报「这句不在基线里」，
+    同一条文案在画布、标题、基线三处各有一版，看起来就像「我改的没生效」。
+    """
+    if not before.get('svg'):
+        return
+    old_texts = {node.get(ID_ATTR): ''.join(node.itertext()) for node in ET.fromstring(before['svg']).iter()
+                 if node.tag.split('}')[-1] == 'text'}
+    new_texts = {node.get(ID_ATTR): ''.join(node.itertext()) for node in tree.iter()
+                 if node.tag.split('}')[-1] == 'text'}
+    changed = [(old_texts[i], new_texts[i]) for i in new_texts
+               if i in old_texts and old_texts[i] != new_texts[i] and new_texts[i].strip()]
+    if not changed:
+        return
+    path = Path(root) / '_internal/01_content/page_content.json'
+    data = load(path, {})
+    entry = next((page for page in data.get('pages', []) if page.get('page_key') == key), None)
+    page = head['pages'][key]
+    title = str((entry or {}).get('title') or page.get('title') or '')
+    content = str((entry or {}).get('content') or page.get('input', {}).get('content') or '')
+    for old, new in changed:
+        if old and old in title:
+            title = title.replace(old, new, 1)
+        if new and new not in content:
+            content = (content.rstrip() + '\n' + new).strip()
+    page['title'] = title
+    page.setdefault('input', {})
+    page['input']['title'] = title
+    page['input']['content'] = content
+    if entry is not None:
+        entry['title'] = title
+        entry['content'] = content
+        entry['copy_confirmed'] = True
+        atomic(path, encoded(data))
+
+
 def save_page(root, head, command, browser, prepared_candidate=None):
     key = command.get('page_key')
     current = page_value(root, head, key)
@@ -517,7 +613,8 @@ def save_page(root, head, command, browser, prepared_candidate=None):
             if task.get('status') != 'pending' or page_task.get('revision') != current['revision']:
                 raise StoreError('stale_task', 'Rewrite task is not bound to this current revision')
             authorized = page_task.get('rewrite_elements', [])
-        missing = lost_edits(tree, protected, authorized)
+        effective = with_implicit_geometry(protected, current['svg'])
+        missing = lost_edits(tree, effective, authorized)
         if missing:
             # 把 guard 原样带回去：整页重建时照着它把节点写回来即可，不必再 op=get 猜一遍。
             raise StoreError(
@@ -525,7 +622,7 @@ def save_page(root, head, command, browser, prepared_candidate=None):
                 'Candidate drops retained human edits; re-apply each element with the same '
                 'data-workbench-id carrying the guarded text and attributes',
                 elements=missing,
-                guards={identity: protected[identity] for identity in missing},
+                guards={identity: effective[identity] for identity in missing},
                 candidate=str(candidate) if candidate else None)
         for identity in authorized:
             protected.pop(identity, None)
@@ -540,8 +637,11 @@ def save_page(root, head, command, browser, prepared_candidate=None):
     page['revision'] = record['revision']
     page.setdefault('baseline_revision', record['revision'])
     changes = revision_changes(current, record, (revision_dir(root, record['revision']) / 'page.svg').read_text())
+    if author == 'human':
+        sync_human_copy(root, head, key, current, tree)
+    rendered = command.get('render') is True and author == 'human' and _queue_render(root, key, record['revision'])
     return {'ok': True, 'page_key': key, 'revision': record['revision'], 'saved': True,
-            'rendered': False, 'notes': notes, 'changes': changes,
+            'rendered': 'queued' if rendered else False, 'notes': notes, 'changes': changes,
             'warnings': ['no_change'] if changes['no_change'] else []}
 
 

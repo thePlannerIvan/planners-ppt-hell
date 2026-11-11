@@ -15,7 +15,7 @@
 | SVG 渲染与 PPT 转换能力 | 对应渲染器/转换器实现与测试；`validate_svg_layout.py` 执行路线检查 | 技术文档说明用法与限制；不定义配色、留白或页面骨架 |
 | 图片槽位与源图比例测量 | `image_diagnostics.py`；frames 与 validator 共用 | 只报告预计裁切/填充和测量限制，页面设计结合实际图判断 |
 | 页面文案对表 | `copy_audit.py` 读取内容入口确认的 page_content 与既有来源绑定 | 不另造权威稿；只提示疑似新增文字，未确认明确 unchecked |
-| 页面集合、页序、版本、用户保护、资产与快照 | `workbench_store.py`，add_page / delete_page / order、checkout → save / snapshot；save 输出 changes | 浏览器、模型与导出使用同一接口，不写兼容视图代替提交 |
+| 页面集合、页序、版本、用户保护、资产与快照 | `workbench_store.py`，add_page / delete_page / order、checkout → save / snapshot；save 输出 changes；人保存时按请求排队 `render_revision.py` 重渲该页位图（只写回仍是当前版本的那一次） | 浏览器、模型与导出使用同一接口，不写兼容视图代替提交 |
 | 模板包校验、确认与入库 | `template_library.py` 与模板审阅接口 | 普通制作不承担入库流程；入库批准绑定当前包 |
 | 视频合成及动效字段 | 可选：作者明确要做元素级动效时才按 Video Craft 的 composition / SVG animation 契约准备元素与分组 | 默认不要求 id / step / anchor；没有这些，Craft 按整页画面使用或自行重排。实际动画、时间轴与声音归 Craft |
 

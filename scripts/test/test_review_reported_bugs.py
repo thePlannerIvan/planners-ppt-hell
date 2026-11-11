@@ -347,6 +347,31 @@ class ReportedBugTests(unittest.TestCase):
         page.fill('#notes', value)
         page.evaluate("() => {clearTimeout(saveTimer);clearTimeout(draftTimer)}")
 
+
+    def test_host_revision_advances_without_clicking_refresh(self):
+        """宿主版本自己往前走时，工作台应当静默跟上——不该让人到处找「刷新」。"""
+        fixture, root, keys = self.build(count=2)
+        key = keys[0]
+        pw = browser = host = None
+        try:
+            pw, browser, page, host = self.open_surface(root)
+            page.wait_for_timeout(400)
+            identity, ahead = self.advance_page(root, key, '模型刚改的字')
+            page.evaluate('() => onHostChanged()')
+            page.wait_for_function(
+                "() => data.pages.find(p => p.key === '%s').revision === '%s'" % (key, ahead),
+                timeout=10000)
+            self.assertEqual(page.evaluate("() => state['%s'].save_status" % key), 'clean')
+            self.assertTrue(page.locator('#staleNote').is_hidden())
+        finally:
+            if browser:
+                browser.close()
+            if pw:
+                pw.stop()
+            if host:
+                review_host.stop_host(host)
+            fixture.tearDown()
+
     def test_notes_only_conflict_is_rebased_too(self):
         """现场就是这个形态：没动过元素，冲突的只有**页面备注**。
 
@@ -367,6 +392,12 @@ class ReportedBugTests(unittest.TestCase):
             identity, ahead = self.advance_page(root, key, '别人的字', notes='别人的备注')
 
             page.evaluate('() => onHostChanged()')
+            page.wait_for_timeout(300)
+            # 新契约：人还在写的时候不搬 DOM，也不提前弹「版本冲突」；
+            # 冲突要等保存真的被拒才算，所以这里先触发一次保存。
+            self.assertNotEqual(page.evaluate("() => state['%s'].save_status" % key), 'conflict',
+                                '人还在写的时候就弹冲突，会把正在编辑的内容吓掉')
+            page.evaluate("() => savePage(data.pages.find(p => p.key === '%s'))" % key)
             page.wait_for_function("() => state['%s'].save_status==='conflict'" % key)
             page.click('#retrySave')
             page.wait_for_timeout(1500)
@@ -400,6 +431,10 @@ class ReportedBugTests(unittest.TestCase):
             identity, ahead = self.advance_page(root, key, '别人的字', notes='第二版备注')
 
             page.evaluate('() => onHostChanged()')
+            page.wait_for_timeout(300)
+            self.assertNotEqual(page.evaluate("() => state['%s'].save_status" % key), 'conflict',
+                                '人还在写的时候就弹冲突，会把正在编辑的内容吓掉')
+            page.evaluate("() => savePage(data.pages.find(p => p.key === '%s'))" % key)
             page.wait_for_function("() => state['%s'].save_status==='conflict'" % key)
             page.click('#retrySave')
             page.wait_for_timeout(1500)

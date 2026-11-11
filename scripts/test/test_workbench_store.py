@@ -385,5 +385,70 @@ class WorkbenchTests(unittest.TestCase):
         self.assertEqual(result['code'], 'cyclic_asset')
 
 
+    # ── 2026-11-11：人改过的字，位置也归人 ──────────────────────────────
+
+    def test_human_text_edit_pins_the_element_position(self):
+        """人改过字之后，模型不能悄悄把它挪走（此前只锁文字，位置是自由的）。"""
+        first = self.save([{'element_id': 'title', 'kind': 'text', 'value': 'Human copy'}])
+        guard = store.revision_record(self.root, first['revision'])['protected']['title']
+        self.assertEqual(guard['attributes'].get('x'), '10')
+        self.assertEqual(guard['attributes'].get('y'), '20')
+        current = store.get_page(self.root, 'p1')
+        moved = current['svg'].replace('x="10" y="20"', 'x="80" y="60"')
+        result = self.candidate(moved)
+        self.assertEqual(result['code'], 'human_edits_lost', result)
+        self.assertIn('title', result['elements'])
+        self.assertEqual(result['guards']['title']['attributes']['x'], '10')
+
+    def test_position_is_still_pinned_when_guard_predates_geometry(self):
+        """老修订只记了文字、没记位置：按它现在的位置补上，不留「位置自由」的缺口。"""
+        saved = self.save([{'element_id': 'title', 'kind': 'text', 'value': 'Legacy guard'}])
+        record_path = store.revision_dir(self.root, saved['revision']) / 'revision.json'
+        record = json.loads(record_path.read_text())
+        record['protected']['title'].pop('attributes', None)
+        record_path.write_text(json.dumps(record))
+        current = store.get_page(self.root, 'p1')
+        result = self.candidate(current['svg'].replace('x="10" y="20"', 'x="80" y="60"'))
+        self.assertEqual(result['code'], 'human_edits_lost', result)
+        self.assertIn('title', result['elements'])
+
+    def test_human_edit_updates_the_copy_baseline(self):
+        """人改的文案要进基线：轨道标题和 copy audit 不能继续挂着旧句子。"""
+        self.write('_internal/01_content/page_content.json', json.dumps({'pages': [
+            {'page_key': 'p1', 'title': 'First Original', 'content': 'Original'},
+            {'page_key': 'p2', 'title': 'Second', 'content': ''}]}))
+        result = self.save([{'element_id': 'title', 'kind': 'text', 'value': 'Human copy'}])
+        self.assertTrue(result['ok'])
+        content = json.loads((self.root / '_internal/01_content/page_content.json').read_text())
+        entry = next(page for page in content['pages'] if page['page_key'] == 'p1')
+        self.assertEqual(entry['title'], 'First Human copy')
+        self.assertIn('Human copy', entry['content'])
+        head = store.commit(self.root, {'op': 'state'})
+        self.assertEqual(head['pages']['p1']['title'], 'First Human copy')
+
+    def test_save_queues_a_render_only_when_asked(self):
+        calls = []
+        original = store._queue_render
+        store._queue_render = lambda root, key, revision: calls.append((key, revision)) or True
+        try:
+            quiet = self.save([{'element_id': 'title', 'kind': 'text', 'value': 'no render'}])
+            self.assertFalse(quiet['rendered'])
+            loud = self.save([{'element_id': 'title', 'kind': 'text', 'value': 'render please'}], render=True)
+            self.assertEqual(loud['rendered'], 'queued')
+        finally:
+            store._queue_render = original
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(calls[0][0], 'p1')
+
+    def test_stale_revision_render_is_skipped_instead_of_overwriting(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+        import render_revision
+        old = self.save([{'element_id': 'title', 'kind': 'text', 'value': 'first'}])['revision']
+        self.save([{'element_id': 'title', 'kind': 'text', 'value': 'second'}])
+        self.assertEqual(render_revision.current_revision(self.root, 'p1') != old, True)
+        out = render_revision.main(['render_revision.py', str(self.root), 'p1', old])
+        self.assertEqual(out, 0)
+
+
 if __name__ == '__main__':
     unittest.main()
