@@ -17,6 +17,8 @@
 
 ## 2. 转换器能力与检查范围
 
+`font-family` 的**第一位必须是具体字体名**（如 `'PingFang SC'`）。CSS 通用族（`system-ui`、`-apple-system`、`sans-serif`、`serif`、`monospace`）不是任何机器上的字体名，写进 PPT 的 `typeface` 只会被 PowerPoint／LibreOffice 自行替换，导出 PDF 后整页字形走样；转换器遇到这种写法会**直接判转换失败并点名元素**，不会静默替换。
+
 转换器处理以下特性；复杂组合仍需核对转换报告与实际 PPTX 渲染：
 
 1. **页内 `<style>` 与 `:root` `var(--...)` CSS 变量自动展开**：

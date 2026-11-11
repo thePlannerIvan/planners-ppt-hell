@@ -188,6 +188,9 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
 #message.ok{background:var(--dsw-alias-toast-bg);color:var(--dsw-alias-toast-label)}
 #message.warn{background:var(--dsw-alias-state-warn-primary);color:var(--dsw-alias-label-primary-foreground)}
 #message.error{background:var(--dsw-alias-state-error-primary);color:var(--dsw-alias-label-primary-foreground)}
+.preview-missing{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font:13px/1.6 var(--dsw-font-family);color:var(--dsw-alias-label-secondary);background:var(--dsw-alias-bg-layer-1);pointer-events:none}
+.preview-missing[hidden]{display:none}
+.preview-missing span{font:var(--dsw-font-xxs-strong-12);opacity:.72}
 #regions{max-height:170px;overflow:auto}
 #regionNote{width:100%}
 .find-panel{padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);flex-shrink:0}
@@ -328,6 +331,7 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
     <div id="staleNote" hidden style="width:100%;margin:0 0 8px;padding:8px 12px;border-radius:6px;background:var(--dsw-alias-state-warn-tertiary);color:var(--dsw-alias-state-warn-label);font-size:13px;line-height:1.4"></div>
     <div class="preview" id="preview">
       <img id="slide" draggable="false" alt="当前幻灯片">
+      <div id="previewMissing" class="preview-missing" hidden>预览还没生成<span>刷新工作台，或让模型重出这一页</span></div>
       <div id="svgStageWrap" class="svg-stage-wrap"></div>
       <textarea id="inlineCanvasEditor" class="inline-canvas-editor" hidden spellcheck="false" aria-label="原地编辑文字"></textarea>
       <div id="elHighlightBox" class="el-highlight-box" hidden><span id="elHighlightTag" class="el-highlight-tag"></span></div>
@@ -337,7 +341,6 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
   </section>
 
   <aside class="panel" id="reviewPanel">
-    <p id="updatedNote" class="muted" hidden style="background:var(--dsw-alias-state-business-tertiary);color:var(--dsw-alias-state-business-primary);padding:6px 8px;border-radius:5px"></p>
     <p id="previewState" class="muted" role="status"></p>
     <p id="previousNote" class="muted" hidden style="white-space:pre-wrap;background:var(--dsw-alias-bg-module-platform);padding:6px 8px;border-radius:5px"></p>
 
@@ -561,10 +564,18 @@ function setTemplateDecision(choice){
 }
 const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>((window.crypto&&crypto.randomUUID)?crypto.randomUUID():'f'+Math.random().toString(16).slice(2)+Date.now().toString(16));
+let noteLastText='',noteLastAt=0;
 function note(text,kind){
   clearTimeout(noteTimer);
   const el=$('#message');el.textContent=text||'';el.className=kind||'';
-  if(text&&!['error','warn'].includes(kind))noteTimer=setTimeout(()=>{el.textContent=''},3500);
+  /* 状态行只说当前这一件事，而且自己会过期。
+     以前 error/warn 常驻不消，于是「取不到资源」会一直挂在屏幕底部，
+     看起来像在反复报同一件事，也不告诉人该做什么。 */
+  if(!text){noteLastText='';return}
+  const now=Date.now();
+  if(text!==noteLastText){noteLastText=text;noteLastAt=now}
+  const ttl=kind==='error'?8000:kind==='warn'?6000:3200;
+  noteTimer=setTimeout(()=>{el.textContent='';el.className='';noteLastText=''},ttl);
 }
 
 const assetVersion=a=>String((a&&(a.version||a.sha256))||'').slice(0,12);
@@ -575,6 +586,13 @@ const assetVersion=a=>String((a&&(a.version||a.sha256))||'').slice(0,12);
  * 版本没变就是同一份字节，重复取没有意义。取失败不缓存，下次还会再试。
  */
 const assetUrls=new Map();
+const assetFailures=new Set();
+const missingPreviews=new Set();
+function previewKeyOf(rel){const m=String(rel||'').match(/_internal\/03_png_preview\/pages\/([^/]+)\.png$/);return m?m[1]:''}
+function renderPreviewMissing(){
+  const box=$('#previewMissing');if(!box)return;
+  box.hidden=!missingPreviews.has(page().key);
+}
 async function assetFor(rel,v){
   const cacheKey=rel+'\u0000'+(v==null?'':String(v));
   if(assetUrls.has(cacheKey))return assetUrls.get(cacheKey);
@@ -582,8 +600,19 @@ async function assetFor(rel,v){
   if(!review)return '';
   let url='';
   try{url=await review.asset(rel,v?{v:String(v)}:undefined)}
-  catch(error){note('取不到资源：'+error.message,'error');return ''}
-  if(url)assetUrls.set(cacheKey,url);
+  catch(error){
+    /* 按旧版本取不到时退一步取当前版：宿主可能只保留最新渲染，按旧版本要会 404。
+       预览缺失就退到当前图，不再把同一句「取不到资源」反复糊到状态行上。 */
+    try{url=await review.asset(rel)}catch(fallbackError){url=''}
+    if(!url){
+      const key=previewKeyOf(rel);
+      if(key)missingPreviews.add(key);
+      if(!assetFailures.has(rel)){assetFailures.add(rel);note('这一页的预览还没生成','warn')}
+      renderPreviewMissing();
+      return '';
+    }
+  }
+  if(url){assetUrls.set(cacheKey,url);const key=previewKeyOf(rel);if(key)missingPreviews.delete(key)}
   return url;
 }
 
@@ -1457,9 +1486,9 @@ async function render(){
   $('#title').textContent=(index+1)+' / '+data.pages.length+' · '+p.title;
   $('#feedback').value=s.feedback;
   updateTemplateDecisionUI();
-  const updated=updatedPages.has(p.key);
-  $('#updatedNote').hidden=!updated;
-  $('#updatedNote').textContent=updated?'这一页已有新版本。':'';
+  /* 「有新版本」是未读标记，不是一条常驻横幅：人看到这一页就消掉。
+     以前把它当持久状态写进右栏横幅，同一页永远在喊「已有新版本」，也不说该做什么。 */
+  if(updatedPages.delete(p.key))note('这一页已更新到最新版本','ok');
   $('#notes').value=s.notes;
   drawHistory(p);
   const prev=p.previousFeedback||'';

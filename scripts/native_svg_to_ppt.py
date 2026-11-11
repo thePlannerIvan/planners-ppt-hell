@@ -1378,16 +1378,38 @@ def _apply_run_alpha(run, alpha_val):
         pass
 
 
-def _set_run_font_family(run, family):
-    """Apply the SVG font to both Latin and East-Asian DrawingML runs."""
-    family = str(family).split(",")[0].strip().strip("'\"") or "Microsoft YaHei"
-    run.font.name = family
+GENERIC_FONT_FAMILIES = {
+    'system-ui', 'ui-sans-serif', 'ui-serif', 'ui-monospace', '-apple-system',
+    'blinkmacsystemfont', 'sans-serif', 'serif', 'monospace', 'cursive', 'fantasy',
+    'emoji', 'math', 'fangsong', 'inherit', 'initial', 'unset', 'revert',
+}
+
+
+def _set_run_font_family(run, family, where=''):
+    """Apply the SVG font to both Latin and East-Asian DrawingML runs.
+
+    CSS 通用族（`system-ui` / `-apple-system` / `sans-serif`）不是真实字体名，
+    写进 OOXML 的 `typeface` 只能让 PowerPoint／LibreOffice 自己找替身，
+    最后在交付的 PDF 里看到整页字形走样，却查不到是哪一步坏的。
+    这里直接判失败，让人把具体字体名写在 font-family 第一位。
+    """
+    first = str(family).split(",")[0].strip().strip("'\"")
+    if not first:
+        error(f"<text> 没有可用的 font-family{where}：请写具体字体名（例如 'PingFang SC'）")
+        return
+    if first.lower() in GENERIC_FONT_FAMILIES:
+        error(
+            f"font-family 的第一位是 CSS 通用族 '{first}'{where}：PPT 的 typeface 必须是具体字体名"
+            f"（例如 'PingFang SC'），否则导出后会被替换成别的字形"
+        )
+        return
+    run.font.name = first
     try:
         rPr = run._r.get_or_add_rPr()
         ea = rPr.find(qn('a:ea'))
         if ea is None:
             ea = etree.SubElement(rPr, qn('a:ea'))
-        ea.set('typeface', family)
+        ea.set('typeface', first)
     except Exception:
         pass
 
@@ -1591,6 +1613,12 @@ def _add_text_element(slide, node, offset_x, offset_y, inherited_attrs=None,
     tf.margin_bottom = Emu(0)
 
     prev_fs_svg = lines[0]['runs'][0]['fs_svg'] if lines[0]['runs'] else fs_svg
+    font_where = ''
+    if lines and lines[0]['runs']:
+        where_id = (node.get('data-workbench-id') or '').strip()
+        where_text = ''.join(node.itertext()).strip().replace('\n', ' ')[:16]
+        if where_id or where_text:
+            font_where = '（元素 ' + (where_id or '?') + '「' + where_text + '」）'
     for idx_ln, ln in enumerate(lines):
         p = tf.paragraphs[0] if idx_ln == 0 else tf.add_paragraph()
         p.alignment = align
@@ -1604,7 +1632,7 @@ def _add_text_element(slide, node, offset_x, offset_y, inherited_attrs=None,
             run.text = r['text']
             run.font.size = Pt(r['fs_svg'] * FONT_SCALE)
             run.font.bold = r['weight'] in ('bold', '900', '800', '700', '600')
-            _set_run_font_family(run, r['family'])
+            _set_run_font_family(run, r['family'], font_where)
             if r['color']:
                 run.font.color.rgb = r['color']
             _apply_letter_spacing(run, r['ls'], font_size_svg=r['fs_svg'])

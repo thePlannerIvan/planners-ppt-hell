@@ -4,6 +4,17 @@
 
 看每一条时问三件事：**边界怎么变了**、**哪些 module 被牵动**、**删掉了什么**。
 
+## 2026-11-11 · 字体链路与提醒语义（来自 cny_deck 真实提案）
+
+| 做了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| 转换器解析 `font-family` 首位，命中 CSS 通用族或空值直接判失败并点名元素 | 通用族不是字体名，写进 `typeface` 只会被替换；交付 PDF 字形走样时没有任何一步报错 | `scripts/native_svg_to_ppt.py`（`_set_run_font_family`）、`scripts/test/test_converter_font_family.py`（新）、`references/domain/svg_to_ppt_rules.md` | 「首位原样写入 typeface」与空值静默默认 `Microsoft YaHei` 的回退 |
+| 工作台「已有新版本」从未读标记改为看即消；`note()` 按类型过期；预览取不到时退回当前版本并在画面中央占位 | 同一页横幅反复出现、红字常驻，看起来像反复报同一件事却不说要做什么 | `assets/review/review.html`（`updatedPages` / `#updatedNote` / `note()` / `assetFor` / `#previewMissing`） | 右栏常驻横幅 `#updatedNote`；error/warn 永不过期的提示；按旧版本取预览失败时的红色错误刷屏 |
+
+**边界怎么变了**：字体名成为转换契约的一部分（页面必须写具体字体），不再是"尽力而为"；工作台的状态提示一律「有动作才出现、看过即清、过时即散」。
+
+**回归**：`python3 -m unittest scripts.test.test_converter_font_family scripts.test.test_workbench_store scripts.test.test_review_surface scripts.test.test_v5` → 95 项通过；真实 19 页中抽两页转换 `OK`，PDF 字体为 Hiragino Sans GB。
+
 ## 2026-10-23 · 活跃规则对齐
 
 方向文件记录本次实际选择，具体视频约束按需填写；控制器提示与验收同步移除固定字段要求。视频默认交付已保存 SVG 与关联素材，快照能力保留为固定版本交接选项。README、入口与 eval 对齐，退役视频审阅批准门、强制快照交付及模板一概禁用的旧描述。存储、转换和快照格式保持不变。

@@ -398,6 +398,24 @@
 - **证据**：`verify` 修前 `valid: false`（3 个包有问题）→ 修后 `valid: true`（5 个包全过）；`test_repaired_pack_still_applies` 证明修好之后文档里的 `apply` 真能跑通。
 - **状态**：已升级（2026-10-20）
 
+### G-41 CSS 通用族被当成字体名写进 PPT，导出后整页字形走样
+
+- **module**：`scripts/native_svg_to_ppt.py`（`_set_run_font_family`）、`scripts/test/test_converter_font_family.py`
+- **现象**：页面写 `font-family="system-ui, -apple-system, 'PingFang SC', sans-serif"`，导出的 PDF 里汉字变成楷体/衬线一类的替身字形；转换、导出、复核全程不报错，只有人眼能看出来。
+- **原因**：`_set_run_font_family` 把 `font-family` 的第一位原样写进 DrawingML 的 `typeface`。`system-ui` / `-apple-system` / `sans-serif` 是 CSS 通用族，不是任何机器上的字体名，PowerPoint 与 LibreOffice 只能自行替换。
+- **行为修正**：解析首位；命中通用族或为空直接判转换失败（`error()`），消息带元素 `data-workbench-id` 与文字片段，要求写具体字体名。只把真实字体名写进 typeface。
+- **证据**：2026-11-11 真实提案（19 页）导出 PDF 后字形整体错误；修后同样两页转换 `OK`，PDF 内嵌 Hiragino Sans GB。新增 3 个用例：通用族报错并点名元素、显式字体仍生效、判失败时不留 PPTX。
+- **状态**：已升级（2026-11-11）
+
+### G-42 「已有新版本」被写成常驻横幅，状态提示分不清目的
+
+- **module**：`assets/review/review.html`（`updatedPages` / `#updatedNote` / `note()` / `assetFor`）
+- **现象**：右栏一直挂着「这一页已有新版本。」，页面轨道上一直亮着蓝点；同一句「取不到资源：…」红字常驻，看起来像在反复报同一件事，却不知道要做什么。
+- **原因**：`updatedPages` 只 add 从不 delete，横幅把它当持久状态渲染；`note()` 对 error/warn 不设过期；`assetFor` 取失败不缓存，每次重建缩略图都重报一次。
+- **行为修正**：`updatedPages` 改成未读语义——页面被看到时 delete 并给一条会自动消失的通知，蓝点随之清除；`note()` 按类型过期（error 8s / warn 6s / ok 3.2s）；预览按旧版本 404 时退回取当前版本，仍失败就在画面中央显示「预览还没生成」占位并只提示一次。
+- **证据**：2026-11-11 工作台截图（同一页横幅反复出现 + p21 预览 404 红字常驻）；改后内联 JS 语法检查通过，store/surface/v5 共 92 项测试通过。
+- **状态**：已升级（2026-11-11）
+
 ---
 ---
 
