@@ -10,7 +10,7 @@ workbench_store.py 唯一写 head、页面 revision、固定资产、用户保�
 ppt_pipeline.py 负责恢复提示、技术检查、实际看图记录、工作台打开及快照输出。review_surface 与页面宿主接入另有 owner。
 review_feedback.py 只对尚未接入 store 的旧项目保留原消费方式；store 存在时报告原始待恢复内容，封住树索引写回。
 project_state.py 管输入、方向与派生证据；store 项目页面版本依赖保存 revision，不用 compat 修改时间判断。
-模板模块按实际格式生成审阅、消费确认与发布，不与页面任务混用；版式索引只读包，工作台画廊与模型任务共用。
+模板模块按实际格式生成审阅、消费确认与发布，不与页面任务混用；版式索引只读包，工作台画廊与模型任务共用。`layout_catalog.py` 从 PPTX 读原生 master/layout 与占位符几何，`scaffold_template_pack.py` 只写有据可依的 tokens/SPEC/shell/layouts；版式选择面（`select`）决定生产范围，最终模板仍走 `template` 面批准。
 
 ## 输出
 

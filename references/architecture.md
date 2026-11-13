@@ -18,6 +18,7 @@
 | 页面集合、页序、版本、用户保护、资产与快照 | `workbench_store.py`，add_page / delete_page / order、checkout → save / snapshot；save 输出 changes；人保存时按请求排队 `render_revision.py` 重渲该页位图（只写回仍是当前版本的那一次） | 浏览器、模型与导出使用同一接口，不写兼容视图代替提交 |
 | 模板包校验、确认与入库 | `template_library.py` 与模板审阅接口 | 普通制作不承担入库流程；入库批准绑定当前包 |
 | 模板版式目录与选择 | `template/layout_index.py` 只读包；工作台任务携带 `template_id` / `layout_id` | 画廊不复制第二份版式清单，执行归页面设计；版式是参考不是锁层 |
+| 原生 layout 目录与模板脚手架 | `template/layout_catalog.py` 读 PPTX master/layout；`template/scaffold_template_pack.py` 写 tokens/SPEC/shell/layouts | 只写有据可依的值；设计哲学与 primitive 归模型，最终仍走模板人工审阅 |
 | 视频合成及动效字段 | 可选：作者明确要做元素级动效时才按 Video Craft 的 composition / SVG animation 契约准备元素与分组 | 默认不要求 id / step / anchor；没有这些，Craft 按整页画面使用或自行重排。实际动画、时间轴与声音归 Craft |
 
 ## 两条路线

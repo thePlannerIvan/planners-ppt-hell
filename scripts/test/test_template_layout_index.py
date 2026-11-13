@@ -1,9 +1,12 @@
 """模板版式索引：v2 四件套与 legacy fidelity 都读成同一个「可选版式」形状。"""
+import json
 import shutil
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+from PIL import Image
 
 SCRIPTS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPTS))
@@ -53,6 +56,29 @@ class LayoutIndexTests(unittest.TestCase):
             layouts = layout_index.pack_layouts(project)
             self.assertEqual(layouts[0]['primitive'], 'fidelity_template/layout_canvases/cover_dark.svg')
             self.assertTrue((project / layouts[0]['preview']).is_file())
+
+    def test_declared_layouts_json_is_preferred_over_primitives(self):
+        with tempfile.TemporaryDirectory() as temp:
+            pack = Path(temp) / 'pack'
+            (pack / 'previews' / 'pages').mkdir(parents=True)
+            (pack / 'primitives').mkdir()
+            Image.new('RGB', (320, 180), 'white').save(pack / 'previews' / 'pages' / 'cover.png')
+            (pack / 'primitives' / 'p01_cover.svg').write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080"/>', encoding='utf-8')
+            (pack / 'layouts.json').write_text(json.dumps({'schema': 'planner.template-layouts.v1', 'layouts': [
+                {'layout_id': 'cover', 'name': '封面', 'family': 'cover', 'use_for': '封面', 'usage': 3,
+                 'preview': 'previews/pages/cover.png', 'primitive': 'primitives/p01_cover.svg', 'slots': []},
+                {'layout_id': 'one_column', 'name': '单栏', 'family': 'one_column', 'usage': 2,
+                 'preview': 'previews/pages/one_column.png', 'primitive': 'primitives/p02_one_column.svg', 'slots': []},
+            ]}), encoding='utf-8')
+            layouts = layout_index.pack_layouts(pack)
+            self.assertEqual([item['layout_id'] for item in layouts], ['cover', 'one_column'])
+            self.assertEqual(layouts[0]['name'], '封面')
+            self.assertEqual(layouts[0]['preview'], 'previews/pages/cover.png')
+            self.assertEqual(layouts[0]['primitive'], 'primitives/p01_cover.svg')
+            self.assertTrue(layouts[0]['available'])
+            self.assertEqual(layouts[1]['primitive'], '')
+            self.assertFalse(layouts[1]['available'])
 
     def test_unknown_pack_is_empty_not_an_error(self):
         with tempfile.TemporaryDirectory() as temp:

@@ -371,6 +371,31 @@ def template_review(root, port=0, surface_only=False):
             'next_action_zh':'作者在页面上逐 Layout 决定通过／舍弃／返修（全部通过时必须填模板名）；'
                              '没有插件时 wake 落在日志里，人回对话说一声「已完成」。'}
 
+def template_select(root, port=0, surface_only=False):
+    """版式选择面：从 layout_catalog 里勾选要收进模板的家族。
+
+    这是生产范围的决定（不是模板批准）；产物是 `_internal/00_project/layout_selection.json`。
+    后续 `apply_layout_selection.py` 把选择落到 `layouts.json`，模型只为选中的家族做 primitive。
+    """
+    run(SCRIPTS/'generate_template_select_html.py', root)
+    face=review_surface.describe('select')
+    if surface_only:
+        surface=review_surface.write_surface(root,'select')
+        review_surface.validate_surface(root,'select')
+        return {'status':'surface_ready','face':'select','surface':str(surface.resolve()),
+                'entry':str((root/face['entry']).resolve()),
+                'feedback_path':str(review_surface.feedback_path(root,'select').resolve()),
+                'host_started':False,
+                'next_action_zh':'把 surface 的绝对路径交给宿主的 review_open 工具（有插件时）；'
+                                 '没有那个工具就重跑 template-select（不带 --surface-only）起本地宿主。'}
+    info=review_surface.open_review(root,port=port,name='select')
+    return {'status':'awaiting_user','face':'select','url':info['url'],'pid':info['pid'],
+            'started':info['started'],'reused':info['reused'],'opened':info.get('opened',False),
+            'surface':info['surface'],'entry':info['entry'],'feedback_path':info['feedback_path'],
+            'wake_log':info['wake_log'],'host_state':str(review_surface.host_state_path(root,'select')),
+            'next_action_zh':'作者勾选要收进模板的家族并提交；模型读 layout_selection.json，'
+                             '再跑 apply_layout_selection.py 收窄 layouts.json。'}
+
 def review_open(root, port=0, surface_only=False):
     """页面审阅：生成审阅页与 surface，然后交给公共件的宿主（有插件时是 DSH 侧栏）。
 
@@ -736,6 +761,8 @@ def main():
                         '（宿主有 review_open 工具时用这条；没有就用不带开关的那条）')
     c=sub.add_parser('export');c.add_argument('--snapshot',help='Use this exact verified workbench snapshot.json; invalid input never falls back to current pages')
     t=sub.add_parser('template-review');t.add_argument('--port',type=int,default=0)
+    ts=sub.add_parser('template-select');ts.add_argument('--port',type=int,default=0)
+    ts.add_argument('--surface-only','--no-host',action='store_true',dest='surface_only')
     t.add_argument('--surface-only','--no-host',action='store_true',dest='surface_only')
     c=sub.add_parser('export-inspect');c.add_argument('--note',required=True);c.add_argument('--previews',nargs='+',required=True);c.add_argument('--snapshot',help='Inspect the output job for this exact snapshot, rather than the latest export pointer')
     c=sub.add_parser('template');c.add_argument('--mode',choices=['autonomous','reference','fidelity'],required=True);c.add_argument('--template-id');c.add_argument('--reference')
@@ -754,6 +781,7 @@ def main():
         elif a.command=='export':result=export(root,snapshot_path=a.snapshot)
         elif a.command=='export-inspect':result=export_inspect(root,a.note,a.previews,snapshot_path=a.snapshot)
         elif a.command=='template-review':result=template_review(root,port=a.port,surface_only=a.surface_only)
+        elif a.command=='template-select':result=template_select(root,port=a.port,surface_only=a.surface_only)
         elif a.command=='template':
             m=manifest(root)
             if a.template_id:

@@ -91,7 +91,24 @@ TEMPLATE = {
     'wake_text': '模板审阅已提交；按反馈重建模板，其余不要动。',
 }
 
-FACES = {face['name']: face for face in (VISUAL, TEMPLATE)}
+# ── 面三：版式选择（生产范围，不是模板批准）────────────────────────────────────
+# 从源 PPTX 的原生 layout 目录里勾选要收进模板的家族。单位是 family；决定是「收/不收」，
+# 不是 pass/revise/discard。产物是 `layout_selection.json`，模型据此只做被选中的 primitive；
+# 最终模板仍走 template 面批准。与 template 面分开的理由：一个是「做哪些」，一个是「做得行不行」。
+SELECT = {
+    'name': 'select',
+    'surface_rel': f'{PROJECT_DIR}/template-select-surface.json',
+    'entry': '00_template_select.html',
+    'feedback_rel': 'layout_selection.json',
+    'watch': ['template_pack/layout_catalog.json'],
+    'id': 'planners-ppt-hell/template-select',
+    'title': '版式选择',
+    'description': '从源 PPTX 的版式目录勾选要收进模板的家族；这不是模板批准，是生产范围。',
+    'capabilities': [],
+    'wake_text': '版式选择已提交；按选中的家族制作 primitive，未选中的不要做。',
+}
+
+FACES = {face['name']: face for face in (VISUAL, TEMPLATE, SELECT)}
 
 # 向后兼容：visual 面那组名字继续存在（`ppt_pipeline` 与测试按它们取路径）。
 SURFACE_REL = VISUAL['surface_rel']

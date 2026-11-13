@@ -43,13 +43,13 @@
 
 ## 版式索引
 
-模板包分两层：**主题**（tokens、底壳、SPEC）与**版式**（这一页的参考骨架）。版式索引由 `scripts/template/layout_index.py` 从包里读出来，工作台画廊与模型任务共用同一份，不另存清单：
+模板包分两层：**主题**（tokens、底壳、SPEC）与**版式**（这一页的参考骨架）。版式索引由 `scripts/template/layout_index.py` 读出来，工作台画廊、模板审阅与模型任务共用同一份：
 
-- v2：每个 `primitives/*.svg` 是一个版式；`layout_id` 是文件名 stem；缩略图依次取 `previews/pages/<stem>.png`、`previews/<stem>.png`、`anchors/<stem>.png`。
+- `layouts.json`（新包）：每个条目是 `layout_id / name / family / use_for / usage / source_layouts / source_pages / slots / preview / primitive / selected`。脚手架生成草案，人用 `template-select` 勾选家族，`apply_layout_selection.py` 收窄；模型按 `primitive` 制作。索引优先读它。
+- v2 旧包：每个 `primitives/*.svg` 是一个版式；缩略图依次取 `previews/pages/<stem>.png`、`previews/<stem>.png`、`anchors/<stem>.png`。
 - legacy：`fidelity_template/template_registry.json` 的 layouts；缩略图取 `canvas_previews/pages/<layout_id>.png`。
-- 包里没有声明名字时，显示文件名派生的短名；不猜中文名。
 
-索引只读，不改变包哈希与批准。整套模板的切换、逐页版式请求与执行见 [页面制作](../workflow/04_svg_stage.md) 与 [工作台](../07_visual_review.md)。
+索引只读，不改变包哈希与批准。新包发布前严格校验（tokens 是合法单值、SPEC 无空表格、每个版式有预览与 primitive、primitive 不引用未声明 tokens）；旧包不回溯。整套模板的切换、逐页版式请求与执行见 [页面制作](../workflow/04_svg_stage.md) 与 [工作台](../07_visual_review.md)。
 
 视频视觉来源由本 Skill 自己维护的视频风格文档与随包参考图提供（数值写在风格文档里），不再沿用 Video Craft 主题库的格式与数值；视频样张及制作说明在本 Skill 提供引用，动作和合成字段只引用 Craft 契约，见 [视频提取](../workflow/08_video_style_extraction_sop.md)。不强制两路同包格式。
 

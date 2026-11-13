@@ -128,8 +128,53 @@ def fidelity_layouts(root):
     return layouts
 
 
+def declared_layouts(root):
+    """包自己声明的版式索引（`layouts.json`）。脚手架与人工策展都写这一份。
+
+    只读、只取存在的预览/primitive；`available` 表示这一条现在能不能真的当参考用。
+    """
+    root = Path(root)
+    document = read_json(root / "layouts.json", {})
+    items = document.get("layouts") if isinstance(document, dict) else None
+    if not isinstance(items, list) or not items:
+        return []
+    layouts = []
+    for index, item in enumerate(items, start=1):
+        if not isinstance(item, dict):
+            continue
+        layout_id = str(item.get("layout_id") or "").strip()
+        if not layout_id:
+            continue
+        preview = str(item.get("preview") or "")
+        primitive = str(item.get("primitive") or "")
+        preview = preview if preview and (root / preview).is_file() else ""
+        primitive = primitive if primitive and (root / primitive).is_file() else ""
+        layouts.append({
+            "layout_id": layout_id,
+            "name": str(item.get("name") or layout_name(layout_id)),
+            "number": str(index),
+            "preview": preview,
+            "primitive": primitive,
+            "family": str(item.get("family") or ""),
+            "use_for": str(item.get("use_for") or ""),
+            "usage": item.get("usage") or 0,
+            "source_pages": item.get("source_pages") or [],
+            "source_layouts": item.get("source_layouts") or [],
+            "slots": item.get("slots") or [],
+            "selected": item.get("selected") is not False,
+            "available": bool(preview or primitive),
+        })
+    return layouts
+
+
 def pack_layouts(root):
-    """一套包的版式列表。包不可识别时返回空列表，不抛异常。"""
+    """一套包的版式列表。包不可识别时返回空列表，不抛异常。
+
+    优先读包自己声明的 `layouts.json`；旧包没有它时，按原语/legacy registry 派生。
+    """
+    declared = declared_layouts(root)
+    if declared:
+        return declared
     kind = pack_format(root)
     if kind == "four-piece":
         return four_piece_layouts(root)

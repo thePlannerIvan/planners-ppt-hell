@@ -88,7 +88,74 @@ def validate_component_references(registry):
         raise ValueError(f"invalid layout component references: layouts={invalid}, unreferenced={unreferenced}")
 
 
-def validate_pack_dir(pack_dir, check_manifest_hashes=False):
+TOKEN_DECLARATION = re.compile(r"--([A-Za-z0-9_-]+)\s*:\s*([^;]+);")
+TOKEN_REFERENCE = re.compile(r"var\(\s*--([A-Za-z0-9_-]+)")
+
+
+def token_declarations(text):
+    return {name: value.strip() for name, value in TOKEN_DECLARATION.findall(text or "")}
+
+
+def quality_issues(pack_dir):
+    """新包的硬质量：tokens 是合法单值、SPEC 没有空表格单元格、版式有预览与 primitive。"""
+    pack_dir = Path(pack_dir)
+    issues = []
+    tokens_path = pack_dir / "tokens.css"
+    declarations = token_declarations(tokens_path.read_text(encoding="utf-8")) if tokens_path.is_file() else {}
+    for name, value in declarations.items():
+        if not value:
+            issues.append(f"tokens.css: --{name} has an empty value")
+        if re.search(r"\d+\s*(?:px|pt|em|rem|%)?\s*[-–]\s*\d+", value):
+            issues.append(f"tokens.css: --{name} looks like a range ({value!r}); tokens must be single values")
+    spec_path = pack_dir / "SPEC.md"
+    if spec_path.is_file():
+        spec = spec_path.read_text(encoding="utf-8")
+        if re.search(r"\|\s*\|\s*\|", spec):
+            issues.append("SPEC.md has empty table cells")
+    primitives = sorted((pack_dir / "primitives").glob("*.svg")) if (pack_dir / "primitives").is_dir() else []
+    for primitive in primitives:
+        undefined = sorted({ref for ref in TOKEN_REFERENCE.findall(primitive.read_text(encoding="utf-8", errors="ignore"))
+                            if ref not in declarations})
+        if undefined:
+            issues.append(f"{primitive.name} references undefined tokens: {undefined}")
+    layouts_path = pack_dir / "layouts.json"
+    if layouts_path.is_file():
+        try:
+            document = json.loads(layouts_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return issues + ["layouts.json is not valid JSON"]
+        items = document.get("layouts") if isinstance(document, dict) else None
+        if not isinstance(items, list) or not items:
+            issues.append("layouts.json has no layouts")
+            return issues
+        seen = set()
+        referenced = set()
+        for item in items:
+            layout_id = str(item.get("layout_id") or "") if isinstance(item, dict) else ""
+            if not layout_id:
+                issues.append("layouts.json has a layout without layout_id")
+                continue
+            if layout_id in seen:
+                issues.append(f"layouts.json duplicates layout_id: {layout_id}")
+            seen.add(layout_id)
+            preview = str(item.get("preview") or "")
+            primitive = str(item.get("primitive") or "")
+            if preview and not (pack_dir / preview).is_file():
+                issues.append(f"layout {layout_id} declares a missing preview: {preview}")
+            if primitive:
+                referenced.add(primitive)
+                if not (pack_dir / primitive).is_file():
+                    issues.append(f"layout {layout_id} declares a missing primitive: {primitive}")
+            else:
+                issues.append(f"layout {layout_id} has no primitive")
+        for primitive in primitives:
+            relative = primitive.relative_to(pack_dir).as_posix()
+            if relative not in referenced:
+                issues.append(f"primitive is not declared by layouts.json: {relative}")
+    return issues
+
+
+def validate_pack_dir(pack_dir, check_manifest_hashes=False, strict=False):
     """Validate a v2 4-piece multimodal template pack (`tokens.css`, `skyline_shell.svg`, `primitives/*.svg`, `SPEC.md` + `anchors/`)."""
     pack_dir = Path(pack_dir).resolve()
     issues = []
@@ -116,6 +183,8 @@ def validate_pack_dir(pack_dir, check_manifest_hashes=False):
         tokens_text = tokens_path.read_text(encoding="utf-8")
         if ":root" not in tokens_text or "--" not in tokens_text:
             issues.append("tokens.css must define :root CSS custom properties (--*)")
+    if strict:
+        issues.extend(quality_issues(pack_dir))
 
     if check_manifest_hashes:
         manifest_path = pack_dir / "manifest.json"
@@ -168,6 +237,8 @@ def build_manifest(pack_dir, template_id, name, description="", is_default=False
             "primitives": [f"primitives/{p.name}" for p in primitives],
             "spec_md": "SPEC.md",
             "anchors": [f"anchors/{a.name}" for a in anchors],
+            **({"layouts_json": "layouts.json", "layout_count": len(read_json(pack_dir / "layouts.json", {}).get("layouts", []))}
+               if (pack_dir / "layouts.json").is_file() else {}),
         },
         "palette_summary": palette_summary or {},
         "recommended_scenarios": scenarios or [],
@@ -259,7 +330,7 @@ def publish_template(project_root, template_id="", name="", description="", libr
     project_root = Path(project_root).resolve()
     lib_root = Path(library_root).resolve() if library_root else LIBRARY_ROOT
     source_pack = project_root / "_internal" / "00_project" / "template_pack"
-    validation = validate_pack_dir(source_pack, check_manifest_hashes=False)
+    validation = validate_pack_dir(source_pack, check_manifest_hashes=False, strict=True)
     if not validation["valid"]:
         raise ValueError(f"Project template_pack is incomplete: {validation['issues']}")
 
@@ -523,6 +594,7 @@ def main():
     p_val = sub.add_parser("validate")
     p_val.add_argument("pack_dir")
     p_val.add_argument("--check-hashes", action="store_true")
+    p_val.add_argument("--strict", action="store_true", help="Also enforce token/SPEC/layouts quality")
 
     p_pub = sub.add_parser("publish")
     p_pub.add_argument("project_dir")
@@ -544,7 +616,7 @@ def main():
     if args.command == "list":
         result = list_templates(args.library_root)
     elif args.command == "validate":
-        result = validate_pack_dir(args.pack_dir, check_manifest_hashes=args.check_hashes)
+        result = validate_pack_dir(args.pack_dir, check_manifest_hashes=args.check_hashes, strict=args.strict)
         if not result["valid"]:
             print(json.dumps(result, ensure_ascii=False, indent=2))
             sys.exit(1)

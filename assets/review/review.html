@@ -261,6 +261,12 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
 .toolbar-badge[hidden]{display:none!important}
 .toolbar-badge.applied{color:var(--dsw-alias-label-secondary);background:var(--dsw-alias-bg-module-platform)}
 .toolbar-icon{width:16px;height:16px;flex:0 0 16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* 版式选择：只留「收进模板」与源页信息，工作台编辑件都收起。 */
+#reviewPanel.select-mode > *:not(#selectionSection){display:none!important}
+.selection-toggle{display:flex;align-items:center;gap:8px;font:var(--dsw-font-xs-strong-13);cursor:pointer}
+.selection-toggle input{width:16px;height:16px;accent-color:var(--dsw-static-blue-500)}
+#selectionInfo{margin:10px 0 0;font:var(--dsw-font-xxs-12);white-space:pre-wrap}
+.rail button.discarded{opacity:.5}
 /* 画廊沿用 DSH 的 dialog 表面：菜单表面 + 强阴影 + lg 圆角；卡片才是实底，避免白上白。 */
 .gallery-dialog{display:flex;flex-direction:column;width:min(960px,calc(100vw - 32px));max-height:88vh;padding:0;border:0;border-radius:var(--dsw-radius-lg);background:var(--dsw-menu-surface-fill);backdrop-filter:var(--dsw-menu-backdrop-filter);color:var(--dsw-alias-label-primary);box-shadow:var(--dsw-elevation-prominent);overflow:hidden}
 .gallery-dialog:not([open]){display:none}
@@ -392,6 +398,10 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
   </section>
 
   <aside class="panel" id="reviewPanel">
+    <div id="selectionSection" hidden>
+      <label class="selection-toggle"><input id="includeLayout" type="checkbox" checked> <span>收进模板</span></label>
+      <p id="selectionInfo" class="muted"></p>
+    </div>
 <section id="layoutGalleryPanel" class="layout-panel" aria-label="本页版式" hidden>
   <div class="gallery-head"><h2 id="layoutGalleryTitle">本页版式</h2><button class="review-icon-button" onclick="closeGallery('layout')" aria-label="关闭"><span data-review-icon="X"></span></button></div>
   <p class="gallery-hint" id="layoutGalleryHint">版式只作参考：模型按它组织页面，不会为套骨架删掉这页的主张和证据。</p>
@@ -597,7 +607,8 @@ const initialPageState=p=>({
   task:null,
   layout_id:p.layout_id||'',
   layout_staged:null,
-  layout_requested:null
+  layout_requested:null,
+  selected:p.selected!==false
 });
 const state=Object.fromEntries(data.pages.map(p=>[p.key,initialPageState(p)]));
 
@@ -625,7 +636,7 @@ function layoutShort(id){
   return found.layout.number||found.layout.name||'已选';
 }
 function updateTemplateButtons(){
-  if(data.route==='template')return;
+  if(data.route==='template'||data.route==='template-select')return;
   const s=state[page()?.key]||{};
   const deckBadge=$('#deckTemplateBadge'),layoutBadge=$('#pageLayoutBadge');
   if(deckBadge){deckBadge.hidden=!stagedTemplate;deckBadge.textContent=stagedTemplate?'整套待提交':''}
@@ -740,6 +751,9 @@ function stageLayout(id){
 }
 function resetLayoutChoice(){const s=state[page().key];s.layout_staged=null;drawLayoutGallery();updateTemplateButtons();updateRail();scheduleDraft();}
 if($('#layoutSearch'))$('#layoutSearch').oninput=e=>{layoutFilter=String(e.target.value||'').trim();drawLayoutGallery()};
+if($('#includeLayout'))$('#includeLayout').onchange=e=>{
+  const s=state[page().key];s.selected=!!e.target.checked;updateRail([page().key]);status();
+};
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&!$('#layoutGalleryPanel').hidden){e.preventDefault();closeGallery('layout')}
 });
@@ -951,6 +965,7 @@ function setMode(mode){
 }
 
 function railClass(i,p){
+  if(data.route==='template-select')return 'rail-button'+(state[p.key].selected===false?' discarded':'');
   const s=state[p.key];
   let statusClass = s.save_status;
   if(data.route==='template'){
@@ -961,6 +976,7 @@ function railClass(i,p){
   return statusClass+(i===index?' active':'')+(updatedPages.has(p.key)?' updated':'');
 }
 function railTagText(s){
+  if(data.route==='template-select')return s.selected===false?'舍':'';
   if(data.route==='template'){
     if(s.decision==='discard')return '舍弃';
     if(s.decision==='revise'||s.feedback.trim()||s.annotations.length)return '返修';
@@ -1716,6 +1732,7 @@ async function render(){
   const p=page(),s=state[p.key];
   syncHash();   // 切页/换页都记下位置，重新加载后还停在这一页
   $('#title').textContent=(index+1)+' / '+data.pages.length+' · '+p.title;
+  if(data.route==='template'||data.route==='template-select')$('#title').style.display='block';
   $('#feedback').value=s.feedback;
   updateTemplateDecisionUI();
   /* 「有新版本」是未读标记，不是一条常驻横幅：人看到这一页就消掉。
@@ -1734,7 +1751,16 @@ async function render(){
   $('#previousNote').textContent=prevLines.length
     ?'上一轮你说的：'+prevLines.join('\n') :'';
   $('#compare').disabled=!p.parent&&!p.previous;$('#compare').textContent='查看修改前';
-  mountInlineSvg(p);
+  if(data.route==='template-select'){
+    $('#reviewPanel').classList.add('select-mode');
+    $('#selectionSection').hidden=false;
+    $('#includeLayout').checked=s.selected!==false;
+    $('#selectionInfo').textContent=p.notes||'';
+    if(p.svgMarkup){mountInlineSvg(p);$('#slide').style.opacity='0'}
+    else{$('#svgStageWrap').replaceChildren();$('#slide').style.opacity='1'}
+  }else{
+    mountInlineSvg(p);
+  }
   const url=await assetFor(p.png,p.version);
   if(seq===slideSeq&&url)$('#slide').src=url;
   drawRail();drawAssets();drawRegions();drawFeedbackTasks();status();drawStale();
@@ -2096,6 +2122,7 @@ function drawAssets(){
   });
 }
 function applyUploadCapability(){
+  if(data.route==='template'||data.route==='template-select')return false;
   const can=Array.isArray(review&&review.capabilities)&&review.capabilities.indexOf('asset-upload')>=0;
   canUpload=can;
   $('#addDrop').hidden=!can;
@@ -2985,6 +3012,29 @@ async function askReload(){
     syncBusy=false;if(btn){btn.disabled=false;btn.removeAttribute('aria-busy');}
   }
 }
+async function submitSelection(){
+  if(!review){note('本页只读：没有连上审阅宿主，选择存不进去','warn');return false}
+  const selected=orderedPages().filter(p=>state[p.key].selected!==false);
+  if(!selected.length){note('至少收一个版式','error');return false}
+  const payload={
+    review_id:data.review_id,
+    catalog_sha256:data.catalog_sha256||'',
+    source:data.source||'',
+    selected:selected.map(p=>p.key),
+    families:Object.fromEntries(orderedPages().map(p=>[p.key,{selected:state[p.key].selected!==false,title:p.title,family:p.family,usage:p.usage}])),
+    submitted_at:new Date().toISOString(),
+    provenance:{source:'template_select_page',transport:(review&&review.transport)||'',
+      surface:'planners-ppt-hell/template-select'}
+  };
+  try{
+    await review.write(payload);
+    const names=selected.map(p=>p.title).join('、');
+    await review.wake({unit:'版式选择',text:`版式选择已提交：${selected.length} 个家族（${names}）；按选中的做 primitive，未选中的不要做。`});
+    note('版式选择已提交','ok');
+    return true;
+  }catch(error){note('版式选择未保存：'+error.message,'error');return false}
+}
+
 function showSubmit(){
   endInlineTextEdit(true);
   if(!$('#regionDialog').hidden&&$('#regionNote').value.trim())saveRegion();
@@ -3183,7 +3233,16 @@ function sayReadOnly(why){
     document.title=(data.project?data.project+' · ':'')+'模板人工审阅工作台';
     $('#project').textContent=(data.project||'模板版式')+' · 模板审阅';
   }
-  if(data.route==='template'&&$('#templateTools'))$('#templateTools').hidden=true;
+  if((data.route==='template'||data.route==='template-select')&&$('#templateTools'))$('#templateTools').hidden=true;
+  if(data.route==='template-select'){
+    document.title=(data.project?data.project+' · ':'')+'版式选择';
+    $('#project').textContent=(data.project||'版式选择')+' · 版式选择';
+    $('#exportOutput').hidden=true;$('#pageDispatch').hidden=true;
+    $('#modeSelect').closest('.toolbar-group').hidden=true;
+    $('#findToggle').hidden=true;$('#undoEditBtn').hidden=true;
+    $('#deckDispatchLabel').textContent='提交版式选择';
+    $('#deckDispatch').onclick=()=>submitSelection();
+  }
   const fromHash=pageOrder.indexOf(pageKeyFromHash());
   if(fromHash>=0)index=fromHash;      // 重新加载回到原来那一页（hash 是唯一来源）
   render();sizePreview();drawPulse();
@@ -3210,6 +3269,14 @@ function sayReadOnly(why){
     workbenchReady=true;
     document.documentElement.dataset.workbenchReady='true';
     updateTemplateDecisionUI();
+    review.on('changed',()=>onHostChanged());
+    return;
+  }
+  if(data.route==='template-select'){
+    canCommand=false;
+    await render();
+    workbenchReady=true;
+    document.documentElement.dataset.workbenchReady='true';
     review.on('changed',()=>onHostChanged());
     return;
   }

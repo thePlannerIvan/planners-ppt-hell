@@ -115,13 +115,72 @@ def assemble_review_html(data):
     return html_text
 
 
+def generate_layout_pack_review(root, pack, tokens, declared_layouts):
+    """有 `layouts.json` 的包：按版式（不是 shell + primitive 路径）审阅。
+
+    版式条目的 key 是 layout_id；每个 primitive 必须是已经做好的文件，否则审阅页没有可看的实现。
+    """
+    records = [item for item in declared_layouts(pack) if item.get('selected', True)]
+    if not records:
+        raise ValueError('layouts.json has no selected layouts')
+    pages = []
+    for record in records:
+        primitive = pack / str(record.get('primitive') or '')
+        if not str(record.get('primitive') or '') or not primitive.is_file():
+            raise ValueError(f"layout {record['layout_id']} has no authored primitive; make primitives/ before review")
+        relative_primitive = primitive.resolve().relative_to(pack.resolve())
+        markup = inline_pack_canvas(root, primitive, tokens)
+        preview = str(record.get('preview') or '')
+        png = f'{PROJECT}/template_pack/{preview}' if preview and (pack / preview).is_file() else ''
+        source_pages = record.get('source_pages') or []
+        source_names = '、'.join(
+            str(item.get('name') or '') for item in record.get('source_layouts') or [] if item.get('name'))
+        pages.append({
+            'key': record['layout_id'],
+            'title': record['name'],
+            'png': png,
+            'svg': f'{PROJECT}/template_pack/{relative_primitive.as_posix()}',
+            'svgMarkup': markup,
+            'revision': 1,
+            'version': sha(primitive)[:12],
+            'notes': f"{record.get('use_for') or ''}\n源使用 {record.get('usage', 0)} 页：{', '.join(str(page) for page in source_pages[:10]) or '—'}\n源版式：{source_names or '—'}",
+            'assets': [],
+            'family': record.get('family') or '',
+            'usage': record.get('usage') or 0,
+        })
+    manifest = load(pack / 'manifest.json')
+    template_name = manifest.get('name') or root.name
+    version = template_version(root)
+    review_id = uuid.uuid4().hex
+    data = {
+        'project': template_name,
+        'template_name': template_name,
+        'review_id': review_id,
+        'snapshot': f'{PROJECT}/{TEMPLATE_REVIEW_SNAPSHOT}',
+        'order': [page['key'] for page in pages],
+        'workbench_root': str(root),
+        'route': 'template',
+        'local_fallback_command': f'python3 {shlex.quote(str(Path(__file__).with_name("review_surface.py")))} {shlex.quote(str(root))} --face template',
+        'pages': pages,
+    }
+    out = root / '00_template_review.html'
+    out.write_text(assemble_review_html(data), encoding='utf-8')
+    write(root / PROJECT / TEMPLATE_REVIEW_SNAPSHOT,
+          {'review_id': review_id, 'template_version': version, 'html_sha256': sha(out),
+           'layouts': data['order'], 'package_format': 'four_piece_layouts'})
+    return out
+
+
 def generate_pack_review(root):
     from template.template_library import validate_pack_dir
+    from template.layout_index import declared_layouts
     pack = root / PROJECT / 'template_pack'
     validation = validate_pack_dir(pack)
     if not validation['valid']:
         raise ValueError('Incomplete template pack: ' + str(validation['issues']))
     tokens = (pack / 'tokens.css').read_text(encoding='utf-8') if (pack / 'tokens.css').is_file() else ''
+    if (pack / 'layouts.json').is_file():
+        return generate_layout_pack_review(root, pack, tokens, declared_layouts)
     paths = [pack / 'skyline_shell.svg', *sorted((pack / 'primitives').glob('*.svg'))]
     layouts = [path.relative_to(pack).as_posix() for path in paths]
 
