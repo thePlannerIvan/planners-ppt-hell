@@ -806,7 +806,8 @@ def run_extract_template_pack(source, project, output_visuals=None, dpi=144, max
         "rendered_page_count": len(page_entries),
         "visual_palette_sampling": visual_palette,
         "pptx_structural_facts": pptx_facts,
-        "layout_catalog": layout_catalog,
+        # 版式目录只有一个来源：同目录的 layout_catalog.json。facts 里只记指针，不复制一份。
+        "layout_catalog": "layout_catalog.json" if layout_catalog else None,
         "next_step_instruction": (
             "Step 2 (Scaffold): run `python scripts/template/scaffold_template_pack.py --project <project>` to write "
             "tokens/SPEC/skyline_shell/layouts.json plus previews/anchors from the native layout catalog. "
