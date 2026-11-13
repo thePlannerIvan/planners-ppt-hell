@@ -262,24 +262,32 @@ class WorkbenchBrowserTests(WorkbenchGeneratorTests):
 
     def test_layout_gallery_stages_a_reference_for_one_page(self):
         self.page.locator('#pageLayoutBtn').click()
-        self.page.wait_for_selector('#layoutGalleryDialog[open]')
+        self.page.wait_for_selector('#layoutGalleryPanel:not([hidden])')
         cards = self.page.locator('#layoutGalleryGrid .gallery-card')
         self.assertEqual(cards.count(), 2)
         cards.nth(1).click()
         self.assertEqual(self.page.evaluate("state[page().key].layout_staged"), 'p02_content')
         self.assertEqual(self.page.locator('.rail-tag').first.inner_text(), '版式待提交')
-        self.page.locator('#layoutGalleryDialog .gallery-foot .review-primary-action').click()
+        # 版式面板是非模态的：翻到下一页时它不关，卡片跟着换到该页的当前版式。
+        self.page.locator('#pageNext').click()
+        self.page.wait_for_function("page().key==='omega'")
+        self.assertTrue(self.page.locator('#layoutGalleryPanel').is_visible())
+        self.page.locator('#layoutGalleryGrid .gallery-card').nth(0).click()
+        self.assertEqual(self.page.evaluate("state['omega'].layout_staged"), 'p01_cover')
+        self.page.locator('#layoutGalleryPanel .gallery-head .review-icon-button').click()
         self.page.locator('#deckDispatch').click()
         self.page.locator('#submitBatchBtn').click()
         self.page.wait_for_function("Object.values(feedbackTasks).some(t=>Object.values(t.pages||{}).some(p=>p.layout_id))")
         feedback = [call for call in self.calls if call.get('op') == 'feedback'][-1]
         self.assertEqual(feedback['scope'], 'deck')
         self.assertEqual(feedback['pages']['alpha']['layout_id'], 'p02_content')
-        self.assertNotIn('omega', feedback['pages'])
+        self.assertEqual(feedback['pages']['omega']['layout_id'], 'p01_cover')
         self.assertEqual(self.page.evaluate("state['alpha'].layout_requested"), 'p02_content')
+        self.assertEqual(self.page.evaluate("state['omega'].layout_requested"), 'p01_cover')
         task_id = self.page.evaluate('Object.keys(feedbackTasks)[0]')
         stored = commit(self.root, {'op': 'task', 'task_id': task_id})['task']
         self.assertEqual(stored['pages']['alpha']['layout_id'], 'p02_content')
+        self.assertEqual(stored['pages']['omega']['layout_id'], 'p01_cover')
 
     def test_deck_template_choice_stages_and_submits_without_pages(self):
         import shutil
@@ -299,7 +307,7 @@ class WorkbenchBrowserTests(WorkbenchGeneratorTests):
         self.assertEqual(cards.count(), 2)
         cards.filter(has_text='Other Pack').click()
         self.assertEqual(self.page.evaluate('stagedTemplate'), 'other-pack')
-        self.page.locator('#templateGalleryDialog .gallery-foot .review-primary-action').click()
+        self.page.locator('#templateGalleryDialog .gallery-head .review-icon-button').click()
         self.page.locator('#deckDispatch').click()
         self.page.locator('#submitBatchBtn').click()
         self.page.wait_for_function("Object.values(feedbackTasks).some(t=>t.template_id==='other-pack')")

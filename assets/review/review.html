@@ -259,30 +259,49 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
 /* 模板 / 版式：人选择参考，模型执行。样式沿用工作台令牌，不引第二套皮肤。 */
 .toolbar-badge{font:var(--dsw-font-xxxs-strong-11);color:var(--dsw-alias-state-warn-label);background:var(--dsw-alias-state-warn-tertiary);border-radius:999px;padding:1px 6px;margin-left:2px;white-space:nowrap}
 .toolbar-badge[hidden]{display:none!important}
-.gallery-dialog{display:flex;flex-direction:column;width:min(960px,calc(100vw - 32px));max-height:88vh;padding:0;border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-md);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);box-shadow:var(--dsw-elevation-panel);overflow:hidden}
+.toolbar-badge.applied{color:var(--dsw-alias-label-secondary);background:var(--dsw-alias-bg-module-platform)}
+.toolbar-icon{width:16px;height:16px;flex:0 0 16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* 画廊沿用 DSH 的 dialog 表面：菜单表面 + 强阴影 + lg 圆角；卡片才是实底，避免白上白。 */
+.gallery-dialog{display:flex;flex-direction:column;width:min(960px,calc(100vw - 32px));max-height:88vh;padding:0;border:0;border-radius:var(--dsw-radius-lg);background:var(--dsw-menu-surface-fill);backdrop-filter:var(--dsw-menu-backdrop-filter);color:var(--dsw-alias-label-primary);box-shadow:var(--dsw-elevation-prominent);overflow:hidden}
 .gallery-dialog:not([open]){display:none}
 .gallery-dialog[open]{display:flex}
 .gallery-dialog .gallery-head,.gallery-dialog .gallery-hint,.gallery-dialog .gallery-search,.gallery-dialog .gallery-foot{flex:0 0 auto}
-.gallery-dialog::backdrop{background:rgba(0,0,0,.42)}
-.gallery-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px 4px}
-.gallery-head h2{margin:0;font:var(--dsw-font-s-strong-14);font-size:15px}
-.gallery-hint{margin:0;padding:2px 16px 10px;font:var(--dsw-font-xxs-12);color:var(--dsw-alias-label-secondary)}
-.gallery-search{display:flex;gap:8px;padding:0 16px 8px}
+.gallery-dialog::backdrop{background:var(--dsw-alias-bg-mask-1)}
+#templateGalleryDialog{width:min(780px,calc(100vw - 32px))}
+#templateGalleryDialog .gallery-grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+/* 版式是「边看页边挑」的动作：非模态侧边面板，翻页/切页时留在原位，不遮画布。 */
+/* 版式面板占用原有的右栏，画布随栅格缩窄而不是被盖住；翻页/切页时它留在原位。 */
+.panel.gallery-open{overflow:hidden}
+.panel.gallery-open > :not(#layoutGalleryPanel){display:none!important}
+#layoutGalleryPanel{display:flex;flex-direction:column;min-height:0;flex:1 1 auto}
+.panel.gallery-open > #layoutGalleryPanel{flex:1 1 auto;min-height:0}
+#layoutGalleryPanel .gallery-head{padding:0 0 4px}
+#layoutGalleryPanel .gallery-hint{padding:0 0 8px}
+#layoutGalleryPanel .gallery-search{padding:0 0 8px}
+#layoutGalleryPanel .gallery-grid{padding:0 0 8px;flex:1 1 auto;min-height:0;overflow:auto;grid-template-columns:repeat(2,minmax(0,1fr))}
+#layoutGalleryPanel .gallery-foot{padding:8px 0 0;background:transparent}
+@media (max-width:760px){#layoutGalleryPanel .gallery-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.gallery-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px 6px}
+.gallery-head h2{margin:0;font:var(--dsw-font-base-strong-16)}
+.gallery-hint{margin:0;padding:0 18px 10px;font:var(--dsw-font-xxs-12);color:var(--dsw-alias-label-secondary)}
+.gallery-search{display:flex;gap:8px;padding:0 18px 10px}
 .gallery-search input{flex:1;height:32px;padding:0 9px;border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-xs);background:var(--dsw-specific-input-major);color:var(--dsw-alias-label-primary);font:inherit}
-.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));grid-auto-rows:max-content;align-content:start;gap:10px;padding:0 16px 16px;flex:1 1 auto;min-height:0;overflow:auto}
-.gallery-card{display:flex;flex-direction:column;align-items:stretch;align-self:start;gap:5px;width:100%;height:auto;min-width:0;padding:6px;border:2px solid var(--dsw-alias-border-l1);border-radius:var(--dsw-radius-sm);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);text-align:left;cursor:pointer;font:inherit}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));grid-auto-rows:max-content;align-content:start;gap:10px;padding:0 18px 18px;flex:1 1 auto;min-height:0;overflow:auto}
+.gallery-card{display:flex;flex-direction:column;align-items:stretch;align-self:start;gap:5px;width:100%;height:auto;min-width:0;padding:7px;border:1px solid var(--dsw-alias-border-l1);border-radius:var(--dsw-radius-sm);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);text-align:left;cursor:pointer;font:inherit}
 .gallery-card:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}
-.gallery-card.selected{border-color:var(--dsw-static-blue-500)}
+.gallery-card.selected{border-color:var(--dsw-static-blue-500);box-shadow:0 0 0 1px var(--dsw-static-blue-500)}
 .gallery-card:disabled{opacity:.55;cursor:default}
 .gallery-card .thumb{position:relative;width:100%;aspect-ratio:16/9;min-height:0;border-radius:var(--dsw-radius-xs);overflow:hidden;background:var(--dsw-alias-bg-skeleton);display:flex;align-items:center;justify-content:center}
 .gallery-card .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .gallery-card .thumb .num{font:var(--dsw-font-xxs-strong-12);color:var(--dsw-alias-label-secondary)}
-.gallery-card .name{font:var(--dsw-font-xxs-strong-12);line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.gallery-card .name{font:var(--dsw-font-xs-strong-13);line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.gallery-card .desc{font:var(--dsw-font-xxxs-11);line-height:1.45;color:var(--dsw-alias-label-secondary);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .gallery-card .sub{font:var(--dsw-font-xxxs-11);color:var(--dsw-alias-label-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.gallery-card .flag{position:absolute;top:4px;left:4px;font:var(--dsw-font-xxxs-strong-11);background:var(--dsw-alias-state-business-primary);color:var(--dsw-alias-label-primary-foreground);border-radius:var(--dsw-radius-xs);padding:1px 5px}
+.gallery-card .flag{position:absolute;top:4px;left:4px;font:var(--dsw-font-xxxs-strong-11);background:var(--dsw-alias-state-business-tertiary);color:var(--dsw-alias-label-primary);border-radius:var(--dsw-radius-xs);padding:1px 5px}
 .gallery-empty{padding:18px 0;color:var(--dsw-alias-label-secondary);font:var(--dsw-font-xxs-12)}
-.gallery-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 16px 14px;border-top:1px solid var(--dsw-alias-border-l1)}
+.gallery-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 18px 14px;border-top:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1)}
 @media (max-width:760px){.gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){#templateGalleryDialog .gallery-grid{grid-template-columns:minmax(0,1fr)}}
 </style>
 
 <header>
@@ -307,8 +326,8 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
   <button id="findToggle" class="review-icon-button" onclick="toggleFind()" title="查找与替换" aria-label="查找与替换" aria-expanded="false" aria-controls="findPanel"><span data-review-icon="Search"></span></button>
   <button id="undoEditBtn" class="review-icon-button" onclick="undoLastSvgEdit()" disabled title="撤销本页上一次编辑" aria-label="撤销本页上一次编辑"><span data-review-icon="Undo2"></span></button>
   <div class="toolbar-group" id="templateTools">
-    <button id="deckTemplateBtn" class="tool-mode" onclick="openTemplateGallery()" title="选择整套模板"><span>模板</span><small id="deckTemplateBadge" class="toolbar-badge" hidden></small></button>
-    <button id="pageLayoutBtn" class="tool-mode" onclick="openLayoutGallery()" title="本页参考版式"><span>版式</span><small id="pageLayoutBadge" class="toolbar-badge" hidden></small></button>
+    <button id="deckTemplateBtn" class="tool-mode" onclick="openTemplateGallery()" title="选择整套模板"><svg class="toolbar-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15.5V5.5A1.5 1.5 0 0 1 4.5 4H14"/><rect x="7" y="8" width="14" height="11" rx="1.5"/><path d="M7 12h14"/><path d="M10 15.5h5"/></svg><span>模板</span><small id="deckTemplateBadge" class="toolbar-badge" hidden></small></button>
+    <button id="pageLayoutBtn" class="tool-mode" onclick="openLayoutGallery()" title="本页参考版式"><svg class="toolbar-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><rect x="6.5" y="12" width="11" height="4.5" rx="1"/></svg><span>版式</span><small id="pageLayoutBadge" class="toolbar-badge" hidden></small></button>
   </div>
   <span class="toolbar-spacer"></span>
   <details class="version-menu" id="versionMenu">
@@ -373,6 +392,13 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
   </section>
 
   <aside class="panel" id="reviewPanel">
+<section id="layoutGalleryPanel" class="layout-panel" aria-label="本页版式" hidden>
+  <div class="gallery-head"><h2 id="layoutGalleryTitle">本页版式</h2><button class="review-icon-button" onclick="closeGallery('layout')" aria-label="关闭"><span data-review-icon="X"></span></button></div>
+  <p class="gallery-hint" id="layoutGalleryHint">版式只作参考：模型按它组织页面，不会为套骨架删掉这页的主张和证据。</p>
+  <div class="gallery-search"><input id="layoutSearch" type="search" placeholder="搜索版式名称" aria-label="搜索版式名称"></div>
+  <div id="layoutGalleryGrid" class="gallery-grid"></div>
+  <div class="gallery-foot"><button class="review-secondary-action" onclick="resetLayoutChoice()">保持当前版式</button><button class="review-secondary-action" onclick="closeGallery('layout')">关闭</button></div>
+</section>
     <p id="previewState" class="muted" role="status"></p>
     <p id="previousNote" class="muted" hidden style="white-space:pre-wrap;background:var(--dsw-alias-bg-module-platform);padding:6px 8px;border-radius:5px"></p>
 
@@ -453,16 +479,10 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
   <div class="gallery-head"><h2>整套模板</h2><button class="review-icon-button" onclick="closeGallery('template')" aria-label="关闭"><span data-review-icon="X"></span></button></div>
   <p class="gallery-hint">选定后作为整套方案提交。已有页面不会立刻重排；只有逐页指定了版式的页，模型才按参考改。</p>
   <div id="templateGalleryGrid" class="gallery-grid"></div>
-  <div class="gallery-foot"><button class="review-secondary-action" onclick="resetTemplateChoice()">保持当前模板</button><button class="review-primary-action" onclick="closeGallery('template')">完成</button></div>
+  <div class="gallery-foot"><button class="review-secondary-action" onclick="resetTemplateChoice()">保持当前模板</button><button class="review-secondary-action" onclick="closeGallery('template')">关闭</button></div>
 </dialog>
 
-<dialog id="layoutGalleryDialog" class="gallery-dialog" aria-label="本页版式">
-  <div class="gallery-head"><h2 id="layoutGalleryTitle">本页版式</h2><button class="review-icon-button" onclick="closeGallery('layout')" aria-label="关闭"><span data-review-icon="X"></span></button></div>
-  <p class="gallery-hint">版式只作参考：模型按它组织页面，不会为套骨架删掉这页的主张和证据。</p>
-  <div class="gallery-search"><input id="layoutSearch" type="search" placeholder="搜索版式名称"></div>
-  <div id="layoutGalleryGrid" class="gallery-grid"></div>
-  <div class="gallery-foot"><button class="review-secondary-action" onclick="resetLayoutChoice()">保持当前版式</button><button class="review-primary-action" onclick="closeGallery('layout')">完成</button></div>
-</dialog>
+
 
 <dialog id="reloadDialog">
   <h2>刷新会丢掉这些还没保存的东西</h2>
@@ -611,9 +631,11 @@ function updateTemplateButtons(){
   if(deckBadge){deckBadge.hidden=!stagedTemplate;deckBadge.textContent=stagedTemplate?'整套待提交':''}
   if(layoutBadge){
     const current=s.layout_staged||s.layout_requested||s.layout_id||'';
+    const pending=!!(s.layout_staged||(s.layout_requested&&s.layout_requested!==s.layout_id));
     layoutBadge.hidden=!current;
-    layoutBadge.classList.toggle('pending',!!(s.layout_staged||(s.layout_requested&&s.layout_requested!==s.layout_id)));
-    layoutBadge.textContent=s.layout_staged?'待提交':(s.layout_requested&&s.layout_requested!==s.layout_id?'待应用':layoutShort(current));
+    layoutBadge.classList.toggle('pending',pending);
+    layoutBadge.classList.toggle('applied',!pending&&!!s.layout_id);
+    layoutBadge.textContent=current?layoutShort(current):'';
   }
   const pageBtn=$('#pageLayoutBtn');
   if(pageBtn){const found=layoutRecord(s.layout_staged||s.layout_requested||s.layout_id);pageBtn.title=found?('本页版式：'+found.layout.name+'（参考）'):'为本页选择参考版式'}
@@ -634,15 +656,18 @@ function drawTemplateGallery(){
   for(const t of galleryData.templates){
     const card=document.createElement('button');card.type='button';card.className='gallery-card'+(t.template_id===current?' selected':'');
     card.disabled=!t.selectable;
+    card.setAttribute('aria-pressed',t.template_id===current?'true':'false');
     const thumb=document.createElement('div');thumb.className='thumb';
-    if(t.cover){const img=document.createElement('img');img.alt=t.name;assetFor(t.cover,'').then(url=>{if(url)img.src=url});thumb.append(img)}
+    if(t.cover){const img=document.createElement('img');img.alt=t.name;img.loading='lazy';assetFor(t.cover,'').then(url=>{if(url)img.src=url});thumb.append(img)}
     else{const num=document.createElement('span');num.className='num';num.textContent=(t.layouts&&t.layouts.length)?t.layouts.length+' 个版式':'';thumb.append(num)}
     if(t.applied){const flag=document.createElement('span');flag.className='flag';flag.textContent='当前';thumb.append(flag)}
     else if(t.legacy){const flag=document.createElement('span');flag.className='flag';flag.textContent='旧版';thumb.append(flag)}
     const name=document.createElement('div');name.className='name';name.textContent=t.name;
     const sub=document.createElement('div');sub.className='sub';
     sub.textContent=(t.legacy?'旧版 fidelity 模板':((t.layouts&&t.layouts.length)?t.layouts.length+' 个版式':''))+(t.selectable?'':' · 仅参考');
-    card.append(thumb,name,sub);
+    card.append(thumb,name);
+    if(t.description){const desc=document.createElement('div');desc.className='desc';desc.textContent=t.description;card.append(desc)}
+    card.append(sub);
     if(t.selectable)card.onclick=()=>stageTemplate(t.template_id);
     grid.append(card);
   }
@@ -662,18 +687,27 @@ function resetTemplateChoice(){
 }
 function closeGallery(which){
   if(which==='template')$('#templateGalleryDialog').close();
-  else $('#layoutGalleryDialog').close();
+  else{
+    $('#layoutGalleryPanel').hidden=true;
+    $('#reviewPanel').classList.remove('gallery-open');
+    togglePanel(true);
+  }
 }
 function openLayoutGallery(){
   if(data.route==='template')return;
+  if(panelCollapsed)togglePanel(true);
+  $('#reviewPanel').classList.add('gallery-open');
+  $('#layoutGalleryPanel').hidden=false;
   layoutFilter='';if($('#layoutSearch'))$('#layoutSearch').value='';
-  drawLayoutGallery();$('#layoutGalleryDialog').showModal();
+  drawLayoutGallery();
 }
 function drawLayoutGallery(){
   const grid=$('#layoutGalleryGrid');if(!grid)return;
   grid.replaceChildren();
   const t=activeTemplate();
-  $('#layoutGalleryTitle').textContent=t?('本页版式 · '+t.name):'本页版式';
+  $('#layoutGalleryTitle').textContent='本页版式';
+  const hint=$('#layoutGalleryHint');
+  if(hint)hint.textContent=(t?('当前模板：'+t.name+'。'):'')+'版式只作参考：模型按它组织页面，不会为套骨架删掉这页的主张和证据。';
   if(!t){const empty=document.createElement('p');empty.className='gallery-empty';empty.textContent='先选择一套模板，才有版式可选。';grid.append(empty);return}
   const s=state[page().key];
   const activeIsApplied=!stagedTemplate||stagedTemplate===galleryData.applied_template_id;
@@ -685,9 +719,9 @@ function drawLayoutGallery(){
   });
   if(!layouts.length){const empty=document.createElement('p');empty.className='gallery-empty';empty.textContent='没有匹配的版式。';grid.append(empty);return}
   for(const layout of layouts){
-    const card=document.createElement('button');card.type='button';card.className='gallery-card'+(layout.layout_id===current?' selected':'');
+    const card=document.createElement('button');card.type='button';card.className='gallery-card'+(layout.layout_id===current?' selected':'');card.setAttribute('aria-pressed',layout.layout_id===current?'true':'false');
     const thumb=document.createElement('div');thumb.className='thumb';
-    if(layout.preview){const img=document.createElement('img');img.alt=layout.name;assetFor(layout.preview,'').then(url=>{if(url)img.src=url});thumb.append(img)}
+    if(layout.preview){const img=document.createElement('img');img.alt=layout.name;img.loading='lazy';assetFor(layout.preview,'').then(url=>{if(url)img.src=url});thumb.append(img)}
     else{const num=document.createElement('span');num.className='num';num.textContent=layout.number||'—';thumb.append(num)}
     const name=document.createElement('div');name.className='name';name.textContent=layout.name||layout.layout_id;
     const sub=document.createElement('div');sub.className='sub';sub.textContent=layout.layout_id;
@@ -706,6 +740,9 @@ function stageLayout(id){
 }
 function resetLayoutChoice(){const s=state[page().key];s.layout_staged=null;drawLayoutGallery();updateTemplateButtons();updateRail();scheduleDraft();}
 if($('#layoutSearch'))$('#layoutSearch').oninput=e=>{layoutFilter=String(e.target.value||'').trim();drawLayoutGallery()};
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&!$('#layoutGalleryPanel').hidden){e.preventDefault();closeGallery('layout')}
+});
 
 function updateTemplateDecisionUI(){
   if(data.route!=='template')return;
@@ -1701,6 +1738,7 @@ async function render(){
   const url=await assetFor(p.png,p.version);
   if(seq===slideSeq&&url)$('#slide').src=url;
   drawRail();drawAssets();drawRegions();drawFeedbackTasks();status();drawStale();
+  if(!$('#layoutGalleryPanel').hidden)drawLayoutGallery();
   if(!$('#findPanel').hidden)updateFindMatches();
 }
 
@@ -2969,10 +3007,13 @@ function showSubmit(){
     $('#submitDialogTitle').textContent='整套修改任务';
     $('#templateNameSection').hidden=true;
     const feedbackPages=data.pages.filter(p=>{const s=state[p.key];return !!(s.feedback.trim()||s.annotations.length||s.assets.length)}).length;
-    const layoutPages=data.pages.filter(p=>state[p.key].layout_staged).length;
+    const layoutTargets=data.pages.filter(p=>state[p.key].layout_staged);
     const parts=[];
     if(feedbackPages)parts.push(feedbackPages+' 页修改意见');
-    if(layoutPages)parts.push(layoutPages+' 页参考版式');
+    if(layoutTargets.length){
+      const detail=layoutTargets.slice(0,4).map(p=>p.key+' · '+layoutShort(state[p.key].layout_staged)).join('、');
+      parts.push(layoutTargets.length+' 页参考版式（'+detail+(layoutTargets.length>4?' 等':'')+'）');
+    }
     const tpl=galleryTemplate(stagedTemplate);
     if(tpl)parts.push('整套模板 → '+tpl.name);
     $('#stats').textContent=parts.length?parts.join(' · '):'还没有可提交的修改';

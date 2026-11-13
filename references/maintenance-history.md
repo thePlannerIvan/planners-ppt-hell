@@ -9,7 +9,8 @@
 | 做了什么 | 为什么 | 影响了哪些 module | 删了什么 |
 |---|---|---|---|
 | 新增 `scripts/template/layout_index.py`：v2 `primitives/` 与 legacy `template_registry.json` 统一读成版式索引（id、短名、缩略图、primitive） | 模板包只有整页样张，没有可选的「版式」；审阅页的版式标题还是写死的字典 | `scripts/template/layout_index.py`（新）、`scripts/test/test_template_layout_index.py`（新） | 写死的 `layout_title` 字典只留在旧模板审阅页，不再扩散 |
-| 工作台顶部加「模板 / 版式」：整套模板画廊 + 当前模板的 16:9 版式画廊（可搜索）；选择先停在页面上，提交后成为 store 任务 | 模板只有项目级 `apply`，页面层没有版式入口；人只能写「这页用三栏」让模型猜 | `assets/review/review.html`、`scripts/generate_review_html.py`（`build_gallery` / 缩略图 / `gallery_sha256`） | 「模型自己从一套里挑」这条唯一路径 |
+| 工作台顶部加「模板 / 版式」：整套模板画廊 + 当前模板的 16:9 版式面板（可搜索）；选择先停在页面上，提交后成为 store 任务 | 模板只有项目级 `apply`，页面层没有版式入口；人只能写「这页用三栏」让模型猜 | `assets/review/review.html`、`scripts/generate_review_html.py`（`build_gallery` / 缩略图 / `gallery_sha256`） | 「模型自己从一套里挑」这条唯一路径 |
+| 版式面板占用右栏（非模态），翻页/切页时保留；两个入口换成 PPT 语义图标（叠层幻灯片 = 模板，标题 + 内容占位 = 版式） | 居中模态会在选版式时盖住画布与页轨，跨页选择要反复开关；抽象方框图不表达「主题/版式」 | `assets/review/review.html`（`.layout-panel` / `openLayoutGallery` / 工具栏 SVG） | 居中模态的版式画廊、四宫格/三方块图标 |
 | 任务带 `template_id` 与每页 `layout_id`；无页面的整套模板请求合法；模型 save 可带 `layout_id`，人工保存拒绝；`get`/`state` 返回页面版式 | 版式请求要能持久、可重试、能在 DSH 唤醒与本地异步两条宿主上都成立 | `scripts/workbench_store.py`（`feedback` / `save_page` / `page_value` / `add_page`）、`scripts/orchestrate/ppt_pipeline.py`（`make_review` 比画廊指纹）、`scripts/test/test_workbench_store.py`、`test_workbench_ui.py` | 「反馈任务必须有页面」这条把整套模板请求挡在外面的默认 |
 | 保存被拒（`conflict`）的当下就亮冲突横幅，不等下一次宿主同步 | 测试在「写反馈一轮」里抓到：状态已冲突、横幅还藏着，冲突在一段时间里看不见 | `assets/review/review.html`（`markStaleFromPages`） | 只在 `syncFromHost` / 重试里更新 `staleKeys` 的默认 |
 | 文档写清版式是**参考**不是锁层：整套模板不重排已有页，逐页版式只改指定页，内容冲突时保留主张与证据 | 选了版式不等于工具自动重绘；不写清会把「模型没照做」和「工具没生效」混成一件事 | `SKILL.md`、`references/workflow/01_template_intake.md`、`04_svg_stage.md`、`07_visual_review.md`、`references/contracts/template_package.md`、`project_contract.md`、`references/architecture.md`、`docs/ARCHITECTURE.md` | 「模板 = 一整套样张，模型自己看着办」的旧口径 |
