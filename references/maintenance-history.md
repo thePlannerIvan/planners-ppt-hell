@@ -8,7 +8,7 @@
 
 | 做了什么 | 为什么 | 影响了哪些 module | 删了什么 |
 |---|---|---|---|
-| `extract_template_pack.py` 新增原生 `layout_catalog.json`：master/layout 名称、占位符几何、每页所用版式、非占位内容框；按结构家族归并 | 原来只产渲染页 + 颜色/字号聚合，把 PPTX 里最结构化的东西扔掉了；模型只能看 71 张图自己归纳，SPEC 的安全边距写成 96px（源占位符实际 75.5px） | `scripts/template/layout_catalog.py`（新）、`scripts/template/extract_template_pack.py`、`scripts/test/test_layout_catalog.py`（新） | 「提取只有图片和聚合事实」的默认 |
+| `extract_template_pack.py` 新增原生 `layout_catalog.json`：master/layout 名称、占位符几何、每页所用版式、非占位内容框；PPTX 按结构家族归并，PDF 按文字/图片块推测同一形状 | 原来只产渲染页 + 颜色/字号聚合，把 PPTX 里最结构化的东西扔掉了；模型只能看 71 张图自己归纳，SPEC 的安全边距写成 96px（源占位符实际 75.5px） | `scripts/template/layout_catalog.py`（新）、`scripts/template/extract_template_pack.py`、`scripts/test/test_layout_catalog.py`（新） | 「提取只有图片和聚合事实」的默认 |
 | 新增 `scaffold_template_pack.py`：tokens（合法单值）、SPEC（真实色彩/安全区/版式目录）、shell、`layouts.json`、previews/anchors | step 2 原来是从零写四件套；脚手架把有据可依的部分先写出来，模型只补设计哲学、用法与 primitive | `scripts/template/scaffold_template_pack.py`（新）、`scripts/test/test_scaffold_template_pack.py`（新） | 「模型从空文件开始造包」的默认 |
 | 新增 `template-select` 审阅面：从 catalog 家族里勾选要收的版式；槽位骨架图 + 源页信息 + 「收进模板」开关；`apply_layout_selection.py` 把选择收窄到 `layouts.json` | 34 个源 layout 不能全部进包，也不能靠模型猜哪几个要；选择是生产范围，批准是质量门，两者分开 | `scripts/review_surface.py`（SELECT 面）、`scripts/generate_template_select_html.py`（新）、`scripts/template/apply_layout_selection.py`（新）、`assets/review/review.html`（route=template-select） | 「模板审阅里顺手 discard」的含糊语义 |
 | 最终模板审阅在有 `layouts.json` 时按版式条目审（名称/用法/源页），不再把 shell 与 primitive 文件名当版式 | 审阅页的版式标题过去是写死字典；shell 不该是一个待批版式 | `scripts/generate_template_review_html.py`、`template_feedback.expected_layouts` 继续取快照 | 写死 `layout_title` 在新包上的使用 |
@@ -16,7 +16,7 @@
 
 **边界怎么变了**：提取生产从「模型看渲染页手写四件套」变成「原生 layout 目录 → 脚手架 → 人选生产范围 → 模型只做被选中的 primitive → 最终批准」。选择面不是批准；批准仍绑定最终包字节。旧包没有 `layouts.json` 时继续从 primitives 派生，不走新链。
 
-**回归**：非浏览器全量 423 项通过（98 项浏览器/环境门跳过）；`test_layout_catalog` 2、`test_scaffold_template_pack` 4、`test_template_production` 4、`test_template_layout_index` 7、`test_workbench_store` 42；workbench UI 40（浏览器门）、review 浏览器门 29 项通过。
+**回归**：非浏览器全量 424 项通过（98 项浏览器/环境门跳过）；`test_layout_catalog` 2、`test_scaffold_template_pack` 4、`test_template_production` 4、`test_template_layout_index` 7、`test_workbench_store` 42；workbench UI 40（浏览器门）、review 浏览器门 29 项通过。
 
 ## 2026-11-13 · 模板版式：整套选择与逐页参考
 

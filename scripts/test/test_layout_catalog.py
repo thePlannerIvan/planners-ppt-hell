@@ -6,7 +6,14 @@ from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPTS / 'template'))
-from layout_catalog import catalog_from_pptx, family_of, placeholder_role  # noqa: E402
+from layout_catalog import catalog_from_pdf, catalog_from_pptx, family_of, placeholder_role  # noqa: E402
+
+from PIL import Image  # noqa: E402
+
+try:
+    import fitz  # noqa: E402
+except ImportError:  # pragma: no cover
+    fitz = None
 
 from pptx import Presentation  # noqa: E402
 from pptx.util import Inches  # noqa: E402
@@ -53,6 +60,35 @@ class LayoutCatalogTests(unittest.TestCase):
         body = next(item for item in catalog['families'] if item['family'] == 'one_column')
         self.assertEqual(body['label'], '单栏')
         self.assertTrue(body['slots'])
+
+    @unittest.skipUnless(fitz is not None, 'PyMuPDF is required for PDF catalog')
+    def test_pdf_catalog_reads_text_image_blocks_and_families(self):
+        with tempfile.TemporaryDirectory() as temp:
+            temp = Path(temp)
+            image = temp / 'image.png'
+            Image.new('RGB', (480, 270), 'blue').save(image)
+            source = temp / 'deck.pdf'
+            doc = fitz.open()
+            page = doc.new_page(width=960, height=540)
+            page.insert_text((80, 120), 'COVER TITLE', fontsize=40)
+            page.insert_text((80, 190), 'A subtitle', fontsize=16)
+            page = doc.new_page(width=960, height=540)
+            page.insert_text((80, 100), 'Section headline', fontsize=24)
+            page.insert_text((80, 180), 'A paragraph of body text.', fontsize=11)
+            page = doc.new_page(width=960, height=540)
+            page.insert_image(fitz.Rect(0, 0, 960, 540), filename=str(image))
+            doc.save(str(source))
+            doc.close()
+            catalog = catalog_from_pdf(source)
+        self.assertEqual(catalog['source_kind'], 'pdf')
+        self.assertEqual(catalog['slide_count'], 3)
+        self.assertGreaterEqual(len(catalog['families']), 3)
+        families = {item['family']: item for item in catalog['families']}
+        self.assertIn('cover', families)
+        self.assertIn('full_bleed', families)
+        self.assertEqual([slot['role'] for slot in families['cover']['slots']], ['title', 'subtitle'])
+        self.assertEqual([slot['role'] for slot in families['full_bleed']['slots']], ['image'])
+        self.assertEqual(catalog['pages'][1]['title'], 'Section headline')
 
     def test_family_and_role_mapping(self):
         self.assertEqual(family_of('Title Slide'), ('cover', '封面'))

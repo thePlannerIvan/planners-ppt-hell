@@ -18,9 +18,9 @@
 
 索引读法见 [模板契约的版式索引](../contracts/template_package.md#版式索引)。它只读包，不改哈希，也不另存第二份清单。
 
-## 提取生产（PPTX 优先）
+## 提取生产（PPTX / PDF）
 
-源是 `.pptx` 时，先用原生 master/layout，不再只靠看渲染页：
+源是 `.pptx` 时先用原生 master/layout；PDF 没有母版，按文字/图片块推测结构家族。两者都产出同一份 `layout_catalog.json`，不再只靠看渲染页：
 
 ```bash
 python scripts/template/extract_template_pack.py <source.pptx> --project <project>   # 渲染页 + 事实 + layout_catalog.json
@@ -30,7 +30,7 @@ python scripts/template/apply_layout_selection.py <project>                     
 # 模型按 layouts.json 的槽位与代表源页做 primitives；再 template-review 逐版式批准
 ```
 
-`layout_catalog.json` 记录每个源 layout 的名称、占位符几何与使用页；`layouts.json` 是**发布版式索引**，同时被工作台的版式画廊、最终模板审阅和模型执行消费。脚手架只写有据可依的值（色彩、字号、安全边距、版式目录），设计哲学与 primitive 仍由模型补。旧包没有 `layouts.json` 时继续从 primitives 派生，不走这条新链。
+`layout_catalog.json` 记录每个源 layout 的名称、占位符几何与使用页（PDF 是代表页的文字/图片块）；`layouts.json` 是**发布版式索引**，同时被工作台的版式画廊、最终模板审阅和模型执行消费。脚手架只写有据可依的值（色彩、字号、安全边距、版式目录），设计哲学与 primitive 仍由模型补。旧包没有 `layouts.json` 时继续从 primitives 派生，不走这条新链。纯图片目录仍走“当次参考”模式：没有文字/块结构可提取，不硬造版式目录。
 
 ## 提炼可复用模板
 

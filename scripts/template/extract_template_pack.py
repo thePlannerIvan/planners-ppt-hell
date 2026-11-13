@@ -43,7 +43,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-from layout_catalog import catalog_from_pptx, write_catalog
+from layout_catalog import catalog_from_pdf, catalog_from_pptx, write_catalog
 
 try:
     from pptx import Presentation
@@ -756,6 +756,7 @@ def run_extract_template_pack(source, project, output_visuals=None, dpi=144, max
 
     elif suffix == ".pdf":
         pages = render_pdf_to_pngs(source_path, visuals_dir, dpi=dpi, max_pages=max_pages)
+        layout_catalog = catalog_from_pdf(source_path)
         render_method = "pdf_to_png"
 
     elif suffix == ".pptx":

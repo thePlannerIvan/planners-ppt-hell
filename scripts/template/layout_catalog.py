@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""PPTX layout catalog：把母版里的版式目录读成可生产的数据。
+"""Layout catalog：把 PPTX 母版或 PDF 页读成可生产的版式目录。
 
 提取脚本原来只产出渲染页与颜色/字号聚合，把 PPTX 里最结构化的东西扔掉了：
 master、layout、占位符名称与几何、每一页用了哪个版式。这里把那些读出来，
 写成 `layout_catalog.json`：
 
   · `layouts`  —— 每个源 layout 一条：名称、master/layout 序号、占位符槽位、使用页；
+                PDF 没有母版，按文字/图片块推测结构家族，槽位来自代表页。
   · `families` —— 按结构家族归并（封面 / 章节分隔 / 三栏 / 大图 …），供脚手架收版式；
   · `pages`    —— 每一页用了哪个版式，以及占位符之外的内容框（文字/图/表/图表）。
 
@@ -226,6 +227,187 @@ def catalog_from_pptx(source_path):
     }
 
 
+PDF_FAMILY_LABELS = {
+    "full_bleed": "全幅图",
+    "large_image": "大图 + 文字",
+    "blank": "空白/自由",
+    "cover": "封面",
+    "divider": "章节分隔",
+    "three_columns": "三栏",
+    "two_columns": "双栏",
+    "one_column": "单栏",
+}
+
+
+def _pdf_blocks(page, sx, sy):
+    """把 PDF 页读成文字/图片块；字体大小折算到 1080p。"""
+    blocks = page.get_text("dict").get("blocks") or []
+    items = []
+    for block in blocks:
+        bbox = block.get("bbox")
+        if not bbox:
+            continue
+        x0, y0, x1, y1 = (float(value) for value in bbox[:4])
+        item = {
+            "x": round(x0 * sx, 1),
+            "y": round(y0 * sy, 1),
+            "width": round(max(0.0, x1 - x0) * sx, 1),
+            "height": round(max(0.0, y1 - y0) * sy, 1),
+        }
+        if item["width"] <= 0 or item["height"] <= 0:
+            continue
+        if block.get("type") == 0:
+            text = " ".join(
+                span.get("text", "") for line in block.get("lines") or [] for span in line.get("spans") or []
+            ).strip()
+            sizes = [float(span.get("size") or 0) for line in block.get("lines") or []
+                     for span in line.get("spans") or []]
+            if text:
+                item.update(kind="text", text=text[:120], font_size=round(max(sizes or [0]) * sy, 1))
+                items.append(item)
+        elif block.get("type") == 1:
+            item.update(kind="image")
+            items.append(item)
+    return items
+
+
+def _pdf_columns(body_blocks):
+    centers = [item["x"] + item["width"] / 2 for item in body_blocks
+               if item.get("width", 0) < TARGET_W * 0.58]
+    if len(centers) < 2:
+        return 1
+    left = sum(1 for value in centers if value < TARGET_W * 0.44)
+    right = sum(1 for value in centers if value > TARGET_W * 0.56)
+    middle = len(centers) - left - right
+    if left and right and not middle:
+        return 2
+    if left and middle and right:
+        return 3
+    return 1
+
+
+def _pdf_family(page_index, title, body_count, columns, image_ratio):
+    if image_ratio >= 0.80:
+        return "full_bleed"
+    if image_ratio >= 0.30:
+        return "large_image"
+    if not title and not body_count:
+        return "blank"
+    if title and body_count == 0:
+        return "cover" if page_index == 1 else "divider"
+    if page_index == 1 and title and image_ratio <= 0.20:
+        return "cover"
+    if columns >= 3:
+        return "three_columns"
+    if columns == 2:
+        return "two_columns"
+    return "one_column"
+
+
+def _pdf_page(page_index, page):
+    page_width = float(page.rect.width or 1)
+    page_height = float(page.rect.height or 1)
+    sx, sy = TARGET_W / page_width, TARGET_H / page_height
+    blocks = _pdf_blocks(page, sx, sy)
+    text_blocks = [item for item in blocks if item["kind"] == "text"]
+    image_blocks = [item for item in blocks if item["kind"] == "image"]
+    image_ratio = min(1.0, sum(item["width"] * item["height"] for item in image_blocks) / (TARGET_W * TARGET_H))
+    sizes = sorted((item.get("font_size", 0) for item in text_blocks if item.get("font_size", 0) > 0), reverse=True)
+    second = sizes[1] if len(sizes) > 1 else 0
+    title_block = max(text_blocks, key=lambda item: item.get("font_size", 0), default=None)
+    if title_block is not None and second and title_block.get("font_size", 0) < second * 1.35:
+        title_block = None
+    body = [item for item in text_blocks if item is not title_block]
+    columns = _pdf_columns(body)
+    family = _pdf_family(page_index, bool(title_block), len(body), columns, image_ratio)
+    subtitle_block = None
+    if family in ("cover", "divider") and body:
+        subtitle_block = max(body, key=lambda item: item.get("font_size", 0))
+        body = [item for item in body if item is not subtitle_block]
+    slots = []
+    for item, role in [(title_block, "title"), (subtitle_block, "subtitle"),
+                       *[(item, "body") for item in body], *[(item, "image") for item in image_blocks]]:
+        if item is None:
+            continue
+        slots.append({"role": role, "x": item["x"], "y": item["y"],
+                      "width": item["width"], "height": item["height"]})
+    shapes = [
+        {"kind": item["kind"], "role": role, "text": item.get("text", ""),
+         "x": item["x"], "y": item["y"], "width": item["width"], "height": item["height"]}
+        for item, role in [(title_block, "title"), (subtitle_block, "subtitle"),
+                           *[(item, "body") for item in body], *[(item, "image") for item in image_blocks]]
+        if item is not None
+    ]
+    title = (title_block.get("text") or "")[:80] if title_block else ""
+    return {
+        "page": page_index,
+        "layout": family,
+        "family": family,
+        "title": title,
+        "slots": slots,
+        "shapes": shapes[:24],
+    }
+
+
+def catalog_from_pdf(source_path):
+    """PDF 没有母版：按每页的文字/图片块推测结构家族，并生成可用的槽位。"""
+    try:
+        import fitz  # PyMuPDF
+    except ImportError as error:
+        raise RuntimeError("PyMuPDF is required to catalog PDF layouts") from error
+    source_path = Path(source_path).resolve()
+    doc = fitz.open(str(source_path))
+    pages = [_pdf_page(index, page) for index, page in enumerate(doc, start=1)]
+    doc.close()
+
+    grouped = {}
+    for page in pages:
+        grouped.setdefault(page["family"], []).append(page)
+    ordered = sorted(grouped.items(), key=lambda item: (-len(item[1]), item[0]))
+    layouts = []
+    families = []
+    for index, (family, group) in enumerate(ordered, start=1):
+        representative = group[0]
+        label = PDF_FAMILY_LABELS.get(family, family)
+        layout = {
+            "source_id": family,
+            "master": 0,
+            "layout": index,
+            "name": label,
+            "family": family,
+            "family_label": label,
+            "usage": len(group),
+            "source_pages": [page["page"] for page in group],
+            "slots": representative["slots"],
+            "slot_signature": [[slot["role"], slot["x"], slot["y"], slot["width"], slot["height"]]
+                               for slot in representative["slots"]],
+            "representative_page": representative["page"],
+        }
+        layouts.append(layout)
+        families.append({
+            "family": family,
+            "label": label,
+            "usage": len(group),
+            "layout_ids": [family],
+            "layout_names": [label],
+            "source_pages": [page["page"] for page in group][:30],
+            "representative_layout": family,
+            "representative_page": representative["page"],
+            "slots": representative["slots"],
+        })
+    return {
+        "schema": "planner.template-layout-catalog.v1",
+        "source": str(source_path),
+        "source_kind": "pdf",
+        "canvas": {"width": int(TARGET_W), "height": int(TARGET_H), "source_width": 0, "source_height": 0},
+        "slide_count": len(pages),
+        "master_count": 0,
+        "layouts": layouts,
+        "families": families,
+        "pages": pages,
+    }
+
+
 def write_catalog(project, catalog):
     path = Path(project) / "_internal" / "00_project" / "template_pack" / "layout_catalog.json"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -234,11 +416,11 @@ def write_catalog(project, catalog):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Read a PPTX master/layout catalog")
-    parser.add_argument("source", help="Path to .pptx")
+    parser = argparse.ArgumentParser(description="Read a PPTX/PDF layout catalog")
+    parser.add_argument("source", help="Path to .pptx or .pdf")
     parser.add_argument("--project", required=True, help="Project root to write layout_catalog.json into")
     args = parser.parse_args()
-    catalog = catalog_from_pptx(args.source)
+    catalog = catalog_from_pdf(args.source) if Path(args.source).suffix.lower() == ".pdf" else catalog_from_pptx(args.source)
     path = write_catalog(args.project, catalog)
     print(json.dumps({
         "catalog": str(path),
