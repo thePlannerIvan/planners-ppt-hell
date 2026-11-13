@@ -22,6 +22,7 @@ SVG 工作台持续存在。用户改字与模型候选共用版本存储；PPT 
 
 一次确认画幅与视觉来源，用户已指明的直接执行。共同秩序写入 _internal/01_content/design_direction.md。
 通用判断读 [style_system.md](references/domain/style_system.md)；选择信息关系时读 [layout_taxonomy.md](references/domain/layout_taxonomy.md)。模板含义以 [模板契约](references/contracts/template_package.md) 为准；开画前读取所选模板或视频风格文档并实际查看样张；没有模板时查看本次参考，具体构图由当前内容决定。
+模板是「主题 + 一组具名版式」：主题定 tokens、底壳与 SPEC，版式是某一页的参考骨架。工作台里整套选模板、逐页选版式都只是给模型的一条请求，不是页面自动重绘。
 幻灯片复用参考、选择库模板或提炼入库时读 [01_template_intake.md](references/workflow/01_template_intake.md)；只有入库分支需要模板人工确认。
 结束条件：方向和画幅明确，必要的源参考已经实际查看。
 
@@ -29,6 +30,7 @@ SVG 工作台持续存在。用户改字与模型候选共用版本存储；PPT 
 
 读 [04_svg_stage.md](references/workflow/04_svg_stage.md)。模型可以通过 store CLI 新增或删除页面；新增页提交完整 candidate 与 page 元数据，删除页提交 page_key、base_revision 与 base_order。已有页先 checkout 当前页，编辑返回的候选，再提交 author=model、candidate、base_revision。_internal/02_svg_source 是可重建兼容视图，不是生成脚本写入位置。
 读取 notes、protected 与待办 tasks；冲突时保留候选并重新读取。遗漏用户操作会被拦下，明确改写范围只来自浏览器任务授权。
+工作台的「模板 / 版式」是请求入口：整套模板与逐页参考版式跟意见一起提交成 store 任务（任务 `template_id`、页面 `layout_id`）。DSH 当场唤醒模型；本地宿主只把任务落盘，等模型下次读到。模型按任务 checkout 该页，以所选版式为参考重排，保存时带 `layout_id`，在回执里说明保留与偏离。版式是参考，不是锁层：内容放不下时，这页的主张与证据优先。
 用 check --summary 批量检查本轮页面，再逐页查看当前 PNG、记录实际 inspect。打开工作台与反馈恢复见 [07_visual_review.md](references/workflow/07_visual_review.md)；反馈不是批准，未完成反馈不阻止独立输出。运行在 DSH 时用 `review_open` 自动加载同一工作台到侧栏；非 DSH 自动启动或复用 `planners-review-core` 本地宿主。两路共用同一份 Workbench Store、草稿和命令回执。
 结束条件：本轮提交有保存回执，技术问题与实际看图结果可查。工作台可继续修改，没有永久 COMPLETE。
 

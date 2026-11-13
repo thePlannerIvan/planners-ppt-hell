@@ -10,6 +10,7 @@
 所以这里给的是 `rel` 与 `version`，不是拼好的 URL。
 同时注入存储分配的稳定元素 ID 与隔离前缀 SVG，供工作台进行元素级编辑。
 """
+import hashlib
 import json
 import re
 import shlex
@@ -18,14 +19,18 @@ import uuid
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from PIL import Image
+
 from project_state import (PNG, REVIEW, SVG, content, images, local, read,
                            review_snapshot, sha, source_digest, versions, write)
 from review_surface import DRAFT_REL, resolve_module, write_surface
+from template import layout_index
 from workbench_store import ensure, get_page
 from lib.svg_style_inline import expand_for_inline
 
 SNAPSHOT_REL = f'{REVIEW}/snapshot.json'
 VERSIONS_REL = f'{REVIEW}/versions'
+GALLERY_REL = f'{REVIEW}/template_gallery'
 XLINK_HREF = '{http://www.w3.org/1999/xlink}href'
 SVG_NS = 'http://www.w3.org/2000/svg'
 ET.register_namespace('', SVG_NS)
@@ -138,8 +143,159 @@ def template_fingerprint():
     ui = resolve_module('planners-review-core')/'assets'
     ui_files = [ui/'review-ui.css', *sorted((ui/'review-ui').glob('*'))]
     tools = path.with_name('workbench-tools.js')
+    # 生成器自己与版式索引也进指纹：页面里的画廊数据是这两个模块算出来的，只比皮肤会漏掉数据层。
+    generator = Path(__file__).resolve()
+    index = generator.parent / 'template' / 'layout_index.py'
     return ':'.join([sha(path), sha(tools) if tools.is_file() else '', sha(tokens) if tokens.is_file() else '',
+                     sha(generator), sha(index) if index.is_file() else '',
                      *(sha(file) for file in ui_files if file.is_file())])
+
+
+def template_library_root():
+    """随 Skill 发布的内置模板库。调用方要换根（测试、私有库）时显式传。"""
+    return Path(__file__).resolve().parents[1] / 'assets' / 'template_library'
+
+
+def _safe_name(value):
+    return re.sub(r'[^A-Za-z0-9._-]+', '-', str(value)).strip('.-') or 'item'
+
+
+def _applied_template(root):
+    """项目当前这套模板：v2 看 `template_pack/`，v1 看 `fidelity_template/`。
+
+    返回 `(manifest, pack_root, legacy)`。没有模板时 `(空, None, False)`。
+    """
+    project = Path(root) / '_internal' / '00_project'
+    pack = project / 'template_pack'
+    if pack.is_dir():
+        manifest = read(pack / 'manifest.json', {}) or read(project / 'template_library_source.json', {})
+        return manifest, pack, False
+    if (project / 'fidelity_template' / 'template_registry.json').is_file():
+        return read(project / 'template_library_source.json', {}), project, True
+    return {}, None, False
+
+
+def _thumb(root, template_key, key, src, cache):
+    """把一张版式预览缩成画廊缩略图；源没变就复用。返回项目相对路径，失败给空串。"""
+    src = Path(src)
+    if not src.is_file():
+        return ''
+    relative = f'{GALLERY_REL}/{_safe_name(template_key)}/{_safe_name(key)}.jpg'
+    destination = Path(root) / relative
+    stamp = f'{src.stat().st_mtime_ns}:{src.stat().st_size}'
+    cache_key = f'{template_key}|{key}'
+    cached = cache.get(cache_key)
+    if isinstance(cached, dict) and cached.get('stamp') == stamp and destination.is_file():
+        return relative
+    try:
+        image = Image.open(src).convert('RGB')
+        image.thumbnail((640, 360))
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        image.save(destination, 'JPEG', quality=84)
+    except (OSError, ValueError):
+        return ''
+    cache[cache_key] = {'stamp': stamp, 'src': str(src)}
+    return relative
+
+
+def _template_entry(root, template_id, manifest, pack_root, cache, applied=False, selectable=True, legacy=False):
+    layouts = []
+    for layout in layout_index.pack_layouts(pack_root):
+        preview = layout.get('preview', '')
+        thumb = _thumb(root, template_id, layout['layout_id'], Path(pack_root) / preview, cache) if preview else ''
+        layouts.append({**layout, 'preview': thumb})
+    cover = ''
+    declared = str(manifest.get('preview') or '')
+    if declared and (Path(pack_root) / declared).is_file():
+        cover = _thumb(root, template_id, '__cover__', Path(pack_root) / declared, cache)
+    elif legacy:
+        contact = Path(pack_root) / 'fidelity_template' / 'canvas_previews' / 'full_deck_contact_sheet.png'
+        cover = _thumb(root, template_id, '__cover__', contact, cache)
+    if not cover and layouts:
+        cover = layouts[0].get('preview', '')
+    return {
+        'template_id': template_id,
+        'name': str(manifest.get('name') or template_id),
+        'description': str(manifest.get('description') or ''),
+        'schema': str(manifest.get('schema') or ('planner.template-library.v1' if legacy else '')),
+        'applied': applied,
+        'selectable': selectable,
+        'legacy': legacy,
+        'cover': cover,
+        'layouts': layouts,
+    }
+
+
+def build_gallery(root, library_root=None):
+    """工作台的模板/版式画廊数据。
+
+    `library_root=''` 表示只列项目当前这套模板（测试用，也避免把大库的缩略图反复算）。
+    默认读随 Skill 发布的库；库条目只收 approved 的 v2 四件套——legacy fidelity 套用会切走
+    页面锁层流程，不适合在「版式只作参考」的面里当整套模板选。
+    """
+    root = Path(root)
+    cache_path = root / GALLERY_REL / 'cache.json'
+    cache = read(cache_path, {})
+    if not isinstance(cache, dict):
+        cache = {}
+    manifest, pack_root, legacy = _applied_template(root)
+    applied_id = str(manifest.get('template_id') or '') if manifest else ''
+    templates = []
+    if pack_root:
+        templates.append(_template_entry(
+            root, applied_id or 'project-template', manifest, pack_root, cache,
+            applied=True, selectable=not legacy, legacy=legacy))
+    if library_root != '':
+        library = Path(library_root) if library_root else template_library_root()
+        if library.is_dir():
+            for manifest_path in sorted(library.glob('*/manifest.json')):
+                data = read(manifest_path, {})
+                if data.get('status') != 'approved':
+                    continue
+                is_v2 = data.get('schema') == 'planner.multimodal-template-pack.v2' or 'four_piece_contract' in data
+                if not is_v2:
+                    continue
+                template_id = str(data.get('template_id') or manifest_path.parent.name)
+                if template_id == applied_id:
+                    continue
+                templates.append(_template_entry(
+                    root, template_id, data, manifest_path.parent, cache,
+                    applied=False, selectable=True, legacy=False))
+    write(cache_path, cache)
+    return {'applied_template_id': applied_id, 'templates': templates}
+
+
+def gallery_fingerprint(root, library_root=None):
+    """这一版画廊数据是否还对应当前模板与库。
+
+    应用了另一套模板、或库里某套包重新发布，都应重出审阅页（缩略图与可选项都变了）。
+    只看 manifest 里预计算的 `package_sha256`，不为指纹重算整包哈希。
+    """
+    root = Path(root)
+    project = root / '_internal' / '00_project'
+    entries = []
+    manifest, pack_root, legacy = _applied_template(root)
+    if pack_root:
+        if legacy:
+            entries.append(['applied', str(manifest.get('template_id') or ''),
+                            sha(project / 'template_library_source.json') if (project / 'template_library_source.json').is_file() else ''])
+            registry = pack_root / 'fidelity_template' / 'template_registry.json'
+            entries.append(['registry', sha(registry) if registry.is_file() else ''])
+        else:
+            entries.append(['applied', str(manifest.get('template_id') or ''),
+                            str(manifest.get('package_sha256') or '')])
+    if library_root != '':
+        library = Path(library_root) if library_root else template_library_root()
+        if library.is_dir():
+            for manifest_path in sorted(library.glob('*/manifest.json')):
+                data = read(manifest_path, {})
+                if data.get('status') != 'approved':
+                    continue
+                if data.get('schema') != 'planner.multimodal-template-pack.v2' and 'four_piece_contract' not in data:
+                    continue
+                entries.append(['library', str(data.get('template_id') or manifest_path.parent.name),
+                                str(data.get('package_sha256') or '')])
+    return hashlib.sha256(json.dumps(entries, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:16]
 
 
 def previous_page_feedback(root, current):
@@ -161,7 +317,7 @@ def previous_page_feedback(root, current):
     return carried
 
 
-def generate(root, template_path=None):
+def generate(root, template_path=None, library_root=None):
     root = Path(root).resolve()
     head = ensure(root)
     c = content(root)
@@ -176,6 +332,7 @@ def generate(root, template_path=None):
         'png_hashes': {k: sha(root/PNG/(k+'.png')) if (root/PNG/(k+'.png')).is_file() else '' for k in v},
         'assets': {k: asset_records(root, k) for k in v},
         'template_sha256': template_fingerprint(),
+        'gallery_sha256': gallery_fingerprint(root, library_root),
         'source_sha256': source_digest(root),
     }
     data = {
@@ -191,6 +348,7 @@ def generate(root, template_path=None):
         'route': head.get('route', 'slides'),
         'export_command_base': f'python3 {shlex.quote(str(Path(__file__).parent / "orchestrate/ppt_pipeline.py"))} {shlex.quote(str(root))} export',
         'local_fallback_command': f'python3 {shlex.quote(str(Path(__file__).with_name("review_surface.py")))} {shlex.quote(str(root))}',
+        'gallery': build_gallery(root, library_root),
         'pages': [],
     }
     by_key = {p['page_key']: p for p in c['pages']}
@@ -206,6 +364,7 @@ def generate(root, template_path=None):
             'svg': f'{SVG}/{k}.svg',
             'svgMarkup': prepare_inline_svg(root, k, stored),
             'revision': stored['revision'],
+            'layout_id': stored.get('layout_id', ''),
             'svg_path': stored.get('svg_path', ''),
             'notes': stored.get('notes', ''),
             'protected': stored.get('protected', {}),

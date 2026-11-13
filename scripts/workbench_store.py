@@ -23,6 +23,8 @@ PNG = '_internal/03_png_preview/pages'
 ID_ATTR = 'data-workbench-id'
 XLINK = '{http://www.w3.org/1999/xlink}href'
 KEY = re.compile(r'[A-Za-z][A-Za-z0-9_-]{0,63}')
+# 版式引用是模板包里的 primitive/canvas 名（p24_... / cover_dark），允许数字开头。
+LAYOUT_KEY = re.compile(r'[A-Za-z0-9][A-Za-z0-9._-]{0,127}')
 ET.register_namespace('', 'http://www.w3.org/2000/svg')
 ET.register_namespace('xlink', 'http://www.w3.org/1999/xlink')
 
@@ -295,12 +297,13 @@ def page_value(root, head, key):
     if key not in head['pages']:
         raise StoreError('unknown_page', 'Unknown page', page_key=key)
     revision = head['pages'][key]['revision']
+    layout_id = head['pages'][key].get('layout_id', '')
     if not revision:
-        return {'page_key': key, 'revision': None, 'svg': '', 'notes': head['pages'][key]['input'].get('notes', ''),
-                'protected': {}}
+        return {'page_key': key, 'revision': None, 'svg': '', 'layout_id': layout_id,
+                'notes': head['pages'][key]['input'].get('notes', ''), 'protected': {}}
     record = revision_record(root, revision)
     return {**record, 'svg': (revision_dir(root, revision) / 'page.svg').read_text(),
-            'svg_path': str(revision_dir(root, revision) / 'page.svg')}
+            'layout_id': layout_id, 'svg_path': str(revision_dir(root, revision) / 'page.svg')}
 
 
 def get_page(root, key):
@@ -588,6 +591,12 @@ def save_page(root, head, command, browser, prepared_candidate=None):
     author = command.get('author', 'human' if browser else 'model')
     if author not in ('human', 'model') or (browser and author != 'human'):
         raise StoreError('invalid_author', 'Browser cannot submit model candidates')
+    layout_id = command.get('layout_id')
+    if layout_id is not None:
+        if author != 'model':
+            raise StoreError('invalid_layout', 'Only the model records a layout reference')
+        if not isinstance(layout_id, str) or (layout_id and not LAYOUT_KEY.fullmatch(layout_id)):
+            raise StoreError('invalid_layout', 'layout_id must be a template layout key')
     protected = copy.deepcopy(current['protected'])
     source_dir = revision_dir(root, current['revision']) if current['revision'] else Path(root) / VIEW
     candidate = command.get('candidate')
@@ -636,6 +645,8 @@ def save_page(root, head, command, browser, prepared_candidate=None):
     page['previous_view_sha256'] = digest(view.read_bytes()) if view.is_file() else None
     page['revision'] = record['revision']
     page.setdefault('baseline_revision', record['revision'])
+    if layout_id is not None:
+        page['layout_id'] = layout_id
     changes = revision_changes(current, record, (revision_dir(root, record['revision']) / 'page.svg').read_text())
     if author == 'human':
         sync_human_copy(root, head, key, current, tree)
@@ -648,7 +659,15 @@ def save_page(root, head, command, browser, prepared_candidate=None):
 def feedback(head, command):
     pages = command.get('pages', {})
     scope = command.get('scope')
-    if scope not in ('page', 'deck') or not pages or (scope == 'page' and len(pages) != 1):
+    template_id = command.get('template_id')
+    if template_id is not None:
+        if not isinstance(template_id, str) or (template_id and not LAYOUT_KEY.fullmatch(template_id)):
+            raise StoreError('invalid_feedback', 'template_id must be a template library key')
+        if template_id and scope != 'deck':
+            raise StoreError('invalid_feedback', 'A whole-template request needs deck scope')
+    # 整套模板请求可以不绑页面：这一步只换项目的视觉语言，页面重做由逐页版式另说。
+    if (scope not in ('page', 'deck') or (scope == 'page' and len(pages) != 1)
+            or (not pages and not template_id)):
         raise StoreError('invalid_feedback', 'Feedback needs page or deck scope and targets')
     for key, item in pages.items():
         if key not in head['pages'] or item.get('revision') != head['pages'][key]['revision']:
@@ -656,8 +675,13 @@ def feedback(head, command):
                              current_revision=head['pages'].get(key, {}).get('revision'))
         if not isinstance(item.get('rewrite_elements', []), list):
             raise StoreError('invalid_feedback', 'Rewrite scope must be an element list')
+        layout_id = item.get('layout_id')
+        if layout_id is not None and (not isinstance(layout_id, str)
+                                      or (layout_id and not LAYOUT_KEY.fullmatch(layout_id))):
+            raise StoreError('invalid_feedback', 'layout_id must be a template layout key')
     identity = 'task_' + uuid.uuid4().hex
     head['tasks'][identity] = {'task_id': identity, 'scope': scope, 'pages': copy.deepcopy(pages),
+                               'template_id': template_id or '',
                                'overall_feedback': str(command.get('overall_feedback') or ''),
                                'status': 'pending', 'created_at': now()}
     return {'ok': True, 'task_id': identity, 'saved': True}
@@ -878,10 +902,16 @@ def add_page(root, head, command, prepared_candidate, operation_id):
     before = command.get('before_page_key')
     if before is not None and before not in head['order']:
         raise StoreError('unknown_page', 'before_page_key is not in the current order')
+    layout_id = command.get('layout_id')
+    if layout_id is not None and (not isinstance(layout_id, str)
+                                  or (layout_id and not LAYOUT_KEY.fullmatch(layout_id))):
+        raise StoreError('invalid_layout', 'layout_id must be a template layout key')
     tree = parse_svg(candidate.read_text())
     record = create_revision(root, key, xml(tree), candidate.parent, page_input['notes'], {}, 'model', None, operation_id)
     head['pages'][key] = {'revision': record['revision'], 'baseline_revision': record['revision'],
                           'title': page_input['title'], 'input': page_input}
+    if layout_id is not None:
+        head['pages'][key]['layout_id'] = layout_id
     order = list(head['order'])
     if before is None:
         order.append(key)

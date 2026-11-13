@@ -7,6 +7,7 @@ _internal/00_project/page_manifest.json 保留 version 5.0 与 route（slides / 
 store 位于 _internal/06_workbench；原 _internal/06_ppt_output 不受影响。
 ensure(root) 首次导入兼容 SVG，之后核对外部改写；state(root) 返回 order、pages[key].revision、tasks[id]；get_page(root,key) 返回 revision、svg、notes、protected。`add_page` / `delete_page` 是页面集合的唯一写入口；add 以 candidate 创建首个 revision，delete 从当前 order 移除但保留 revision 历史。
 模型命令通过 workbench_store.py --root <project> --command-json 的 JSON stdin 提交。checkout 返回固定资产引用的 candidate，save 带 author=model、candidate、base_revision。操作 ID 控制重试，基版与用户保护控制覆盖。
+模型 save 可带 `layout_id`（这页的参考版式），存进页面记录并随 get/state 返回；人工保存不能写它。反馈任务可带 `template_id` 与每页 `layout_id`；只换整套模板的任务可以没有页面，resolve 用空 results。
 save 回执增加 changes（元素增删改 ID/数量、图片和文本变化 ID、notes/protected 变化、序列化字节差、no_change）。比较归 store，图片按冻结内容哈希识别；路径改写不算换图，字节差也不等同视觉变化。no_change 仅提醒，保存与幂等语义不变。
 版本 SVG 与资产保存后不可重写。兼容 _internal/02_svg_source 可重建，直接修改会被检测，不静默当作模型新版本。
 用户保护与任务在同一 head 持久化。浏览器反馈才可声明元素改写范围。resolve 绑定真实结果版本，不建立页面批准。

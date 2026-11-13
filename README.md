@@ -128,7 +128,7 @@ git clone https://github.com/thePlannerIvan/planners-ppt-hell.git ~/.claude/skil
 
 ## 幻灯片路线
 
-没有模板时自主选择视觉；严格品牌复用与模板提取按需启用。画幅默认 16:9，初始化可用 `--width` / `--height` 选择，值记录在项目 manifest，由 `scripts/canvas_frame.py` 统一解释；模板库在开局挑一个即可，不需要经过模板提取。
+没有模板时自主选择视觉；严格品牌复用与模板提取按需启用。画幅默认 16:9，初始化可用 `--width` / `--height` 选择，值记录在项目 manifest，由 `scripts/canvas_frame.py` 统一解释；模板库在开局挑一个即可，不需要经过模板提取。工作台里可以整套换模板、逐页选参考版式；两者都是给模型的请求，模型保存后才改页。
 
 普通页面没有批准门。导出固定快照并运行技术检查；每个快照输出存入 _internal/06_ppt_output/<snapshot_id>/，根 final_deck.pptx 只是最近成功输出的兼容副本。
 

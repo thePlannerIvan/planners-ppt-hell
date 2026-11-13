@@ -211,6 +211,39 @@ class WorkbenchTests(unittest.TestCase):
         active = store.commit(self.root, {'op': 'task', 'task_id': next_task['task_id']})['task']
         self.assertEqual(active['pages']['p1']['feedback'], 'New opinion')
 
+    def test_task_carries_template_and_page_layout_reference(self):
+        revision = store.get_page(self.root, 'p1')['revision']
+        task = store.commit(self.root, {'op': 'feedback', 'operation_id': 'feedback_layout',
+            'scope': 'deck', 'template_id': 'fixture-pack',
+            'pages': {'p1': {'revision': revision, 'layout_id': 'p02_content'}}}, True)
+        stored = store.commit(self.root, {'op': 'task', 'task_id': task['task_id']})['task']
+        self.assertEqual(stored['template_id'], 'fixture-pack')
+        self.assertEqual(stored['pages']['p1']['layout_id'], 'p02_content')
+
+    def test_whole_template_request_may_have_no_pages(self):
+        task = store.commit(self.root, {'op': 'feedback', 'operation_id': 'feedback_template_only',
+            'scope': 'deck', 'template_id': 'fixture-pack', 'pages': {}}, True)
+        self.assertTrue(task['ok'])
+        self.assertEqual(store.commit(self.root, {'op': 'task', 'task_id': task['task_id']})['task']['pages'], {})
+        resolved = store.commit(self.root, {'op': 'resolve', 'operation_id': 'resolve_template_only',
+            'task_id': task['task_id'], 'results': {}, 'note': 'Applied the whole template; no page reworked'})
+        self.assertTrue(resolved['ok'])
+        empty = store.commit(self.root, {'op': 'feedback', 'operation_id': 'feedback_empty',
+            'scope': 'deck', 'pages': {}}, True)
+        self.assertFalse(empty['ok'])
+        self.assertEqual(empty['code'], 'invalid_feedback')
+
+    def test_model_save_records_layout_reference_and_human_cannot(self):
+        result = self.candidate(layout_id='p02_content')
+        self.assertTrue(result['ok'])
+        self.assertEqual(store.get_page(self.root, 'p1')['layout_id'], 'p02_content')
+        refused = self.save(layout_id='p02_content')
+        self.assertFalse(refused['ok'])
+        self.assertEqual(refused['code'], 'invalid_layout')
+        invalid = self.candidate(layout_id='bad layout id')
+        self.assertFalse(invalid['ok'])
+        self.assertEqual(invalid['code'], 'invalid_layout')
+
     def test_restore_creates_new_revision(self):
         old = store.get_page(self.root, 'p1')['revision']
         new = self.save([{'element_id': 'title', 'kind': 'text', 'value': 'New'}])

@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import tempfile
+import time
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -16,6 +17,34 @@ from generate_review_html import generate, prepare_inline_svg  # noqa: E402
 from project_state import CONTENT, PNG, SVG, write  # noqa: E402
 from review_surface import surface_document  # noqa: E402
 from workbench_store import commit, ensure, get_page  # noqa: E402
+
+
+def install_fixture_pack(root):
+    """给夹具一套最小四件套：画廊与版式索引要读它，但不跑模板校验。"""
+    pack = Path(root) / '_internal' / '00_project' / 'template_pack'
+    (pack / 'primitives').mkdir(parents=True, exist_ok=True)
+    (pack / 'previews' / 'pages').mkdir(parents=True, exist_ok=True)
+    (pack / 'anchors').mkdir(parents=True, exist_ok=True)
+    (pack / 'tokens.css').write_text(':root{--ink:#111;--accent:#E2F827}', encoding='utf-8')
+    (pack / 'skyline_shell.svg').write_text(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080"><rect width="1920" height="1080" fill="#fff"/></svg>',
+        encoding='utf-8')
+    (pack / 'SPEC.md').write_text('# Fixture pack', encoding='utf-8')
+    for stem, label in (('p01_cover', 'Cover'), ('p02_content', 'Content')):
+        (pack / 'primitives' / (stem + '.svg')).write_text(
+            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">'
+            f'<rect width="1920" height="1080" fill="#fff"/><text x="100" y="200">{label}</text></svg>',
+            encoding='utf-8')
+        Image.new('RGB', (320, 180), 'white').save(pack / 'previews' / 'pages' / (stem + '.png'))
+    manifest = {
+        'schema': 'planner.multimodal-template-pack.v2', 'template_id': 'fixture-pack',
+        'name': 'Fixture Pack', 'status': 'approved', 'description': 'fixture',
+        'preview': 'previews/pages/p01_cover.png',
+        'four_piece_contract': {'primitives': ['primitives/p01_cover.svg', 'primitives/p02_content.svg']},
+    }
+    (pack / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False), encoding='utf-8')
+    (Path(root) / '_internal' / '00_project' / 'template_library_source.json').write_text(
+        json.dumps(manifest, ensure_ascii=False), encoding='utf-8')
 
 
 class WorkbenchGeneratorTests(unittest.TestCase):
@@ -36,9 +65,17 @@ class WorkbenchGeneratorTests(unittest.TestCase):
                 '<text x="120" y="260" font-size="32"><tspan x="120">Line one</tspan>'
                 '<tspan x="120" dy="40">Line two</tspan></text>'
                 '<image href="photo.png" x="120" y="400" width="200" height="100"/></svg>', encoding='utf-8')
+        install_fixture_pack(self.root)
         ensure(self.root)
 
     def tearDown(self):
+        # 后台重渲可能还在写 _internal/06_workbench；它写完再删，别把异步当同步。
+        for _ in range(40):
+            try:
+                self.tmp.cleanup()
+                return
+            except OSError:
+                time.sleep(0.1)
         self.tmp.cleanup()
 
     def test_generator_ids_and_order_are_store_owned(self):
@@ -50,7 +87,7 @@ class WorkbenchGeneratorTests(unittest.TestCase):
         result = commit(self.root, {'op': 'order', 'operation_id': 'order_test',
                                    'base_order': ['alpha', 'omega'], 'order': ['omega', 'alpha']}, browser=True)
         self.assertTrue(result['ok'])
-        snap = generate(self.root)
+        snap = generate(self.root, library_root='')
         self.assertEqual(snap['order'], ['omega', 'alpha'])
         self.assertEqual(snap['revisions']['alpha'], page['revision'])
         html = (self.root / '02_visual_review.html').read_text()
@@ -58,6 +95,28 @@ class WorkbenchGeneratorTests(unittest.TestCase):
         self.assertIn('"version":', html)
         self.assertNotIn('本页通过', html)
         self.assertNotIn('批准未处理页', html)
+
+    def test_gallery_exposes_the_applied_template_and_layout_thumbs(self):
+        from generate_review_html import build_gallery
+        gallery = build_gallery(self.root, library_root='')
+        self.assertEqual(gallery['applied_template_id'], 'fixture-pack')
+        entry = gallery['templates'][0]
+        self.assertTrue(entry['applied'])
+        self.assertEqual([item['layout_id'] for item in entry['layouts']], ['p01_cover', 'p02_content'])
+        self.assertEqual(entry['layouts'][0]['name'], 'Cover')
+        for layout in entry['layouts']:
+            self.assertTrue((self.root / layout['preview']).is_file())
+        self.assertTrue((self.root / entry['cover']).is_file())
+
+    def test_gallery_fingerprint_follows_the_applied_pack(self):
+        from generate_review_html import gallery_fingerprint
+        manifest_path_suffix = Path('_internal/00_project/template_pack/manifest.json')
+        before = gallery_fingerprint(self.root, library_root='')
+        manifest = json.loads((self.root / manifest_path_suffix).read_text())
+        manifest['package_sha256'] = 'changed'
+        (self.root / manifest_path_suffix).write_text(json.dumps(manifest))
+        after = gallery_fingerprint(self.root, library_root='')
+        self.assertNotEqual(before, after)
 
     def test_template_surface_does_not_gain_workbench_commands(self):
         visual = surface_document(self.root)
@@ -139,10 +198,11 @@ class WorkbenchBrowserTests(WorkbenchGeneratorTests):
             asset:async rel=>'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="192" height="108"><rect width="192" height="108" fill="white"/></svg>'),
             draft:body=>window.__draft(body),
             readText:async rel=>window.__readDraft(),
-            wake:body=>window.__wake(body), on:(event,fn)=>window.__changedCallbacks.push(fn)
+            wake:async body=>{const result=await window.__wake(body);window.__wakeCount=(window.__wakeCount||0)+1;return result},
+            on:(event,fn)=>window.__changedCallbacks.push(fn)
           })};
         """)
-        generate(self.root)
+        generate(self.root, library_root='')
         self.page = self.context.new_page()
         self.page.on('pageerror', lambda error: self.errors.append(str(error)))
         self.page.goto((self.root / '02_visual_review.html').as_uri())
@@ -199,6 +259,56 @@ class WorkbenchBrowserTests(WorkbenchGeneratorTests):
         self.assertLessEqual(dimensions['scroll'], dimensions['height']+2)
         self.assertTrue(self.flush())
         self.assertEqual(self.text(), '大字号标题编辑不应自动换行大字号标题编辑不应自动换行')
+
+    def test_layout_gallery_stages_a_reference_for_one_page(self):
+        self.page.locator('#pageLayoutBtn').click()
+        self.page.wait_for_selector('#layoutGalleryDialog[open]')
+        cards = self.page.locator('#layoutGalleryGrid .gallery-card')
+        self.assertEqual(cards.count(), 2)
+        cards.nth(1).click()
+        self.assertEqual(self.page.evaluate("state[page().key].layout_staged"), 'p02_content')
+        self.assertEqual(self.page.locator('.rail-tag').first.inner_text(), '版式待提交')
+        self.page.locator('#layoutGalleryDialog .gallery-foot .review-primary-action').click()
+        self.page.locator('#deckDispatch').click()
+        self.page.locator('#submitBatchBtn').click()
+        self.page.wait_for_function("Object.values(feedbackTasks).some(t=>Object.values(t.pages||{}).some(p=>p.layout_id))")
+        feedback = [call for call in self.calls if call.get('op') == 'feedback'][-1]
+        self.assertEqual(feedback['scope'], 'deck')
+        self.assertEqual(feedback['pages']['alpha']['layout_id'], 'p02_content')
+        self.assertNotIn('omega', feedback['pages'])
+        self.assertEqual(self.page.evaluate("state['alpha'].layout_requested"), 'p02_content')
+        task_id = self.page.evaluate('Object.keys(feedbackTasks)[0]')
+        stored = commit(self.root, {'op': 'task', 'task_id': task_id})['task']
+        self.assertEqual(stored['pages']['alpha']['layout_id'], 'p02_content')
+
+    def test_deck_template_choice_stages_and_submits_without_pages(self):
+        import shutil
+        library = Path(self.tmp.name) / 'library'
+        shutil.copytree(self.root / '_internal/00_project/template_pack', library / 'other-pack')
+        manifest_path = library / 'other-pack' / 'manifest.json'
+        manifest = json.loads(manifest_path.read_text())
+        manifest.update({'template_id': 'other-pack', 'name': 'Other Pack'})
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False))
+        generate(self.root, library_root=library)
+        self.page.goto((self.root / '02_visual_review.html').as_uri())
+        self.page.wait_for_function("typeof canCommand!=='undefined'&&canCommand&&recoveryReady")
+        self.page.wait_for_function('workbenchReady')
+        self.page.locator('#deckTemplateBtn').click()
+        self.page.wait_for_selector('#templateGalleryDialog[open]')
+        cards = self.page.locator('#templateGalleryGrid .gallery-card')
+        self.assertEqual(cards.count(), 2)
+        cards.filter(has_text='Other Pack').click()
+        self.assertEqual(self.page.evaluate('stagedTemplate'), 'other-pack')
+        self.page.locator('#templateGalleryDialog .gallery-foot .review-primary-action').click()
+        self.page.locator('#deckDispatch').click()
+        self.page.locator('#submitBatchBtn').click()
+        self.page.wait_for_function("Object.values(feedbackTasks).some(t=>t.template_id==='other-pack')")
+        # task 落盘与唤醒是两个异步动作：等唤醒真的回来，别在同一帧里读 sleep 之前的结果。
+        self.page.wait_for_function("(window.__wakeCount||0)>0")
+        feedback = [call for call in self.calls if call.get('op') == 'feedback'][-1]
+        self.assertEqual(feedback.get('template_id'), 'other-pack')
+        self.assertEqual(feedback['pages'], {})
+        self.assertTrue(self.wakes and '整套模板 other-pack' in self.wakes[-1].get('text', ''))
 
     def test_model_add_delete_updates_open_workbench(self):
         candidate=self.root / 'new.svg'

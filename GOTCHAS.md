@@ -425,6 +425,15 @@
 - **证据**：2026-11-11 cny_deck Page 4（`p07_page4`）右卡文字 y=723→611；Page 1（`p04_page1`）标题/基线仍是旧句。修后 store 39 项、核心 154 项、浏览器 9 项通过（含「宿主前进后自动跟上」新用例）。
 - **状态**：已升级（2026-11-11）
 
+### G-44 模板包能通过校验，但 SPEC 空值、tokens 非法、原语不引用 tokens
+
+- **module**：`scripts/template/template_library.py`（`validate_pack_dir`）、`scripts/template/layout_index.py`（版式索引读它）、`references/workflow/01_template_intake.md`（提取流程）
+- **现象**：`dark-titanium-cockpit`（Labbrand 项目实际在用）的 `SPEC.md` 有 4 处空单元格（CSS 变量与色值都空），`tokens.css` 有 5 处 `72px - 76px` 这类非法值，52 个 primitive 没有一个引用 tokens；`validate_pack_dir` 仍判 valid，模板审阅也能通过。
+- **原因**：四件套校验只查文件存在、`primitives`/`anchors` 非空、`tokens.css` 有 `:root` 与 `--`；不校验值可解析、SPEC 引用存在、原语是否真的使用 tokens。提取第二段是模型从零写四件套，没有脚手架与回读。
+- **行为修正（候选，未实施）**：模板包校验补三项——tokens 值可解析（长度/颜色/字体，不收区间）、SPEC 引用的变量都存在、每个 primitive 不引用未声明变量；提取先产出 `layouts` 草案与 `tokens`/`SPEC` 脚手架，模型只做命名与试做。工作台版式索引已能读旧包，不受这条阻挡。
+- **证据**：2026-11-13 检查 `01-projects/LabbrandCaseStudy/deck/_internal/00_project/template_pack/`：`grep '|  |  |' SPEC.md` = 4，`grep 'px - ' tokens.css` = 5，`grep -l 'var(' primitives/*.svg | wc -l` = 0；`validate_pack_dir` 返回 valid。
+- **状态**：候选（2026-11-13 发现；等提取侧升级时一起修）
+
 ---
 ---
 

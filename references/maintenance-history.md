@@ -4,6 +4,22 @@
 
 看每一条时问三件事：**边界怎么变了**、**哪些 module 被牵动**、**删掉了什么**。
 
+## 2026-11-13 · 模板版式：整套选择与逐页参考
+
+| 做了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| 新增 `scripts/template/layout_index.py`：v2 `primitives/` 与 legacy `template_registry.json` 统一读成版式索引（id、短名、缩略图、primitive） | 模板包只有整页样张，没有可选的「版式」；审阅页的版式标题还是写死的字典 | `scripts/template/layout_index.py`（新）、`scripts/test/test_template_layout_index.py`（新） | 写死的 `layout_title` 字典只留在旧模板审阅页，不再扩散 |
+| 工作台顶部加「模板 / 版式」：整套模板画廊 + 当前模板的 16:9 版式画廊（可搜索）；选择先停在页面上，提交后成为 store 任务 | 模板只有项目级 `apply`，页面层没有版式入口；人只能写「这页用三栏」让模型猜 | `assets/review/review.html`、`scripts/generate_review_html.py`（`build_gallery` / 缩略图 / `gallery_sha256`） | 「模型自己从一套里挑」这条唯一路径 |
+| 任务带 `template_id` 与每页 `layout_id`；无页面的整套模板请求合法；模型 save 可带 `layout_id`，人工保存拒绝；`get`/`state` 返回页面版式 | 版式请求要能持久、可重试、能在 DSH 唤醒与本地异步两条宿主上都成立 | `scripts/workbench_store.py`（`feedback` / `save_page` / `page_value` / `add_page`）、`scripts/orchestrate/ppt_pipeline.py`（`make_review` 比画廊指纹）、`scripts/test/test_workbench_store.py`、`test_workbench_ui.py` | 「反馈任务必须有页面」这条把整套模板请求挡在外面的默认 |
+| 保存被拒（`conflict`）的当下就亮冲突横幅，不等下一次宿主同步 | 测试在「写反馈一轮」里抓到：状态已冲突、横幅还藏着，冲突在一段时间里看不见 | `assets/review/review.html`（`markStaleFromPages`） | 只在 `syncFromHost` / 重试里更新 `staleKeys` 的默认 |
+| 文档写清版式是**参考**不是锁层：整套模板不重排已有页，逐页版式只改指定页，内容冲突时保留主张与证据 | 选了版式不等于工具自动重绘；不写清会把「模型没照做」和「工具没生效」混成一件事 | `SKILL.md`、`references/workflow/01_template_intake.md`、`04_svg_stage.md`、`07_visual_review.md`、`references/contracts/template_package.md`、`project_contract.md`、`references/architecture.md`、`docs/ARCHITECTURE.md` | 「模板 = 一整套样张，模型自己看着办」的旧口径 |
+
+**边界怎么变了**：模板拆成主题与版式两层；人可以在工作台里成套选模板、逐页指定参考版式，两者都只是给模型的请求。DSH 当场唤醒，本地宿主只把任务落盘。模型保存后才把 `layout_id` 写进页面记录，页面不假装已套用。
+
+**发现但未修**：当前 `dark-titanium-cockpit` 的 SPEC/tokens 有空值与非法值，原语不引用 tokens（G-44）；本轮使用侧不依赖这些值，提取侧升级时一起修。
+
+**回归**：非浏览器全量 412 项通过（98 项浏览器/环境门跳过）；浏览器门 `test_workbench_ui` 40（含 7 项）、`test_review_browser` + `test_review_reported_bugs` + `test_template_review_browser` + `test_design_ownership` 29 项通过。
+
 ## 2026-11-11 · 用户改动优先：锁定位置、保存即重渲、自动同步
 
 | 做了什么 | 为什么 | 影响了哪些 module | 删了什么 |

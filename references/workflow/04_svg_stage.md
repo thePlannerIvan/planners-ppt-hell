@@ -22,13 +22,24 @@ python scripts/workbench_store.py --root <project> --command-json
 编辑返回的 candidate 文件。checkout 已把 href 定位到固定资产，保持可解析；新资产放项目内并使用相对候选可解析的路径。首次空页 base_revision 为 null，完整 SVG 写入候选。
 
 ```json
-{"op":"save","operation_id":"save_alpha_01","page_key":"alpha","author":"model","candidate":"<checkout返回的绝对路径>","base_revision":"<checkout返回的revision>","notes":"<本次notes>"}
+{"op":"save","operation_id":"save_alpha_01","page_key":"alpha","author":"model","candidate":"<checkout返回的绝对路径>","base_revision":"<checkout返回的revision>","notes":"<本次notes>","layout_id":"<所选参考版式，可省略>"}
 ```
 
 任务改版附 task_id。写命令有稳定 operation_id；同次重试使用同命令与 ID，新动作用新 ID。确认回执 ok、revision 与 changes：图片或文案修改应在对应元素列表里出现；no_change 提醒表示没有有效变化，不能据此声称修改完成。save 保留版本语义，技术 check 另行判断。
 task_id 的改写授权绑定反馈当时的 revision；首次保存后再迭代，重新 checkout 最新页，沿用已保存结果，不重复使用过期 task_id。需要扩大人工保护的改写范围时取得新的浏览器反馈授权。最终 resolve 原任务时绑定最新结果版本。
 冲突不覆盖当前页：保留候选，重新 checkout 最新版本。候选遗漏 protected 用户改字、位置或删除会被拦下。人改过字的那一处，`guard` 同时钉住它的位置（`x`/`y`/`transform`）：模型想挪动它，必须拿到页面反馈里的显式授权，否则按 `human_edits_lost` 退回。指定元素改写必须有浏览器 feedback 的显式 rewrite_elements 授权；模型不手写授权。
 兼容 _internal/02_svg_source 是可重建输出，生成器不能写它。也不手写 head、revision、保护记录或任务完成戳。
+
+## 按版式请求改页
+
+待办任务可能带 `template_id` 与页面 `layout_id`。先用 `{"op":"task","task_id":"..."}` 读任务，不要从历史反馈拼指令。
+
+1. `template_id` 与项目当前模板不同：运行 `python scripts/template/template_library.py apply <project> --template-id <id>`。整套模板只换项目的视觉语言，不自动重排已有页。
+2. 看所选版式：`python scripts/template/layout_index.py <模板包>` 找到 `primitive`，或直接看 `_internal/00_project/template_pack/primitives/<layout_id>.svg`（legacy 是 `fidelity_template/layout_canvases/`），并看缩略图。**版式是参考，不是锁层**：按它组织这一页，内容放不下时保留这页的主张与证据，在 notes 或回执里说明偏离。
+3. checkout → 编辑候选 → save，命令带 `layout_id`。只有模型保存会记录；浏览器保存不记版式。回执的 changes 应出现对应改动。
+4. resolve：results 覆盖任务页面；只有 `template_id`、没有页面的任务用空 results（`{}`），note 写模板已切换及其影响范围。
+
+不要因为选了版式就删证据、改分页，或把样张里的文字当成本页文案。版式请求不是批准，也不阻塞输出。
 
 ## 用生成器重建整页
 

@@ -330,9 +330,11 @@ def make_review(root):
     卡住的：模板改了，项目里的页面还是旧的）。所以再审模板与令牌表的指纹。
     """
     sync(root); ensure(root)
-    from generate_review_html import generate, template_fingerprint
-    if review_current(root) and review_snapshot(root).get('template_sha256')==template_fingerprint():
-        return review_snapshot(root)
+    from generate_review_html import gallery_fingerprint, generate, template_fingerprint
+    snapshot=review_snapshot(root)
+    if (review_current(root) and snapshot.get('template_sha256')==template_fingerprint()
+            and snapshot.get('gallery_sha256')==gallery_fingerprint(root)):
+        return snapshot
     return generate(root)
 
 def template_review(root, port=0, surface_only=False):
