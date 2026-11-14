@@ -14,7 +14,7 @@ SVG 工作台持续存在。用户改字与模型候选共用版本存储；PPT 
 
 职责与接口见 [架构](references/architecture.md)。读 [00_pipeline_controller.md](references/workflow/00_pipeline_controller.md)，初始化或恢复同一项目。
 幻灯片可接收 Bypage 逐页稿，也可从用户材料、已有稿件或需求直接整理内容；按复杂度调用 Bypage，不把它设为前置门。见 [02_content_stage.md](references/workflow/02_content_stage.md)。
-视频可适配 visual-plan.json 与 assets，也可直接接收上屏稿或材料；已有 screen ID 保持不变。见 [03_video_route.md](references/workflow/03_video_route.md)。
+视频可适配 visual-plan.json 与 assets；直接接收只限**作者已有上屏稿（逐页文字已定）**的片子 —— 从材料开始、还没有 `visual-plan.json` 的新片回 `video-idea-system`。已有 screen ID 保持不变。见 [03_video_route.md](references/workflow/03_video_route.md)。
 接收 Bypage 成品时沿用其 canonical 来源索引和已绑定的事实核查；内容改写后的核查时机与范围见内容输入文档，不把原 audit 扩大为新页面已核查。
 结束条件：来源可读、稳定页面身份可定位、资产已登记且没有静默遗漏。
 
@@ -52,6 +52,9 @@ PPT 用实际渲染预览运行 `export-inspect --snapshot <同一snapshot.json>
 | 新模板包制作、审阅、替换入库 | [template_package.md](references/contracts/template_package.md)；提取生产流程见 [01_template_intake.md](references/workflow/01_template_intake.md) |
 | 视频风格选择（私有风格库挂载与开源通用降级） | [03_video_route.md](references/workflow/03_video_route.md)；运行 `python3 scripts/resolve_video_vault.py --style <style_id>` 读取 `~/.config/planners/video-vault/styles/<style_id>/page.md` 与 `anchors/`（无私有库时自动降级为 `default-clean`） |
 | 新视频风格提炼 | [08_video_style_extraction_sop.md](references/workflow/08_video_style_extraction_sop.md) |
+| 文案表达要改（标题、层级、扫读） | `slide-copy`：页面文案的规矩归它，本 Skill 只负责画面 |
+| 论证关系不清楚，需要方法视角 | `planners-method-wiki`：只给论证关系与解释角度，不改字 |
+| 内容改写后要复核事实 | `planners-fact-check`：改过内容的页在出声前核一遍，纯排版不动 |
 | 工程维护与验证 | [ARCHITECTURE.md](docs/ARCHITECTURE.md)；命令参数以各脚本 --help 为准 |
 
 ## 运行后迭代
