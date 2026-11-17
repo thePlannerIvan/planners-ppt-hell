@@ -14,3 +14,6 @@ build/
 *.key
 .env
 .env.*
+
+# 发布过的旧模板包（本机回滚用，不进库也不推 GitHub）
+assets/template_library/.history/

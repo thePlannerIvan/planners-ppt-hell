@@ -52,10 +52,10 @@
   --size-display-break: 132px;         /* Interrupted hero (FOR BRANDS MISSION) */
   --size-number-slender: 320px;        /* Ghost background numbers */
   --size-number-kpi: 130px;            /* Hero financial metrics (85.6M) */
-  --size-headline-section: 72px - 76px;/* Section headers (SCOPE OF WORK / AGENDA) */
-  --size-headline-lead: 44px - 52px;   /* Major assertions / Step titles */
-  --size-subtitle: 28px - 32px;        /* Paragraph lead-ins / Manifesto lines */
-  --size-body-large: 24px - 26px;      /* Key takeaways */
+  --size-headline-section: 74px;/* Section headers (SCOPE OF WORK / AGENDA) */
+  --size-headline-lead: 48px;   /* Major assertions / Step titles */
+  --size-subtitle: 30px;        /* Paragraph lead-ins / Manifesto lines */
+  --size-body-large: 25px;      /* Key takeaways */
   --size-body-regular: 20px;           /* Primary reading copy */
   --size-annotation-floor: 18px;       /* Absolute minimum for any label/tag/source */
 
@@ -66,5 +66,5 @@
   --margin-safe-top: 80px;             /* Skyline header baseline */
   --margin-safe-bottom: 960px;         /* Footer / coordinates baseline */
   --hairline-width: 1.5px;
-  --corner-pill-radius: 17px - 55px;   /* Pure geometric pills, zero boxy bento */
+  --corner-pill-radius: 24px;   /* Pure geometric pills, zero boxy bento */
 }
