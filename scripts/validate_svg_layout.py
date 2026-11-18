@@ -48,8 +48,17 @@ except ImportError:
     def locked_sha256(_path):
         raise ValueError("legacy layout_canvas module not present")
 
-from native_svg_to_ppt import compose_axis_aligned, parse_axis_aligned_transform  # noqa: E402
+from lib.svg_geometry import compose_axis_aligned, parse_axis_aligned_transform
+from project_state import digest, sha
 from project_state import DEFAULT_ROUTE, ROUTES, project_root_of, route as project_route  # noqa: E402
+
+def validator_fingerprint(scripts):
+    """Identify the local rules that produced a cached check report."""
+    paths = ('validate_svg_layout.py', 'lib/svg_geometry.py', 'image_diagnostics.py',
+             'canvas_frame.py', 'project_state.py', 'template/layout_canvas.py')
+    return digest({name: sha(scripts / name) if (scripts / name).is_file() else None
+                   for name in paths})
+
 
 TEXT_RE = re.compile(r"\s+")
 EMOJI_RE = re.compile(

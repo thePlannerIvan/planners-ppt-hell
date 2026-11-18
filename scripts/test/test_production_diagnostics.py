@@ -192,6 +192,25 @@ class PipelineDiagnosticsTests(unittest.TestCase):
         self.assertEqual(row['element_id'],'hero')
         self.assertEqual(row['source_visible_fraction'],.2)
 
+    def test_geometry_change_rechecks_same_page_but_export_only_change_does_not(self):
+        import shutil
+        scripts = self.root / 'checker-copy'
+        shutil.copytree(SCRIPTS, scripts, ignore=shutil.ignore_patterns('__pycache__', 'test'))
+        with patch.object(pipeline, 'SCRIPTS', scripts), patch.object(pipeline, 'run', side_effect=self.fake_render):
+            def check_page():
+                return pipeline.check(self.root, ['alpha'])['pages'][0]
+
+            self.assertEqual(check_page()['status'], 'pass')
+            with (scripts / 'native_svg_to_ppt.py').open('a') as f:
+                f.write('\n# Export-only change\n')
+            self.assertEqual(check_page()['status'], 'unchanged')
+            geometry = scripts / 'lib/svg_geometry.py'
+            with geometry.open('a') as f:
+                f.write('\ndef compose_axis_aligned(parent, local):\n    return (100000, 100000, 1, 1)\n')
+            result = check_page()
+            self.assertEqual(result['status'], 'fix', result)
+            self.assertTrue(result['issues']['summary']['errors'])
+
     def test_batch_and_cached_results_include_copy_audit(self):
         document=ps.read(self.root/ps.CONTENT)
         document['pages'][0]['copy_confirmed']=True

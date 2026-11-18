@@ -41,6 +41,7 @@ from canvas_frame import SLIDE_H_IN as FRAME_SLIDE_H_IN  # noqa: E402
 from canvas_frame import SLIDE_W_IN as FRAME_SLIDE_W_IN  # noqa: E402
 
 from lib.svg_style_inline import _css_declarations  # noqa: E402
+from lib.svg_geometry import compose_axis_aligned, parse_axis_aligned_transform
 from lib.svg_style_inline import inline_svg_styles_and_vars  # noqa: E402
 from pptx import Presentation
 from pptx.util import Inches, Pt, Emu
@@ -648,40 +649,6 @@ def add_missing_image_placeholder(slide, x, y, w, h, href):
     run.font.name = "Microsoft YaHei"
     run.font.size = Pt(10)
     run.font.color.rgb = RGBColor(153, 153, 153)
-
-
-def parse_axis_aligned_transform(transform):
-    """Compose one SVG transform string's translate/scale operations without losing nested offsets.
-
-    这是本包的**唯一坐标模型**。检查画面（validate_svg_layout）必须从这里取，
-    不允许自己再写一份——两份曾经分歧到同一份输入差 100px。
-    """
-    sx = sy = 1.0
-    ox = oy = 0.0
-    for name, raw_args in re.findall(r"(translate|scale)\s*\(([^)]*)\)", transform or ""):
-        values = [float(value) for value in re.findall(r"[-+]?(?:\d*\.)?\d+(?:[eE][-+]?\d+)?", raw_args)]
-        if not values:
-            continue
-        if name == "translate":
-            tx = values[0]
-            ty = values[1] if len(values) > 1 else 0.0
-            ox += sx * tx
-            oy += sy * ty
-        else:
-            sx *= values[0]
-            sy *= values[1] if len(values) > 1 else values[0]
-    return ox, oy, sx, sy
-
-
-def compose_axis_aligned(parent, local):
-    """(ox,oy,sx,sy) of an outer transform composed with an inner one.
-
-    这是 add_elements 在 <g> 递归里实际使用的合成规则，也是检查画面沿祖先链
-    累计时必须用的同一条规则。
-    """
-    ox, oy, sx, sy = parent
-    local_ox, local_oy, local_sx, local_sy = local
-    return ox + sx * local_ox, oy + sy * local_oy, sx * local_sx, sy * local_sy
 
 
 def _image_anchor_fractions(preserve_aspect_ratio):

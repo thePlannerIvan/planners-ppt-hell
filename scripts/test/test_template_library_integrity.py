@@ -21,6 +21,35 @@ from template_library import LIBRARY_ROOT, verify_library  # noqa: E402
 
 
 class TemplateLibraryIntegrityTest(unittest.TestCase):
+    def test_failed_replacement_preserves_pack_and_provenance(self):
+        import tempfile
+        from unittest.mock import patch
+        from template_library import apply_template
+
+        for failure in ('copy', 'switch', 'source'):
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as tmp:
+                project = Path(tmp).resolve() / '_internal/00_project'
+                pack = project / 'template_pack'
+                pack.mkdir(parents=True)
+                (pack / 'old').write_bytes(b'original')
+                metadata = project / 'template_library_source.json'
+                metadata.write_bytes(b'previous metadata')
+                rename = Path.rename
+
+                def fail_switch(src, dst):
+                    if src.name == 'new' and dst == pack:
+                        raise OSError('switch failed')
+                    return rename(src, dst)
+
+                fault = {'copy': patch('shutil.copytree', side_effect=OSError('copy failed')),
+                         'switch': patch.object(Path, 'rename', fail_switch),
+                         'source': patch.object(Path, 'replace', side_effect=OSError('metadata failed'))}
+                with fault[failure], self.assertRaises(OSError):
+                    apply_template(tmp, 'dark-titanium-cockpit')
+                self.assertEqual((pack / 'old').read_bytes(), b'original')
+                self.assertEqual(metadata.read_bytes(), b'previous metadata')
+                self.assertEqual(set(project.iterdir()), {pack, metadata})
+
     def test_every_published_pack_matches_its_manifest(self):
         result = verify_library()
         broken = [p for p in result["packs"] if not p["valid"]]

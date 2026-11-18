@@ -495,17 +495,36 @@ def apply_template(project_root, template_id, library_root=None):
 
     # v2 4-piece multimodal template pack
     if manifest.get("schema") == "planner.multimodal-template-pack.v2" or "four_piece_contract" in manifest:
-        validation = validate_pack_dir(source, check_manifest_hashes=True)
-        if not validation["valid"]:
-            raise ValueError(f"Template pack '{template_id}' failed validation: {validation['issues']}")
         target = project_root / "_internal" / "00_project" / "template_pack"
-        if target.exists():
-            shutil.rmtree(target)
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(source, target)
-        (project_root / "_internal" / "00_project" / "template_library_source.json").write_text(
-            json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
+        provenance = target.parent / "template_library_source.json"
+        with tempfile.TemporaryDirectory(dir=target.parent, prefix='.apply-') as tmp:
+            stage = Path(tmp)
+            pack = stage / 'new'
+            shutil.copytree(source, pack)
+            validation = validate_pack_dir(pack, check_manifest_hashes=True)
+            if not validation['valid'] or read_json(pack / 'manifest.json') != manifest:
+                raise ValueError(f"Template pack '{template_id}' failed validation or changed during copy: {validation['issues']}")
+            metadata = stage / 'source.json'
+            shutil.copyfile(pack / 'manifest.json', metadata)
+            # Keep the old pack outside the temporary directory until both commits succeed.
+            backup = stage.with_name(stage.name + '-previous')
+            previous = target.exists()
+            if previous:
+                target.rename(backup)
+            try:
+                pack.rename(target)
+                try:
+                    metadata.replace(provenance)
+                except OSError:
+                    target.rename(pack)
+                    raise
+            except OSError:
+                if previous:
+                    backup.rename(target)
+                raise
+            if previous:
+                shutil.rmtree(backup)
         return {
             "applied_template_id": template_id,
             "target_dir": str(target),

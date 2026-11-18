@@ -18,6 +18,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 import review_surface
+from validate_svg_layout import validator_fingerprint
 from image_diagnostics import image_frames
 from copy_audit import audit_copy
 from canvas_frame import project_frame, frame_from_manifest
@@ -226,7 +227,7 @@ def check(root, keys):
     m=sync(root); require_direction(root); contract=require_contract(root)
     ensure(root)
     document=content(root); pages=document['pages']; selected=selected_pages(pages,keys)
-    checker=digest({name:sha(SCRIPTS/name) for name in ('validate_svg_layout.py','image_diagnostics.py')})
+    checker=validator_fingerprint(SCRIPTS)
     results=[]
     for p in pages:
         k=p['page_key']

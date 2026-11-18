@@ -30,7 +30,8 @@ class LayoutIndexTests(unittest.TestCase):
     def test_dark_titanium_previews_fall_back_to_previews_root(self):
         pack = LIBRARY / 'dark-titanium-cockpit'
         layouts = layout_index.pack_layouts(pack)
-        self.assertEqual(len(layouts), 52)
+        primitives = json.loads((pack / 'manifest.json').read_text())['four_piece_contract']['primitives']
+        self.assertEqual(len(layouts), len(primitives))
         self.assertEqual(layouts[0]['preview'], 'previews/p01_master_brutalist_cover.png')
 
     def test_name_is_readable_without_inventing_a_chinese_one(self):
