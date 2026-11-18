@@ -10,6 +10,7 @@
 所以这里给的是 `rel` 与 `version`，不是拼好的 URL。
 同时注入存储分配的稳定元素 ID 与隔离前缀 SVG，供工作台进行元素级编辑。
 """
+import base64
 import hashlib
 import json
 import re
@@ -203,6 +204,12 @@ def _template_entry(root, template_id, manifest, pack_root, cache, applied=False
     for layout in layout_index.pack_layouts(pack_root):
         preview = layout.get('preview', '')
         thumb = _thumb(root, template_id, layout['layout_id'], Path(pack_root) / preview, cache) if preview else ''
+        if not thumb and layout.get('primitive'):
+            pack = Path(pack_root).resolve()
+            src = (pack / layout['primitive']).resolve()
+            if src.is_relative_to(pack) and src.suffix.lower() == '.svg' and src.is_file():
+                # Display as an image, never as live DOM. Numbered source slides need not match layouts.
+                thumb = 'data:image/svg+xml;base64,' + base64.b64encode(src.read_bytes()).decode('ascii')
         layouts.append({**layout, 'preview': thumb})
     cover = ''
     declared = str(manifest.get('preview') or '')

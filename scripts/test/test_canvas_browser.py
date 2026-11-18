@@ -21,10 +21,12 @@ class CanvasBrowserTests(harness.WorkbenchBrowserTests):
         box=self.page.locator('#preview').bounding_box()
         title=self.page.locator('#svgStageWrap text').first.bounding_box()
         x=title['x']+title['width']/2;y=title['y']+title['height']/2
+        self.page.keyboard.down('Alt')  # Measure free drag, not a nearby alignment target.
         self.page.mouse.move(x,y);self.page.mouse.down()
         self.page.mouse.move(x+box['width']/10,y+box['height']/10,steps=5)
         edits=self.page.evaluate('() => state[page().key].svg_edits')
         self.page.mouse.up()
+        self.page.keyboard.up('Alt')
         self.assertTrue(edits)
         self.assertAlmostEqual(edits[-1]['dx'],108,delta=2)
         self.assertAlmostEqual(edits[-1]['dy'],192,delta=2)

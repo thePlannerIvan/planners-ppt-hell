@@ -387,6 +387,8 @@ dialog textarea{width:100%;min-height:96px;font:inherit;padding:8px;border:1px s
     </div>
     <div id="staleNote" hidden style="width:100%;margin:0 0 8px;padding:8px 12px;border-radius:6px;background:var(--dsw-alias-state-warn-tertiary);color:var(--dsw-alias-state-warn-label);font-size:13px;line-height:1.4"></div>
     <div class="preview" id="preview">
+      <i id="snapX" hidden aria-hidden="true" style="position:absolute;pointer-events:none;z-index:12;top:0;bottom:0;border-left:1px solid var(--dsw-static-blue-500)"></i>
+      <i id="snapY" hidden aria-hidden="true" style="position:absolute;pointer-events:none;z-index:12;left:0;right:0;border-top:1px solid var(--dsw-static-blue-500)"></i>
       <img id="slide" draggable="false" alt="当前幻灯片">
       <div id="previewMissing" class="preview-missing" hidden>预览还没生成<span>刷新工作台，或让模型重出这一页</span></div>
       <div id="svgStageWrap" class="svg-stage-wrap"></div>
@@ -657,6 +659,12 @@ function openTemplateGallery(){
   if(data.route==='template')return;
   drawTemplateGallery();$('#templateGalleryDialog').showModal();
 }
+function galleryImage(src,name){
+  const img=document.createElement('img');img.alt=name;img.loading='lazy';
+  if(src.startsWith('data:image/svg+xml;base64,'))img.src=src;
+  else assetFor(src,'').then(url=>{if(url)img.src=url});
+  return img;
+}
 function drawTemplateGallery(){
   const grid=$('#templateGalleryGrid');if(!grid)return;
   grid.replaceChildren();
@@ -669,7 +677,7 @@ function drawTemplateGallery(){
     card.disabled=!t.selectable;
     card.setAttribute('aria-pressed',t.template_id===current?'true':'false');
     const thumb=document.createElement('div');thumb.className='thumb';
-    if(t.cover){const img=document.createElement('img');img.alt=t.name;img.loading='lazy';assetFor(t.cover,'').then(url=>{if(url)img.src=url});thumb.append(img)}
+    if(t.cover){thumb.append(galleryImage(t.cover,t.name))}
     else{const num=document.createElement('span');num.className='num';num.textContent=(t.layouts&&t.layouts.length)?t.layouts.length+' 个版式':'';thumb.append(num)}
     if(t.applied){const flag=document.createElement('span');flag.className='flag';flag.textContent='当前';thumb.append(flag)}
     else if(t.legacy){const flag=document.createElement('span');flag.className='flag';flag.textContent='旧版';thumb.append(flag)}
@@ -732,7 +740,7 @@ function drawLayoutGallery(){
   for(const layout of layouts){
     const card=document.createElement('button');card.type='button';card.className='gallery-card'+(layout.layout_id===current?' selected':'');card.setAttribute('aria-pressed',layout.layout_id===current?'true':'false');
     const thumb=document.createElement('div');thumb.className='thumb';
-    if(layout.preview){const img=document.createElement('img');img.alt=layout.name;img.loading='lazy';assetFor(layout.preview,'').then(url=>{if(url)img.src=url});thumb.append(img)}
+    if(layout.preview){thumb.append(galleryImage(layout.preview,layout.name))}
     else{const num=document.createElement('span');num.className='num';num.textContent=layout.number||'—';thumb.append(num)}
     const name=document.createElement('div');name.className='name';name.textContent=layout.name||layout.layout_id;
     const sub=document.createElement('div');sub.className='sub';sub.textContent=layout.layout_id;
@@ -3095,6 +3103,27 @@ function sizePreview(){
 }
 
 /* ---- 指针事件：支持「框选问题」与「选择与拖拽微调 SVG 元素」双模式 ---- */
+function snapGeometry(el){
+  const svg=currentSvgRoot(),canvas=svg.getBoundingClientRect(),box=el.getBoundingClientRect();
+  const anchors=(a,b)=>[a,(a+b)/2,b];
+  const x=[(canvas.left+canvas.right)/2],y=[(canvas.top+canvas.bottom)/2];
+  for(const other of svg.querySelectorAll('[data-review-id]')){
+    if(other.contains(el)||el.contains(other)||pickSelectableSvgTarget(other)!==other)continue;
+    const r=other.getBoundingClientRect(),s=getComputedStyle(other);
+    if((!r.width&&!r.height)||s.visibility!=='visible'||s.opacity==='0'||r.right<canvas.left||r.left>canvas.right||r.bottom<canvas.top||r.top>canvas.bottom)continue;
+    x.push(...anchors(r.left,r.right));y.push(...anchors(r.top,r.bottom));
+  }
+  return {x,y,fromX:anchors(box.left,box.right),fromY:anchors(box.top,box.bottom)};
+}
+function snapAxis(delta,from,targets,guide,offset,axis,free){
+  let best=5,adjust=0,line=null;
+  if(!free)for(const target of targets)for(const anchor of from){
+    const diff=target-anchor-delta;
+    if(Math.abs(diff)<best){best=Math.abs(diff);adjust=diff;line=target}
+  }
+  guide.hidden=line===null;if(line!==null)guide.style[axis]=(line-offset)+'px';
+  return delta+adjust;
+}
 $('#preview').onpointerdown=e=>{
   if(e.target===$('#inlineCanvasEditor'))return;
   if(marking){
@@ -3116,6 +3145,7 @@ $('#preview').onpointerdown=e=>{
   dragState={
     pointerId:e.pointerId,
     el:picked,
+    snap:snapGeometry(picked),
     startX:e.clientX,
     startY:e.clientY,
     origDx:(existing&&existing.dx)||0,
@@ -3133,7 +3163,7 @@ $('#preview').onpointermove=e=>{
     Object.assign(b.style,{left:rect.x*100+'%',top:rect.y*100+'%',width:rect.w*100+'%',height:rect.h*100+'%'});
     return;
   }
-  if(!dragState)return;
+  if(!dragState||e.pointerId!==dragState.pointerId)return;
   const dist=Math.hypot(e.clientX-dragState.startX,e.clientY-dragState.startY);
   if(!dragState.moved&&dist<3)return;
   if(!dragState.moved){
@@ -3144,9 +3174,15 @@ $('#preview').onpointermove=e=>{
   if(!pr.width||!pr.height)return;
   const vb=currentSvgRoot()?.viewBox?.baseVal;
   if(!vb||!vb.width||!vb.height)return;
-  const scaleX=vb.width/pr.width,scaleY=vb.height/pr.height;
-  const newDx=dragState.origDx+(e.clientX-dragState.startX)*scaleX;
-  const newDy=dragState.origDy+(e.clientY-dragState.startY)*scaleY;
+  const g=dragState.snap;
+  const dx=snapAxis(e.clientX-dragState.startX,g.fromX,g.x,$('#snapX'),pr.left,'left',e.altKey);
+  const dy=snapAxis(e.clientY-dragState.startY,g.fromY,g.y,$('#snapY'),pr.top,'top',e.altKey);
+  const matrix=dragState.el.parentElement.getScreenCTM();
+  if(!matrix)return;
+  const det=matrix.a*matrix.d-matrix.b*matrix.c;
+  if(!det)return;
+  const newDx=dragState.origDx+(matrix.d*dx-matrix.c*dy)/det;
+  const newDy=dragState.origDy+(matrix.a*dy-matrix.b*dx)/det;
   const rec=getOrCreateEditRecord(dragState.el);
   rec.dx=Math.round(newDx);
   rec.dy=Math.round(newDy);
@@ -3154,6 +3190,7 @@ $('#preview').onpointermove=e=>{
   updateToolbarSelection();
 };
 $('#preview').onpointerup=()=>{
+  $('#snapX').hidden=$('#snapY').hidden=true;
   if(marking){
     if(!start)return;
     start=null;
@@ -3176,6 +3213,9 @@ $('#preview').onpointerup=()=>{
     }
     dragState=null;
   }
+};
+$('#preview').onpointercancel=$('#preview').onlostpointercapture=()=>{
+  if(dragState)$('#preview').onpointerup();
 };
 $('#preview').ondblclick=e=>{
   if(marking||previous)return;

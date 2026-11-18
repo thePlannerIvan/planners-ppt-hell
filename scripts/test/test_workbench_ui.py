@@ -218,6 +218,41 @@ class WorkbenchBrowserTests(WorkbenchGeneratorTests):
             raise RuntimeError('Simulated lost receipt after durable commit')
         return result
 
+    def test_missing_named_preview_displays_its_own_primitive(self):
+        pack = self.root / '_internal/00_project/template_pack'
+        (pack/'previews/pages/p01_cover.png').rename(pack/'previews/page_01.png')
+        generate(self.root, library_root='')
+        self.page.reload()
+        self.page.locator('#pageLayoutBtn').click()
+        img = self.page.locator('#layoutGalleryGrid .thumb img').first
+        self.assertTrue(img.evaluate('async img=>{await img.decode();return img.naturalWidth>0 && atob(img.src.split(",")[1]).includes(">Cover</text>")}'))
+
+    def test_drag_center_guide_and_alt_bypass(self):
+        el = self.page.locator('#svgStageWrap text').first
+        box = el.bounding_box(); svg = self.page.locator('#svgStageWrap svg').bounding_box()
+        cx = svg['x']+svg['width']/2
+        x = box['x']+box['width']/2; y = box['y']+box['height']/2
+        self.page.mouse.move(x,y); self.page.mouse.down(); self.page.mouse.move(cx+3,y)
+        self.assertTrue(self.page.locator('#snapX').is_visible())
+        def center():
+            r=el.bounding_box(); return r['x']+r['width']/2
+        self.assertAlmostEqual(center(),cx,delta=1)
+        self.page.keyboard.down('Alt'); self.page.mouse.move(cx+4,y)
+        self.assertFalse(self.page.locator('#snapX').is_visible())
+        self.assertAlmostEqual(center(),cx+4,delta=1)
+        self.page.mouse.up(); self.page.keyboard.up('Alt')
+        self.assertFalse(self.page.locator('#snapY').is_visible())
+
+    def test_drag_snaps_to_visible_peer_edge(self):
+        el=self.page.locator('#svgStageWrap text').first
+        box=el.bounding_box(); peer=self.page.locator('#svgStageWrap image').first.bounding_box()
+        x=box['x']+box['width']/2; y=box['y']+box['height']/2
+        self.page.mouse.move(x,y); self.page.mouse.down()
+        self.page.mouse.move(x+peer['x']+peer['width']-box['x']+2,y)
+        self.assertTrue(self.page.locator('#snapX').is_visible())
+        self.assertAlmostEqual(el.bounding_box()['x'],peer['x']+peer['width'],delta=1)
+        self.page.mouse.up(); self.assertFalse(self.page.locator('#snapX').is_visible())
+
     def save_server_draft(self, body):
         self.server_draft = body
         return {'ok': True}
