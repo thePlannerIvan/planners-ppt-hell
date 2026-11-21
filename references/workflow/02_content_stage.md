@@ -2,15 +2,20 @@
 
 ## Bypage 成品
 
-接收 Bypage、委派资料整理或恢复这条链路时，读取 planners-bypage 的 references/content-handoff.md。复用同一项目记忆与 canonical source_index、正式稿、audit、feedback、资产清单和制作快照的原路径；不在 PPT Hell 另造第二份权威索引或把本地派生稿冒充正式稿。
-Bypage 生产包由上游脚本产生，本侧程序导入：
+接收 Bypage、委派资料整理或恢复这条链路时，读取 `planners-bypage` 的 `references/content-handoff.md`。复用同一 `project-memory.md` 与权威 `source-index.json`、正式稿 `.planners/by-page.md`、事实核查 `fact-audit.json` 与图片清单 `by-page.assets.json` 的原路径；不在 PPT Hell 另造第二份权威索引或把本地派生稿冒充正式稿。
 
-```bash
-python scripts/import_bypage.py <project> --production <bypage-production.json>
-```
+按上游交付形态选择初始化入口（已有项目继续原工作台，不重新初始化覆盖用户修改）：
 
-该命令为新项目检查原稿、审计与反馈的绑定以及页序和资产指纹。已有项目继续原工作台，不能拿旧生产包覆盖用户修改。
-Production Notes 的图片路径先相对原交付稿定位，再映射本地登记资产；保留 Bypage 页号、来源 ID、资产 ID 与 canonical 文件绑定。本地 page_content / source_assets 都是制作派生文件。
+1. **现行 `planners-doc/2` 逐页稿（`<Project>/.planners/by-page.md`）**：
+   ```bash
+   python scripts/init_svg_project.py <project> --source "<Project>/.planners/by-page.md" --route slides
+   ```
+   按 `.planners/by-page.md` 的章节（`#`）、页（`##`）及页内 `### 正文 / 口播 / 制作` 与页末 `>` 出处，将各页整理写入 `_internal/01_content/page_content.json`（标记 `copy_confirmed: true`），将 `by-page.assets.json` 中的图片复制到项目登记资产并保留原资产 ID、来源 ID 与 `fact-audit.json` 绑定。
+2. **旧版 `bypage-production/1` 生产包（`bypage-production.json`）**：
+   ```bash
+   python scripts/import_bypage.py <project> --production <bypage-production.json>
+   ```
+   程序校验原稿、审计与反馈的绑定以及页序和资产指纹，自动生成 `page_content.json` 与 `source_assets.json`。本地 `page_content` / `source_assets` 均为制作派生文件。
 
 同时承接原项目记忆中的方法采用记录和已确认论证关系。出现新的表达组织问题时可读取并调用 `planners-method-wiki`，只发展适用的画面或论证表达；方法查询不另建来源索引、不重复事实核查，也不重新决定策略。
 

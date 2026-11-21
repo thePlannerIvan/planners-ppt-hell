@@ -4,6 +4,14 @@
 
 看每一条时问三件事：**边界怎么变了**、**哪些 module 被牵动**、**删掉了什么**。
 
+## 2026-11-21 · 按新版 PBC 与 WFA 收束入口、对齐 Bypage planners-doc/2 与清理历史沉积
+
+| 做了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| `SKILL.md` 重构为统一四阶段主线 + 按任务切入路由表 + 核心深模块 CLI 表；将 `00_pipeline_controller.md` 初始化命令并入 `SKILL.md` | 按新版 `planning-before-create-skill` 与 `writing-for-agents` 消除多头重复（Sprawl）与防御性否定句，提供清晰的非线性格局重入路由 | `SKILL.md`、`README.md` | `00_pipeline_controller.md` 独立入口、`SKILL.md` 末尾与 PBC 重复的「运行后迭代」段落 |
+| `docs/ARCHITECTURE.md` 验证门禁并入 `references/architecture.md`；将 `docs/` 整体及未被引用的 `flagship_theme_guidance.md`、`flagship_layout_examples.md` 移入归档 | 维持 `references/architecture.md` 单一真相源，移除 1.6 万行陈年过程文件与孤儿样张规范对活跃上下文的干扰 | `references/architecture.md`、`_archive/ppt-hell-retired-docs-2026-11-21/` | `docs/`（含 `ARCHITECTURE.md` / `README.md` / `UPGRADE-v5.md` / `history/`）及两份孤儿 `flagship_*.md` |
+| `02_content_stage.md` 补齐 `planners-bypage` 的 `planners-doc/2`（`.planners/by-page.md` + `by-page.assets.json` + `fact-audit.json`）交接入口 | Bypage 已升级至 `planners-doc/2`，原有 `bypage-production/1` 说明会导致新链路模型误找 JSON 包 | `SKILL.md`、`references/workflow/02_content_stage.md` | 「只有 `import_bypage.py --production`」的单一入口假设（保留用于旧版兼容） |
+
 ## 2026-11-18 · 模板切换失败恢复与几何规则缓存
 
 工作台画廊找不到具名预览时，直接以图像显示该版式自己的 SVG，不把来源页序号猜成版式。拖动可编辑元素时按屏幕距离吸附到画布中心或其他元素的边缘及中心；Option/Alt 临时绕过。辅助线留在工作台，不进 SVG。

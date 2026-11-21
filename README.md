@@ -151,10 +151,9 @@ planners-ppt-hell/
 ├── SKILL.md
 ├── agents/openai.yaml
 ├── assets/                  # 4 套内置模板包（template_library/）与审阅页
-├── docs/                    # 架构与历史文档
 ├── evals/
 ├── examples/minimal_deck/
-├── references/              # 契约、领域排版规则与 00-08 工作流文档
+├── references/              # 架构契约、领域排版规则与工作流文档
 └── scripts/                 # 画布几何、SVG→PPTX 转换、模板提取与工作台服务
 ```
 

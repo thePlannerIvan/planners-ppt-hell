@@ -33,4 +33,10 @@ PPT：材料或逐页稿 → 内容适配 → 画面设计 → store → PPT 能
 
 视觉参考 → [提取流程](workflow/01_template_intake.md) → 模板；内容与项目选择 → 模板辅助的页面设计 → 保存 → 按路线检查和输出。
 检查器读取项目画幅，冻结输出读取快照画幅；改变模板不改变历史 SVG。模板内部 tokens 是数值来源，SPEC 引用其语义，SVG 是实现，PNG 是视觉证据。
-修改主题只影响主题；修改转换能力只影响对应出口；修改版本机制服务两路。`SKILL.md` 负责导航，不复制这些所有权。工程与测试入口见 [ARCHITECTURE](../docs/ARCHITECTURE.md)。
+修改主题只影响主题；修改转换能力只影响对应出口；修改版本机制服务两路。`SKILL.md` 负责导航，不复制这些所有权。
+
+## 工程门禁与候选验证
+
+- **模板库完整性闸门**（修改 `assets/template_library/` 后必跑）：`python3 scripts/template/template_library.py verify`
+- **回归测试**：在 Skill 根用已安装 `scripts/requirements.txt` 的 Python 运行 `python3 -m unittest discover -s scripts/test -p 'test_*.py'`（开启浏览器测试加环境变量 `PPT_BROWSER_TESTS=1 PPT_WORKBENCH_BROWSER_TESTS=1`）。完整结果以本轮实测报告为准，不沿用历史通过数量。
+- **核心覆盖面**：store task 路由、legacy 原件恢复、候选基版与 checkout、用户直改文字与几何位置保护（`guards`）、独立导出快照冻结、真实技术错误拦截、输出复核独立、当前模板包确认与失败回滚、版式任务字段与模型保存的 `layout_id`。
