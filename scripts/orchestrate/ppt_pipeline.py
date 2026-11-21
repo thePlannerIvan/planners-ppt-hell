@@ -737,7 +737,7 @@ def _next_action(root):
                                   'Report unavailable rendering explicitly. The workbench remains editable.'}
     return {'state':'WORKBENCH','route':route_now,'actions':['review','check','export'],
             'export_available':True,'last_export':out,
-            'instruction':'Continue candidate edits, open review, or export the current version snapshot.'}
+            'instruction':'All checked pages are ready. Open or refresh the visual workbench (review / review --surface-only) and hand off to the user. Run export ONLY when the user explicitly requests a PPTX file or triggers a snapshot export from the workbench.'}
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('project_dir');sub=p.add_subparsers(dest='command',required=True)
@@ -790,7 +790,7 @@ def main():
                 run(SCRIPTS/'template/template_library.py','apply',root,'--template-id',a.template_id)
             if a.mode=='reference':
                 if not a.reference:raise ValueError('Reference mode needs --reference <pptx|pdf|image|dir> so the reference pages are actually rendered before design_direction.md is written')
-                run(SCRIPTS/'template/prepare_visual_references.py',a.reference,'--project',root)
+                run(SCRIPTS/'template/extract_template_pack.py',a.reference,'--project',root)
             m['template_intake']={'mode':a.mode,'template_id':a.template_id};write(root/PROJECT/'page_manifest.json',m);result=m['template_intake']
         print(json.dumps(result,ensure_ascii=False,indent=2))
         if a.command=='check' and any(x.get('validation_status',x['status']) in {'blocked','fix'} for x in result['pages']):raise SystemExit(1)

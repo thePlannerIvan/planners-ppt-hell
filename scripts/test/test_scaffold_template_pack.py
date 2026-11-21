@@ -160,6 +160,34 @@ class ScaffoldTests(unittest.TestCase):
         self.assertTrue(any('undefined tokens' in issue for issue in result['issues']))
         self.assertTrue(any('missing primitive' in issue for issue in result['issues']))
 
+    def test_scaffold_falls_back_to_other_family_for_pdf_catalog(self):
+        pdf_catalog = {
+            'source': 'sample.pdf',
+            'slide_count': 2,
+            'master_count': 0,
+            'layouts': [],
+            'pages': [
+                {'page': 1, 'shapes': [{'kind': 'text', 'x': 80, 'y': 80, 'width': 400, 'height': 60}]},
+                {'page': 2, 'shapes': [{'kind': 'text', 'x': 80, 'y': 80, 'width': 400, 'height': 60}]},
+            ],
+            'families': [{
+                'family': 'other',
+                'label': '自由版式',
+                'usage': 2,
+                'layout_ids': [],
+                'layout_names': [],
+                'source_pages': [1, 2],
+                'representative_page': 1,
+                'slots': [{'role': 'body', 'x': 80, 'y': 80, 'width': 400, 'height': 60}],
+            }],
+        }
+        write_catalog(self.root, pdf_catalog)
+        result = self.run_scaffold()
+        self.assertTrue(result['ok'])
+        self.assertEqual(result['layouts'], 1)
+        document = json.loads((self.pack / 'layouts.json').read_text())
+        self.assertEqual(document['layouts'][0]['family'], 'other')
+
 
 if __name__ == '__main__':
     unittest.main()

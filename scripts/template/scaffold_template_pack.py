@@ -188,11 +188,15 @@ def slug(value):
 
 
 def selected_families(catalog, only=None, limit=0, include_unused=False):
-    families = [item for item in (catalog or {}).get("families") or []
-                if item.get("family") != "other" and (include_unused or int(item.get("usage") or 0) > 0)]
+    all_families = [item for item in (catalog or {}).get("families") or []
+                    if include_unused or int(item.get("usage") or 0) > 0]
     if only:
         wanted = {slug(item) for item in only}
-        families = [item for item in families if item.get("family") in wanted]
+        families = [item for item in all_families if item.get("family") in wanted]
+    else:
+        families = [item for item in all_families if item.get("family") != "other"]
+        if not families:
+            families = all_families
     families.sort(key=lambda item: (-int(item.get("usage") or 0), str(item.get("label") or "")))
     if limit and limit > 0:
         families = families[:limit]
@@ -301,7 +305,7 @@ def spec_markdown(name, facts, catalog, records, palette_values, sizes, margins,
         f"`{record['layout_id']}` |" for record in records)
     return f"""# {name} · 模板包（脚手架）
 
-> 由 `scaffold_template_pack.py` 从源 PPTX 的 master/layout 目录生成。色彩、字号、安全区、版式目录都来自源事实；设计哲学、逐版式的用法与红线、primitive 与 skyline_shell 仍需模型补齐。
+> 由 `scaffold_template_pack.py` 从源 PPTX / PDF 的版式目录与提取事实生成。色彩、字号、安全区、版式目录都来自源事实；设计哲学、逐版式的用法与红线、primitive 与 skyline_shell 仍需模型补齐。
 
 ## 源与覆盖
 

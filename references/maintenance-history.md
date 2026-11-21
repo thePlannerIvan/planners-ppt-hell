@@ -4,6 +4,15 @@
 
 看每一条时问三件事：**边界怎么变了**、**哪些 module 被牵动**、**删掉了什么**。
 
+## 2026-11-21 · 确立 Workbench 主交付物地位、双密度构图力学、领域模型及模板维护 CLI
+
+| 做了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| 新增 `GLOSSARY.md` 与 `docs/adr/0001..0005.md` | 统一 `Workbench / Store / Guard / Template Pack / Theme / Layout / Universal Mechanics / Snapshot` 领域词表，固化五项难逆转架构裁决 | `GLOSSARY.md`、`docs/adr/`、`README.md`、`references/architecture.md` | 术语混用（`Fidelity Template` / `Master Slide` 等） |
+| 确立「打开 `review` 工作台即默认终点」，`SKILL.md` 收束为三步主线 + 按需导出分支；修改 `ppt_pipeline.py next` 提示并修复第 793 行 `prepare_visual_references.py` 死引用；活跃流程退役 `inspect` / `export-inspect` 命令行打卡 | 切断模型主动导出 `.pptx` 的抢跑冲动；长程多模态模型直接看 PNG 大图即可自检，无需表单打卡 | `SKILL.md`、`scripts/orchestrate/ppt_pipeline.py`、`references/workflow/04_svg_stage.md` | `next` 中教唆 `export` 的提示语、`SKILL.md` 中的第四步默认导出门与 `inspect` 强制步骤 |
+| 重写 `style_system.md` 与 `layout_taxonomy.md`：厘清模板（管视觉皮肤）与通用构图力学（管层级、焦点、高密台账 vs 低密大字双密度自适应）的职责边界 | 防止把单一模板的细线/去框化写成跨模板教条，同时解决高密咨询报告页与低密留白页排版分裂的问题 | `references/domain/style_system.md`、`references/domain/layout_taxonomy.md` | `layout_taxonomy.md` 头条默认的 Bento Grid 教条与纯原则性废话 |
+| `01_template_intake.md` 分出「当次参考快提 / 外部提炼入库 / 存量直接维护」三场景；`template_library.py` 新增 `refresh <id>` 子命令；`scaffold_template_pack.py` 支持 PDF `other` 家族回退 | 让轻度参考无需走两轮网页审批；解决直接编辑库模板包后 `manifest.json` 哈希脱同步硬崩及 PDF 家族为空报错的问题 | `references/workflow/01_template_intake.md`、`scripts/template/template_library.py`、`scripts/template/scaffold_template_pack.py`、`scripts/test/test_template_library_integrity.py`、`test_scaffold_template_pack.py` | `scaffold_template_pack.py` 对纯 `other` 家族目录的误杀 |
+
 ## 2026-11-21 · 按新版 PBC 与 WFA 收束入口、对齐 Bypage planners-doc/2 与清理历史沉积
 
 | 做了什么 | 为什么 | 影响了哪些 module | 删了什么 |

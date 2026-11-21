@@ -75,18 +75,17 @@ task_id 的改写授权绑定反馈当时的 revision；首次保存后再迭代
 
 `frames` 与 validator 共用 `image_diagnostics.py`。测量按 image 的本地矩形与源图比例计算，不推断人脸/产品主体，也不计入外层裁切、遮挡或非等比变换；源图或尺寸无法解析则明确 unmeasured。slice 可见面积、meet 填充率只是提醒，是否改素材/槽位由实际看图决定。
 
-## Check → 看图 → Inspect
+## Check → 看图 → 打开工作台
 
 ```bash
 python scripts/orchestrate/ppt_pipeline.py <project> check --pages alpha omega --summary
-python scripts/orchestrate/ppt_pipeline.py <project> inspect --page alpha --render-token <token> --note '<实际观察>' --first-glance '<第一眼焦点>' --design-check '<检查内容与发现>' --position 'x=120,y=150,w=400,h=80' --clean
+python scripts/orchestrate/ppt_pipeline.py <project> review [--surface-only]
 ```
 
-`--pages` 用空格分隔，省略即检查全页；不支持逗号列表。`--summary` 返回页、技术状态、缓存标记、issue 码、文案核对状态、token 与 PNG；完整输出保留设计测量、疑似新增文案，validator 报告在 `_internal/04_validation/`。缓存命中仍报告原技术结果，不能把 unchanged 理解成修改已完成。
-文案对表的依据和授权修订见 [内容输入](02_content_stage.md)；COPY_UNCHECKED 不是通过，COPY_NOT_IN_BASELINE 需要查看疑似文本。
-有问题用 --must-fix，修候选后重跑。看逐页 PNG 大图，不用联系表代替。render_token 绑定当前版本与 PNG；没有实际查看就不记录 clean。
-技术错误、缺图、非法 SVG 仍阻止输出；设计测量只是事实，不代替判断。此处没有用户通过门。
-处理反馈后用 store resolve 绑定每个目标页的结果 revision 与具体 note，见 [工作台反馈](07_visual_review.md)。
+`--pages` 用空格分隔，省略即检查全页；不支持逗号列表。`--summary` 返回每页技术状态、缓存标记、issue 码、文案核对状态与渲染出的 PNG 路径（位于 `_internal/03_png_preview/pages/<page_key>.png`）；完整报告在 `_internal/04_validation/`。缓存命中仍报告原技术结果，不能把 `unchanged` 理解成修改已完成。
+文案对表的依据和授权修订见 [内容输入](02_content_stage.md)；`COPY_UNCHECKED` 不是通过，`COPY_NOT_IN_BASELINE` 需要核对疑似新增文字。
+运行 `check` 后直接打开逐页 PNG 大图（不用联系表缩略格代替），对照所选模板 `SPEC.md` 与 [视觉构图力学](../domain/style_system.md) 检查层级、断行、留白密度与图片裁切；发现问题立即修改候选 SVG 并重跑 `check`。技术错误、缺图或非法 SVG 必须修清；此处不设人工批准门，也不强求在命令行填报 `inspect` 打卡记录（`inspect` CLI 仅作为可选历史审计接口保留）。
+处理完待办反馈后，用 Store `resolve` 绑定结果 `revision` 与具体 `note`，然后运行 `review`（有侧栏插件时加 `--surface-only`）打开或刷新工作台交付给用户，见 [工作台反馈](07_visual_review.md)。除非用户显式要求或从工作台点击导出，否则不运行 `export`。
 
 ## 页序与反馈收尾
 

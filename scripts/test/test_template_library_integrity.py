@@ -76,6 +76,38 @@ class TemplateLibraryIntegrityTest(unittest.TestCase):
             self.assertEqual(result["applied_template_id"], "dark-titanium-cockpit")
             self.assertTrue((Path(tmp) / "_internal/00_project/template_pack/manifest.json").is_file())
 
+    def test_refresh_template_recomputes_hashes_and_primitives_after_direct_edit(self):
+        """直接编辑模板包里的原语后，verify 先拦截脱同步，跑 refresh 立即修复并同步原语清单。"""
+        import json
+        import shutil
+        import tempfile
+        from template_library import apply_template, refresh_template
+
+        with tempfile.TemporaryDirectory() as tmp:
+            lib = Path(tmp) / "library"
+            lib.mkdir()
+            pack = lib / "agency-social-proposal"
+            shutil.copytree(LIBRARY_ROOT / "agency-social-proposal", pack)
+
+            extra = pack / "primitives" / "p99_custom_ledger.svg"
+            extra.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">'
+                '<rect width="1920" height="1080" fill="#FFFFFF"/></svg>',
+                encoding="utf-8",
+            )
+            self.assertFalse(verify_library(lib)["valid"])
+
+            refreshed = refresh_template("agency-social-proposal", library_root=lib)
+            self.assertTrue(refreshed["ok"])
+            self.assertEqual(refreshed["primitives"], 7)
+            self.assertTrue(verify_library(lib)["valid"])
+            manifest = json.loads((pack / "manifest.json").read_text(encoding="utf-8"))
+            self.assertIn("primitives/p99_custom_ledger.svg", manifest["four_piece_contract"]["primitives"])
+
+            proj = Path(tmp) / "proj"
+            applied = apply_template(proj, "agency-social-proposal", library_root=lib)
+            self.assertEqual(applied["applied_template_id"], "agency-social-proposal")
+
 
 if __name__ == "__main__":
     unittest.main()

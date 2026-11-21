@@ -562,6 +562,66 @@ def apply_template(project_root, template_id, library_root=None):
     return manifest
 
 
+def refresh_template(template_id, library_root=None):
+    """直接修改库模板包（如增删 primitives / 改 SPEC / 改 tokens）后，同步元数据并重算 manifest 哈希。"""
+    lib_root = Path(library_root).resolve() if library_root else LIBRARY_ROOT.resolve()
+    candidate = Path(template_id)
+    if candidate.is_dir() and (candidate / "manifest.json").is_file():
+        pack_dir = candidate.resolve()
+    else:
+        pack_dir = (lib_root / str(template_id)).resolve()
+        if pack_dir.parent != lib_root:
+            raise ValueError("template ID must stay within library root")
+    if not pack_dir.is_dir():
+        raise ValueError(f"unknown template_id: {template_id}")
+    manifest_path = pack_dir / "manifest.json"
+    manifest = read_json(manifest_path, None)
+    if not isinstance(manifest, dict):
+        raise ValueError(f"Missing or invalid manifest.json in {pack_dir}")
+
+    is_multimodal = (
+        manifest.get("schema") == "planner.multimodal-template-pack.v2"
+        or "four_piece_contract" in manifest
+    )
+    if is_multimodal:
+        validation = validate_pack_dir(pack_dir, check_manifest_hashes=False, strict=False)
+        if not validation["valid"]:
+            raise ValueError(f"Template pack '{pack_dir.name}' is invalid: {validation['issues']}")
+        contract = dict(manifest.get("four_piece_contract") or {})
+        primitives = sorted((pack_dir / "primitives").glob("*.svg"))
+        anchors = sorted((pack_dir / "anchors").glob("*.png"))
+        contract.update({
+            "tokens_css": "tokens.css",
+            "skyline_shell_svg": "skyline_shell.svg",
+            "primitives": [f"primitives/{p.name}" for p in primitives],
+            "spec_md": "SPEC.md",
+            "anchors": [f"anchors/{a.name}" for a in anchors],
+        })
+        layouts_path = pack_dir / "layouts.json"
+        if layouts_path.is_file():
+            layouts_doc = read_json(layouts_path, {})
+            layouts_list = layouts_doc.get("layouts", []) if isinstance(layouts_doc, dict) else []
+            contract["layouts_json"] = "layouts.json"
+            contract["layout_count"] = len(layouts_list)
+        else:
+            contract.pop("layouts_json", None)
+            contract.pop("layout_count", None)
+        manifest["four_piece_contract"] = contract
+
+    hashes = package_hashes(pack_dir)
+    manifest["files"] = hashes
+    manifest["package_sha256"] = package_sha256(hashes)
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {
+        "ok": True,
+        "template_id": manifest.get("template_id", pack_dir.name),
+        "schema": manifest.get("schema", ""),
+        "files": len(hashes),
+        "package_sha256": manifest["package_sha256"],
+        **({"primitives": len(manifest["four_piece_contract"]["primitives"])} if is_multimodal else {}),
+    }
+
+
 def verify_library(library_root=None):
     """发布前体检：库里的每个包都要通过 `check_manifest_hashes=True`。
 
@@ -626,6 +686,10 @@ def main():
     p_verify = sub.add_parser("verify", help="发布前体检：逐包核对 manifest 哈希与 preview")
     p_verify.add_argument("--library-root", default=None)
 
+    p_refresh = sub.add_parser("refresh", help="直接修改库模板包后同步原语列表并重算 manifest.json 哈希")
+    p_refresh.add_argument("template_id", help="模板 ID 或模板包目录路径")
+    p_refresh.add_argument("--library-root", default=None)
+
     p_app = sub.add_parser("apply")
     p_app.add_argument("project_dir")
     p_app.add_argument("--template-id", required=True)
@@ -644,6 +708,8 @@ def main():
         if not result["valid"]:
             print(json.dumps(result, ensure_ascii=False, indent=2))
             sys.exit(1)
+    elif args.command == "refresh":
+        result = refresh_template(args.template_id, library_root=args.library_root)
     elif args.command == "publish":
         result = publish(args.project_dir, template_id=args.template_id, name=args.name,
                          description=args.description, library_root=args.library_root,replace=args.replace)

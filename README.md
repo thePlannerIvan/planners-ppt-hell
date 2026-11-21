@@ -149,8 +149,10 @@ python3 -m unittest discover -s scripts/test -p 'test_*.py'
 ```text
 planners-ppt-hell/
 ├── SKILL.md
+├── GLOSSARY.md              # 领域统一术语表
 ├── agents/openai.yaml
 ├── assets/                  # 4 套内置模板包（template_library/）与审阅页
+├── docs/adr/                # 关键架构决策记录（ADR）
 ├── evals/
 ├── examples/minimal_deck/
 ├── references/              # 架构契约、领域排版规则与工作流文档
