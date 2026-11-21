@@ -2,7 +2,7 @@
 
 读 page_content.json、共同方向、所选视觉样张与模板/主题定义，以及当前页用户修改和任务。模板是当前页的设计起点，按内容任务选用或重组；需要改分页或证据时回到内容决定，不为套原语静默删改。
 画幅由 canvas_frame.py 管理；SVG 特性见 [SVG 规则](../domain/svg_rules.md)，PPT 再读 [转换规则](../domain/svg_to_ppt_rules.md)。
-通用阅读层级与证据可读性见 [设计原则](../domain/style_system.md)，共享视觉数值来自主题，原语坐标是示例实现。
+通用阅读层级、双密度调度与拓扑原型见 [页面构图力学](../domain/page_composition.md)，共享视觉数值来自主题，原语坐标是示例实现。
 
 ## Checkout → 修改 → Save
 
@@ -84,7 +84,7 @@ python scripts/orchestrate/ppt_pipeline.py <project> review [--surface-only]
 
 `--pages` 用空格分隔，省略即检查全页；不支持逗号列表。`--summary` 返回每页技术状态、缓存标记、issue 码、文案核对状态与渲染出的 PNG 路径（位于 `_internal/03_png_preview/pages/<page_key>.png`）；完整报告在 `_internal/04_validation/`。缓存命中仍报告原技术结果，不能把 `unchanged` 理解成修改已完成。
 文案对表的依据和授权修订见 [内容输入](02_content_stage.md)；`COPY_UNCHECKED` 不是通过，`COPY_NOT_IN_BASELINE` 需要核对疑似新增文字。
-运行 `check` 后直接打开逐页 PNG 大图（不用联系表缩略格代替），对照所选模板 `SPEC.md` 与 [视觉构图力学](../domain/style_system.md) 检查层级、断行、留白密度与图片裁切；发现问题立即修改候选 SVG 并重跑 `check`。技术错误、缺图或非法 SVG 必须修清；此处不设人工批准门，也不强求在命令行填报 `inspect` 打卡记录（`inspect` CLI 仅作为可选历史审计接口保留）。
+运行 `check` 后直接打开逐页 PNG 大图（不用联系表缩略格代替），对照所选模板 `SPEC.md` 与 [页面构图力学](../domain/page_composition.md) 检查层级、断行、留白密度与图片裁切；发现问题立即修改候选 SVG 并重跑 `check`。技术错误、缺图或非法 SVG 必须修清；此处不设人工批准门，也不强求在命令行填报 `inspect` 打卡记录（`inspect` CLI 仅作为可选历史审计接口保留）。
 处理完待办反馈后，用 Store `resolve` 绑定结果 `revision` 与具体 `note`，然后运行 `review`（有侧栏插件时加 `--surface-only`）打开或刷新工作台交付给用户，见 [工作台反馈](07_visual_review.md)。除非用户显式要求或从工作台点击导出，否则不运行 `export`。
 
 ## 页序与反馈收尾

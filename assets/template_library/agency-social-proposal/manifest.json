@@ -25,7 +25,9 @@
       "anchors/mizuno_v2_pdf_p13_architecture_house.png",
       "anchors/mizuno_v2_pdf_p32_table_calendar.png",
       "anchors/mizuno_v2_pdf_p43_evidence_xhs_demo.png"
-    ]
+    ],
+    "layouts_json": "layouts.json",
+    "layout_count": 6
   },
   "palette_summary": {
     "canvas": "#F4F5F7 / #FFFFFF",
@@ -47,6 +49,7 @@
     "anchors/mizuno_v2_pdf_p13_architecture_house.png": "1170c570904da4807a2b6dd2398791347f736d966691010affde952d0f038e68",
     "anchors/mizuno_v2_pdf_p32_table_calendar.png": "f10042fdf954f0a1b6284e66c1dba82b4a6994876349fa0e10b3d034cb7641eb",
     "anchors/mizuno_v2_pdf_p43_evidence_xhs_demo.png": "02eed107189c4f69691d853e0715f4d50fd33060420805dc8b9866f81c2aba7a",
+    "layouts.json": "e3ed4f238bf9013a364f0812b5f4e504c96d256799fcfdef1a48d45fbb458e31",
     "previews/full_deck_contact_sheet.png": "cd4d596277ea46490770f31393a595a38623d3b288350eac0b3bde1ebf02759a",
     "previews/pages/p00_skyline_shell.png": "3608de28b0e7d9dab73bb8b6b8376fa0002f73edcb185bb7d0cc3266bc4f467e",
     "previews/pages/p01_cover.png": "b781bf73221c8a5682317d69a125d583462c2a383b270850bd0d28d9448f0eee",
@@ -65,5 +68,5 @@
     "skyline_shell.svg": "5c3308f835f6b1606821b28df66808d708f92eb7e24fe7fa19f8defc05900865",
     "tokens.css": "d158e6f04064d93b1d2f46acf636e35b9b043bc22fad060d0fd3c58510f4a463"
   },
-  "package_sha256": "1c9c58e0b688aa17540f76760ee39b5b947c01e79f6888341531715ca254130c"
+  "package_sha256": "dccb3b7bbae9ef50c449d5826d515d4d1908ba3f1206d13bbea752d83b9a7293"
 }

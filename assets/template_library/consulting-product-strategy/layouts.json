@@ -1,0 +1,87 @@
+{
+  "schema": "planner.template-layouts.v1",
+  "canvas": {
+    "width": 1920,
+    "height": 1080
+  },
+  "layouts": [
+    {
+      "layout_id": "p01_cover",
+      "name": "战略报告封面",
+      "family": "cover",
+      "use_for": "商业分析、产品定位、竞标战略总报告封面（左 2/3 深空蓝黑命题 + 右 1/3 三项量化发现）",
+      "usage": 1,
+      "source_layouts": [],
+      "source_pages": [],
+      "slots": [],
+      "preview": "previews/pages/p01_cover.png",
+      "primitive": "primitives/p01_cover.svg",
+      "selected": true
+    },
+    {
+      "layout_id": "p02_kpi_closed_loop",
+      "name": "顶部大数带 + 三列闭环验证",
+      "family": "metrics",
+      "use_for": "标杆拆解、阶段复盘、策略动作×实证（顶部深色 4 指标带 + 下方三列上动作下实证盒）",
+      "usage": 1,
+      "source_layouts": [],
+      "source_pages": [],
+      "slots": [],
+      "preview": "previews/pages/p02_kpi_closed_loop.png",
+      "primitive": "primitives/p02_kpi_closed_loop.svg",
+      "selected": true
+    },
+    {
+      "layout_id": "p03_quadrant_2x2",
+      "name": "2×2 战略定位象限 + 右侧裁决栏",
+      "family": "quadrant",
+      "use_for": "竞争格局重构、蓝海生态位卡位（三暗一亮象限 + 右侧深色战略裁决栏）",
+      "usage": 1,
+      "source_layouts": [],
+      "source_pages": [],
+      "slots": [],
+      "preview": "previews/pages/p03_quadrant_2x2.png",
+      "primitive": "primitives/p03_quadrant_2x2.svg",
+      "selected": true
+    },
+    {
+      "layout_id": "p04_mechanism_pipeline",
+      "name": "四阶因果传导机制流",
+      "family": "process",
+      "use_for": "痛点推导、技术转译、商业价值链（纯矢量 01–04 数字徽章与单向箭头传导）",
+      "usage": 1,
+      "source_layouts": [],
+      "source_pages": [],
+      "slots": [],
+      "preview": "previews/pages/p04_mechanism_pipeline.png",
+      "primitive": "primitives/p04_mechanism_pipeline.svg",
+      "selected": true
+    },
+    {
+      "layout_id": "p05_asymmetric_comparison",
+      "name": "非对称攻防范式对比矩阵",
+      "family": "comparison",
+      "use_for": "旧逻辑 vs 新主张、本品 vs 竞品多维 PK（左窄暗灰旧范式 vs 右宽亮蓝破局新范式）",
+      "usage": 1,
+      "source_layouts": [],
+      "source_pages": [],
+      "slots": [],
+      "preview": "previews/pages/p05_asymmetric_comparison.png",
+      "primitive": "primitives/p05_asymmetric_comparison.svg",
+      "selected": true
+    },
+    {
+      "layout_id": "p06_chart_and_takeaway",
+      "name": "复合柱状图 + 右侧结构化洞察",
+      "family": "chart",
+      "use_for": "市场规模预测、分季度投放弹性、ROI 测算（左 2/3 双柱图表配盈亏线 + 右 1/3 三张驱动卡）",
+      "usage": 1,
+      "source_layouts": [],
+      "source_pages": [],
+      "slots": [],
+      "preview": "previews/pages/p06_chart_and_takeaway.png",
+      "primitive": "primitives/p06_chart_and_takeaway.svg",
+      "selected": true
+    }
+  ]
+}

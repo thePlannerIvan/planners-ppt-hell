@@ -1,6 +1,6 @@
 # 转可编辑 PPT 的双向契约与专属约束（SVG-to-PPT Rules v6.0）
 
-**只有幻灯片出口（`slides`）读取本文件。** 本文件说明 SVG 与 `native_svg_to_ppt.py` 的转换约束。通用规则见 [SVG 规则](svg_rules.md) 与 [设计原则](style_system.md)。具体支持范围以转换器报告、几何测试与实际 PPTX 渲染为准。
+**只有幻灯片出口（`slides`）读取本文件。** 本文件说明 SVG 与 `native_svg_to_ppt.py` 的转换约束。通用规则见 [SVG 规则](svg_rules.md) 与 [页面构图力学](page_composition.md)。具体支持范围以转换器报告、几何测试与实际 PPTX 渲染为准。
 
 ---
 

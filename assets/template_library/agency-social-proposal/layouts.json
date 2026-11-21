@@ -1,0 +1,87 @@
+{
+  "schema": "planner.template-layouts.v1",
+  "canvas": {
+    "width": 1920,
+    "height": 1080
+  },
+  "layouts": [
+    {
+      "layout_id": "p01_cover",
+      "name": "扉页与篇章封面",
+      "family": "cover",
+      "use_for": "年度全案封面、篇章扉页（左黑右灰 62:38 黄金分割，右侧预告四大篇章）",
+      "usage": 1,
+      "source_layouts": [],
+      "source_pages": [],
+      "slots": [],
+      "preview": "previews/pages/p01_cover.png",
+      "primitive": "primitives/p01_cover.svg",
+      "selected": true
+    },
+    {
+      "layout_id": "p02_asymmetric_insight",
+      "name": "非对称 1:2 洞察锚点",
+      "family": "two_column",
+      "use_for": "品牌诊断、核心破局主张、人群痛点转译（左 1/3 深色核心大数 + 右 2/3 三行竖条横排）",
+      "usage": 1,
+      "source_layouts": [],
+      "source_pages": [],
+      "slots": [],
+      "preview": "previews/pages/p02_asymmetric_insight.png",
+      "primitive": "primitives/p02_asymmetric_insight.svg",
+      "selected": true
+    },
+    {
+      "layout_id": "p03_swiss_editorial_grid",
+      "name": "瑞士无框 3×2 水印网格",
+      "family": "grid",
+      "use_for": "六大栏目矩阵、内容资产盘点、多维方法论（零外框配 132px 浅灰水印数字与通道虚线）",
+      "usage": 1,
+      "source_layouts": [],
+      "source_pages": [],
+      "slots": [],
+      "preview": "previews/pages/p03_swiss_editorial_grid.png",
+      "primitive": "primitives/p03_swiss_editorial_grid.svg",
+      "selected": true
+    },
+    {
+      "layout_id": "p04_strategy_house",
+      "name": "咨询式话题屋 / 战略屋",
+      "family": "framework",
+      "use_for": "年度内容架构、房顶总主张 + 四支柱执行 + 底部地基与话题锚点盒",
+      "usage": 1,
+      "source_layouts": [],
+      "source_pages": [],
+      "slots": [],
+      "preview": "previews/pages/p04_strategy_house.png",
+      "primitive": "primitives/p04_strategy_house.svg",
+      "selected": true
+    },
+    {
+      "layout_id": "p05_xhs_evidence_split",
+      "name": "社媒笔记样板与策略拆解",
+      "family": "evidence",
+      "use_for": "种草 Demo 样板、爆文拆解、达人执行 SOP（左栏笔记样机 + 右侧结构化拆解）",
+      "usage": 1,
+      "source_layouts": [],
+      "source_pages": [],
+      "slots": [],
+      "preview": "previews/pages/p05_xhs_evidence_split.png",
+      "primitive": "primitives/p05_xhs_evidence_split.svg",
+      "selected": true
+    },
+    {
+      "layout_id": "p06_zebra_battle_table",
+      "name": "无竖线斑马纹作战大表",
+      "family": "table",
+      "use_for": "全年月度排期、KFS 预算表、达人矩阵配比（禁竖线，S 级重点行浅红高光高亮）",
+      "usage": 1,
+      "source_layouts": [],
+      "source_pages": [],
+      "slots": [],
+      "preview": "previews/pages/p06_zebra_battle_table.png",
+      "primitive": "primitives/p06_zebra_battle_table.svg",
+      "selected": true
+    }
+  ]
+}

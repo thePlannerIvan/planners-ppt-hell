@@ -12,8 +12,24 @@ python scripts/init_svg_project.py <project> --assets <pack>/assets --plan <pack
 无生产包时用 `python scripts/init_svg_project.py <project> --source <上屏稿.md> --route video`，整理 page_content 后使用同一工作台。独立输入输出快照标明未绑定脚本，后续合成需由 Craft 建立脚本与时间绑定；不声称它已满足生产包交接。
 
 已有包的 screen ID 不重新编号；契约中的正文、原样标签和花字按适配器进 content，理由、来源与说明进 notes。未知字段报告裁决，不假装已画上屏。
-确认风格与画幅：视频路线仅服务 `production_mode="keyframe-svg"` 的关键帧示意风格（如 `line-art`、`collage`、`business-report`、`concept-film`；若上游契约标为 `footage-montage` 如哈雷/Vans 混剪风，则直接跳过本 Skill 交 `video-craft`）。开工前运行 `python3 scripts/resolve_video_vault.py --style <style_id>` 从私有风格库 `~/.config/planners/video-vault/styles/<style_id>/` 读取 `page.md`、画框预设 `frames/*.json` 与 `anchors/` 多模态参考图（未挂载私有库的开源环境自动降级为 `default-clean` 通用规范）；新视频风格进化与沉淀见 [提炼 SOP](08_video_style_extraction_sop.md)。
+确认风格与画幅：视频路线仅服务 `production_mode="keyframe-svg"` 的关键帧示意风格（如 `line-art`、`collage`、`business-report`、`concept-film`；若上游契约标为 `footage-montage` 如哈雷/Vans 混剪风，则直接跳过本 Skill 交 `video-craft`）。开工前运行 `python3 scripts/resolve_video_vault.py --style <style_id>` 从私有风格库 `~/.config/planners/video-vault/styles/<style_id>/` 读取 `page.md`、画框预设 `frames/*.json` 与 `anchors/` 多模态参考图（未挂载私有库的开源环境自动降级为 `default-clean` 通用规范）；新视频风格的提取与进化已统一归口至 `video-craft`（`helpers/extract_style.py`）。
 共同方向写入 _internal/01_content/design_direction.md，写清风格、机器画幅引用和本次实际选择。字幕区、人物位置、透明/不透明、强调余量都只是**可选提示**：项目需要就写，不需要就不写，不拦页面制作与快照。只有明确要用 Video Craft 的 composition 事实时才读它的 references/composition-facts-contract.md；本 Skill 不复制第二份字段定义。
+
+## 默认视频关键帧判据（`default-clean` 与通用基线）
+
+以下 7 条仅服务视频静态关键帧（不约束商业 PPT 模板）；当所选私有风格 `page.md`（如 `collage` 红圈圈注、`business-report` 字阶对比）有专项规则时以 `page.md` 为准，否则以此表为制作与看图基线：
+
+| 概念 | 判据（怎么算做到） | 反例（怎么一眼看出没做到） |
+|---|---|---|
+| **一页一主张** | 能用一句话指认这页在说什么，且只有一件 | 一页并列三件事，说不出重点 |
+| **概念锚点** | 画面上的词是**概念的名字**（2–6 字） | 把口播稿或文案整句搬上画面 |
+| **形即其义** | 遮住所有文字，仍能读出概念的方向（闭合 / 破出、收敛 / 发散、均匀 / 异质） | 形状与概念无关，只起装饰作用 |
+| **静默判读** | 静音看一遍，画面自己讲得通 | 不看字幕就看不懂，画面成了字幕的背景板 |
+| **动效承重** | 强调由**动作**承担：生长、穿出、伸缩、落点 | 靠压暗其余元素、划线、放大字号、加彩色来「强调」 |
+| **无彩层级** | 同层元素同色、同线宽、同字号；彩色只做品牌标记或单点重音 | 用「灰 vs 白 + 琥珀」区分新旧、主次、对错 |
+| **单帧即海报** | 任意一帧暂停都成立，构图不依赖运动补全 | 只有动起来才看得出结构 |
+
+**交给视频时**：本 Skill 只交付静态画面，强调动作与合成节拍由 Video Craft 契约定义；需要元素级动效时保留清晰的分层与可识别结构。
 
 ## 制作与检查
 

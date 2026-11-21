@@ -383,6 +383,8 @@ class FourPieceApprovalTests(unittest.TestCase):
         self.tmp=tempfile.TemporaryDirectory();self.root=Path(self.tmp.name)/'project'
         self.pack=self.root/ps.PROJECT/'template_pack'
         shutil.copytree(template_library.LIBRARY_ROOT/'agency-social-proposal',self.pack)
+        # Keep this test focused on pre-layouts.json four-piece packs (layouts.json flow is covered in test_template_production.py)
+        (self.pack/'layouts.json').unlink(missing_ok=True)
         self.library=Path(self.tmp.name)/'library'
         ps.write(self.root/ps.PROJECT/'page_manifest.json',{'version':'5.0','route':'slides'})
 

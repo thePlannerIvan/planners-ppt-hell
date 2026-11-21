@@ -1,8 +1,8 @@
-# 2. 模板包分为 Theme 与 Layout 两层，并与通用构图力学正交
+# 2. 模板包分为 Theme 与 Layout 两层，并与页面构图力学正交
 
 - **Status**: accepted
 
-我们将模板包（`Template Pack`）拆分为 **Theme**（`tokens.css` / `skyline_shell.svg` / `SPEC.md`）与 **Layouts**（`layouts.json` / `primitives/*.svg`）两层，并把版式定位为给模型的结构参考请求而非自动重绘锁层；同时将具体模板的视觉皮肤与通用构图力学（`Universal Mechanics`）解耦正交。
+我们将模板包（`Template Pack`）拆分为 **Theme**（`tokens.css` / `skyline_shell.svg` / `SPEC.md`）与 **Layouts**（`layouts.json` / `primitives/*.svg`）两层，并把版式定位为给模型的结构参考请求而非自动重绘锁层；同时将具体模板的视觉皮肤与页面构图力学（`Page Composition`，`references/domain/page_composition.md`）解耦正交。
 
 ## Considered Options
 
@@ -11,5 +11,5 @@
 
 ## Consequences
 
-- 选定 `Template Pack` 时，色彩、字体、容器形式与参考骨架 100% 服从模板；信息主次、单一焦点及高密/低密双密度调度服从 `Universal Mechanics`。
+- 选定 `Template Pack` 时，色彩、字体、容器形式与参考骨架 100% 服从模板；信息主次、单一焦点、高密/低密双密度调度与通用拓扑原型服从 `Page Composition`。
 - 工作台内切换整套模板（`template_id`）或指定单页版式（`layout_id`）仅向 Store 提交任务，由模型按内容重排并允许在回执中说明合理偏离。

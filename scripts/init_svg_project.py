@@ -9,7 +9,7 @@ import tempfile
 from pathlib import Path
 from canvas_frame import Canvas
 
-from prepare_source_material import (folder_files, image_name_key, prepare_source_material,
+from prepare_source_material import (IMAGE_RE, folder_files, image_name_key, prepare_source_material,
                                      register_image_folder)
 
 INTERNAL_ROOT = "_internal"
@@ -333,7 +333,173 @@ def sha256_file(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def _write_manifest_state(staging, route, plan_path, plan, canvas=None):
+_DOC_ANCHOR_RE = re.compile(r"\n?<!--\s*b:[A-Za-z0-9_.-]+\s*-->[ \t]*")
+
+
+def _parse_frontmatter(raw_text):
+    """Return (meta_dict, body_text) if text begins with valid YAML-like `---` frontmatter."""
+    text = raw_text.replace("\r\n", "\n")
+    if not text.startswith("---\n"):
+        return None, text
+    end = text.find("\n---\n", 4)
+    if end == -1:
+        return None, text
+    meta = {}
+    for line in text[4:end].splitlines():
+        if ":" not in line:
+            continue
+        k, v = line.split(":", 1)
+        meta[k.strip()] = v.strip().strip("\"'")
+    return meta, text[end + 5:]
+
+
+def _split_trailing_sources(page_lines):
+    """Separate trailing contiguous `>` citation blockquotes at page end from section body lines."""
+    end = len(page_lines)
+    while end > 0 and not page_lines[end - 1].strip():
+        end -= 1
+    first_quote = end
+    idx = end - 1
+    saw_quote = False
+    while idx >= 0:
+        line = page_lines[idx]
+        if line.lstrip().startswith(">"):
+            saw_quote = True
+            first_quote = idx
+            idx -= 1
+        elif not line.strip() and saw_quote:
+            idx -= 1
+        else:
+            break
+    if not saw_quote:
+        return page_lines, ""
+    sources = "\n".join(line.strip() for line in page_lines[first_quote:end] if line.strip())
+    return page_lines[:first_quote], sources
+
+
+def _collect_page_assets(raw_segments, asset_by_name):
+    """Find registered asset IDs referenced by Markdown image syntax in page segments."""
+    found = []
+    for seg in raw_segments:
+        for match in IMAGE_RE.finditer(seg):
+            raw_ref = match.group(2).strip()
+            ref = raw_ref[1:-1] if raw_ref.startswith("<") and raw_ref.endswith(">") else raw_ref
+            if re.match(r"^(?:https?:)?//", ref):
+                continue
+            aid = asset_by_name.get(Path(ref).name)
+            if aid and aid not in found:
+                found.append(aid)
+    return found
+
+
+def parse_bypage_doc(normalized_text, source_manifest, normalized_source_path):
+    """Parse normalized `planners-doc/2` (`doc: by-page`) Markdown into `page_content.json`, or None."""
+    meta, body = _parse_frontmatter(normalized_text)
+    if not meta or meta.get("contract") != "planners-doc/2" or meta.get("doc") != "by-page":
+        return None
+
+    clean_body = _DOC_ANCHOR_RE.sub("", body)
+    asset_by_name = {
+        Path(a["normalized_path"]).name: a["asset_id"]
+        for a in source_manifest.get("assets", [])
+        if not a.get("external") and a.get("normalized_path")
+    }
+
+    chapters = []
+    raw_pages = []
+    current_chapter = ""
+    current_page = None
+
+    for line in clean_body.splitlines():
+        if line.startswith("# ") and not line.startswith("##"):
+            current_chapter = line[2:].strip()
+            chapters.append(current_chapter)
+        elif line.startswith("## ") and not line.startswith("###"):
+            if current_page is not None:
+                raw_pages.append(current_page)
+            current_page = {"chapter": current_chapter, "title": line[3:].strip(), "lines": []}
+        elif current_page is not None:
+            current_page["lines"].append(line)
+    if current_page is not None:
+        raw_pages.append(current_page)
+
+    if not raw_pages:
+        raise ValueError("planners-doc/2 by-page.md contains zero `##` pages")
+
+    pages = []
+    for idx, entry in enumerate(raw_pages, start=1):
+        body_lines, sources_text = _split_trailing_sources(entry["lines"])
+        sections = {"正文": [], "口播": [], "制作": []}
+        active_sec = None
+        for line in body_lines:
+            if line.startswith("### "):
+                name = line[4:].strip()
+                active_sec = name if name in sections else None
+            elif active_sec:
+                sections[active_sec].append(line)
+
+        content_text = "\n".join(sections["正文"]).strip()
+        spoken_text = "\n".join(sections["口播"]).strip()
+        prod_text = "\n".join(sections["制作"]).strip()
+        source_assets = _collect_page_assets((content_text, prod_text), asset_by_name)
+        if not content_text and not source_assets:
+            raise ValueError(f"Page {idx} ({entry['title']}) has empty ### 正文 and no image assets")
+
+        pages.append({
+            "page_key": f"p{idx:02d}",
+            "mode": "读",
+            "chapter": entry["chapter"],
+            "title": entry["title"],
+            "content": content_text,
+            "copy_confirmed": True,
+            "notes": spoken_text,
+            "production_notes": prod_text,
+            "sources": sources_text,
+            "source_assets": source_assets,
+        })
+
+    return {
+        "project": meta.get("project") or "",
+        "source_path": normalized_source_path,
+        "source_assets_path": f"{INTERNAL_ROOT}/00_project/source/source_assets.json",
+        "pages": pages,
+    }
+
+
+def validate_sibling_fact_audit(source_path, source_bytes):
+    """Verify sibling `fact-audit.json` when present alongside `by-page.md`."""
+    audit_path = source_path.parent / "fact-audit.json"
+    if not audit_path.is_file():
+        return {"present": False}
+    audit = json.loads(audit_path.read_text(encoding="utf-8"))
+    if audit.get("contract_version") != "fact-audit/1.0.0":
+        raise ValueError(f"Sibling fact-audit.json must use contract_version fact-audit/1.0.0: {audit_path}")
+    expected_sha = hashlib.sha256(source_bytes).hexdigest()
+    if (audit.get("artifact") or {}).get("sha256") != expected_sha:
+        raise ValueError(
+            f"Sibling fact-audit.json does not bind current {source_path.name} (sha256 mismatch); "
+            "re-run planners-fact-check before handing off to planners-ppt-hell"
+        )
+    blocking = [
+        f"{s.get('id', '?')}:{s.get('verdict')}"
+        for s in (audit.get("suspects") or [])
+        if s.get("verdict") in ("confirmed", "no_source", "pending")
+    ]
+    if blocking:
+        raise ValueError(
+            f"Sibling fact-audit.json has blocking/unresolved verdicts ({', '.join(blocking)}); "
+            "resolve in planners-bypage before initializing PPT project"
+        )
+    return {
+        "present": True,
+        "path": str(audit_path),
+        "sha256": sha256_file(audit_path),
+        "checker": audit.get("checker"),
+        "suspect_count": len(audit.get("suspects") or []),
+    }
+
+
+def _write_manifest_state(staging, route, plan_path, plan, canvas=None, upstream=None):
     """项目状态记下路线与契约绑定：路线决定跑哪一半检查，绑定决定画面还算不算数。
 
     记的是契约文件自己的位置与内容摘要，加上它声明的 `script_hash`；稿子按
@@ -343,7 +509,11 @@ def _write_manifest_state(staging, route, plan_path, plan, canvas=None):
     state = json.loads(path.read_text(encoding="utf-8"))
     state["route"] = route
     state["canvas"] = (canvas or Canvas()).as_dict()
-    state["input_kind"] = "visual-plan" if plan_path else "standalone"
+    if upstream is not None:
+        state["input_kind"] = "bypage-doc"
+        state["upstream"] = upstream
+    else:
+        state["input_kind"] = "visual-plan" if plan_path else "standalone"
     if plan_path is not None:
         state["visual_plan"] = {
             "path": str(plan_path),
@@ -422,17 +592,31 @@ def main():
             (staging / rel_path).write_text(text, encoding="utf-8")
 
         source_root = staging / INTERNAL_ROOT / "00_project" / "source"
+        upstream_binding = None
         if source:
             try:
                 source_manifest = prepare_source_material(staging, source, source_root)
+                normalized_text = (staging / source_manifest["normalized_source"]).read_text(encoding="utf-8")
+                parsed_bypage = parse_bypage_doc(normalized_text, source_manifest, source_manifest["normalized_source"])
+                if parsed_bypage is not None:
+                    audit_info = validate_sibling_fact_audit(source, source.read_bytes())
+                    page_content = parsed_bypage
+                    upstream_binding = {
+                        "contract": "planners-doc/2",
+                        "doc": "by-page",
+                        "source_path": str(source),
+                        "source_sha256": sha256_file(source),
+                        "fact_audit": audit_info,
+                    }
+                else:
+                    page_content = {
+                        "project": "",
+                        "source_path": source_manifest["normalized_source"],
+                        "source_assets_path": f"{INTERNAL_ROOT}/00_project/source/source_assets.json",
+                        "pages": [],
+                    }
             except (OSError, UnicodeError, ValueError) as exc:
                 parser.error(str(exc))
-            page_content = {
-                "project": "",
-                "source_path": source_manifest["normalized_source"],
-                "source_assets_path": f"{INTERNAL_ROOT}/00_project/source/source_assets.json",
-                "pages": [],
-            }
         else:
             try:
                 plan = json.loads(plan_path.read_text(encoding="utf-8"))
@@ -444,7 +628,7 @@ def main():
             json.dumps(page_content, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
-        _write_manifest_state(staging, output_route, plan_path, plan, canvas)
+        _write_manifest_state(staging, output_route, plan_path, plan, canvas, upstream=upstream_binding)
 
         if root.exists():
             root.rmdir()

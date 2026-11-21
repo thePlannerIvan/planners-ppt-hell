@@ -378,7 +378,7 @@ def design_observations(root, page_key):
     """Read-only measurements for the model's own design self-check.
 
     Facts about the page, not judgements: no pass/fail, no thresholds. They exist so
-    the self-check in style_system.md can be done against numbers instead of memory.
+    the self-check in page_composition.md can be done against numbers instead of memory.
     v6.0: Honors <g>/leaf transform, inline <style>/:root vars, and measures
     lowest_content_bottom across <text>, <rect>, <image>, <circle>, <ellipse>, <line>, <path>.
     """

@@ -10,6 +10,7 @@ import unittest
 import zipfile
 import zlib
 from pathlib import Path
+import hashlib
 import sys
 
 # 这条测试以前写 `from scripts.prepare_source_material import ...`，隐含要求 CWD = Skill 根。
@@ -129,6 +130,78 @@ class SourceAssetTests(unittest.TestCase):
             manifest = prepare_source_material(root, legacy)
             self.assertEqual(manifest["source_type"], "doc")
             self.assertGreaterEqual(manifest["image_count"], 1)
+
+    def test_init_project_direct_planners_doc2_bypage_intake_and_fact_audit(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            planners_dir = root / ".planners"
+            assets_dir = planners_dir / "assets"
+            assets_dir.mkdir(parents=True)
+            (assets_dir / "evidence.png").write_bytes(png_bytes())
+
+            by_page = planners_dir / "by-page.md"
+            by_page_text = (
+                "---\ncontract: planners-doc/2\ndoc: by-page\nproject: DirectIntakeTest\n---\n\n"
+                "# 一、结论\n\n"
+                "## 复购率达到 65%\n\n"
+                "<!-- b:abc123 -->\n"
+                "### 正文\n\n"
+                "调研样本 120 人中 78 人愿意复购，占比 65%。\n\n"
+                "![证据图](assets/evidence.png)\n\n"
+                "### 口播\n\n"
+                "重点看复购意图。\n\n"
+                "### 制作\n\n"
+                "- 图与核心数据居中并列。\n\n"
+                "> 消费者调研报告 P12（2026-11）。\n"
+            )
+            by_page.write_text(by_page_text, encoding="utf-8")
+
+            audit_path = planners_dir / "fact-audit.json"
+            audit_payload = {
+                "contract_version": "fact-audit/1.0.0",
+                "artifact": {"path": str(by_page), "sha256": hashlib.sha256(by_page_text.encode("utf-8")).hexdigest()},
+                "source_index": {"path": "source-index.json", "index_sha256": None, "read_at": None},
+                "checker": "test",
+                "blind_spots": [],
+                "suspects": [{"id": "s1", "verdict": "correct", "location": {"page": 1}}],
+            }
+            audit_path.write_text(json.dumps(audit_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+            init_script = Path(__file__).resolve().parents[1] / "init_svg_project.py"
+            proj = root / "ppt-proj"
+            subprocess.run(
+                [sys.executable, str(init_script), str(proj), "--source", str(by_page), "--route", "slides"],
+                check=True, capture_output=True, text=True,
+            )
+
+            pc = json.loads((proj / "_internal/01_content/page_content.json").read_text(encoding="utf-8"))
+            self.assertEqual(pc["project"], "DirectIntakeTest")
+            self.assertEqual(len(pc["pages"]), 1)
+            p1 = pc["pages"][0]
+            self.assertEqual(p1["page_key"], "p01")
+            self.assertEqual(p1["chapter"], "一、结论")
+            self.assertEqual(p1["title"], "复购率达到 65%")
+            self.assertTrue(p1["copy_confirmed"])
+            self.assertIn("占比 65%", p1["content"])
+            self.assertNotIn("<!-- b:", p1["content"])
+            self.assertEqual(p1["notes"], "重点看复购意图。")
+            self.assertEqual(p1["production_notes"], "- 图与核心数据居中并列。")
+            self.assertIn("消费者调研报告 P12", p1["sources"])
+            self.assertEqual(p1["source_assets"], ["asset_001"])
+
+            manifest = json.loads((proj / "_internal/00_project/page_manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["input_kind"], "bypage-doc")
+            self.assertTrue(manifest["upstream"]["fact_audit"]["present"])
+
+            # Mismatched sibling fact-audit.json hash must block initialization
+            audit_payload["artifact"]["sha256"] = "0" * 64
+            audit_path.write_text(json.dumps(audit_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+            bad = subprocess.run(
+                [sys.executable, str(init_script), str(root / "ppt-proj-bad"), "--source", str(by_page), "--route", "slides"],
+                capture_output=True, text=True,
+            )
+            self.assertNotEqual(bad.returncode, 0)
+            self.assertIn("sha256 mismatch", bad.stderr)
 
 
 if __name__ == "__main__":

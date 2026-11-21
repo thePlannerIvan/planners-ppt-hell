@@ -18,7 +18,7 @@ description: 制作与持续修改 SVG 视觉工作台（默认直接打开审�
 | **从零 / 从 Bypage 做幻灯片** | `1 → 2 → 3（打开 Workbench 即完成）` | [02_content_stage.md](references/workflow/02_content_stage.md) → [01_template_intake.md](references/workflow/01_template_intake.md) → [04_svg_stage.md](references/workflow/04_svg_stage.md) + [svg_to_ppt_rules.md](references/domain/svg_to_ppt_rules.md) |
 | **做视频静态关键帧 SVG** | `1 → 2 → 3（保存 SVG 并交付 Craft）` | [03_video_route.md](references/workflow/03_video_route.md) → [04_svg_stage.md](references/workflow/04_svg_stage.md) + [svg_rules.md](references/domain/svg_rules.md) |
 | **处理工作台返修 / 换模板与版式** | 直接进 `3`（`workbench_store.py --state` 读任务） | [04_svg_stage.md](references/workflow/04_svg_stage.md) + [07_visual_review.md](references/workflow/07_visual_review.md) |
-| **提炼外部参考 / 维护库模板包** | 走 `2` 的参考快提或模板入库链 | [01_template_intake.md](references/workflow/01_template_intake.md) + [template_package.md](references/contracts/template_package.md)（视频风格见 [08_video_style_extraction_sop.md](references/workflow/08_video_style_extraction_sop.md)） |
+| **提炼外部参考 / 维护库模板包** | 走 `2` 的参考快提或模板入库链 | [01_template_intake.md](references/workflow/01_template_intake.md) + [template_package.md](references/contracts/template_package.md)（视频风格沉淀归 `video-craft`） |
 | **按需外发：导出可编辑 PPTX / 冻结快照** | 仅在用户明确要求导出或网页点选导出唤醒时执行 | [project_contract.md](references/contracts/project_contract.md) |
 
 ## 核心深模块 CLI（`Deep-module Tools`）
@@ -46,9 +46,9 @@ description: 制作与持续修改 SVG 视觉工作台（默认直接打开审�
 ## 2. 定方向与模板（`Direction & Template`）
 
 - **确认秩序与密度基调**：一次确认画幅与视觉来源（用户已指明则直接执行），将本次选择写入 `_internal/01_content/design_direction.md`。
-- **角色分工（`Template Pack vs. Universal Mechanics`）**：
+- **角色分工（`Template Pack vs. Page Composition`）**：
   - **模板管皮肤与参考骨架**：已选 `Template Pack`（或视频风格 `page.md`）时，色彩、字体、容器形式（发丝线 vs. 卡片/色条）与现成原语（`primitives/*.svg`）100% 服从模板；
-  - **通用构图力学管层级与双密度**：开画前结合 [style_system.md](references/domain/style_system.md) 与 [layout_taxonomy.md](references/domain/layout_taxonomy.md)，由模型按每页内容体量动态适配**高密咨询台账（`High-Density Consulting Ledger & Grid`）**或**低密聚光灯留白（`Low-Density Spotlight & Manifesto`）**。
+  - **页面构图力学管层级、双密度与原型**：开画前结合 [page_composition.md](references/domain/page_composition.md)，由模型按每页内容体量动态适配**高密咨询台账（`High-Density Consulting Ledger & Grid`）**或**低密聚光灯留白（`Low-Density Spotlight & Manifesto`）**，并按需选用 9 大拓扑原型。
 - **选用、快提或入库模板**：见 [01_template_intake.md](references/workflow/01_template_intake.md)。开画前必须实际查看所选模板/风格的 `SPEC.md` 与样张（或 `extract_template_pack.py` 生成的 `contact_sheet.png`）。
 - **Completion Criterion**：`design_direction.md` 已落盘，所选模板/风格的规范文档与参考样张已实际查看。
 

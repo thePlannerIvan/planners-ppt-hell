@@ -25,7 +25,9 @@
       "anchors/viomi_v4_pdf_p04_data_table_evidence.png",
       "anchors/viomi_v4_pdf_p12_competitor_teardown.png",
       "anchors/viomi_v4_pdf_p23_quadrant_2x2.png"
-    ]
+    ],
+    "layouts_json": "layouts.json",
+    "layout_count": 6
   },
   "palette_summary": {
     "canvas": "#F8FAFC / #FFFFFF",
@@ -47,6 +49,7 @@
     "anchors/viomi_v4_pdf_p04_data_table_evidence.png": "82abd31e095f9ce9551b8fe9e923e8c032c6d28cfa69ba2e1968d266aa4eefae",
     "anchors/viomi_v4_pdf_p12_competitor_teardown.png": "8114b47763dd185b13ea57b8c91f43a8369ab8c5c1bf3cab6838089f8a2611eb",
     "anchors/viomi_v4_pdf_p23_quadrant_2x2.png": "6ccb9c20d607a11899e7e6bcd7a3f4a9beff973568c5f4bd5a392a87984c0fb2",
+    "layouts.json": "0acd6f7d2b836da75f2e566cf5f1e0b9cc4c976fb0c2012a2e13a37be92b3d59",
     "previews/full_deck_contact_sheet.png": "a8f010371bec05ab8aec76ebc89257958639863a9d547bb66d9a07af8e008862",
     "previews/pages/p00_skyline_shell.png": "91046b9f5d6cfe89db66a666515fbb097318753a656c7d55fdf79ddd8503642d",
     "previews/pages/p01_cover.png": "7c775bfa2674a17cc1d02451498d58a1f2bc3a0213444c46c37914121a7375f3",
@@ -65,5 +68,5 @@
     "skyline_shell.svg": "bcddb4b73f1f930057e63cfe6c60a742ebcec52af640dcc0c457625940f5abec",
     "tokens.css": "799ef5adcbf70e3250b08ca66d63724542db8c6091bcbe80325a2aaf86512928"
   },
-  "package_sha256": "9a98aa07cc0af018ec4864d6d3430ed8609f8c8762ce1aebc5de0a06c29fab12"
+  "package_sha256": "5ac61cb2c82261f6e090d82391ab3eb757719c9ab7950b2c0dde7c923cb2f3fe"
 }

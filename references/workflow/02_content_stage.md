@@ -10,7 +10,7 @@
    ```bash
    python scripts/init_svg_project.py <project> --source "<Project>/.planners/by-page.md" --route slides
    ```
-   按 `.planners/by-page.md` 的章节（`#`）、页（`##`）及页内 `### 正文 / 口播 / 制作` 与页末 `>` 出处，将各页整理写入 `_internal/01_content/page_content.json`（标记 `copy_confirmed: true`），将 `by-page.assets.json` 中的图片复制到项目登记资产并保留原资产 ID、来源 ID 与 `fact-audit.json` 绑定。
+   脚本自动检测 `contract: planners-doc/2` + `doc: by-page` 文档头，按章节（`#`）、页（`##`）、`### 正文 / 口播 / 制作` 与页末 `>` 出处自动填充 `_internal/01_content/page_content.json`（标记 `copy_confirmed: true`），抽取正文/制作说明引用的本地图片进 `source_assets.json`，并在同目录存在 `fact-audit.json` 时校验其 SHA-256 绑定与阻塞裁决。
 2. **旧版 `bypage-production/1` 生产包（`bypage-production.json`）**：
    ```bash
    python scripts/import_bypage.py <project> --production <bypage-production.json>

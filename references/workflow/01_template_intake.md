@@ -9,7 +9,7 @@
 适用于“拿一份客户旧 PPTX / PDF / 参考截图模仿它的视觉感觉做今天这批页面”，不入库、不走网页选择和审阅审批：
 
 1. **选用既有库模板**（最快）：`python scripts/template/template_library.py list` → `apply <project> --template-id <id>`，实际查看 `SPEC.md` 与样张后直接做页。
-2. **自主设计**：直接根据内容形成方向并写进 `design_direction.md`，遵循 [通用视觉构图力学](../domain/style_system.md) 与 [拓扑版式原型](../domain/layout_taxonomy.md) 开画。
+2. **自主设计**：直接根据内容形成方向并写进 `design_direction.md`，遵循 [页面构图力学](../domain/page_composition.md) 开画。
 3. **从参考文件快速取样**：
    ```bash
    python scripts/template/extract_template_pack.py <source.pptx|source.pdf|img_dir> --project <project>

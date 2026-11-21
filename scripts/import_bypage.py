@@ -19,18 +19,23 @@ KEY = re.compile(r'[A-Za-z][A-Za-z0-9_-]{0,63}')
 
 
 def feedback_source_hash(copy, audit, manifest):
-    skill = Path(__file__).resolve().parents[1]
-    candidates = (skill.parent / 'planners-bypage', skill.parent.parent / '02-content-assembly/planners-bypage')
-    for bypage in candidates:
-        contract = bypage / 'scripts/lib/review-source-hash.mjs'
-        if contract.is_file():
-            result = subprocess.run(
-                ['node', str(contract)], input=json.dumps({
-                    'copy': copy.decode('utf-8'), 'audit': audit.decode('utf-8'),
-                    'manifest': manifest.decode('utf-8'),
-                }), text=True, capture_output=True, timeout=30, check=True)
-            return result.stdout.strip()
-    raise ValueError('Bypage review-source-hash contract is required for production import')
+    """Compute the SHA-256 binding digest for legacy import_bypage inputs."""
+    if not isinstance(copy, bytes) or not isinstance(audit, bytes) or (
+        manifest is not None and not isinstance(manifest, bytes)
+    ):
+        raise ValueError('Review binding inputs must be UTF-8 bytes')
+    # Validate UTF-8 parity with the original UTF-8 text digest contract.
+    copy.decode('utf-8')
+    audit.decode('utf-8')
+    digest = hashlib.sha256()
+    digest.update(copy)
+    digest.update(b'\n---FACT-AUDIT---\n')
+    digest.update(audit)
+    if manifest is not None:
+        manifest.decode('utf-8')
+        digest.update(b'\n---ASSET-MANIFEST---\n')
+        digest.update(manifest)
+    return digest.hexdigest()
 
 
 def checked(binding):

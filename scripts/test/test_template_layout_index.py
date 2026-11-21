@@ -17,15 +17,24 @@ LIBRARY = SCRIPTS.parent / 'assets' / 'template_library'
 
 class LayoutIndexTests(unittest.TestCase):
     def test_four_piece_layouts_come_from_primitives_and_named_previews(self):
-        pack = LIBRARY / 'agency-social-proposal'
-        layouts = layout_index.pack_layouts(pack)
+        agency = LIBRARY / 'agency-social-proposal'
+        layouts = layout_index.pack_layouts(agency)
         self.assertEqual(len(layouts), 6)
         first = layouts[0]
         self.assertEqual(first['layout_id'], 'p01_cover')
-        self.assertEqual(first['name'], 'Cover')
+        self.assertEqual(first['name'], '扉页与篇章封面')
+        self.assertEqual(first['family'], 'cover')
+        self.assertTrue(first['use_for'])
         self.assertEqual(first['preview'], 'previews/pages/p01_cover.png')
         self.assertEqual(first['primitive'], 'primitives/p01_cover.svg')
-        self.assertTrue((pack / first['preview']).is_file())
+        self.assertTrue((agency / first['preview']).is_file())
+
+        consulting = LIBRARY / 'consulting-product-strategy'
+        consulting_layouts = layout_index.pack_layouts(consulting)
+        self.assertEqual(len(consulting_layouts), 6)
+        self.assertEqual(consulting_layouts[0]['layout_id'], 'p01_cover')
+        self.assertEqual(consulting_layouts[0]['name'], '战略报告封面')
+        self.assertTrue((consulting / consulting_layouts[1]['preview']).is_file())
 
     def test_dark_titanium_previews_fall_back_to_previews_root(self):
         pack = LIBRARY / 'dark-titanium-cockpit'

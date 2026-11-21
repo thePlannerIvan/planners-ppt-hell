@@ -1,8 +1,17 @@
 # 维护历史：升级记在这里
 
-**这里装升级**：一次改动做了什么、为什么、影响了哪些 module、删了什么。给**改它的人**读——发布视角（对外逐项对账）看 `CHANGELOG.md`；同一件事两边都出现时，这里只留**维护要用的那几面**（边界怎么变、动了哪些 module、删了什么）。候选（还没升级的）在 `GOTCHAS.md`。
+**这里装升级**：一次改动做了什么、为什么、影响了哪些 module、删了什么。给**改它的人**读；候选（还没升级的）与有意保留的设计取舍在 `GOTCHAS.md`。
 
 看每一条时问三件事：**边界怎么变了**、**哪些 module 被牵动**、**删掉了什么**。
+
+## 2026-11-21 · 第二轮架构收敛：页面构图力学合一、剥离视频判据、清理冗余脚本与补齐旗舰 `layouts.json`
+
+| 做了什么 | 为什么 | 影响了哪些 module | 删了什么 |
+|---|---|---|---|
+| 将 `style_system.md` 与 `layout_taxonomy.md` 合并为 `references/domain/page_composition.md`（`Page Composition` / 页面构图力学），确立「模板管视觉皮肤与现成原语、构图力学管层级与双密度及 9 大原型」的单一入口 | 消除 style 与 layout 人为二分带来的认知割裂，减少活跃参照文件数 | `references/domain/page_composition.md`、`SKILL.md`、`GLOSSARY.md`、`docs/adr/0002-theme-and-layout-two-tier-template.md`、`references/architecture.md`、`references/workflow/01_template_intake.md`、`04_svg_stage.md`、`svg_rules.md`、`svg_to_ppt_rules.md` | `references/domain/style_system.md`、`references/domain/layout_taxonomy.md`（移入归档） |
+| 从 `contracts/template_package.md` 剥离 7 条视频上屏判据表并移入 `workflow/03_video_route.md`；将 `08_video_style_extraction_sop.md` 归档，视频风格提取统一指向 `video-craft` | 防止视频关键帧规则污染商业 PPT 模板契约；视频风格提取已于 11-09 迁移至 `video-craft` | `references/contracts/template_package.md`、`references/workflow/03_video_route.md`、`SKILL.md` | `references/workflow/08_video_style_extraction_sop.md`（移入归档） |
+| 归档 5 个无调用旧模板脚本及 `CHANGELOG.md`/`SECURITY.md`，并按 WFA Sediment 原则将 `GOTCHAS.md` 瘦身为只留未闭环候选（全量已备份至归档） | 清除 1,712 行死代码与重复/过期历史叙事，维持单源维护历史 | `GOTCHAS.md`、`_archive/ppt-hell-retired-docs-2026-11-21/` | `extract_template_assets.py`、`prepare_visual_references.py`、`build_fidelity_template.py`、`apply_fidelity_template.py`、`seal_template_review.py`、`CHANGELOG.md`、`SECURITY.md` |
+| 为两套内置 v2 旗舰模板补齐中文具名 `layouts.json` 并重算 `manifest.json` 哈希；将 `evals/evals.json` 的 `autonomous` 用例对齐「默认停在打开 `review` 工作台」 | 让内置旗舰模板与工作台「版式面板」具备完整中文名称、家族与 `use_for` 指引；测试评判对齐主交付物裁决 | `assets/template_library/agency-social-proposal/layouts.json`、`consulting-product-strategy/layouts.json`、`scripts/test/test_template_layout_index.py`、`scripts/test/test_workbench_pipeline.py`、`evals/evals.json` | 过时的「自主制作默认走完导出 `.pptx`」eval 断言 |
 
 ## 2026-11-21 · 确立 Workbench 主交付物地位、双密度构图力学、领域模型及模板维护 CLI
 

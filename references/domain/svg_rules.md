@@ -60,4 +60,4 @@
 5. **图片与样式完整性（`MISSING_IMAGE` / `IMAGE_STRETCHED` / `UNDEFINED_CSS_VAR` / `INVALID_FONT_WEIGHT`）**：
    - 拦截缺失图片、拉伸变形、未定义 CSS 变量与非法属性。
 
-> **技术报告零报错 ≠ 页面已经好看**。检查后查看当前页面 PNG，按 [视觉判断](style_system.md) 记录实际发现。
+> **技术报告零报错 ≠ 页面已经好看**。检查后查看当前页面 PNG，按 [页面构图力学](page_composition.md) 记录实际发现。

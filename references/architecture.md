@@ -11,7 +11,7 @@
 | 项目用途与视觉选择 | `design_direction.md`；机器画幅保存在 `page_manifest.json.canvas`，由 `canvas_frame.py` 解释 | 记录所选视觉来源和项目调整；方向文档引用机器画幅，不维护第二份数值 |
 | 模板的定义与复用范围 | [模板契约](contracts/template_package.md) | 提取流程据此生产，页面设计据此使用，不各自重定义模板 |
 | 视觉身份 | 所选模板，或本 Skill 自己维护的视频风格文档（`references/domain/video_style_*.md` + 随包参考图）；共享数值在其 tokens/风格文档，SPEC 解释用途，样张表达实际效果 | 项目选择引用它；页面设计按内容重组；临时参考不必先制成模板包；不读取或注册 `video-craft` 的主题库 |
-| 当前页面的构图 | 页面设计，见 [制作](workflow/04_svg_stage.md)；[视觉判断](domain/style_system.md)与[版式参考](domain/layout_taxonomy.md)供判断 | 内容、模板及技术能力是输入；原语坐标属于该原语，不自动成为全局坐标 |
+| 当前页面的构图 | 页面设计，见 [制作](workflow/04_svg_stage.md)；[页面构图力学](domain/page_composition.md) 供层级、双密度与原型判断 | 内容、模板及技术能力是输入；原语坐标属于该原语，不自动成为全局坐标 |
 | SVG 渲染与 PPT 转换能力 | 对应渲染器/转换器实现与测试；`validate_svg_layout.py` 执行路线检查 | 技术文档说明用法与限制；不定义配色、留白或页面骨架 |
 | 图片槽位与源图比例测量 | `image_diagnostics.py`；frames 与 validator 共用 | 只报告预计裁切/填充和测量限制，页面设计结合实际图判断 |
 | 页面文案对表 | `copy_audit.py` 读取内容入口确认的 page_content 与既有来源绑定 | 不另造权威稿；只提示疑似新增文字，未确认明确 unchecked |

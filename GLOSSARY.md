@@ -32,9 +32,9 @@ _Avoid_: Master Slide, Color Scheme
 模板包内单个具名页面的空间骨架参考（由 `layout_id` 与参考 `primitive` SVG 组成），作为排版的参考起点而非强制锁层。
 _Avoid_: Wireframe, Canvas Lock
 
-**Universal Mechanics**（通用构图力学）:
-与具体视觉皮肤无关的跨项目信息组织法则，决定单页核心主张、单一视觉焦点与高密/低密双模式调度，但不越权覆盖已选模板包的视觉风格。
-_Avoid_: Global Style Rules, Fixed Coordinate Standard
+**Page Composition**（页面构图力学）:
+与具体视觉皮肤无关的跨项目信息组织法则（见 `references/domain/page_composition.md`），决定单页核心主张、单一视觉焦点、高密/低密双模式调度与九大拓扑原型，但不越权覆盖已选模板包的视觉风格。
+_Avoid_: Universal Mechanics, Global Style Rules, Fixed Coordinate Standard
 
 **Snapshot**（冻结快照）:
 在用户显式要求导出可编辑 PPTX 或下游视频需要固定版本交接时，从 Store 按当前页序与页面修订版生成的不可变只读数据包。
